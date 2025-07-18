@@ -38,14 +38,17 @@ import CodeAnalyzerTool from '@/components/tools/code-analyzer-tool';
 import CodeGeneratorTool from '@/components/tools/code-generator-tool';
 import ImageToolkit from '@/components/tools/image-toolkit';
 import SmartSearchTool from '@/components/tools/smart-search-tool';
-import { Button } from '@/components/ui/button';
+import InterviewQuestionGeneratorTool from '@/components/tools/interview-question-generator-tool';
+import ResumeFeedbackTool from '@/components/tools/resume-feedback-tool';
 
 type ToolId =
   | 'smart-search'
   | 'ai-explanation'
   | 'code-generator'
   | 'code-analyzer'
-  | 'image-toolkit';
+  | 'image-toolkit'
+  | 'interview-question-generator'
+  | 'resume-feedback';
 
 type ToolConfig = {
   id: ToolId;
@@ -84,6 +87,18 @@ const tools: ToolConfig[] = [
     name: 'Image Toolkit',
     icon: ImageIcon,
     component: ImageToolkit,
+  },
+  {
+    id: 'interview-question-generator',
+    name: 'Interview Questions',
+    icon: ClipboardList,
+    component: InterviewQuestionGeneratorTool,
+  },
+  {
+    id: 'resume-feedback',
+    name: 'Resume Feedback',
+    icon: FileText,
+    component: ResumeFeedbackTool,
   },
 ];
 

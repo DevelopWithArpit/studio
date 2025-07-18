@@ -20,6 +20,14 @@ import {
   imageToolkit,
   type ImageToolkitInput,
 } from '@/ai/flows/image-toolkit';
+import {
+  generateInterviewQuestions,
+  type GenerateInterviewQuestionsInput,
+} from '@/ai/flows/interview-question-generator-tool';
+import {
+  getResumeFeedback,
+  type GetResumeFeedbackInput,
+} from '@/ai/flows/resume-feedback-tool';
 
 async function handleAction<T_Input, T_Output>(
   input: T_Input,
@@ -53,4 +61,12 @@ export async function handleAnalyzeCodeAction(input: AnalyzeCodeInput) {
 
 export async function handleImageToolkitAction(input: ImageToolkitInput) {
   return handleAction(input, imageToolkit);
+}
+
+export async function handleGenerateInterviewQuestionsAction(input: GenerateInterviewQuestionsInput) {
+  return handleAction(input, generateInterviewQuestions);
+}
+
+export async function handleGetResumeFeedbackAction(input: GetResumeFeedbackInput) {
+  return handleAction(input, getResumeFeedback);
 }
