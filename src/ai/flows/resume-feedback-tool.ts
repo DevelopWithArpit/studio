@@ -28,16 +28,10 @@ export async function getResumeFeedback(input: GetResumeFeedbackInput): Promise<
   return getResumeFeedbackFlow(input);
 }
 
-// Helper for handlebars
-function startsWith(str: string, prefix: string) {
-  return str.startsWith(prefix);
-}
-
 const prompt = ai.definePrompt({
   name: 'getResumeFeedbackPrompt',
   input: { schema: GetResumeFeedbackInputSchema },
   output: { schema: GetResumeFeedbackOutputSchema },
-  helpers: [startsWith],
   prompt: `You are an expert career coach and professional resume writer with deep knowledge of Applicant Tracking Systems (ATS). Your task is to provide a comprehensive review of the user's resume, focusing on improving its content, structure, and ATS score.
 
 The user's resume is provided below.
@@ -45,12 +39,10 @@ The user's resume is provided below.
 {{#if additionalInfo}}Additional context from the user: {{{additionalInfo}}}{{/if}}
 
 Resume content:
-{{#if resume}}
-  {{#if (startsWith resume "data:")}}
-    {{media url=resume}}
-  {{else}}
-    {{{resume}}}
-  {{/if}}
+{{#if (equals resume "text")}}
+  {{{resumeText}}}
+{{else}}
+  {{media url=resume}}
 {{/if}}
 
 Please perform the following two tasks:
@@ -67,7 +59,15 @@ const getResumeFeedbackFlow = ai.defineFlow(
     outputSchema: GetResumeFeedbackOutputSchema,
   },
   async (input) => {
-    const { output } = await prompt(input);
+    let promptInput: any = { ...input };
+    if (input.resume.startsWith('data:')) {
+      promptInput.resumeText = ''; // Pass empty text if it's a data URI
+    } else {
+      promptInput.resumeText = input.resume;
+      promptInput.resume = 'text'; // Signal to the prompt it's text
+    }
+
+    const { output } = await prompt(promptInput);
     return output!;
   }
 );
