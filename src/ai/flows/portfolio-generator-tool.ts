@@ -30,28 +30,45 @@ const prompt = ai.definePrompt({
   name: 'generatePortfolioPrompt',
   input: { schema: GeneratePortfolioInputSchema },
   output: { schema: GeneratePortfolioOutputSchema },
-  prompt: `You are an expert web developer specializing in creating stylish, modern, single-page portfolios.
-Your task is to generate the complete HTML and CSS for a portfolio website based on the provided resume text.
+  prompt: `You are an expert web developer specializing in creating stylish, modern, single-page portfolios based on a provided resume text. Your task is to generate the complete HTML and CSS to replicate the layout and style of the professional resume seen in the example.
 
-Resume Content:
+Resume Content to use:
 ---
 {{{resumeText}}}
 ---
 
-**Requirements:**
-1.  **HTML Structure:**
-    *   Create a clean, semantic HTML structure.
-    *   Include a header with the person's name and title.
-    *   Create sections for "About Me", "Work Experience", "Education", and "Skills".
-    *   Use appropriate tags (e.g., \`<header>\`, \`<section>\`, \`<h2>\`, \`<p>\`, \`<ul>\`).
-2.  **CSS Styling:**
-    *   Generate all necessary CSS. Do NOT use any external frameworks like Tailwind or Bootstrap.
-    *   The design should be modern, professional, and fully responsive.
-    *   Use a dark theme with a color palette of your choice (e.g., dark grays, blues, and a highlight color).
-    *   Style all elements, including typography, spacing, and layout.
-    *   Ensure the final output is visually appealing.
+**Design & Layout Requirements:**
 
-Generate the full HTML and CSS code. The code should be ready to be dropped into files and rendered in a browser.`,
+1.  **Overall Layout:**
+    *   Create a two-column layout.
+    *   The left column should be wider (approx. 65-70%) and contain the main content.
+    *   The right column should be narrower (approx. 30-35%) and act as a sidebar.
+    *   The entire page should have a white background.
+
+2.  **Header Section (Spanning both columns):**
+    *   Display the full name in a large, bold, black font (e.g., 'ARPIT PISE').
+    *   Below the name, display the job title(s) in a smaller, blue font (e.g., 'AI Engineer / Robotics Software Engineer').
+    *   Below the titles, list contact information horizontally: phone, email, LinkedIn, and location. Use small icons (Unicode or SVG) next to each item.
+
+3.  **Left Column Content:**
+    *   **SUMMARY:** A section with a heading. The paragraph text should follow.
+    *   **EXPERIENCE:** A section with a main heading. Each job should be a sub-section with the job title, company name (in blue), dates, and location. Use bullet points for responsibilities.
+    *   **EDUCATION:** A section with a main heading. List each degree with the institution name (in blue), dates, and location.
+    *   **PROJECTS:** A section with a main heading, following the same structure as EXPERIENCE.
+
+4.  **Right Column Content:**
+    *   **Profile Picture:** A circular placeholder for a profile picture at the top. You can represent this with a simple div with a background color and the initials 'AP' in the center.
+    *   **KEY ACHIEVEMENTS:** A section with a heading. List achievements with a small icon next to each.
+    *   **SKILLS:** A section with a heading. Display skills as tags or badges with a light grey background.
+
+5.  **Styling (CSS):**
+    *   **Typography:** Use a clean, sans-serif font like Arial or Helvetica.
+    *   **Colors:** Use black for main text, a professional blue (e.g., #007BFF) for headings, links, and titles, and grey for borders and backgrounds of skill tags.
+    *   **Separators:** Use thin, black horizontal lines under each major section heading (SUMMARY, EXPERIENCE, etc.).
+    *   **No External Libraries:** Do not use any external CSS frameworks like Bootstrap or Tailwind. Generate all necessary vanilla CSS.
+    *   **Responsiveness:** Ensure the layout is reasonably responsive, stacking to a single column on smaller screens.
+
+Generate the full, ready-to-use HTML and CSS code based on these precise instructions.`,
 });
 
 const generatePortfolioFlow = ai.defineFlow(

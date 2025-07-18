@@ -33,24 +33,36 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-const placeholderResume = `John Doe
-Senior Software Engineer
+const placeholderResume = `ARPIT PISE
+AI Engineer / Robotics Software Engineer
+7276602831 | arpitpise1@gmail.com | linkedin.com/in/arpit-pise-20029a287 | Nagpur, India
 
-Summary:
-A highly motivated Senior Software Engineer with 8+ years of experience in designing, developing, and deploying scalable web applications using React, Node.js, and cloud technologies.
+SUMMARY:
+As a B.Tech student specializing in Robotics and Artificial Intelligence, I am dedicated to crafting cutting-edge AI solutions. My expertise in Python, Java, and C++ complements my projects, notably leading the successful development of the AI Mentor platform. I am eager to apply my skills in an AI Engineer or Robotics Software Engineer role to contribute to advanced technological innovations.
 
-Experience:
-- Senior Software Engineer, Tech Corp (2018-Present)
-  - Led the development of a major e-commerce platform, increasing sales by 20%.
-  - Mentored junior engineers and improved code quality through reviews.
-- Software Engineer, Web Solutions (2015-2018)
-  - Developed and maintained client-side features for various web applications.
+KEY ACHIEVEMENTS:
+- AI Mentor by AP Platform Development: Led the development of the AI Mentor by AP platform, achieving a 30% increase in user engagement within the first month through personalized learning experiences.
 
-Education:
-- B.S. in Computer Science, University of Technology (2011-2015)
+EXPERIENCE:
+- Technical Member, Priyadarshini College of Engineering (01/2023 - Present, Nagpur, India)
+  - Collaborated in the organization of 5+ technical events and workshops, resulting in a 50% increase in student participation.
+  - Implemented an online registration system using PHP and MySQL, decreasing average registration wait times by 85%.
+  - Developed and maintained the college committee website using HTML, CSS, and JavaScript, leading to a 30% increase in event promotion click-through rates.
 
-Skills:
-- JavaScript, TypeScript, React, Node.js, Python, AWS, Docker, SQL`;
+PROJECTS:
+- AI Mentor by AP (Personal Project, 05/2025 - Present)
+  - Spearheaded the development of an AI-powered platform offering personalized learning and career guidance.
+  - Engineered and implemented AI-driven tools for resume and cover letter creation, career path recommendations, and code/DSA assistance.
+  - Integrated AI-powered image generation (Stable Diffusion, DALL-E), text-based image editing, and diagram generation.
+  - Designed the platform with a user-centric approach, seamlessly integrating diverse AI functionalities.
+
+EDUCATION:
+- Bachelor of Technology in Robotics and Artificial Intelligence (B.Tech), Priyadarshini College Of Engineering (08/2024 - 05/2028, Nagpur, India)
+- HSC, ST. PAUL PUBLIC SCHOOL & JUNIOR COLLEGE (01/2021 - 05/2023)
+- SSC, PURUSHOTTAM DAS BAGLA CONVENT (01/2019 - 05/2021)
+
+SKILLS:
+AWS, Azure, C/C++, CSS, Data Structures, Deep Learning, Django, Docker, Flask, GAMS, Git, HTML, Java, JavaScript, Keras, Linux, NLP, Numpy, Pandas, PHP, Python, PyTorch, Robotics, Scikit-Learn, TensorFlow, Gmail`;
 
 
 export default function PortfolioGeneratorTool() {
