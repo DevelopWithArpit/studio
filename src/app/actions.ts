@@ -17,10 +17,6 @@ import {
   type AnalyzeCodeInput,
 } from '@/ai/flows/code-analyzer-tool';
 import {
-  imageToolkit,
-  type ImageToolkitInput,
-} from '@/ai/flows/image-toolkit';
-import {
   generateInterviewQuestions,
   type GenerateInterviewQuestionsInput,
 } from '@/ai/flows/interview-question-generator-tool';
@@ -44,6 +40,34 @@ import {
     suggestCareerPaths,
     type SuggestCareerPathsInput,
 } from '@/ai/flows/career-path-suggester-tool';
+import {
+    summarizeDocument,
+    type SummarizeDocumentInput,
+} from '@/ai/flows/document-summarizer-tool';
+import {
+    generateImage,
+    type GenerateImageInput,
+} from '@/ai/flows/image-generator-tool';
+import {
+    generatePresentation,
+    type GeneratePresentationInput,
+} from '@/ai/flows/presentation-generator-tool';
+import {
+    generatePortfolio,
+    type GeneratePortfolioInput,
+} from '@/ai/flows/portfolio-generator-tool';
+import {
+    generateLinkedInVisuals,
+    type GenerateLinkedInVisualsInput,
+} from '@/ai/flows/linkedin-visuals-generator-tool';
+import {
+    removeWatermark,
+    type RemoveWatermarkInput,
+} from '@/ai/flows/watermark-remover-tool';
+import {
+    manipulateImageText,
+    type ManipulateImageTextInput,
+} from '@/ai/flows/image-text-manipulation-tool';
 
 async function handleAction<T_Input, T_Output>(
   input: T_Input,
@@ -75,10 +99,6 @@ export async function handleAnalyzeCodeAction(input: AnalyzeCodeInput) {
   return handleAction(input, analyzeCode);
 }
 
-export async function handleImageToolkitAction(input: ImageToolkitInput) {
-  return handleAction(input, imageToolkit);
-}
-
 export async function handleGenerateInterviewQuestionsAction(input: GenerateInterviewQuestionsInput) {
   return handleAction(input, generateInterviewQuestions);
 }
@@ -101,4 +121,32 @@ export async function handleGenerateCoverLetterAction(input: GenerateCoverLetter
 
 export async function handleSuggestCareerPathsAction(input: SuggestCareerPathsInput) {
     return handleAction(input, suggestCareerPaths);
+}
+
+export async function handleSummarizeDocumentAction(input: SummarizeDocumentInput) {
+    return handleAction(input, summarizeDocument);
+}
+
+export async function handleGenerateImageAction(input: GenerateImageInput) {
+    return handleAction(input, generateImage);
+}
+
+export async function handleGeneratePresentationAction(input: GeneratePresentationInput) {
+    return handleAction(input, generatePresentation);
+}
+
+export async function handleGeneratePortfolioAction(input: GeneratePortfolioInput) {
+    return handleAction(input, generatePortfolio);
+}
+
+export async function handleGenerateLinkedInVisualsAction(input: GenerateLinkedInVisualsInput) {
+    return handleAction(input, generateLinkedInVisuals);
+}
+
+export async function handleRemoveWatermarkAction(input: RemoveWatermarkInput) {
+    return handleAction(input, removeWatermark);
+}
+
+export async function handleManipulateImageTextAction(input: ManipulateImageTextInput) {
+    return handleAction(input, manipulateImageText);
 }

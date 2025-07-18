@@ -26,12 +26,18 @@ import {
   Mic,
   Mail,
   Compass,
+  FileSearch,
+  Paintbrush,
+  Presentation,
+  UserSquare,
+  Linkedin,
+  Eraser,
+  Type,
 } from 'lucide-react';
 import { AppLogo } from '@/components/app-logo';
 import AiExplanationTool from '@/components/tools/ai-explanation-tool';
 import CodeAnalyzerTool from '@/components/tools/code-analyzer-tool';
 import CodeGeneratorTool from '@/components/tools/code-generator-tool';
-import ImageToolkit from '@/components/tools/image-toolkit';
 import SmartSearchTool from '@/components/tools/smart-search-tool';
 import InterviewQuestionGeneratorTool from '@/components/tools/interview-question-generator-tool';
 import ResumeFeedbackTool from '@/components/tools/resume-feedback-tool';
@@ -39,19 +45,32 @@ import DiagramGeneratorTool from '@/components/tools/diagram-generator-tool';
 import TextToSpeechTool from '@/components/tools/text-to-speech-tool';
 import CoverLetterAssistantTool from '@/components/tools/cover-letter-assistant-tool';
 import CareerPathSuggesterTool from '@/components/tools/career-path-suggester-tool';
+import DocumentSummarizerTool from '@/components/tools/document-summarizer-tool';
+import ImageGeneratorTool from '@/components/tools/image-generator-tool';
+import PresentationGeneratorTool from '@/components/tools/presentation-generator-tool';
+import PortfolioGeneratorTool from '@/components/tools/portfolio-generator-tool';
+import LinkedInVisualsGeneratorTool from '@/components/tools/linkedin-visuals-generator-tool';
+import WatermarkRemoverTool from '@/components/tools/watermark-remover-tool';
+import ImageTextManipulationTool from '@/components/tools/image-text-manipulation-tool';
 
 type ToolId =
   | 'smart-search'
   | 'ai-explanation'
   | 'code-generator'
   | 'code-analyzer'
-  | 'image-toolkit'
   | 'interview-question-generator'
   | 'resume-feedback'
-  | 'diagram-generator'
-  | 'text-to-speech'
   | 'cover-letter-assistant'
-  | 'career-path-suggester';
+  | 'career-path-suggester'
+  | 'document-summarizer'
+  | 'image-generator'
+  | 'diagram-generator'
+  | 'presentation-generator'
+  | 'portfolio-generator'
+  | 'linkedin-visuals-generator'
+  | 'text-to-speech'
+  | 'watermark-remover'
+  | 'image-text-manipulation';
 
 type ToolConfig = {
   id: ToolId;
@@ -86,12 +105,6 @@ const tools: ToolConfig[] = [
     component: CodeAnalyzerTool,
   },
   {
-    id: 'image-toolkit',
-    name: 'Image Toolkit',
-    icon: ImageIcon,
-    component: ImageToolkit,
-  },
-  {
     id: 'interview-question-generator',
     name: 'Interview Questions',
     icon: ClipboardList,
@@ -104,18 +117,6 @@ const tools: ToolConfig[] = [
     component: ResumeFeedbackTool,
   },
   {
-    id: 'diagram-generator',
-    name: 'Diagram Generator',
-    icon: GitGraph,
-    component: DiagramGeneratorTool,
-  },
-  {
-    id: 'text-to-speech',
-    name: 'Text to Speech',
-    icon: Mic,
-    component: TextToSpeechTool,
-  },
-  {
     id: 'cover-letter-assistant',
     name: 'Cover Letter Assistant',
     icon: Mail,
@@ -126,6 +127,60 @@ const tools: ToolConfig[] = [
     name: 'Career Path Suggester',
     icon: Compass,
     component: CareerPathSuggesterTool,
+  },
+  {
+    id: 'document-summarizer',
+    name: 'Document Summarizer',
+    icon: FileSearch,
+    component: DocumentSummarizerTool,
+  },
+  {
+    id: 'image-generator',
+    name: 'Image Generator',
+    icon: ImageIcon,
+    component: ImageGeneratorTool,
+  },
+  {
+    id: 'diagram-generator',
+    name: 'Diagram Generator',
+    icon: GitGraph,
+    component: DiagramGeneratorTool,
+  },
+  {
+    id: 'presentation-generator',
+    name: 'Presentation Generator',
+    icon: Presentation,
+    component: PresentationGeneratorTool,
+  },
+  {
+    id: 'portfolio-generator',
+    name: 'Portfolio Generator',
+    icon: UserSquare,
+    component: PortfolioGeneratorTool,
+  },
+  {
+    id: 'linkedin-visuals-generator',
+    name: 'LinkedIn Visuals',
+    icon: Linkedin,
+    component: LinkedInVisualsGeneratorTool,
+  },
+  {
+    id: 'text-to-speech',
+    name: 'Text to Speech',
+    icon: Mic,
+    component: TextToSpeechTool,
+  },
+  {
+    id: 'watermark-remover',
+    name: 'Watermark Remover',
+    icon: Eraser,
+    component: WatermarkRemoverTool,
+  },
+  {
+    id: 'image-text-manipulation',
+    name: 'Image Text Manipulation',
+    icon: Type,
+    component: ImageTextManipulationTool,
   },
 ];
 

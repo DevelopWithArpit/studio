@@ -4,7 +4,6 @@ config();
 
 import '@/ai/flows/smart-search-tool.ts';
 import '@/ai/flows/ai-explanation-tool.ts';
-import '@/ai/flows/image-toolkit.ts';
 import '@/ai/flows/code-generator-tool.ts';
 import '@/ai/flows/code-analyzer-tool.ts';
 import '@/ai/flows/interview-question-generator-tool.ts';
@@ -13,3 +12,10 @@ import '@/ai/flows/diagram-generator-tool.ts';
 import '@/ai/flows/text-to-speech-tool.ts';
 import '@/ai/flows/cover-letter-assistant-tool.ts';
 import '@/ai/flows/career-path-suggester-tool.ts';
+import '@/ai/flows/document-summarizer-tool.ts';
+import '@/ai/flows/image-generator-tool.ts';
+import '@/ai/flows/presentation-generator-tool.ts';
+import '@/ai/flows/portfolio-generator-tool.ts';
+import '@/ai/flows/linkedin-visuals-generator-tool.ts';
+import '@/ai/flows/watermark-remover-tool.ts';
+import '@/ai/flows/image-text-manipulation-tool.ts';
