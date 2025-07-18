@@ -22,8 +22,10 @@ import {
   FileText,
   type LucideIcon,
   PanelLeft,
-  Diagram,
+  GitGraph,
   Mic,
+  Mail,
+  Compass,
 } from 'lucide-react';
 import { AppLogo } from '@/components/app-logo';
 import AiExplanationTool from '@/components/tools/ai-explanation-tool';
@@ -35,6 +37,8 @@ import InterviewQuestionGeneratorTool from '@/components/tools/interview-questio
 import ResumeFeedbackTool from '@/components/tools/resume-feedback-tool';
 import DiagramGeneratorTool from '@/components/tools/diagram-generator-tool';
 import TextToSpeechTool from '@/components/tools/text-to-speech-tool';
+import CoverLetterAssistantTool from '@/components/tools/cover-letter-assistant-tool';
+import CareerPathSuggesterTool from '@/components/tools/career-path-suggester-tool';
 
 type ToolId =
   | 'smart-search'
@@ -45,7 +49,9 @@ type ToolId =
   | 'interview-question-generator'
   | 'resume-feedback'
   | 'diagram-generator'
-  | 'text-to-speech';
+  | 'text-to-speech'
+  | 'cover-letter-assistant'
+  | 'career-path-suggester';
 
 type ToolConfig = {
   id: ToolId;
@@ -100,7 +106,7 @@ const tools: ToolConfig[] = [
   {
     id: 'diagram-generator',
     name: 'Diagram Generator',
-    icon: Diagram,
+    icon: GitGraph,
     component: DiagramGeneratorTool,
   },
   {
@@ -108,6 +114,18 @@ const tools: ToolConfig[] = [
     name: 'Text to Speech',
     icon: Mic,
     component: TextToSpeechTool,
+  },
+  {
+    id: 'cover-letter-assistant',
+    name: 'Cover Letter Assistant',
+    icon: Mail,
+    component: CoverLetterAssistantTool,
+  },
+  {
+    id: 'career-path-suggester',
+    name: 'Career Path Suggester',
+    icon: Compass,
+    component: CareerPathSuggesterTool,
   },
 ];
 

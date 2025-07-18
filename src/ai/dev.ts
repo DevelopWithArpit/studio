@@ -11,3 +11,5 @@ import '@/ai/flows/interview-question-generator-tool.ts';
 import '@/ai/flows/resume-feedback-tool.ts';
 import '@/ai/flows/diagram-generator-tool.ts';
 import '@/ai/flows/text-to-speech-tool.ts';
+import '@/ai/flows/cover-letter-assistant-tool.ts';
+import '@/ai/flows/career-path-suggester-tool.ts';

@@ -36,6 +36,14 @@ import {
     textToSpeech,
     type TextToSpeechInput,
 } from '@/ai/flows/text-to-speech-tool';
+import {
+    generateCoverLetter,
+    type GenerateCoverLetterInput,
+} from '@/ai/flows/cover-letter-assistant-tool';
+import {
+    suggestCareerPaths,
+    type SuggestCareerPathsInput,
+} from '@/ai/flows/career-path-suggester-tool';
 
 async function handleAction<T_Input, T_Output>(
   input: T_Input,
@@ -85,4 +93,12 @@ export async function handleGenerateDiagramAction(input: GenerateDiagramInput) {
 
 export async function handleTextToSpeechAction(input: TextToSpeechInput) {
     return handleAction(input, textToSpeech);
+}
+
+export async function handleGenerateCoverLetterAction(input: GenerateCoverLetterInput) {
+    return handleAction(input, generateCoverLetter);
+}
+
+export async function handleSuggestCareerPathsAction(input: SuggestCareerPathsInput) {
+    return handleAction(input, suggestCareerPaths);
 }
