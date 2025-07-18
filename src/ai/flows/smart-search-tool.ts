@@ -26,6 +26,24 @@ const SmartSearchOutputSchema = z.object({
 });
 export type SmartSearchOutput = z.infer<typeof SmartSearchOutputSchema>;
 
+// Define a tool for getting the weather
+const getWeatherTool = ai.defineTool(
+    {
+      name: 'getWeatherTool',
+      description: 'Get the weather forecast for a given location.',
+      inputSchema: z.object({
+        location: z.string().describe('The location to get the weather for.'),
+      }),
+      outputSchema: z.string(),
+    },
+    async (input) => {
+      // In a real application, you would call a weather API here.
+      // For this example, we'll return mock data.
+      return `The weather in ${input.location} is 72°F and sunny.`;
+    }
+);
+
+
 export async function smartSearch(input: SmartSearchInput): Promise<SmartSearchOutput> {
   return smartSearchFlow(input);
 }
@@ -34,7 +52,10 @@ const prompt = ai.definePrompt({
   name: 'smartSearchPrompt',
   input: {schema: SmartSearchInputSchema},
   output: {schema: SmartSearchOutputSchema},
+  tools: [getWeatherTool],
   prompt: `You are an expert document analyzer. Your task is to extract key information from the document provided, based on the user's query.
+
+If the user asks about the weather, use the getWeatherTool to provide a weather forecast. Otherwise, analyze the provided document.
 
 Document: {{media url=documentDataUri}}
 
