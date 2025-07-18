@@ -1,7 +1,7 @@
 'use server';
 
 /**
- * @fileOverview Provides AI-powered feedback on a user's resume.
+ * @fileOverview Provides AI-powered feedback on a user's resume, focusing on ATS optimization.
  * 
  * - getResumeFeedback - Analyzes a resume and provides feedback and a rewritten version.
  * - GetResumeFeedbackInput - The input type for the function.
@@ -32,10 +32,10 @@ const prompt = ai.definePrompt({
   name: 'getResumeFeedbackPrompt',
   input: { schema: GetResumeFeedbackInputSchema },
   output: { schema: GetResumeFeedbackOutputSchema },
-  prompt: `You are an expert career coach and professional resume writer. Your task is to provide a comprehensive review of the user's resume.
+  prompt: `You are an expert career coach and professional resume writer with deep knowledge of Applicant Tracking Systems (ATS). Your task is to provide a comprehensive review of the user's resume, focusing on improving its content, structure, and ATS score.
 
 The user's resume is provided below.
-{{#if targetJobRole}}The user is targeting the role of: {{{targetJobRole}}}{{/if}}
+{{#if targetJobRole}}The user is targeting the role of: {{{targetJobRole}}}. You must tailor your feedback and rewritten resume to align with keywords and qualifications for this role.{{/if}}
 {{#if additionalInfo}}Additional context from the user: {{{additionalInfo}}}{{/if}}
 
 Resume content:
@@ -48,8 +48,8 @@ Resume content:
 {{/if}}
 
 Please perform the following two tasks:
-1.  **Provide Detailed Feedback:** Analyze the resume for clarity, impact, formatting, and relevance to the target role (if provided). Give constructive feedback in Markdown format, with clear sections for "Strengths", "Areas for Improvement", and "Actionable Suggestions".
-2.  **Rewrite the Resume:** Provide a professionally rewritten version of the resume. Structure it logically with clear headings (e.g., "Summary", "Experience", "Education", "Skills"). Use action verbs and quantify achievements where possible. Ensure the output is clean, well-formatted text.
+1.  **Provide Detailed Feedback:** Analyze the resume for clarity, impact, formatting, and ATS compatibility. Give constructive feedback in Markdown format, with clear sections for "Strengths", "Areas for Improvement", and "Actionable Suggestions for ATS Optimization". The ATS suggestions should include advice on keywords, formatting, and structure to ensure the resume passes through automated screening systems effectively.
+2.  **Rewrite the Resume:** Provide a professionally rewritten version of the resume. Structure it logically with clear headings (e.g., "Summary", "Experience", "Education", "Skills"). Use strong action verbs, quantify achievements with metrics where possible, and integrate keywords relevant to the target job role to maximize ATS score. Ensure the output is clean, well-formatted text.
 `,
 });
 
