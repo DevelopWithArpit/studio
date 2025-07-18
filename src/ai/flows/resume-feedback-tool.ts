@@ -37,7 +37,7 @@ const prompt = ai.definePrompt({
   name: 'getResumeFeedbackPrompt',
   input: { schema: GetResumeFeedbackInputSchema },
   output: { schema: GetResumeFeedbackOutputSchema },
-  helpers: { startsWith },
+  helpers: [startsWith],
   prompt: `You are an expert career coach and professional resume writer with deep knowledge of Applicant Tracking Systems (ATS). Your task is to provide a comprehensive review of the user's resume, focusing on improving its content, structure, and ATS score.
 
 The user's resume is provided below.
