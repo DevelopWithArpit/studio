@@ -48,7 +48,6 @@ import CareerPathSuggesterTool from '@/components/tools/career-path-suggester-to
 import DocumentSummarizerTool from '@/components/tools/document-summarizer-tool';
 import ImageGeneratorTool from '@/components/tools/image-generator-tool';
 import PresentationGeneratorTool from '@/components/tools/presentation-generator-tool';
-import PortfolioGeneratorTool from '@/components/tools/portfolio-generator-tool';
 import LinkedInVisualsGeneratorTool from '@/components/tools/linkedin-visuals-generator-tool';
 import WatermarkRemoverTool from '@/components/tools/watermark-remover-tool';
 import ImageTextManipulationTool from '@/components/tools/image-text-manipulation-tool';
@@ -66,7 +65,6 @@ type ToolId =
   | 'image-generator'
   | 'diagram-generator'
   | 'presentation-generator'
-  | 'portfolio-generator'
   | 'linkedin-visuals-generator'
   | 'text-to-speech'
   | 'watermark-remover'
@@ -112,7 +110,7 @@ const tools: ToolConfig[] = [
   },
   {
     id: 'resume-feedback',
-    name: 'Resume Feedback',
+    name: 'Resume & Portfolio',
     icon: FileText,
     component: ResumeFeedbackTool,
   },
@@ -151,12 +149,6 @@ const tools: ToolConfig[] = [
     name: 'Presentation Generator',
     icon: Presentation,
     component: PresentationGeneratorTool,
-  },
-  {
-    id: 'portfolio-generator',
-    name: 'Portfolio Generator',
-    icon: UserSquare,
-    component: PortfolioGeneratorTool,
   },
   {
     id: 'linkedin-visuals-generator',

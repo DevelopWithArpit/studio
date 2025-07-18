@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -25,9 +25,10 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { handleGetResumeFeedbackAction } from '@/app/actions';
-import type { GetResumeFeedbackInput, GetResumeFeedbackOutput } from '@/ai/flows/resume-feedback-tool';
-import { FileText, UploadCloud } from 'lucide-react';
+import { handleGetResumeFeedbackAction, handleGeneratePortfolioAction } from '@/app/actions';
+import type { GetResumeFeedbackOutput } from '@/ai/flows/resume-feedback-tool';
+import type { GeneratePortfolioOutput } from '@/ai/flows/portfolio-generator-tool';
+import { FileText, UploadCloud, Wand2 } from 'lucide-react';
 
 const formSchema = z.object({
   resume: z.string().min(1, "Please upload or paste your resume."),
@@ -39,8 +40,11 @@ type FormData = z.infer<typeof formSchema>;
 
 export default function ResumeFeedbackTool() {
   const [isLoading, setIsLoading] = useState(false);
+  const [isGeneratingPortfolio, setIsGeneratingPortfolio] = useState(false);
   const [result, setResult] = useState<GetResumeFeedbackOutput | null>(null);
+  const [portfolioResult, setPortfolioResult] = useState<GeneratePortfolioOutput | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const { toast } = useToast();
 
   const form = useForm<FormData>({
@@ -69,13 +73,14 @@ export default function ResumeFeedbackTool() {
     }
   };
 
-  async function onSubmit(data: GetResumeFeedbackInput) {
+  async function onSubmit(data: FormData) {
     if (!data.resume) {
         form.setError("resume", { type: "manual", message: "Please upload or paste your resume." });
         return;
     }
     setIsLoading(true);
     setResult(null);
+    setPortfolioResult(null);
     const response = await handleGetResumeFeedbackAction(data);
     setIsLoading(false);
 
@@ -84,18 +89,49 @@ export default function ResumeFeedbackTool() {
     } else {
       toast({
         variant: 'destructive',
-        title: 'Error',
+        title: 'Error Analyzing Resume',
         description: response.error,
       });
     }
   }
 
+  async function onGeneratePortfolio() {
+      if (!result?.rewrittenResume) return;
+
+      setIsGeneratingPortfolio(true);
+      setPortfolioResult(null);
+      const response = await handleGeneratePortfolioAction({ resumeText: result.rewrittenResume });
+      setIsGeneratingPortfolio(false);
+
+      if (response.success) {
+          setPortfolioResult(response.data);
+      } else {
+          toast({
+              variant: 'destructive',
+              title: 'Error Generating Portfolio',
+              description: response.error,
+          });
+      }
+  }
+  
+  useEffect(() => {
+    if (portfolioResult && iframeRef.current) {
+        iframeRef.current.srcdoc = `
+            <html>
+                <head><style>${portfolioResult.css}</style></head>
+                <body>${portfolioResult.html}</body>
+            </html>
+        `;
+    }
+  }, [portfolioResult]);
+
+
   return (
     <div className="space-y-8">
       <header className="space-y-2">
-        <h1 className="text-3xl font-bold font-headline">Resume Feedback</h1>
+        <h1 className="text-3xl font-bold font-headline">Resume & Portfolio Tool</h1>
         <p className="text-muted-foreground">
-          Get AI-powered feedback to improve your resume and land your dream job.
+          Get AI-powered feedback to improve your resume, then instantly generate a professional portfolio page.
         </p>
       </header>
 
@@ -240,11 +276,65 @@ export default function ResumeFeedbackTool() {
                                 <Skeleton className="h-4 w-full" />
                              </div>
                         ) : (
-                           result && <pre className="bg-muted p-4 rounded-md overflow-x-auto text-sm whitespace-pre-wrap font-sans">{result.rewrittenResume}</pre>
+                           result && (
+                            <div className="space-y-4">
+                                <pre className="bg-muted p-4 rounded-md overflow-x-auto text-sm whitespace-pre-wrap font-sans">{result.rewrittenResume}</pre>
+                                <Button onClick={onGeneratePortfolio} disabled={isGeneratingPortfolio}>
+                                    <Wand2 className="mr-2 h-4 w-4" />
+                                    {isGeneratingPortfolio ? 'Generating Portfolio...' : 'Generate Portfolio from this Resume'}
+                                </Button>
+                            </div>
+                           )
                         )}
                     </TabsContent>
                 </Tabs>
             </CardContent>
+        </Card>
+      )}
+
+      {(isGeneratingPortfolio || portfolioResult) && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Generated Portfolio</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="preview">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="preview">Preview</TabsTrigger>
+                <TabsTrigger value="html">HTML</TabsTrigger>
+                <TabsTrigger value="css">CSS</TabsTrigger>
+              </TabsList>
+              <TabsContent value="preview" className="mt-4">
+                {isGeneratingPortfolio ? (
+                  <Skeleton className="w-full h-[600px] rounded-lg" />
+                ) : (
+                  <iframe
+                    ref={iframeRef}
+                    title="Portfolio Preview"
+                    className="w-full h-[600px] rounded-lg border bg-white"
+                  />
+                )}
+              </TabsContent>
+              <TabsContent value="html" className="mt-4">
+                 {isGeneratingPortfolio ? (
+                  <Skeleton className="w-full h-[600px] rounded-lg" />
+                ) : (
+                    <pre className="w-full h-[600px] overflow-auto bg-muted p-4 rounded-md text-sm">
+                        <code className="text-foreground">{portfolioResult?.html}</code>
+                    </pre>
+                )}
+              </TabsContent>
+               <TabsContent value="css" className="mt-4">
+                 {isGeneratingPortfolio ? (
+                  <Skeleton className="w-full h-[600px] rounded-lg" />
+                ) : (
+                    <pre className="w-full h-[600px] overflow-auto bg-muted p-4 rounded-md text-sm">
+                        <code className="text-foreground">{portfolioResult?.css}</code>
+                    </pre>
+                )}
+              </TabsContent>
+            </Tabs>
+          </CardContent>
         </Card>
       )}
     </div>
