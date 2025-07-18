@@ -30,6 +30,43 @@ import type { GetResumeFeedbackOutput } from '@/ai/flows/resume-feedback-tool';
 import type { GeneratePortfolioOutput } from '@/ai/flows/portfolio-generator-tool';
 import { FileText, UploadCloud, Wand2 } from 'lucide-react';
 
+const defaultResumeText = `ARPIT PISE
+AI Engineer / Robotics Software Engineer
+7276602831 | arpitpise1@gmail.com | linkedin.com/in/arpit-pise-20029a287 | Nagpur, India
+
+SUMMARY
+As a B.Tech student specializing in Robotics and Artificial Intelligence, I am dedicated to crafting cutting-edge AI solutions. My expertise in Python, Java, and C++ complements my projects, notably leading the successful development of the AI Mentor platform. I am eager to apply my skills in an AI Engineer or Robotics Software Engineer role to contribute to advanced technological innovations.
+
+EXPERIENCE
+Technical Member, Priyadarshini College of Engineering, Nagpur, India
+01/2023 - Present
+* Collaborated in the organization of 5+ technical events and workshops, resulting in a 50% increase in student participation.
+* Implemented an online registration system using PHP and MySQL, decreasing average registration wait times by 85%.
+* Developed and maintained the college committee website using HTML, CSS, and JavaScript, leading to a 30% increase in event promotion visibility.
+
+EDUCATION
+Bachelor of Technology in Robotics and Artificial Intelligence (B.Tech)
+Priyadarshini College Of Engineering, Nagpur, India
+08/2024 - 05/2028
+
+HSC, ST. PAUL PUBLIC SCHOOL & JUNIOR COLLEGE
+01/2021 - 05/2023
+
+SSC, PURUSHOTTAM DAS BAGLA CONVENT
+01/2019 - 05/2021
+
+KEY ACHIEVEMENTS
+* AI Mentor by AP Platform Development: Led the development of the AI Mentor platform, achieving a 30% increase in user engagement within the first month.
+
+PROJECTS
+AI Mentor by AP
+* Spearheaded the development of an AI-powered platform offering personalized learning and career guidance.
+* Engineered and implemented AI-driven tools for resume and cover letter creation, career path recommendations, and code/DSA assistance.
+* Integrated AI-powered image generation (Stable Diffusion, DALL-E), text-based image editing, and presentation assistance features.
+
+SKILLS
+AWS, Azure, C/C++, CSS, Data Structures, Deep Learning, Django, Docker, Flask, Git, HTML, Java, JavaScript, Keras, Linux, NLP, Numpy, Pandas, PHP, Python, PyTorch, Robotics, Scikit-Learn, TensorFlow, Gmail`;
+
 const formSchema = z.object({
   resume: z.string().min(1, "Please upload or paste your resume."),
   targetJobRole: z.string().optional(),
@@ -50,7 +87,7 @@ export default function ResumeFeedbackTool() {
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      resume: '',
+      resume: defaultResumeText,
       targetJobRole: '',
       additionalInfo: '',
     },
