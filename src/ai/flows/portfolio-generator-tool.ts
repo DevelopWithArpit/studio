@@ -30,49 +30,28 @@ const prompt = ai.definePrompt({
   name: 'generatePortfolioPrompt',
   input: { schema: GeneratePortfolioInputSchema },
   output: { schema: GeneratePortfolioOutputSchema },
-  prompt: `You are an expert web developer specializing in creating stylish, modern, single-page portfolios based on a provided resume text. Your task is to generate the complete HTML and CSS to precisely replicate the layout and style of the professional resume example.
+  prompt: `You are an expert web developer creating a single-page portfolio from resume text. Generate complete, standalone HTML and CSS.
 
-Resume Content to use:
+**Resume Content:**
 ---
 {{{resumeText}}}
 ---
 
-**Design & Layout Requirements:**
+**Instructions:**
+1.  **Layout:** Create a professional two-column layout.
+    *   **Header:** Start with a full-width header containing the Name, Job Title, and contact info (Phone, Email, LinkedIn, Location) with icons.
+    *   **Left Column (Wider):** Place the 'Summary', 'Experience', 'Education', and 'Projects' sections here.
+    *   **Right Column (Narrower):** Place a circular profile picture placeholder at the top, followed by 'Key Achievements' and 'Skills' sections.
+2.  **Styling:**
+    *   Use a clean, sans-serif font.
+    *   Use black for text, a professional blue for headings/links, and light grey for backgrounds on skill tags.
+    *   Use thin horizontal lines to separate major sections in the left column.
+    *   The code must be vanilla HTML and CSS without external libraries.
+    *   Ensure the layout is responsive and stacks to a single column on smaller screens.
 
-1.  **Overall Structure:**
-    *   The entire page must have a single root container.
-    *   **Crucially, the page starts with a full-width header section.**
-    *   Below the header, the page splits into a two-column layout.
-
-2.  **Header Section (Full Width):**
-    *   Display the full name in a large, bold, black font (e.g., 'ARPIT PISE').
-    *   Below the name, display the job title(s) in a smaller, blue font (e.g., 'AI Engineer / Robotics Software Engineer').
-    *   Below the titles, list contact information horizontally: phone, email, LinkedIn, and location. Use small icons (Unicode or SVG) next to each item. This entire header block (name, title, contacts) must be in a single full-width container at the top of the page.
-
-3.  **Two-Column Layout (Below Header):**
-    *   The left column should be wider (approx. 65-70%) and contain the main content.
-    *   The right column should be narrower (approx. 30-35%) and act as a sidebar.
-
-4.  **Left Column Content:**
-    *   **SUMMARY:** A section with a heading. The paragraph text should follow.
-    *   **EXPERIENCE:** A section with a main heading. Each job should be a sub-section with the job title, company name (in blue), dates, and location. Use bullet points for responsibilities.
-    *   **EDUCATION:** A section with a main heading. List each degree with the institution name (in blue), dates, and location.
-    *   **PROJECTS:** A section with a main heading, following the same structure as EXPERIENCE.
-
-5.  **Right Column Content:**
-    *   **Profile Picture:** A circular placeholder for a profile picture at the top. You can represent this with a simple div with a background color and the initials 'AP' in the center.
-    *   **KEY ACHIEVEMENTS:** A section with a heading. List achievements with a small icon next to each.
-    *   **SKILLS:** A section with a heading. Display skills as tags or badges with a light grey background.
-
-6.  **Styling (CSS):**
-    *   **Typography:** Use a clean, sans-serif font like Arial or Helvetica.
-    *   **Colors:** Use black for main text, a professional blue (e.g., #007BFF) for headings, links, and titles, and grey for borders and backgrounds of skill tags.
-    *   **Separators:** Use thin, black horizontal lines under each major section heading (SUMMARY, EXPERIENCE, etc.).
-    *   **No External Libraries:** Do not use any external CSS frameworks like Bootstrap or Tailwind. Generate all necessary vanilla CSS.
-    *   **Responsiveness:** Ensure the layout is reasonably responsive, stacking to a single column on smaller screens.
-
-Generate the full, ready-to-use HTML and CSS code based on these precise instructions.`,
+Generate the full HTML and CSS code.`,
 });
+
 
 const generatePortfolioFlow = ai.defineFlow(
   {
