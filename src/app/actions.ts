@@ -28,6 +28,14 @@ import {
   getResumeFeedback,
   type GetResumeFeedbackInput,
 } from '@/ai/flows/resume-feedback-tool';
+import {
+  generateDiagram,
+  type GenerateDiagramInput,
+} from '@/ai/flows/diagram-generator-tool';
+import {
+    textToSpeech,
+    type TextToSpeechInput,
+} from '@/ai/flows/text-to-speech-tool';
 
 async function handleAction<T_Input, T_Output>(
   input: T_Input,
@@ -69,4 +77,12 @@ export async function handleGenerateInterviewQuestionsAction(input: GenerateInte
 
 export async function handleGetResumeFeedbackAction(input: GetResumeFeedbackInput) {
   return handleAction(input, getResumeFeedback);
+}
+
+export async function handleGenerateDiagramAction(input: GenerateDiagramInput) {
+    return handleAction(input, generateDiagram);
+}
+
+export async function handleTextToSpeechAction(input: TextToSpeechInput) {
+    return handleAction(input, textToSpeech);
 }

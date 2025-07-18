@@ -9,3 +9,5 @@ import '@/ai/flows/code-generator-tool.ts';
 import '@/ai/flows/code-analyzer-tool.ts';
 import '@/ai/flows/interview-question-generator-tool.ts';
 import '@/ai/flows/resume-feedback-tool.ts';
+import '@/ai/flows/diagram-generator-tool.ts';
+import '@/ai/flows/text-to-speech-tool.ts';

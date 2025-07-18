@@ -18,19 +18,12 @@ import {
   CodeXml,
   ScanEye,
   ImageIcon,
-  Mic,
-  Briefcase,
-  FileText,
   ClipboardList,
-  GraduationCap,
-  Presentation,
-  Linkedin,
-  Sparkles,
-  Scissors,
-  ALargeSmall,
-  Diagram,
+  FileText,
   type LucideIcon,
   PanelLeft,
+  Diagram,
+  Mic,
 } from 'lucide-react';
 import { AppLogo } from '@/components/app-logo';
 import AiExplanationTool from '@/components/tools/ai-explanation-tool';
@@ -40,6 +33,8 @@ import ImageToolkit from '@/components/tools/image-toolkit';
 import SmartSearchTool from '@/components/tools/smart-search-tool';
 import InterviewQuestionGeneratorTool from '@/components/tools/interview-question-generator-tool';
 import ResumeFeedbackTool from '@/components/tools/resume-feedback-tool';
+import DiagramGeneratorTool from '@/components/tools/diagram-generator-tool';
+import TextToSpeechTool from '@/components/tools/text-to-speech-tool';
 
 type ToolId =
   | 'smart-search'
@@ -48,7 +43,9 @@ type ToolId =
   | 'code-analyzer'
   | 'image-toolkit'
   | 'interview-question-generator'
-  | 'resume-feedback';
+  | 'resume-feedback'
+  | 'diagram-generator'
+  | 'text-to-speech';
 
 type ToolConfig = {
   id: ToolId;
@@ -99,6 +96,18 @@ const tools: ToolConfig[] = [
     name: 'Resume Feedback',
     icon: FileText,
     component: ResumeFeedbackTool,
+  },
+  {
+    id: 'diagram-generator',
+    name: 'Diagram Generator',
+    icon: Diagram,
+    component: DiagramGeneratorTool,
+  },
+  {
+    id: 'text-to-speech',
+    name: 'Text to Speech',
+    icon: Mic,
+    component: TextToSpeechTool,
   },
 ];
 
