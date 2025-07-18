@@ -37,7 +37,7 @@ const analyzeCodePrompt = ai.definePrompt({
 
 Language: {{{language}}}
 Code:
-{{code}}
+{{{code}}}
 
 Constraints: {{constraints}}
 

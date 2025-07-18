@@ -33,7 +33,7 @@ const prompt = ai.definePrompt({
 
   Please provide a clear and concise explanation of the following topic:
 
-  {{topic}}`,
+  {{{topic}}}`,
 });
 
 const explainTopicFlow = ai.defineFlow(
