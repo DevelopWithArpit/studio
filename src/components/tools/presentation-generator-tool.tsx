@@ -36,6 +36,7 @@ import {
 } from '@/components/ui/carousel';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { ImageIcon } from 'lucide-react';
 
 const formSchema = z.object({
   topic: z.string().min(3, 'Please enter a topic with at least 3 characters.'),
