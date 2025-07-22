@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Image from 'next/image';
+import PptxGenJS from 'pptxgenjs';
 import {
   Card,
   CardContent,
@@ -35,8 +36,7 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { ImageIcon } from 'lucide-react';
+import { Download, ImageIcon } from 'lucide-react';
 
 const formSchema = z.object({
   topic: z.string().min(3, 'Please enter a topic with at least 3 characters.'),
@@ -76,6 +76,55 @@ export default function PresentationGeneratorTool() {
       });
     }
   }
+
+  const handleDownload = () => {
+    if (!result) return;
+
+    const pptx = new PptxGenJS();
+    pptx.layout = 'LAYOUT_WIDE';
+
+    result.slides.forEach((slide, index) => {
+      const pptxSlide = pptx.addSlide();
+
+      // Title
+      pptxSlide.addText(slide.title, { 
+        x: 0.5, 
+        y: 0.25, 
+        w: '90%', 
+        h: 1, 
+        fontSize: 36, 
+        bold: true, 
+        color: '363636' 
+      });
+
+      if (index > 0 && index < result.slides.length -1) {
+         // Image
+        if (slide.imageUrl) {
+            pptxSlide.addImage({
+                data: slide.imageUrl,
+                x: 5.0,
+                y: 1.5,
+                w: 4.5,
+                h: 3.5,
+            });
+        }
+    
+        // Content
+        pptxSlide.addText(slide.content.join('\n\n'), {
+            x: 0.5,
+            y: 1.5,
+            w: 4.0,
+            h: 3.5,
+            fontSize: 18,
+            bullet: true,
+            color: '363636',
+        });
+      }
+    });
+
+    pptx.writeFile({ fileName: `${result.title}.pptx` });
+  };
+
 
   return (
     <div className="space-y-8">
@@ -194,6 +243,12 @@ export default function PresentationGeneratorTool() {
                 <CarouselNext className="mr-12" />
             </Carousel>
           </CardContent>
+          <CardFooter>
+            <Button onClick={handleDownload}>
+                <Download className="mr-2 h-4 w-4"/>
+                Download Presentation
+            </Button>
+          </CardFooter>
         </Card>
       )}
     </div>

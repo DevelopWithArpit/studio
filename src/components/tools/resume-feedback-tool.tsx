@@ -10,6 +10,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from '@/components/ui/card';
 import {
   Form,
@@ -28,7 +29,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { handleGetResumeFeedbackAction, handleGeneratePortfolioAction } from '@/app/actions';
 import type { GetResumeFeedbackOutput } from '@/ai/flows/resume-feedback-tool';
 import type { GeneratePortfolioOutput } from '@/ai/flows/portfolio-generator-tool';
-import { FileText, UploadCloud, Wand2 } from 'lucide-react';
+import { FileText, UploadCloud, Wand2, Download } from 'lucide-react';
 
 const defaultResumeText = `ARPIT PISE
 AI Engineer / Robotics Software Engineer
@@ -150,6 +151,30 @@ export default function ResumeFeedbackTool() {
           });
       }
   }
+
+  const handleDownloadPortfolio = () => {
+    if (!portfolioResult) return;
+
+    const blob = new Blob(
+        [`<!DOCTYPE html>
+<html>
+<head>
+<title>Portfolio</title>
+<style>${portfolioResult.css}</style>
+</head>
+<body>${portfolioResult.html}</body>
+</html>`], 
+        { type: 'text/html' }
+    );
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'portfolio.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
   
   useEffect(() => {
     if (portfolioResult && iframeRef.current) {
@@ -300,7 +325,7 @@ export default function ResumeFeedbackTool() {
                                 <Skeleton className="h-4 w-5/6" />
                              </div>
                         ) : (
-                            result && <div className="prose prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: result.feedback.replace(/\n/g, '<br />') }} />
+                            result && <div className="prose prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: result.feedback.replace(/\\n/g, '<br />') }} />
                         )}
                     </TabsContent>
                     <TabsContent value="rewritten" className="mt-4">
@@ -372,6 +397,14 @@ export default function ResumeFeedbackTool() {
               </TabsContent>
             </Tabs>
           </CardContent>
+          {portfolioResult && (
+            <CardFooter>
+                <Button onClick={handleDownloadPortfolio}>
+                    <Download className="mr-2 h-4 w-4" />
+                    Download Portfolio
+                </Button>
+            </CardFooter>
+          )}
         </Card>
       )}
     </div>
