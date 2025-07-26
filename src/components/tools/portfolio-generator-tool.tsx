@@ -26,9 +26,9 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { handleGeneratePortfolioWebsiteAction, handleGetResumeFeedbackAction } from '@/app/actions';
+import { handleGeneratePortfolioWebsiteAction } from '@/app/actions';
 import type { GeneratePortfolioWebsiteOutput, GeneratePortfolioWebsiteInput } from '@/ai/flows/portfolio-generator-tool';
-import { Copy, Download, FileArchive, FileText, Loader2, Plus, Trash2, UploadCloud, ChevronDown } from 'lucide-react';
+import { Copy, Download, FileArchive, FileText, Loader2, Plus, Trash2, UploadCloud } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 
@@ -38,8 +38,8 @@ const portfolioSchema = z.object({
     contact: z.object({
         email: z.string().email("Invalid email address."),
         socials: z.array(z.object({
-            network: z.string().min(1, "Network name is required."),
-            url: z.string().url("Invalid URL."),
+            network: z.string(),
+            url: z.string().url().or(z.literal('')),
         })).optional(),
     }),
     about: z.string().min(20, "About section should be at least 20 characters."),
@@ -89,7 +89,7 @@ export default function PortfolioGeneratorTool() {
   const { fields: expFields, append: appendExp, remove: removeExp } = useFieldArray({ control: form.control, name: "experience" });
   const { fields: eduFields, append: appendEdu, remove: removeEdu } = useFieldArray({ control: form.control, name: "education" });
   const { fields: projFields, append: appendProj, remove: removeProj } = useFieldArray({ control: form.control, name: "projects" });
-
+  const { fields: socialFields, append: appendSocial, remove: removeSocial } = useFieldArray({ control: form.control, name: "contact.socials" });
 
   async function onManualSubmit(data: FormData) {
     setIsLoading(true);
@@ -97,7 +97,7 @@ export default function PortfolioGeneratorTool() {
     const response = await handleGeneratePortfolioWebsiteAction({type: 'manual', data});
     setIsLoading(false);
 
-    if (response.success) {
+    if (response.success && response.data) {
       setResult(response.data);
       toast({ title: 'Website Generated!', description: 'Your portfolio has been successfully generated.' });
     } else {
@@ -119,9 +119,9 @@ export default function PortfolioGeneratorTool() {
       const response = await handleGeneratePortfolioWebsiteAction({ type: 'resume', resumeDataUri });
       setIsLoading(false);
 
-      if (response.success) {
+      if (response.success && response.data) {
         setResult(response.data);
-        toast({ title: 'Website Generated!', description: 'Your portfolio has been successfully generated.' });
+        toast({ title: 'Website Generated!', description: 'Your portfolio has been successfully generated from your resume.' });
       } else {
         toast({
           variant: 'destructive',
@@ -246,12 +246,16 @@ export default function PortfolioGeneratorTool() {
 
                         {/* Social Links */}
                         <Card>
-                            <CardHeader><CardTitle>Social Links</CardTitle></CardHeader>
+                            <CardHeader className="flex flex-row items-center justify-between">
+                                <CardTitle>Social Links</CardTitle>
+                                <Button type="button" variant="outline" size="sm" onClick={() => appendSocial({ network: '', url: '' })}><Plus className="mr-2 h-4 w-4" /> Add Link</Button>
+                            </CardHeader>
                             <CardContent className="space-y-4">
-                                {form.getValues('contact.socials')?.map((social, index) => (
-                                    <div key={index} className="flex gap-4 items-end">
-                                        <FormField control={form.control} name={`contact.socials.${index}.network`} render={({ field }) => ( <FormItem className="flex-1"> <FormLabel>Network</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-                                        <FormField control={form.control} name={`contact.socials.${index}.url`} render={({ field }) => ( <FormItem className="flex-1"> <FormLabel>URL</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                {socialFields.map((field, index) => (
+                                    <div key={field.id} className="flex gap-4 items-end">
+                                        <FormField control={form.control} name={`contact.socials.${index}.network`} render={({ field }) => ( <FormItem className="flex-1"> <FormLabel>Network</FormLabel> <FormControl><Input {...field} placeholder="e.g., LinkedIn" /></FormControl> <FormMessage /> </FormItem> )}/>
+                                        <FormField control={form.control} name={`contact.socials.${index}.url`} render={({ field }) => ( <FormItem className="flex-1"> <FormLabel>URL</FormLabel> <FormControl><Input {...field} placeholder="https://linkedin.com/in/..." /></FormControl> <FormMessage /> </FormItem> )}/>
+                                        <Button type="button" variant="ghost" size="icon" className="h-9 w-9" onClick={() => removeSocial(index)}><Trash2 className="h-4 w-4" /></Button>
                                     </div>
                                 ))}
                             </CardContent>
@@ -332,7 +336,6 @@ export default function PortfolioGeneratorTool() {
                                             <FormControl>
                                                 <Textarea
                                                     placeholder="e.g., Python, JavaScript, React, AI, Machine Learning"
-                                                    {...field}
                                                     onChange={(e) => field.onChange(e.target.value.split(',').map(s => s.trim()))}
                                                     value={Array.isArray(field.value) ? field.value.join(', ') : ''}
                                                     rows={3}
@@ -369,6 +372,7 @@ export default function PortfolioGeneratorTool() {
                     <Skeleton className="h-64 w-full" />
                 </div>
              ) : (
+                result &&
                 <Tabs defaultValue="preview">
                     <TabsList>
                         <TabsTrigger value="preview">Preview</TabsTrigger>
@@ -378,30 +382,30 @@ export default function PortfolioGeneratorTool() {
                     </TabsList>
                     <TabsContent value="preview" className="mt-4">
                         <iframe 
-                            srcDoc={`<html><head><style>${result?.css}</style></head><body>${result?.html}<script>${result?.javascript}</script></body></html>`}
+                            srcDoc={`<html><head><style>${result.css}</style></head><body>${result.html}<script>${result.javascript}</script></body></html>`}
                             className="w-full h-[600px] border rounded-md"
                             title="Portfolio Preview"
                         />
                     </TabsContent>
                     <TabsContent value="html">
                         <CodeBlock 
-                          code={result?.html ?? ''} 
-                          onCopy={() => copyToClipboard(result?.html ?? '', 'HTML')} 
-                          onDownload={() => downloadFile(result?.html ?? '', 'index.html', 'text/html')}
+                          code={result.html} 
+                          onCopy={() => copyToClipboard(result.html, 'HTML')} 
+                          onDownload={() => downloadFile(result.html, 'index.html', 'text/html')}
                         />
                     </TabsContent>
                      <TabsContent value="css">
                         <CodeBlock 
-                          code={result?.css ?? ''} 
-                          onCopy={() => copyToClipboard(result?.css ?? '', 'CSS')}
-                          onDownload={() => downloadFile(result?.css ?? '', 'style.css', 'text/css')}
+                          code={result.css} 
+                          onCopy={() => copyToClipboard(result.css, 'CSS')}
+                          onDownload={() => downloadFile(result.css, 'style.css', 'text/css')}
                         />
                     </TabsContent>
                      <TabsContent value="js">
                         <CodeBlock 
-                          code={result?.javascript ?? ''} 
-                          onCopy={() => copyToClipboard(result?.javascript ?? '', 'JavaScript')}
-                          onDownload={() => downloadFile(result?.javascript ?? '', 'script.js', 'text/javascript')}
+                          code={result.javascript} 
+                          onCopy={() => copyToClipboard(result.javascript, 'JavaScript')}
+                          onDownload={() => downloadFile(result.javascript, 'script.js', 'text/javascript')}
                         />
                     </TabsContent>
                 </Tabs>

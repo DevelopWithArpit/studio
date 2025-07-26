@@ -19,7 +19,7 @@ const PortfolioDataSchema = z.object({
       socials: z.array(z.object({
           network: z.string().describe("The social network name (e.g., 'LinkedIn', 'GitHub')."),
           url: z.string().url().describe("The URL to the user's profile."),
-      })).describe("An array of social media links.")
+      })).optional().describe("An array of social media links.")
   }),
   about: z.string().describe("A detailed 'About Me' section."),
   experience: z.array(z.object({
@@ -82,10 +82,12 @@ Your task is to take the user's structured data and generate the complete HTML, 
 - Name: {{{name}}}
 - Headline: {{{headline}}}
 - Contact Email: {{{contact.email}}}
+{{#if contact.socials}}
 - Social Links: 
 {{#each contact.socials}}
   - {{network}}: {{url}}
 {{/each}}
+{{/if}}
 - About Me: {{{about}}}
 - Experience:
 {{#each experience}}
