@@ -71,7 +71,14 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
                         </p>
                     </div>
                     <div className="flex-shrink-0">
-                        <div className="w-14 h-14 rounded-full bg-blue-600 flex items-center justify-center">
+                        <div
+                          className="w-14 h-14 rounded-full bg-blue-600"
+                          style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                          }}
+                        >
                             <span className="text-white text-xl font-bold">{initials}</span>
                         </div>
                     </div>
