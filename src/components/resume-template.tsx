@@ -17,13 +17,11 @@ interface Project {
 }
 
 const parseResumeText = (text: string) => {
-    const lines = text.split('\n').filter(line => line.trim() !== '');
+    // 1. Initial Cleaning
+    const lines = text.split('\n')
+        .map(line => line.replace(/^#+\s*/, '').trim())
+        .filter(line => line.trim() !== '');
 
-    // Clean up markdown hashes from the name if present
-    if (lines.length > 0 && lines[0].startsWith('## ')) {
-        lines[0] = lines[0].substring(3).trim();
-    }
-    
     let name = '';
     let title = '';
     let contactLine = '';
@@ -37,39 +35,44 @@ const parseResumeText = (text: string) => {
         'PROJECTS',
     ];
 
-    if (lines.length > 0) name = lines.shift() || '';
-    if (lines.length > 0) title = lines.shift() || '';
-    if (lines.length > 0) contactLine = lines.shift() || '';
+    // Find first section header to separate personal info from the rest
+    let firstSectionIndex = -1;
+    for(let i = 0; i < lines.length; i++) {
+        const upperLine = lines[i].toUpperCase();
+        if(sectionHeaders.includes(upperLine)) {
+            firstSectionIndex = i;
+            break;
+        }
+    }
+
+    if (firstSectionIndex !== -1) {
+        const personalInfoLines = lines.slice(0, firstSectionIndex);
+        name = personalInfoLines[0] || '';
+        title = personalInfoLines[1] || '';
+        contactLine = personalInfoLines[2] || '';
+    } else {
+         // Fallback if no sections are found
+        name = lines[0] || '';
+        title = lines[1] || '';
+        contactLine = lines[2] || '';
+    }
+
 
     let currentSection: string | null = null;
-    let sectionLines: string[] = [];
-
     for (const line of lines) {
-        const trimmedLine = line.trim().toUpperCase();
-        const foundHeader = sectionHeaders.find(h => trimmedLine === h);
+        const upperLine = line.trim().toUpperCase();
+        const foundHeader = sectionHeaders.find(h => upperLine === h);
 
         if (foundHeader) {
-            if (currentSection && sectionLines.length > 0) {
-                sections[currentSection] = [...sectionLines];
-            }
             currentSection = foundHeader;
-            sectionLines = [];
+            sections[currentSection] = [];
         } else if (currentSection) {
-            sectionLines.push(line);
+            sections[currentSection].push(line);
         }
     }
-    if (currentSection && sectionLines.length > 0) {
-        sections[currentSection] = sectionLines;
-    }
-
-    // Default to empty arrays if sections are missing
-    sectionHeaders.forEach(header => {
-        if (!sections[header]) {
-            sections[header] = [];
-        }
-    });
-
+    
     const parseExperience = (expLines: string[]): Experience[] => {
+        if (!expLines) return [];
         const experiences: Experience[] = [];
         let currentExperience: Experience | null = null;
     
@@ -78,27 +81,20 @@ const parseResumeText = (text: string) => {
                 if (currentExperience) {
                     currentExperience.bullets.push(line.trim().substring(1).trim());
                 }
-            } else {
-                // If a new block starts, save the previous one
+            } else { // This line is a header (Role, Institution, Date, Location)
                 if (currentExperience) {
                     experiences.push(currentExperience);
                 }
-    
-                // This line is a header (Role, Institution, Date, Location)
-                const parts = line.split('•').map(p => p.trim());
-                const roleAndInstitution = parts[0] || '';
-                const dateAndLocation = parts[1] || '';
-    
-                currentExperience = {
-                    role: roleAndInstitution,
-                    institution: '', // Logic to split role/institution can be complex; simplified for now
-                    date: dateAndLocation,
-                    location: '', // Logic to split date/location can be complex; simplified for now
+                 const parts = line.split('•').map(p => p.trim());
+                 currentExperience = {
+                    role: parts[0] || '',
+                    institution: parts[0] || '', // Simplified, assuming role is the main identifier
+                    date: parts[1] || '',
+                    location: parts[2] || '',
                     bullets: [],
                 };
             }
         }
-        // Add the last experience block
         if (currentExperience) {
             experiences.push(currentExperience);
         }
@@ -106,6 +102,7 @@ const parseResumeText = (text: string) => {
     };
     
     const parseProjects = (projLines: string[]): Project[] => {
+         if (!projLines) return [];
         const projects: Project[] = [];
         let currentProject: Project | null = null;
 
@@ -114,18 +111,22 @@ const parseResumeText = (text: string) => {
                  if (currentProject) {
                     currentProject.bullets.push(line.trim().substring(1).trim());
                 }
-            } else if (/\d{2}\/\d{4}/.test(line)) {
-                if(currentProject) {
-                   currentProject.date = line.trim();
-                }
             } else {
                  if (currentProject) {
                     projects.push(currentProject);
                 }
+                const dateMatch = line.match(/\d{2}\/\d{4}.*/);
+                let title = line;
+                let date = '';
+                if(dateMatch){
+                    title = line.substring(0, dateMatch.index).trim();
+                    date = dateMatch[0].trim();
+                }
+
                  currentProject = {
-                    title: line,
-                    date: '',
-                    description: '',
+                    title: title,
+                    date: date,
+                    description: '', // Description not clearly separated in source
                     bullets: [],
                 };
             }
@@ -143,20 +144,23 @@ const parseResumeText = (text: string) => {
         contactLine,
         summary: (sections.SUMMARY || []).join('\n'),
         experiences: parseExperience(sections.EXPERIENCE || []),
-        education: sections.EDUCATION || [],
-        achievements: sections.KEY_ACHIEVEMENTS || [],
+        education: (sections.EDUCATION || []),
+        achievements: (sections.KEY_ACHIEVEMENTS || []),
         skills: (sections.SKILLS || []).join(', ').split(',').map(s => s.trim()).filter(s => s),
         projects: parseProjects(sections.PROJECTS || []),
     };
 };
 
-const BulletList = ({ items }: { items: string[] }) => (
-    <ul className="list-disc pl-5 mt-2 space-y-1">
-        {items.map((item, index) => (
-            <li key={index} className="text-gray-700 text-xs leading-snug">{item.replace(/^•\s*/, '')}</li>
-        ))}
-    </ul>
-);
+const BulletList = ({ items }: { items: string[] }) => {
+    if(!items) return null;
+    return (
+        <ul className="list-disc pl-5 mt-2 space-y-1">
+            {items.map((item, index) => (
+                <li key={index} className="text-gray-700 text-xs leading-snug">{item.replace(/^•\s*/, '')}</li>
+            ))}
+        </ul>
+    )
+};
 
 export const ResumeTemplate: React.FC<{ resumeText: string }> = ({ resumeText }) => {
     const { name, title, contactLine, summary, experiences, education, achievements, skills, projects } = parseResumeText(resumeText);
@@ -207,7 +211,7 @@ export const ResumeTemplate: React.FC<{ resumeText: string }> = ({ resumeText })
                             <p className="mt-2 text-gray-600 leading-relaxed text-xs">{summary}</p>
                         </section>}
 
-                        {experiences.length > 0 && <section className="mt-6">
+                        {experiences && experiences.length > 0 && <section className="mt-6">
                             <h3 className="text-sm font-extrabold uppercase tracking-widest text-gray-700">Experience</h3>
                             <div className="w-full h-px bg-gray-900 my-1" style={{borderWidth: '1.5px'}}></div>
                             <div className="mt-2 space-y-4">
@@ -231,7 +235,7 @@ export const ResumeTemplate: React.FC<{ resumeText: string }> = ({ resumeText })
                             </div>
                         </section>}
 
-                        {education.length > 0 && <section className="mt-6">
+                        {education && education.length > 0 && <section className="mt-6">
                             <h3 className="text-sm font-extrabold uppercase tracking-widest text-gray-700">Education</h3>
                             <div className="w-full h-px bg-gray-900 my-1" style={{borderWidth: '1.5px'}}></div>
                             <div className="mt-2 space-y-4 text-xs">
@@ -261,7 +265,7 @@ export const ResumeTemplate: React.FC<{ resumeText: string }> = ({ resumeText })
                     </div>
 
                     <div className="w-[35%]">
-                         {achievements.length > 0 && <section>
+                         {achievements && achievements.length > 0 && <section>
                             <h3 className="text-sm font-extrabold uppercase tracking-widest text-gray-700">Key Achievements</h3>
                              <div className="w-full h-px bg-gray-900 my-1" style={{borderWidth: '1.5px'}}></div>
                             <div className="mt-2 space-y-3">
@@ -279,7 +283,7 @@ export const ResumeTemplate: React.FC<{ resumeText: string }> = ({ resumeText })
                             </div>
                         </section>}
 
-                        {skills.length > 0 && <section className="mt-6">
+                        {skills && skills.length > 0 && <section className="mt-6">
                             <h3 className="text-sm font-extrabold uppercase tracking-widest text-gray-700">Skills</h3>
                             <div className="w-full h-px bg-gray-900 my-1" style={{borderWidth: '1.5px'}}></div>
                             <div className="mt-2 flex flex-wrap gap-2 text-xs">
@@ -289,7 +293,7 @@ export const ResumeTemplate: React.FC<{ resumeText: string }> = ({ resumeText })
                             </div>
                         </section>}
 
-                         {projects.length > 0 && <section className="mt-6">
+                         {projects && projects.length > 0 && <section className="mt-6">
                             <h3 className="text-sm font-extrabold uppercase tracking-widest text-gray-700">Projects</h3>
                             <div className="w-full h-px bg-gray-900 my-1" style={{borderWidth: '1.5px'}}></div>
                             <div className="mt-2 space-y-4">
@@ -316,5 +320,3 @@ export const ResumeTemplate: React.FC<{ resumeText: string }> = ({ resumeText })
         </div>
     );
 };
-
-    
