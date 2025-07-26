@@ -156,21 +156,7 @@ const parseResumeText = (text: string): ResumeData => {
     });
     if (currentProject) data.projects.push(currentProject);
 
-    // Parse Skills
-    const skillContent = getSectionContent('SKILLS');
-    let currentCategory = '';
-    skillContent.forEach(line => {
-        const cleanedLine = line.replace(/^\*?\s*/, '').trim();
-        if (cleanedLine.endsWith(':')) {
-            currentCategory = cleanedLine.slice(0, -1).trim();
-            data.skills[currentCategory] = data.skills[currentCategory] || [];
-        } else if (currentCategory && cleanedLine) {
-            const skills = cleanedLine.split(',').map(s => s.trim()).filter(Boolean);
-            data.skills[currentCategory].push(...skills);
-        }
-    });
-    
-    // Extract skills from experience
+    // Skills are now exclusively extracted from experience.
     const extractedSkills = new Set<string>();
     const lowerCaseExperience = experienceTextForSkills.toLowerCase();
     PREDEFINED_SKILLS.forEach(skill => {
@@ -178,26 +164,12 @@ const parseResumeText = (text: string): ResumeData => {
             extractedSkills.add(skill);
         }
     });
-
+    
     if (extractedSkills.size > 0) {
-        if (!data.skills['Technical']) {
-            data.skills['Technical'] = [];
-        }
-        extractedSkills.forEach(skill => {
-            if (!data.skills['Technical'].includes(skill)) {
-                data.skills['Technical'].push(skill);
-            }
-        });
+        // Categorize skills for display if needed, or just use a single category.
+        data.skills['Technical Skills (from Experience)'] = Array.from(extractedSkills);
     }
-
-    // Uniq skills
-    Object.keys(data.skills).forEach(category => {
-       if (Array.isArray(data.skills[category])) {
-         data.skills[category] = [...new Set(data.skills[category])];
-       }
-    });
-
-
+    
     return data;
 };
 
