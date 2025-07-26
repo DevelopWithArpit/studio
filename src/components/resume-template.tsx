@@ -35,6 +35,16 @@ interface ResumeData {
     achievements: string[];
 }
 
+const PREDEFINED_SKILLS = [
+    'Python', 'Java', 'C++', 'C', 'HTML', 'JavaScript', 'TypeScript', 'React', 'Next.js', 'Node.js',
+    'Machine Learning', 'TensorFlow', 'Keras', 'PyTorch', 'Scikit-learn', 'OpenAI API', 'Deep Learning', 
+    'Computer Vision', 'Natural Language Processing', 'Generative Al', 'GANs', 'Transformers', 'VAEs',
+    'Robotics', 'ROS', 'Control Systems', 'Surgical Robotics', 'SLAM', 'Path Planning',
+    'Cloud Computing', 'AWS', 'Azure', 'Google Cloud', 'Firebase',
+    'Databases', 'MySQL', 'PostgreSQL', 'MongoDB', 'SQL',
+    'Other', 'Git', 'Linux', 'Docker', 'Cybersecurity', 'Agile', 'JIRA'
+];
+
 const parseResumeText = (text: string): ResumeData => {
     const cleanedText = text.replace(/^##\s*/gm, '');
     const lines = cleanedText.split('\n').map(line => line.trim()).filter(line => line);
@@ -55,11 +65,12 @@ const parseResumeText = (text: string): ResumeData => {
     
     const sectionHeaders = ['SUMMARY', 'EXPERIENCE', 'EDUCATION', 'PROJECTS', 'SKILLS', 'KEY ACHIEVEMENTS'];
     let sectionMap: { [key: string]: number } = {};
+    const upperCaseLines = lines.map(l => l.toUpperCase());
 
-    lines.forEach((line, index) => {
-        const upperLine = line.toUpperCase().trim();
-        if (sectionHeaders.includes(upperLine)) {
-            sectionMap[upperLine] = index;
+    upperCaseLines.forEach((line, index) => {
+        const matchingHeader = sectionHeaders.find(h => line.startsWith(h));
+        if (matchingHeader) {
+            sectionMap[matchingHeader] = index;
         }
     });
 
@@ -79,31 +90,17 @@ const parseResumeText = (text: string): ResumeData => {
     data.summary = getSectionContent('SUMMARY').join(' ');
     data.achievements = getSectionContent('KEY ACHIEVEMENTS').map(line => line.replace(/^\*?\s*/, ''));
 
-    // Parse Skills
-    const skillContent = getSectionContent('SKILLS');
-    let currentCategory = '';
-    skillContent.forEach(line => {
-        if (line.endsWith(':')) {
-            currentCategory = line.slice(0, -1).replace(/^\*?\s*/, '').trim();
-            data.skills[currentCategory] = [];
-        } else if (currentCategory) {
-            const skills = line.split(',').map(s => s.trim()).filter(Boolean);
-            data.skills[currentCategory].push(...skills);
-        }
-    });
-     Object.keys(data.skills).forEach(category => {
-        data.skills[category] = data.skills[category].join(', ').split(',').map(s => s.trim()).filter(s => s);
-    });
-
     // Parse Experience
     const experienceContent = getSectionContent('EXPERIENCE');
+    let experienceTextForSkills = '';
     let currentExperience: Experience | null = null;
     experienceContent.forEach(line => {
+        experienceTextForSkills += line + ' ';
         if (line.startsWith('*')) {
             if (currentExperience) {
                 currentExperience.bullets.push(line.substring(1).trim());
             }
-        } else {
+        } else if (line) {
             if (currentExperience) {
                 data.experience.push(currentExperience);
             }
@@ -116,18 +113,25 @@ const parseResumeText = (text: string): ResumeData => {
         }
     });
     if (currentExperience) data.experience.push(currentExperience);
-
+    
     // Parse Education
     const educationContent = getSectionContent('EDUCATION');
-    if (educationContent.length > 1) {
-        const schoolParts = educationContent[0].split('|').map(p => p.trim());
-        const degreeParts = educationContent[1].split('|').map(p => p.trim());
-        data.education.push({
-            school: schoolParts[0] || '',
-            location: schoolParts[1] || '',
-            degree: degreeParts[0] || '',
-            dates: degreeParts[1] || '',
-        });
+    if (educationContent.length > 0) {
+        const eduBlocks: Education[] = [];
+        for (let i = 0; i < educationContent.length; i++) {
+             if (i + 1 < educationContent.length && !sectionHeaders.some(h => educationContent[i+1].toUpperCase().startsWith(h))) {
+                 const schoolParts = educationContent[i].split('|').map(p => p.trim());
+                 const degreeParts = educationContent[i+1].split('|').map(p => p.trim());
+                 eduBlocks.push({
+                     school: schoolParts[0] || '',
+                     location: schoolParts[1] || '',
+                     degree: degreeParts[0] || '',
+                     dates: degreeParts[1] || '',
+                 });
+                 i++;
+             }
+        }
+        data.education = eduBlocks;
     }
     
     // Parse Projects
@@ -138,7 +142,7 @@ const parseResumeText = (text: string): ResumeData => {
             if (currentProject) {
                 currentProject.bullets.push(line.substring(1).trim());
             }
-        } else {
+        } else if(line) {
             if (currentProject) {
                 data.projects.push(currentProject);
             }
@@ -151,6 +155,48 @@ const parseResumeText = (text: string): ResumeData => {
         }
     });
     if (currentProject) data.projects.push(currentProject);
+
+    // Parse Skills
+    const skillContent = getSectionContent('SKILLS');
+    let currentCategory = '';
+    skillContent.forEach(line => {
+        const cleanedLine = line.replace(/^\*?\s*/, '').trim();
+        if (cleanedLine.endsWith(':')) {
+            currentCategory = cleanedLine.slice(0, -1).trim();
+            data.skills[currentCategory] = data.skills[currentCategory] || [];
+        } else if (currentCategory && cleanedLine) {
+            const skills = cleanedLine.split(',').map(s => s.trim()).filter(Boolean);
+            data.skills[currentCategory].push(...skills);
+        }
+    });
+    
+    // Extract skills from experience
+    const extractedSkills = new Set<string>();
+    const lowerCaseExperience = experienceTextForSkills.toLowerCase();
+    PREDEFINED_SKILLS.forEach(skill => {
+        if (lowerCaseExperience.includes(skill.toLowerCase())) {
+            extractedSkills.add(skill);
+        }
+    });
+
+    if (extractedSkills.size > 0) {
+        if (!data.skills['Technical']) {
+            data.skills['Technical'] = [];
+        }
+        extractedSkills.forEach(skill => {
+            if (!data.skills['Technical'].includes(skill)) {
+                data.skills['Technical'].push(skill);
+            }
+        });
+    }
+
+    // Uniq skills
+    Object.keys(data.skills).forEach(category => {
+       if (Array.isArray(data.skills[category])) {
+         data.skills[category] = [...new Set(data.skills[category])];
+       }
+    });
+
 
     return data;
 };
@@ -214,8 +260,9 @@ export const ResumeTemplate: React.FC<{ resumeText: string }> = ({ resumeText })
                          <section style={{ marginTop: '24px' }}>
                             <h2 style={{ fontSize: '10pt', fontWeight: 'bold', textTransform: 'uppercase', color: '#374151', letterSpacing: '1px', borderBottom: '2px solid #111827', paddingBottom: '4px', marginBottom: '8px' }}>Education</h2>
                             {education.map((edu, i) => (
-                                <div key={i} style={{ marginBottom: '8px' }}>
+                                <div key={i} style={{ marginBottom: i < education.length - 1 ? '8px' : '0' }}>
                                     <h3 style={{ fontSize: '10pt', fontWeight: 'bold', margin: 0 }}>{edu.school}</h3>
+                                    <p style={{ fontSize: '9pt', color: '#4b5563', margin: '2px 0 0 0' }}>{edu.location}</p>
                                     <p style={{ fontSize: '9pt', color: '#4b5563', margin: '2px 0 0 0' }}>{edu.degree} | {edu.dates}</p>
                                 </div>
                             ))}
