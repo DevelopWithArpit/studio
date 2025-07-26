@@ -80,9 +80,9 @@ export default function PortfolioGeneratorTool() {
         headline: '',
         contact: { email: '', socials: [{ network: 'LinkedIn', url: '' }, { network: 'GitHub', url: '' }] },
         about: '',
-        experience: [],
-        education: [],
-        projects: [],
+        experience: [{ title: '', company: '', dates: '', description: '' }],
+        education: [{ degree: '', school: '', dates: '' }],
+        projects: [{ title: '', description: '', link: '', imageUrl: '' }],
         skills: [],
     },
   });
@@ -90,7 +90,6 @@ export default function PortfolioGeneratorTool() {
   const { fields: expFields, append: appendExp, remove: removeExp } = useFieldArray({ control: form.control, name: "experience" });
   const { fields: eduFields, append: appendEdu, remove: removeEdu } = useFieldArray({ control: form.control, name: "education" });
   const { fields: projFields, append: appendProj, remove: removeProj } = useFieldArray({ control: form.control, name: "projects" });
-  const { fields: skillFields, append: appendSkill, remove: removeSkill } = useFieldArray({ control: form.control, name: "skills" });
 
 
   async function onSubmit(data: FormData) {
@@ -188,7 +187,7 @@ export default function PortfolioGeneratorTool() {
       <header className="space-y-2">
         <h1 className="text-3xl font-bold font-headline">Portfolio Website Generator</h1>
         <p className="text-muted-foreground">
-          Auto-fill from your resume or enter details manually to generate a professional portfolio website.
+          Enter your details manually, or upload a resume to get started quickly.
         </p>
       </header>
       
@@ -196,8 +195,8 @@ export default function PortfolioGeneratorTool() {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <Card>
                 <CardHeader>
-                    <CardTitle>Auto-fill from Resume</CardTitle>
-                    <CardDescription>Upload your resume to automatically fill in the form below. You can edit the details before generating.</CardDescription>
+                    <CardTitle>Get Started</CardTitle>
+                    <CardDescription>Upload a resume to auto-fill the form, or fill it out manually below.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center">
@@ -219,9 +218,8 @@ export default function PortfolioGeneratorTool() {
                                 <UploadCloud className="w-12 h-12 text-muted-foreground" />
                                 <p className="mt-2 text-sm text-muted-foreground">
                                     <label htmlFor="resume-upload" className="font-semibold text-accent cursor-pointer hover:underline">
-                                        Click to upload
+                                        Upload Resume (Optional)
                                     </label>
-                                    {' '}or drag and drop
                                 </p>
                                 <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 200MB</p>
                             </>
