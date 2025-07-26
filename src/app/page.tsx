@@ -51,6 +51,7 @@ import PresentationGeneratorTool from '@/components/tools/presentation-generator
 import LinkedInVisualsGeneratorTool from '@/components/tools/linkedin-visuals-generator-tool';
 import WatermarkRemoverTool from '@/components/tools/watermark-remover-tool';
 import ImageTextManipulationTool from '@/components/tools/image-text-manipulation-tool';
+import { SheetTitle } from '@/components/ui/sheet';
 
 type ToolId =
   | 'smart-search'
@@ -110,7 +111,7 @@ const tools: ToolConfig[] = [
   },
   {
     id: 'resume-feedback',
-    name: 'Resume Suite',
+    name: 'Resume Feedback',
     icon: UserSquare,
     component: ResumeFeedbackTool,
   },
@@ -177,7 +178,7 @@ const tools: ToolConfig[] = [
 ];
 
 export default function Home() {
-  const [activeTool, setActiveTool] = useState<ToolId>('smart-search');
+  const [activeTool, setActiveTool] = useState<ToolId>('resume-feedback');
 
   const ActiveToolComponent = tools.find((tool) => tool.id === activeTool)?.component;
 

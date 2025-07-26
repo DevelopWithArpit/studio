@@ -53,10 +53,6 @@ import {
     type GeneratePresentationInput,
 } from '@/ai/flows/presentation-generator-tool';
 import {
-    generatePortfolio,
-    type GeneratePortfolioInput,
-} from '@/ai/flows/portfolio-generator-tool';
-import {
     generateLinkedInVisuals,
     type GenerateLinkedInVisualsInput,
 } from '@/ai/flows/linkedin-visuals-generator-tool';
@@ -133,10 +129,6 @@ export async function handleGenerateImageAction(input: GenerateImageInput) {
 
 export async function handleGeneratePresentationAction(input: GeneratePresentationInput) {
     return handleAction(input, generatePresentation);
-}
-
-export async function handleGeneratePortfolioAction(input: GeneratePortfolioInput) {
-    return handleAction(input, generatePortfolio);
 }
 
 export async function handleGenerateLinkedInVisualsAction(input: GenerateLinkedInVisualsInput) {

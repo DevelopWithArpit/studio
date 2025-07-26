@@ -15,7 +15,6 @@ import '@/ai/flows/career-path-suggester-tool.ts';
 import '@/ai/flows/document-summarizer-tool.ts';
 import '@/ai/flows/image-generator-tool.ts';
 import '@/ai/flows/presentation-generator-tool.ts';
-import '@/ai/flows/portfolio-generator-tool.ts';
 import '@/ai/flows/linkedin-visuals-generator-tool.ts';
 import '@/ai/flows/watermark-remover-tool.ts';
 import '@/ai/flows/image-text-manipulation-tool.ts';

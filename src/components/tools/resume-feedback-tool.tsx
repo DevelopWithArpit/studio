@@ -7,6 +7,7 @@ import { z } from 'zod';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { saveAs } from 'file-saver';
+import ReactDOM from 'react-dom';
 import {
   Card,
   CardContent,
@@ -28,49 +29,54 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  handleGetResumeFeedbackAction,
-  handleGeneratePortfolioAction,
-} from '@/app/actions';
+import { handleGetResumeFeedbackAction } from '@/app/actions';
 import type { GetResumeFeedbackOutput } from '@/ai/flows/resume-feedback-tool';
 import { FileText, UploadCloud, Download, FileCode } from 'lucide-react';
+import { ResumeTemplate } from '@/components/resume-template';
 
 const defaultResumeText = `ARPIT PISE
 AI Engineer / Robotics Software Engineer
-7276602831 | arpitpise1@gmail.com | linkedin.com/in/arpit-pise-20029a287 | Nagpur, India
+(727) 660-2831 | arpitpise1@gmail.com | linkedin.com/in/arpit-pise-20029a287 | Nagpur, India
 
 SUMMARY
-As a B.Tech student specializing in Robotics and Artificial Intelligence, I am dedicated to crafting cutting-edge AI solutions. My expertise in Python, Java, and C++ complements my projects, notably leading the successful development of the AI Mentor platform. I am eager to apply my skills in an AI Engineer or Robotics Software Engineer role to contribute to advanced technological innovations.
+Enthusiastic B.Tech student in Robotics and Artificial Intelligence with expertise in Python, Java, and C++. Led the development of the AI Mentor platform, achieving a 30% increase in user engagement. Seeking an AI Engineer or Robotics Software Engineer role to leverage technical skills in developing advanced AI and robotic systems, contributing to innovative solutions.
 
 EXPERIENCE
-Technical Member, Priyadarshini College of Engineering, Nagpur, India
-01/2023 - Present
-* Collaborated in the organization of 5+ technical events and workshops, resulting in a 50% increase in student participation.
-* Implemented an online registration system using PHP and MySQL, decreasing average registration wait times by 85%.
-* Developed and maintained the college committee website using HTML, CSS, and JavaScript, leading to a 30% increase in event promotion visibility.
+Cybersecurity Consulting Team Member | Tata Consultancy Services | June 2025
+Completed a job simulation involving identity and access management (IAM) for Tata Consultancy Services, collaborating with a Cybersecurity Consulting team.
+Acquired expertise in IAM principles, cybersecurity best practices, and strategic alignment with business objectives.
+Delivered comprehensive documentation and presentations, showcasing the ability to communicate complex technical concepts effectively.
+
+Software Engineer | Electronic Arts | June 2025
+Proposed a new feature for the EA Sports College Football and wrote a Feature Proposal describing it to other stakeholders.
+Built a class diagram and created a header file in C++ with class definitions for each object.
+Patched a bugfix and optimized the EA Sports College Football codebase by implementing an improved data structure.
+
+Robotics & Controls Engineering Intern | Johnson & Johnson | June 2025
+Completed a job simulation as a robotics & controls engineering intern at Johnson & Johnson, focusing on optimizing a surgical robotic arm's performance.
+Used Python-based tools to diagnose control system inefficiencies, identify root causes of delays, and implement targeted optimizations.
+Proposed actionable design modifications using annotated technical visuals, validating their impact on responsiveness and durability through iterative testing.
+Developed a professional design proposal outlining findings, solutions, and recommendations for improving precision and reliability in robotic systems.
+
+Technical Member | College Committee (Priyadarshini College of Engineering) | Oct 2024 - May 2025 | Nagpur, India
+Collaborated in the organization of 5+ technical events and workshops, resulting in increased student participation and boosting engagement with technical subjects.
+Implemented an online registration system using PHP and MySQL, decreasing average registration wait times by 85% (from 20 minutes to 3 minutes) and enhancing user satisfaction.
+Developed and maintained the college committee website using HTML, CSS, and JavaScript, leading to a 30% increase in event promotion click-through rates and improved event visibility.
 
 EDUCATION
-Bachelor of Technology in Robotics and Artificial Intelligence (B.Tech)
-Priyadarshini College Of Engineering, Nagpur, India
-08/2024 - 05/2028
-
-HSC, ST. PAUL PUBLIC SCHOOL & JUNIOR COLLEGE
-01/2021 - 05/2023
-
-SSC, PURUSHOTTAM DAS BAGLA CONVENT
-01/2019 - 05/2021
+Bachelor of Technology in Robotics and Artificial Intelligence (B.Tech) | Priyadarshini College Of Engineering | Sept 2024 - May 2028 | Nagpur, India
 
 KEY ACHIEVEMENTS
-* AI Mentor by AP Platform Development: Led the development of the AI Mentor platform, achieving a 30% increase in user engagement within the first month.
-
-PROJECTS
-AI Mentor by AP
-* Spearheaded the development of an AI-powered platform offering personalized learning and career guidance.
-* Engineered and implemented AI-driven tools for resume and cover letter creation, career path recommendations, and code/DSA assistance.
-* Integrated AI-powered image generation (Stable Diffusion, DALL-E), text-based image editing, and presentation assistance features.
+Led the development of the AI Mentor platform, achieving a 30% increase in user engagement.
+Implemented an online registration system using PHP and MySQL, decreasing average registration wait times by 85%.
+Developed and maintained the college committee website using HTML, CSS, and JavaScript, leading to a 30% increase in event promotion click-through rates.
 
 SKILLS
-AWS, Azure, C/C++, CSS, Data Structures, Deep Learning, Django, Docker, Flask, Git, HTML, Java, JavaScript, Keras, Linux, NLP, Numpy, Pandas, PHP, Python, PyTorch, Robotics, Scikit-Learn, TensorFlow, Gmail`;
+Python, Java, C++, C, HTML, JavaScript, TensorFlow, Keras, PyTorch, Scikit-learn, OpenAI API, Deep Learning, Computer Vision, Natural Language Processing (NLP), Generative AI (GANs), Transformers, VAEs, AWS, Azure, ROS (Robot Operating System), Control Systems, Surgical Robotics, Git, Linux, Docker, PHP, MySQL, IAM, Cybersecurity, C++ Class Definitions
+
+PROJECTS
+AI Mentor by AP | May 2025 - Personal Project
+`;
 
 const formSchema = z.object({
   resume: z.string().min(1, 'Please upload or paste your resume.'),
@@ -141,34 +147,27 @@ export default function ResumeFeedbackTool() {
       });
     }
   }
-
-  const getPortfolioContent = async () => {
-    if (!result?.rewrittenResume) return null;
-    const portfolioResponse = await handleGeneratePortfolioAction({
-      resumeText: result.rewrittenResume,
-    });
-    if (portfolioResponse.success && portfolioResponse.data) {
-      return portfolioResponse.data;
-    }
-    toast({
-      variant: 'destructive',
-      title: 'Error Generating Document',
-      description: portfolioResponse.error,
-    });
-    return null;
+  
+  const getResumeHtml = (resumeText: string) => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    ReactDOM.render(<ResumeTemplate resumeText={resumeText} />, container);
+    const html = container.innerHTML;
+    document.body.removeChild(container);
+    return html;
   };
 
   const handleDownloadPdf = async () => {
+    if (!result?.rewrittenResume) return;
+
     setIsGeneratingPdf(true);
-    const portfolioContent = await getPortfolioContent();
-    if (portfolioContent) {
-      const fullHtml = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Resume</title><style>${portfolioContent.css}</style></head><body>${portfolioContent.html}</body></html>`;
-      const element = document.createElement('div');
-      element.innerHTML = fullHtml;
-      element.style.position = 'absolute';
-      element.style.left = '-9999px';
-      element.style.width = '827px';
-      document.body.appendChild(element);
+    const element = document.createElement('div');
+    element.style.position = 'absolute';
+    element.style.left = '-9999px';
+    element.style.width = '827px'; // A4 width in pixels at 96 DPI
+    document.body.appendChild(element);
+
+    ReactDOM.render(<ResumeTemplate resumeText={result.rewrittenResume} />, element, async () => {
       try {
         const canvas = await html2canvas(element, { scale: 2, useCORS: true });
         const imgData = canvas.toDataURL('image/png');
@@ -178,20 +177,19 @@ export default function ResumeFeedbackTool() {
       } catch (error) {
         toast({ variant: 'destructive', title: 'Error Generating PDF', description: error instanceof Error ? error.message : 'An unknown error occurred.' });
       } finally {
+        ReactDOM.unmountComponentAtNode(element);
         document.body.removeChild(element);
+        setIsGeneratingPdf(false);
       }
-    }
-    setIsGeneratingPdf(false);
+    });
   };
 
   const handleDownloadHtml = async () => {
+    if (!result?.rewrittenResume) return;
     setIsGeneratingHtml(true);
-    const portfolioContent = await getPortfolioContent();
-    if (portfolioContent) {
-       const fullHtml = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Resume</title><style>${portfolioContent.css}</style></head><body>${portfolioContent.html}</body></html>`;
-       const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
-       saveAs(blob, 'resume.html');
-    }
+    const htmlContent = getResumeHtml(result.rewrittenResume);
+    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+    saveAs(blob, 'resume.html');
     setIsGeneratingHtml(false);
   };
 
@@ -384,9 +382,9 @@ export default function ResumeFeedbackTool() {
                 ) : (
                   result && (
                     <div className="space-y-4">
-                      <pre className="bg-muted p-4 rounded-md overflow-x-auto text-sm whitespace-pre-wrap font-sans">
-                        {result.rewrittenResume}
-                      </pre>
+                       <div className="border rounded-lg p-4 bg-muted/50 max-h-[500px] overflow-y-auto">
+                        <ResumeTemplate resumeText={result.rewrittenResume} />
+                      </div>
                       <div className="flex flex-wrap gap-2">
                          <Button
                           onClick={handleDownloadPdf}
