@@ -17,6 +17,7 @@ import {
 import {
   Form,
   FormControl,
+  FormField,
   FormItem,
   FormLabel,
   FormMessage,
@@ -41,7 +42,7 @@ export default function PortfolioGeneratorTool() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<GeneratePortfolioWebsiteOutput | null>(null);
   const { toast } = useToast();
-  const [resumeFile, setResumeFile] = useState<{name: string, dataUri: string} | null>(null);
+  const [resumeFileName, setResumeFileName] = useState<string | null>(null);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -106,7 +107,7 @@ export default function PortfolioGeneratorTool() {
       const reader = new FileReader();
       reader.onload = (loadEvent) => {
         const dataUri = loadEvent.target?.result as string;
-        setResumeFile({ name: file.name, dataUri });
+        setResumeFileName(file.name);
         form.setValue('resumeDataUri', dataUri);
       };
       reader.readAsDataURL(file);
@@ -131,35 +132,41 @@ export default function PortfolioGeneratorTool() {
         <CardContent>
            <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormItem>
-                  <FormLabel>Your Resume</FormLabel>
-                   <FormControl>
-                      <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center">
-                          {resumeFile ? (
-                              <div className='flex flex-col items-center gap-2'>
-                                  <FileText className="w-12 h-12 text-accent" />
-                                  <p className='text-sm font-medium'>{resumeFile.name}</p>
-                                  <Button variant="link" size="sm" asChild className='p-0 h-auto'>
-                                      <label htmlFor="resume-upload" className="cursor-pointer">Change file</label>
-                                  </Button>
-                              </div>
-                          ) : (
-                              <>
-                                  <UploadCloud className="w-12 h-12 text-muted-foreground" />
-                                  <p className="mt-2 text-sm text-muted-foreground">
-                                      <label htmlFor="resume-upload" className="font-semibold text-accent cursor-pointer hover:underline">
-                                          Click to upload
-                                      </label>
-                                      {' '}or drag and drop
-                                  </p>
-                                  <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 100MB</p>
-                              </>
-                          )}
-                          <Input id="resume-upload" type="file" className="sr-only" onChange={handleResumeFileChange} accept=".pdf,.docx,.txt" />
-                      </div>
-                   </FormControl>
-                   <FormMessage>{form.formState.errors.resumeDataUri?.message}</FormMessage>
-                </FormItem>
+                <FormField
+                  control={form.control}
+                  name="resumeDataUri"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Your Resume</FormLabel>
+                       <FormControl>
+                          <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center">
+                              {resumeFileName ? (
+                                  <div className='flex flex-col items-center gap-2'>
+                                      <FileText className="w-12 h-12 text-accent" />
+                                      <p className='text-sm font-medium'>{resumeFileName}</p>
+                                      <Button variant="link" size="sm" asChild className='p-0 h-auto'>
+                                          <label htmlFor="resume-upload" className="cursor-pointer">Change file</label>
+                                      </Button>
+                                  </div>
+                              ) : (
+                                  <>
+                                      <UploadCloud className="w-12 h-12 text-muted-foreground" />
+                                      <p className="mt-2 text-sm text-muted-foreground">
+                                          <label htmlFor="resume-upload" className="font-semibold text-accent cursor-pointer hover:underline">
+                                              Click to upload
+                                          </label>
+                                          {' '}or drag and drop
+                                      </p>
+                                      <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 100MB</p>
+                                  </>
+                              )}
+                              <Input id="resume-upload" type="file" className="sr-only" onChange={handleResumeFileChange} accept=".pdf,.docx,.txt" />
+                          </div>
+                       </FormControl>
+                       <FormMessage/>
+                    </FormItem>
+                  )}
+                />
               <Button type="submit" disabled={isLoading || !form.formState.isValid}>
                 {isLoading ? 'Generating Website...' : 'Generate Website'}
               </Button>
