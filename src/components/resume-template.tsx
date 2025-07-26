@@ -19,6 +19,11 @@ interface Project {
 const parseResumeText = (text: string) => {
     const lines = text.split('\n').filter(line => line.trim() !== '');
 
+    // Clean up markdown hashes from the name if present
+    if (lines.length > 0 && lines[0].startsWith('## ')) {
+        lines[0] = lines[0].substring(3).trim();
+    }
+    
     let name = '';
     let title = '';
     let contactLine = '';
@@ -67,40 +72,33 @@ const parseResumeText = (text: string) => {
     const parseExperience = (expLines: string[]): Experience[] => {
         const experiences: Experience[] = [];
         let currentExperience: Experience | null = null;
-
+    
         for (const line of expLines) {
-            if (line.startsWith('•')) {
+            if (line.trim().startsWith('•')) {
                 if (currentExperience) {
-                    currentExperience.bullets.push(line.substring(1).trim());
+                    currentExperience.bullets.push(line.trim().substring(1).trim());
                 }
             } else {
+                // If a new block starts, save the previous one
                 if (currentExperience) {
                     experiences.push(currentExperience);
                 }
+    
+                // This line is a header (Role, Institution, Date, Location)
                 const parts = line.split('•').map(p => p.trim());
-                if (/\d{2}\/\d{4}/.test(line) || parts.length > 1) {
-                     if (currentExperience) {
-                        currentExperience.date = parts[0] || '';
-                        currentExperience.location = parts[1] || '';
-                    }
-                } else {
-                     currentExperience = {
-                        role: parts[0] || '',
-                        institution: '',
-                        date: '',
-                        location: '',
-                        bullets: [],
-                    };
-                    const institutionKeywords = ['Priyadarshini College of Engineering'];
-                    const foundInstitution = institutionKeywords.find(kw => line.includes(kw));
-                    if (foundInstitution) {
-                        const [role, inst] = line.split(foundInstitution);
-                        currentExperience.role = role.trim();
-                        currentExperience.institution = foundInstitution + (inst || '').trim();
-                    }
-                }
+                const roleAndInstitution = parts[0] || '';
+                const dateAndLocation = parts[1] || '';
+    
+                currentExperience = {
+                    role: roleAndInstitution,
+                    institution: '', // Logic to split role/institution can be complex; simplified for now
+                    date: dateAndLocation,
+                    location: '', // Logic to split date/location can be complex; simplified for now
+                    bullets: [],
+                };
             }
         }
+        // Add the last experience block
         if (currentExperience) {
             experiences.push(currentExperience);
         }
@@ -112,9 +110,9 @@ const parseResumeText = (text: string) => {
         let currentProject: Project | null = null;
 
         for (const line of projLines) {
-            if (line.startsWith('•')) {
+            if (line.trim().startsWith('•')) {
                  if (currentProject) {
-                    currentProject.bullets.push(line.substring(1).trim());
+                    currentProject.bullets.push(line.trim().substring(1).trim());
                 }
             } else if (/\d{2}\/\d{4}/.test(line)) {
                 if(currentProject) {
@@ -203,13 +201,13 @@ export const ResumeTemplate: React.FC<{ resumeText: string }> = ({ resumeText })
                 
                 <main className="flex gap-10 pt-5">
                     <div className="w-[65%]">
-                        <section>
+                        {summary && <section>
                             <h3 className="text-sm font-extrabold uppercase tracking-widest text-gray-700">Summary</h3>
                             <div className="w-full h-px bg-gray-900 my-1" style={{borderWidth: '1.5px'}}></div>
                             <p className="mt-2 text-gray-600 leading-relaxed text-xs">{summary}</p>
-                        </section>
+                        </section>}
 
-                        <section className="mt-6">
+                        {experiences.length > 0 && <section className="mt-6">
                             <h3 className="text-sm font-extrabold uppercase tracking-widest text-gray-700">Experience</h3>
                             <div className="w-full h-px bg-gray-900 my-1" style={{borderWidth: '1.5px'}}></div>
                             <div className="mt-2 space-y-4">
@@ -231,9 +229,9 @@ export const ResumeTemplate: React.FC<{ resumeText: string }> = ({ resumeText })
                                     </div>
                                 ))}
                             </div>
-                        </section>
+                        </section>}
 
-                        <section className="mt-6">
+                        {education.length > 0 && <section className="mt-6">
                             <h3 className="text-sm font-extrabold uppercase tracking-widest text-gray-700">Education</h3>
                             <div className="w-full h-px bg-gray-900 my-1" style={{borderWidth: '1.5px'}}></div>
                             <div className="mt-2 space-y-4 text-xs">
@@ -259,11 +257,11 @@ export const ResumeTemplate: React.FC<{ resumeText: string }> = ({ resumeText })
                                     )
                                 })}
                             </div>
-                        </section>
+                        </section>}
                     </div>
 
                     <div className="w-[35%]">
-                         <section>
+                         {achievements.length > 0 && <section>
                             <h3 className="text-sm font-extrabold uppercase tracking-widest text-gray-700">Key Achievements</h3>
                              <div className="w-full h-px bg-gray-900 my-1" style={{borderWidth: '1.5px'}}></div>
                             <div className="mt-2 space-y-3">
@@ -279,9 +277,9 @@ export const ResumeTemplate: React.FC<{ resumeText: string }> = ({ resumeText })
                                     </div>
                                 ))}
                             </div>
-                        </section>
+                        </section>}
 
-                        <section className="mt-6">
+                        {skills.length > 0 && <section className="mt-6">
                             <h3 className="text-sm font-extrabold uppercase tracking-widest text-gray-700">Skills</h3>
                             <div className="w-full h-px bg-gray-900 my-1" style={{borderWidth: '1.5px'}}></div>
                             <div className="mt-2 flex flex-wrap gap-2 text-xs">
@@ -289,9 +287,9 @@ export const ResumeTemplate: React.FC<{ resumeText: string }> = ({ resumeText })
                                     <span key={i} className="bg-gray-100 text-gray-700 font-medium px-2.5 py-1 rounded-md border border-gray-200">{skill.trim()}</span>
                                 ))}
                             </div>
-                        </section>
+                        </section>}
 
-                         <section className="mt-6">
+                         {projects.length > 0 && <section className="mt-6">
                             <h3 className="text-sm font-extrabold uppercase tracking-widest text-gray-700">Projects</h3>
                             <div className="w-full h-px bg-gray-900 my-1" style={{borderWidth: '1.5px'}}></div>
                             <div className="mt-2 space-y-4">
@@ -311,10 +309,12 @@ export const ResumeTemplate: React.FC<{ resumeText: string }> = ({ resumeText })
                                     </div>
                                 ))}
                             </div>
-                        </section>
+                        </section>}
                     </div>
                 </main>
             </div>
         </div>
     );
 };
+
+    
