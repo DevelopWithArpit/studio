@@ -24,6 +24,7 @@ const RewrittenResumeSchema = z.object({
         phone: z.string().describe("The user's phone number."),
         email: z.string().describe("The user's email address."),
         linkedin: z.string().describe("The user's LinkedIn profile URL."),
+        github: z.string().optional().describe("The user's GitHub profile URL."),
         location: z.string().describe("The user's city and country."),
     }).describe("The user's contact information."),
     summary: z.string().describe("A 2-3 sentence professional summary."),
@@ -94,7 +95,7 @@ ${documentPrompt}
 
 Please perform the following two tasks:
 1.  **Provide Detailed Feedback:** In the 'feedback' field, analyze the resume for clarity, impact, formatting, and ATS compatibility. Give constructive feedback in Markdown format, with clear sections for "Strengths", "Areas for Improvement", and "Actionable Suggestions for ATS Optimization".
-2.  **Rewrite the Resume into JSON:** In the 'rewrittenResume' field, provide a professionally rewritten version of the resume by populating the structured JSON object. Use strong action verbs, quantify achievements, and integrate relevant keywords. Ensure every field in the JSON schema is populated accurately based on the source resume.
+2.  **Rewrite the Resume into JSON:** In the 'rewrittenResume' field, provide a professionally rewritten version of the resume by populating the structured JSON object. Extract all contact information, including phone, email, LinkedIn, and GitHub profile URLs if present. Use strong action verbs, quantify achievements, and integrate relevant keywords. Ensure every field in the JSON schema is populated accurately based on the source resume.
 `,
     });
 

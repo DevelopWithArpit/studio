@@ -36,7 +36,7 @@ import { ResumeTemplate } from '@/components/resume-template';
 
 const defaultResumeText = `Arpit Pise
 AI Engineer | Robotics Software Engineer
-arpitpise1@gmail.com | (727) 660-2831 | linkedin.com/in/arpit-pise-20029a287 | Nagpur, India
+arpitpise1@gmail.com | (727) 660-2831 | linkedin.com/in/arpit-pise-20029a287 | github.com/ap-exe | Nagpur, India
 
 SUMMARY
 Enthusiastic Robotics and AI student with expertise in Python, Java, and C++. Proven ability to develop and implement AI-powered solutions, demonstrated by leading the development of the AI Mentor platform, resulting in a 30% increase in user engagement. Seeking an AI Engineer or Robotics Software Engineer role to leverage technical skills and contribute to innovative AI and robotic systems.

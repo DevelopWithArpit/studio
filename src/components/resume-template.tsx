@@ -8,6 +8,7 @@ interface ResumeData {
     phone: string;
     email: string;
     linkedin: string;
+    github?: string;
     location: string;
   };
   summary: string;
@@ -64,7 +65,9 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
                     <div>
                         <h1 className="text-4xl font-bold text-gray-900 tracking-tight">{name}</h1>
                         <p className="mt-2 text-xs text-gray-500">
-                            {contact.phone} | {contact.email} | {contact.linkedin} | {contact.location}
+                            {contact.phone} | {contact.email}
+                            {contact.github && ` | ${contact.github}`}
+                             | {contact.linkedin} | {contact.location}
                         </p>
                     </div>
                     <div className="flex-shrink-0">
