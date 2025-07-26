@@ -64,6 +64,10 @@ import {
     manipulateImageText,
     type ManipulateImageTextInput,
 } from '@/ai/flows/image-text-manipulation-tool';
+import {
+    generatePortfolioWebsite,
+    type GeneratePortfolioWebsiteInput,
+} from '@/ai/flows/portfolio-generator-tool';
 
 async function handleAction<T_Input, T_Output>(
   input: T_Input,
@@ -141,4 +145,8 @@ export async function handleRemoveWatermarkAction(input: RemoveWatermarkInput) {
 
 export async function handleManipulateImageTextAction(input: ManipulateImageTextInput) {
     return handleAction(input, manipulateImageText);
+}
+
+export async function handleGeneratePortfolioWebsiteAction(input: GeneratePortfolioWebsiteInput) {
+    return handleAction(input, generatePortfolioWebsite);
 }

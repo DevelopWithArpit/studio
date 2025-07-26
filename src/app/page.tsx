@@ -33,6 +33,7 @@ import {
   Linkedin,
   Eraser,
   Type,
+  Briefcase,
 } from 'lucide-react';
 import { AppLogo } from '@/components/app-logo';
 import AiExplanationTool from '@/components/tools/ai-explanation-tool';
@@ -51,6 +52,7 @@ import PresentationGeneratorTool from '@/components/tools/presentation-generator
 import LinkedInVisualsGeneratorTool from '@/components/tools/linkedin-visuals-generator-tool';
 import WatermarkRemoverTool from '@/components/tools/watermark-remover-tool';
 import ImageTextManipulationTool from '@/components/tools/image-text-manipulation-tool';
+import PortfolioGeneratorTool from '@/components/tools/portfolio-generator-tool';
 import { SheetTitle } from '@/components/ui/sheet';
 
 type ToolId =
@@ -69,7 +71,8 @@ type ToolId =
   | 'linkedin-visuals-generator'
   | 'text-to-speech'
   | 'watermark-remover'
-  | 'image-text-manipulation';
+  | 'image-text-manipulation'
+  | 'portfolio-generator';
 
 type ToolConfig = {
   id: ToolId;
@@ -156,6 +159,12 @@ const tools: ToolConfig[] = [
     name: 'LinkedIn Visuals',
     icon: Linkedin,
     component: LinkedInVisualsGeneratorTool,
+  },
+  {
+    id: 'portfolio-generator',
+    name: 'Portfolio Generator',
+    icon: Briefcase,
+    component: PortfolioGeneratorTool,
   },
   {
     id: 'text-to-speech',
