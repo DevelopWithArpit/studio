@@ -63,7 +63,7 @@ const prompt = ai.definePrompt({
     name: 'generatePortfolioWebsitePrompt',
     input: { schema: PortfolioDataSchema },
     output: { schema: GeneratePortfolioWebsiteOutputSchema },
-    prompt: `You are an expert web developer specializing in creating stunning, professional, and modern single-page portfolio websites.
+    prompt: `You are an expert web developer specializing in creating stunning, professional, and modern single-page portfolio websites with impressive visuals and animations.
 
 Your task is to take the user's structured data and generate the complete HTML, CSS, and JavaScript code for a portfolio website.
 
@@ -71,8 +71,10 @@ Your task is to take the user's structured data and generate the complete HTML, 
 - **Visuals & Theme:**
   - **Theme:** Use a sleek dark theme.
   - **Typography:** Use a professional and clean font pairing like 'Poppins' for headings and 'Inter' for body text.
+  - **Accent Gradients:** Use subtle, elegant gradients for headings and key elements to add visual flair.
 - **Animations & Interactivity:**
   - **On-Scroll Animations:** Implement smooth, elegant 'reveal' animations (fade-in and slide-up) for all sections and elements as the user scrolls.
+  - **Interactive Project Cards:** Project cards should have a modern, interactive 3D tilt effect on hover.
   - **Hover Effects:** Buttons should have subtle lift/glow effects.
 - **Layout:**
   - The website must be fully responsive and look exceptional on all screen sizes (desktop, tablet, and mobile).
