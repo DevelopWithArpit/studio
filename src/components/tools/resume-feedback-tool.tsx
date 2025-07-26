@@ -35,44 +35,47 @@ import { FileText, UploadCloud, Download, FileCode } from 'lucide-react';
 import { ResumeTemplate } from '@/components/resume-template';
 
 const defaultResumeText = `Arpit Pise
-AI Engineer | Robotics Software Engineer | arpitpise1@gmail.com | (727) 660-2831 | linkedin.com/in/arpit-pise-20029a287 | Nagpur, India
+AI Engineer | Robotics Software Engineer
+arpitpise1@gmail.com | (727) 660-2831 | linkedin.com/in/arpit-pise-20029a287 | Nagpur, India
 
 SUMMARY
 Enthusiastic Robotics and AI student with expertise in Python, Java, and C++. Proven ability to develop and implement AI-powered solutions, demonstrated by leading the development of the AI Mentor platform, resulting in a 30% increase in user engagement. Seeking an AI Engineer or Robotics Software Engineer role to leverage technical skills and contribute to innovative AI and robotic systems.
 
 EXPERIENCE
 Cybersecurity Consulting Team Member | Tata Consultancy Services | June 2023
-* Completed a job simulation focused on identity and access management (IAM), collaborating with a Cybersecurity Consulting team.
-* Acquired expertise in IAM principles, cybersecurity best practices, and strategic alignment with business objectives.
-* Delivered comprehensive documentation and presentations to articulate complex technical concepts effectively.
+- Completed a job simulation focused on identity and access management (IAM), collaborating with a Cybersecurity Consulting team.
+- Acquired expertise in IAM principles, cybersecurity best practices, and strategic alignment with business objectives.
+- Delivered comprehensive documentation and presentations to articulate complex technical concepts effectively.
 
 Software Engineer Intern | Electronic Arts | June 2023
-* Proposed a new feature for EA Sports College Football, detailing it in a comprehensive feature proposal.
-* Developed a class diagram and corresponding C++ header file, defining class structures for each object.
-* Improved the EA Sports College Football codebase by implementing an enhanced data structure and resolving a critical bug.
+- Proposed a new feature for EA Sports College Football, detailing it in a comprehensive feature proposal.
+- Developed a class diagram and corresponding C++ header file, defining class structures for each object.
+- Improved the EA Sports College Football codebase by implementing an enhanced data structure and resolving a critical bug.
 
 Robotics & Controls Engineering Intern | Johnson & Johnson | June 2023
-* Completed a job simulation as a robotics & controls engineering intern, focused on optimizing a surgical robotic arm's performance.
-* Utilized Python-based tools to diagnose control system inefficiencies, pinpointing root causes of delays and implementing targeted optimizations.
-* Proposed actionable design modifications using annotated technical visuals, validating their impact on responsiveness and durability through iterative testing.
-* Developed a professional design proposal outlining findings, solutions, and recommendations for improving precision and reliability in robotic systems.
+- Completed a job simulation as a robotics & controls engineering intern, focused on optimizing a surgical robotic arm's performance.
+- Utilized Python-based tools to diagnose control system inefficiencies, pinpointing root causes of delays and implementing targeted optimizations.
+- Proposed actionable design modifications using annotated technical visuals, validating their impact on responsiveness and durability through iterative testing.
 
 Technical Member | College Committee (Priyadarshini College of Engineering) | Oct 2022 - May 2023
-* Collaborated in the organization of 5+ technical events and workshops, increasing student participation and engagement with technical subjects.
-
-PROJECTS
-AI Mentor by AP | Personal Project | May 2023
-* Spearheaded the development of an AI-powered platform offering personalized learning and career guidance, resulting in a 30% increase in user engagement within the first month.
-* Engineered and implemented AI-driven tools for resume and cover letter creation, career path recommendations, and code/DSA assistance, boosting user productivity by 25% through reduced task completion times.
-* Integrated AI-powered image generation (Stable Diffusion, DALL-E), text-based image editing, diagram generation, and presentation assistance features, optimizing user workflows and enabling data-driven decision-making.
-* Designed the platform with a user-centric approach, seamlessly integrating diverse AI functionalities into a single, intuitive interface, promoting enhanced learning, creativity, and career progression.
+- Collaborated in the organization of 5+ technical events and workshops, increasing student participation and engagement with technical subjects.
 
 EDUCATION
 Priyadarshini College of Engineering | Nagpur, India
 B.Tech in Robotics and Artificial Intelligence | 2022 - 2026
 
+PROJECTS
+AI Mentor by AP | May 2023
+- Spearheaded the development of an AI-powered platform offering personalized learning and career guidance, resulting in a 30% increase in user engagement within the first month.
+- Engineered and implemented AI-driven tools for resume and cover letter creation, career path recommendations, and code/DSA assistance, boosting user productivity by 25% through reduced task completion times.
+
 SKILLS
-Technical Skills: Python, Java, C++, C, HTML, JavaScript, Robotics, MySQL, SQL, Cybersecurity`;
+Technical Skills: Python, Java, C++, C, HTML, JavaScript, Robotics, MySQL, SQL, Cybersecurity, Git, Linux
+
+KEY ACHIEVEMENTS
+- Led development of AI Mentor, increasing user engagement by 30%.
+- Boosted user productivity by 25% on AI Mentor through new tools.
+`;
 
 const formSchema = z.object({
   resume: z.string().min(1, 'Please upload or paste your resume.'),
@@ -144,17 +147,19 @@ export default function ResumeFeedbackTool() {
     }
   }
   
-  const getResumeHtml = (resumeText: string): Promise<string> => {
+  const getResumeHtml = (resumeData: GetResumeFeedbackOutput['rewrittenResume']): Promise<string> => {
     return new Promise((resolve) => {
         const container = document.createElement('div');
         // Don't hide the container, just give it a specific size for rendering
+        container.style.position = 'absolute';
+        container.style.left = '-9999px';
         container.style.width = '8.5in';
         container.style.height = '11in';
 
         document.body.appendChild(container);
         
         const root = createRoot(container);
-        root.render(<ResumeTemplate resumeText={resumeText} />);
+        root.render(<ResumeTemplate resumeData={resumeData} />);
 
         setTimeout(() => {
             const html = container.innerHTML;
@@ -188,7 +193,7 @@ export default function ResumeFeedbackTool() {
     document.body.appendChild(element);
 
     const root = createRoot(element);
-    root.render(<ResumeTemplate resumeText={result.rewrittenResume} />);
+    root.render(<ResumeTemplate resumeData={result.rewrittenResume} />);
 
     setTimeout(async () => {
          try {
@@ -398,18 +403,12 @@ export default function ResumeFeedbackTool() {
               </TabsContent>
               <TabsContent value="rewritten" className="mt-4">
                 {isLoading ? (
-                  <div className="space-y-4 pt-4">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-full" />
-                  </div>
+                  <div className="border rounded-lg"><Skeleton className="h-[700px] w-full" /></div>
                 ) : (
                   result && (
                     <div className="space-y-4">
                        <div className="border rounded-lg bg-white max-h-[700px] overflow-y-auto">
-                          <ResumeTemplate resumeText={result.rewrittenResume} />
+                          <ResumeTemplate resumeData={result.rewrittenResume} />
                       </div>
                       <div className="flex flex-wrap gap-2">
                          <Button
