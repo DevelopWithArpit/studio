@@ -64,29 +64,22 @@ const prompt = ai.definePrompt({
     name: 'generatePortfolioWebsitePrompt',
     input: { schema: PortfolioDataSchema },
     output: { schema: GeneratePortfolioWebsiteOutputSchema },
-    prompt: `You are an expert web developer specializing in creating ultimate, top-of-the-line, single-page portfolio websites with a "Robotics & AI Blueprint" theme, featuring god-tier, futuristic visuals and animations.
+    prompt: `You are an expert web developer specializing in creating ultimate, top-of-the-line, single-page portfolio websites with a "Live AI Assembly" theme. The entire site should look and feel as if robots and AI are actively constructing it for the user in real-time.
 
-Your task is to take the user's structured data and generate the complete HTML, CSS, and JavaScript for a portfolio website.
+Your task is to take the user's structured data and generate the complete HTML, CSS, and JavaScript for this portfolio.
 
 **Design & Animation Requirements (GOD TIER):**
 - **Theme:** A sleek, futuristic "Robotics & AI Blueprint" dark theme. The primary background color must be a dark tech-blue (#0A192F). Accent colors should be a vibrant cyan or electric green for a high-tech, blueprint feel.
-- **Ultimate Animated "Digital Blueprint" Background:**
-  - The background must be a dynamic, animated grid of faint, glowing lines that slowly move, creating a sense of being within a futuristic blueprint or a Heads-Up Display (HUD). This must be implemented with performant CSS background gradients and animations.
-- **Hero Section with "Decode" Animation:**
-  - The user's name and headline must appear with a high-tech "decode" or "text shuffle" effect. The text should rapidly cycle through random characters before smoothly settling on the final letters. This must be implemented with JavaScript and should be visually smooth and elegant, not jarring.
-- **"Holographic Blueprint" Bento Grid for Projects:**
-  - Projects should be displayed in a clean, modern bento grid.
-  - Each project card must have a "glassmorphism" effect (semi-transparent background with a backdrop-filter blur) and a subtle glowing border.
-  - On hover, a faint horizontal "scan line" should animate vertically down the card, as if a futuristic scanner is analyzing it, and the card should tilt slightly in 3D space.
-- **On-Scroll Animations:**
-  - All sections must have a smooth 'fade-in-up' animation as the user scrolls them into view. Use the Intersection Observer API for performance.
-  - Items within sections (like experience entries or project cards) should have a staggered animation delay to appear one after another.
+- **AI-Powered "Blueprint" Background:** The background must be a dark, animated grid that resembles a futuristic blueprint or a Heads-Up Display (HUD). As the user scrolls, animated "blueprint lines" and schematic markers (like corner brackets) must draw themselves onto the screen just ahead of the content, making it look like an AI is mapping out the site's structure in real-time.
+- **Hero Section with Robotic Text Assembly:** The user's name and headline must be "assembled" on screen. Each letter should animate into place individually with a precise, quick, and slightly offset robotic motion, as if being set by a high-speed robotic arm. The JavaScript implementation must be robust and handle this staggered character animation.
+- **"Component Placement" On-Scroll Animations:** As the user scrolls, entire sections (like "Experience" or "Projects") must not just fade in. They must slide into place with a subtle "overshoot and settle" easing function, mimicking a robotic arm placing a physical component into its final position. This should be powered by the Intersection Observer API for performance.
+- **Holographic "Activation" Effect for Projects:** Projects should be displayed in a clean, modern bento grid. On hover, each project card must "activate": a glowing holographic border should shimmer into view, and the card should light up slightly, as if a robot has just powered it on for inspection.
 - **Typography:** Use 'Space Grotesk' for all text. Import it from Google Fonts in the HTML file's <head>.
 - **Code Structure:**
   - Generate a single, clean HTML file. Do not add comments.
   - All CSS must be inside a <style> tag in the HTML's <head>.
   - All JavaScript must be inside a <script> tag at the end of the <body>. Use vanilla JavaScript only.
-  - The JavaScript must correctly handle the hero text decode animation, the 3D tilt effect on project cards, and the on-scroll reveal animations using the Intersection Observer API.
+  - The JavaScript must correctly handle the hero text assembly animation and the on-scroll reveal animations using the Intersection Observer API.
 
 **User's Portfolio Data:**
 ---
@@ -141,3 +134,5 @@ const generatePortfolioWebsiteFlow = ai.defineFlow(
     return output!;
   }
 );
+
+    
