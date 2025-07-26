@@ -97,7 +97,7 @@ export default function PortfolioGeneratorTool() {
     });
   };
 
-  const handleResumeFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleResumeFileChange = (e: React.ChangeEvent<HTMLInputElement>, fieldChange: (value: string) => void) => {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 100 * 1024 * 1024) { // 100MB limit
@@ -108,7 +108,7 @@ export default function PortfolioGeneratorTool() {
       reader.onload = (loadEvent) => {
         const dataUri = loadEvent.target?.result as string;
         setResumeFileName(file.name);
-        form.setValue('resumeDataUri', dataUri);
+        fieldChange(dataUri);
       };
       reader.readAsDataURL(file);
     }
@@ -160,7 +160,7 @@ export default function PortfolioGeneratorTool() {
                                       <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 100MB</p>
                                   </>
                               )}
-                              <Input id="resume-upload" type="file" className="sr-only" onChange={handleResumeFileChange} accept=".pdf,.docx,.txt" />
+                              <Input id="resume-upload" type="file" className="sr-only" onChange={(e) => handleResumeFileChange(e, field.onChange)} accept=".pdf,.docx,.txt" />
                           </div>
                        </FormControl>
                        <FormMessage/>
