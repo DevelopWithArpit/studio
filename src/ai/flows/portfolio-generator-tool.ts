@@ -30,43 +30,250 @@ const prompt = ai.definePrompt({
   name: 'generatePortfolioPrompt',
   input: { schema: GeneratePortfolioInputSchema },
   output: { schema: GeneratePortfolioOutputSchema },
-  prompt: `You are an expert web developer. Your task is to create a single-page resume HTML and CSS document based on the provided resume text. The output must be a perfect, single-page replica of the structure and format described in the instructions. Do not miss any sections.
+  prompt: `You are an expert web developer. Your task is to take the provided resume text and inject it into the provided HTML and CSS template. You MUST NOT change the structure, layout, or styling of the template. Your only job is to populate the template with the user's information from the 'Resume Content' section.
 
 **Resume Content:**
 ---
 {{{resumeText}}}
 ---
 
-**Mandatory Instructions (Non-negotiable):**
+**HTML and CSS Template (DO NOT CHANGE THIS STRUCTURE):**
 
-1.  **Overall Layout:**
-    *   The entire resume must be on a **single page**.
-    *   It must have a full-width header at the top, followed by a two-column layout for the main content.
+**CSS:**
+\`\`\`css
+body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 2em;
+    background-color: #fff;
+    color: #333;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+.container {
+    width: 100%;
+    max-width: 900px;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+}
+.header {
+    width: 100%;
+    padding-bottom: 1em;
+    margin-bottom: 1.5em;
+}
+.header h1 {
+    font-size: 2.8em;
+    font-weight: bold;
+    margin: 0;
+    color: #000;
+}
+.header h2 {
+    font-size: 1.5em;
+    font-weight: normal;
+    margin: 0.1em 0;
+    color: #007BFF;
+}
+.contact-info {
+    display: flex;
+    gap: 1.5em;
+    margin-top: 1em;
+    font-size: 0.9em;
+    color: #555;
+}
+.contact-info span {
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+}
+.main-content {
+    display: flex;
+    width: 100%;
+    gap: 2em;
+}
+.left-column {
+    width: 65%;
+}
+.right-column {
+    width: 35%;
+}
+.section {
+    margin-bottom: 1.5em;
+}
+.section-title {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #000;
+    margin-bottom: 0.8em;
+    padding-bottom: 0.3em;
+    border-bottom: 2px solid #000;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.section p {
+    margin: 0;
+    line-height: 1.6;
+}
+.experience-item, .education-item, .project-item, .achievement-item {
+    margin-bottom: 1.5em;
+}
+h3 {
+    font-size: 1.1em;
+    font-weight: bold;
+    margin: 0 0 0.2em 0;
+}
+.sub-heading {
+    font-size: 1em;
+    color: #007BFF;
+    font-weight: bold;
+    margin: 0 0 0.3em 0;
+}
+.meta-info {
+    display: flex;
+    gap: 1em;
+    font-size: 0.85em;
+    color: #777;
+    margin-bottom: 0.5em;
+}
+.meta-info span {
+    display: flex;
+    align-items: center;
+    gap: 0.3em;
+}
+ul {
+    list-style-position: outside;
+    padding-left: 1.2em;
+    margin: 0;
+}
+ul li {
+    margin-bottom: 0.5em;
+    line-height: 1.5;
+}
+.profile-pic-placeholder {
+    width: 120px;
+    height: 120px;
+    background-color: #007BFF;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3em;
+    color: white;
+    font-weight: bold;
+    float: right;
+    margin-bottom: 1.5em;
+}
+.skills-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5em;
+    margin-top: 0.5em;
+}
+.skill-tag {
+    background-color: #f0f0f0;
+    padding: 0.4em 0.8em;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+.clear {
+    clear: both;
+}
+\`\`\`
 
-2.  **Header Section (Full Width):**
-    *   Display the person's name ('ARPIT PISE') in a large, bold, black font.
-    *   Below the name, display the job title ('AI Engineer / Robotics Software Engineer') in a smaller font with a professional blue color.
-    *   Below the title, display all contact information horizontally: phone, email, LinkedIn, and location. Each piece of information must be preceded by a simple, appropriate icon (e.g., phone icon, email icon).
+**HTML:**
+\`\`\`html
+<div class="container">
+    <div class="header">
+        <h1>ARPIT PISE</h1>
+        <h2>AI Engineer / Robotics Software Engineer</h2>
+        <div class="contact-info">
+            <span>&#x260E; 7276602831</span>
+            <span>&#x2709; arpitpise1@gmail.com</span>
+            <span>&#x1F517; linkedin.com/in/arpit-pise-20029a287</span>
+            <span>&#x1F4CD; Nagpur, India</span>
+        </div>
+    </div>
+    <div class="main-content">
+        <div class="left-column">
+            <div class="section">
+                <h2 class="section-title">Summary</h2>
+                <p><!-- Populate with Summary from Resume Content --></p>
+            </div>
+            <div class="section">
+                <h2 class="section-title">Experience</h2>
+                <div class="experience-item">
+                    <h3>Technical Member</h3>
+                    <p class="sub-heading">Priyadarshini College of Engineering</p>
+                    <div class="meta-info">
+                        <span>&#x1F4C5; 01/2023 - 01/1970</span>
+                        <span>&#x1F4CD; Nagpur, India</span>
+                    </div>
+                    <ul>
+                        <!-- Populate with Experience bullet points -->
+                    </ul>
+                </div>
+            </div>
+            <div class="section">
+                <h2 class="section-title">Education</h2>
+                <div class="education-item">
+                    <h3>Bachelor of Technology in Robotics and Artificial Intelligence (B.Tech)</h3>
+                    <p class="sub-heading">Priyadarshini College Of Engineering</p>
+                    <div class="meta-info">
+                        <span>&#x1F4C5; 08/2024 - 05/2028</span>
+                        <span>&#x1F4CD; Nagpur, India</span>
+                    </div>
+                </div>
+                 <div class="education-item">
+                    <h3>HSC</h3>
+                    <p class="sub-heading">ST. PAUL PUBLIC SCHOOL & JUNIOR COLLEGE</p>
+                    <div class="meta-info">
+                        <span>&#x1F4C5; 01/2021 - 05/2023</span>
+                    </div>
+                </div>
+                 <div class="education-item">
+                    <h3>SSC</h3>
+                    <p class="sub-heading">PURUSHOTTAM DAS BAGLA CONVENT</p>
+                    <div class="meta-info">
+                        <span>&#x1F4C5; 01/2019 - 05/2021</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="right-column">
+            <div class="profile-pic-placeholder">AP</div>
+            <div class="clear"></div>
+            <div class="section">
+                <h2 class="section-title">Key Achievements</h2>
+                <div class="achievement-item">
+                     <h3>AI Mentor by AP Platform Development</h3>
+                     <p><!-- Populate with Key Achievement description --></p>
+                </div>
+            </div>
+            <div class="section">
+                <h2 class="section-title">Skills</h2>
+                <div class="skills-container">
+                    <!-- Populate with .skill-tag divs -->
+                </div>
+            </div>
+            <div class="section">
+                <h2 class="section-title">Projects</h2>
+                <div class="project-item">
+                    <h3>AI Mentor by AP</h3>
+                     <div class="meta-info">
+                        <span>&#x1F4C5; 05/2025 - 01/1970</span>
+                    </div>
+                    <p>AI Mentor by AP - Personal Project</p>
+                    <ul>
+                         <!-- Populate with Project bullet points -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+\`\`\`
 
-3.  **Main Content (Two-Column Layout):**
-    *   The area below the header must be split into two columns.
-    *   **Left Column (Wider - approx. 65% width):** This column MUST contain the following sections, in this exact order, separated by a solid horizontal line:
-        *   \`SUMMARY\`
-        *   \`EXPERIENCE\`
-        *   \`EDUCATION\`
-    *   **Right Column (Narrower - approx. 35% width):** This column MUST contain the following sections, in this exact order:
-        *   At the very top, a large, circular, blue placeholder for a profile picture with the initials 'AP' inside.
-        *   \`KEY ACHIEVEMENTS\` section, with its content below it.
-        *   \`SKILLS\` section, with each skill displayed as a separate tag with a light-gray background and rounded corners.
-        *   \`PROJECTS\` section, with its content below it.
-
-4.  **Styling Details:**
-    *   **Fonts:** Use a clean, modern, sans-serif font family (like Arial, Helvetica).
-    *   **Colors:** Use black or very dark gray for the main text. Section headings ('SUMMARY', 'EXPERIENCE', etc.) must be bold and black. The job title and any links or highlighted school names should be in a professional blue color (e.g., #007BFF).
-    *   **Code:** The output must be pure, vanilla HTML and CSS. Do not use any external libraries, frameworks (like Bootstrap, Tailwind), or external font imports. All styling must be self-contained in the CSS block.
-    *   **Responsiveness:** Ensure the layout is reasonably responsive, stacking to a single column on smaller screens if necessary.
-
-Generate the complete HTML and CSS code now. Do not omit any sections from the resume content provided.`,
+Generate the final, populated HTML and CSS now. Do not deviate from the template.`,
 });
 
 
