@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { saveAs } from 'file-saver';
@@ -17,130 +17,43 @@ import {
 import {
   Form,
   FormControl,
-  FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { handleGeneratePortfolioWebsiteAction, handleGetResumeFeedbackAction } from '@/app/actions';
+import { handleGeneratePortfolioWebsiteAction } from '@/app/actions';
 import type { GeneratePortfolioWebsiteOutput } from '@/ai/flows/portfolio-generator-tool';
-import { PlusCircle, Trash2, Copy, Download, Save, Upload, FileArchive, FileText, UploadCloud, Wand2 } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
+import { Copy, Download, FileArchive, FileText, UploadCloud } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 
-const projectSchema = z.object({
-  title: z.string().min(1, 'Title is required.'),
-  description: z.string().min(1, 'Description is required.'),
-  imageUrl: z.string().url('Must be a valid URL.'),
-  projectUrl: z.string().url('Must be a valid URL.'),
-});
-
-const experienceSchema = z.object({
-  title: z.string().min(1, 'Title is required.'),
-  company: z.string().min(1, 'Company is required.'),
-  dates: z.string().min(1, 'Dates are required.'),
-  description: z.string().min(1, 'Description is required.'),
-});
-
-const educationSchema = z.object({
-  degree: z.string().min(1, 'Degree is required.'),
-  school: z.string().min(1, 'School is required.'),
-  dates: z.string().min(1, 'Dates are required.'),
-});
-
-const socialLinksSchema = z.object({
-    linkedin: z.string().url().optional().or(z.literal('')),
-    github: z.string().url().optional().or(z.literal('')),
-    twitter: z.string().url().optional().or(z.literal('')),
-});
-
 const formSchema = z.object({
-  fullName: z.string().min(1, 'Full name is required.'),
-  headline: z.string().min(1, 'Headline is required.'),
-  about: z.string().min(10, 'About section needs at least 10 characters.'),
-  experience: z.array(experienceSchema).min(1, 'At least one experience entry is required.'),
-  education: z.array(educationSchema).min(1, 'At least one education entry is required.'),
-  projects: z.array(projectSchema).min(1, 'At least one project is required.'),
-  skills: z.string().min(1, 'Please list at least one skill.'),
-  contactEmail: z.string().email('Must be a valid email.'),
-  socialLinks: socialLinksSchema.optional(),
+  resumeDataUri: z.string().min(1, 'Please upload a resume file.'),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
 export default function PortfolioGeneratorTool() {
   const [isLoading, setIsLoading] = useState(false);
-  const [isAutoFilling, setIsAutoFilling] = useState(false);
   const [result, setResult] = useState<GeneratePortfolioWebsiteOutput | null>(null);
   const { toast } = useToast();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [resumeFile, setResumeFile] = useState<{name: string, dataUri: string} | null>(null);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      fullName: 'Arpit Pise',
-      headline: 'AI & Robotics Engineer',
-      about: 'A passionate engineer with a focus on building intelligent systems. I thrive at the intersection of software, hardware, and artificial intelligence.',
-      experience: [
-        {
-            title: 'Software Engineer Intern',
-            company: 'Electronic Arts',
-            dates: 'June 2023 - Present',
-            description: 'Improved the EA Sports College Football codebase by implementing an enhanced data structure and resolving a critical bug.'
-        }
-      ],
-      education: [
-        {
-            school: 'Priyadarshini College of Engineering',
-            degree: 'B.Tech in Robotics and Artificial Intelligence',
-            dates: '2022 - 2026'
-        }
-      ],
-      projects: [
-        {
-          title: 'AI Mentor Platform',
-          description: 'A suite of AI-powered tools to help with career development, from resume feedback to interview preparation.',
-          imageUrl: 'https://placehold.co/600x400.png',
-          projectUrl: 'https://github.com/DevelopWithArpit',
-        },
-      ],
-      skills: 'Python, TensorFlow, PyTorch, C++, ROS, Docker, JavaScript',
-      contactEmail: 'arpitpise1@gmail.com',
-      socialLinks: {
-        linkedin: 'https://www.linkedin.com/in/arpit-pise-20029a287/',
-        github: 'https://github.com/DevelopWithArpit',
-        twitter: '',
-      }
+      resumeDataUri: '',
     },
-  });
-
-  const { fields: projectFields, append: appendProject, remove: removeProject } = useFieldArray({
-    control: form.control,
-    name: 'projects',
-  });
-  const { fields: experienceFields, append: appendExperience, remove: removeExperience } = useFieldArray({
-    control: form.control,
-    name: 'experience',
-  });
-  const { fields: educationFields, append: appendEducation, remove: removeEducation } = useFieldArray({
-    control: form.control,
-    name: 'education',
   });
 
   async function onSubmit(data: FormData) {
     setIsLoading(true);
     setResult(null);
-    const response = await handleGeneratePortfolioWebsiteAction({
-        ...data,
-        skills: data.skills.split(',').map(s => s.trim()),
-    });
+    const response = await handleGeneratePortfolioWebsiteAction(data.resumeDataUri);
     setIsLoading(false);
 
     if (response.success) {
@@ -182,46 +95,6 @@ export default function PortfolioGeneratorTool() {
       description: `Your portfolio website is being downloaded as a zip file.`,
     });
   };
-  
-  const handleSaveData = () => {
-    const data = form.getValues();
-    const json = JSON.stringify(data, null, 2);
-    downloadFile(json, 'portfolio-data.json', 'application/json');
-     toast({
-      title: 'Data Saved!',
-      description: `Your portfolio data has been saved to portfolio-data.json.`,
-    });
-  };
-
-  const handleLoadData = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const json = e.target?.result as string;
-          const data = JSON.parse(json);
-          // Combine skills array back to a string for the form
-          if (Array.isArray(data.skills)) {
-            data.skills = data.skills.join(', ');
-          }
-          const parsedData = formSchema.parse(data);
-          form.reset(parsedData);
-          toast({
-            title: 'Data Loaded!',
-            description: `Your portfolio data has been loaded from ${file.name}.`,
-          });
-        } catch (error) {
-          toast({
-            variant: 'destructive',
-            title: 'Error Loading Data',
-            description: 'The selected file is not valid portfolio data.',
-          });
-        }
-      };
-      reader.readAsText(file);
-    }
-  };
 
   const handleResumeFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -234,363 +107,66 @@ export default function PortfolioGeneratorTool() {
       reader.onload = (loadEvent) => {
         const dataUri = loadEvent.target?.result as string;
         setResumeFile({ name: file.name, dataUri });
+        form.setValue('resumeDataUri', dataUri);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const handleAutoFill = async () => {
-      if (!resumeFile) {
-        toast({ variant: 'destructive', title: 'No Resume', description: 'Please upload a resume file first.' });
-        return;
-      }
-      setIsAutoFilling(true);
-      const response = await handleGetResumeFeedbackAction({ resume: resumeFile.dataUri });
-      setIsAutoFilling(false);
-
-      if (response.success && response.data.rewrittenResume) {
-          const { rewrittenResume } = response.data;
-          form.setValue('fullName', rewrittenResume.name);
-          form.setValue('contactEmail', rewrittenResume.contact.email);
-          form.setValue('socialLinks.linkedin', rewrittenResume.contact.linkedin);
-          form.setValue('socialLinks.github', rewrittenResume.contact.github);
-          form.setValue('about', rewrittenResume.summary);
-          
-          if(rewrittenResume.experience.length > 0) {
-            const headline = `${rewrittenResume.experience[0].title} at ${rewrittenResume.experience[0].company}`;
-            form.setValue('headline', headline);
-            form.setValue('experience', rewrittenResume.experience.map(exp => ({
-                title: exp.title,
-                company: exp.company,
-                dates: exp.dates,
-                description: exp.bullets.join('. ')
-            })));
-          }
-
-           if(rewrittenResume.education.length > 0) {
-                form.setValue('education', rewrittenResume.education.map(edu => ({
-                    degree: edu.degree,
-                    school: edu.school,
-                    dates: edu.dates,
-                })));
-            }
-
-          if (rewrittenResume.skills) {
-            const allSkills = [...rewrittenResume.skills.technical, ...(rewrittenResume.skills.other || [])];
-            form.setValue('skills', allSkills.join(', '));
-          }
-
-          if (rewrittenResume.projects && rewrittenResume.projects.length > 0) {
-            form.setValue('projects', rewrittenResume.projects.map(p => ({
-                title: p.title,
-                description: p.bullets.join('. '),
-                imageUrl: 'https://placehold.co/600x400.png',
-                projectUrl: rewrittenResume.contact.github || 'https://github.com'
-            })));
-          }
-          toast({ title: 'Form Auto-filled', description: 'The form has been populated with your resume data.' });
-      } else {
-        toast({ variant: 'destructive', title: 'Auto-fill Failed', description: response.error || 'Could not parse resume.' });
-      }
-  };
 
   return (
     <div className="space-y-8">
       <header className="space-y-2">
         <h1 className="text-3xl font-bold font-headline">Portfolio Website Generator</h1>
         <p className="text-muted-foreground">
-          Create a professional, single-page portfolio with animations and visuals.
+          Upload your resume and get a professional, single-page portfolio with animations and visuals.
         </p>
       </header>
 
       <Card>
         <CardHeader>
-            <CardTitle>Auto-fill from Resume</CardTitle>
-            <CardDescription>Upload your resume to have the AI automatically populate the fields below.</CardDescription>
+            <CardTitle>Generate from Resume</CardTitle>
+            <CardDescription>Upload your resume and the AI will generate a complete portfolio website for you.</CardDescription>
         </CardHeader>
-        <CardContent className='flex flex-col md:flex-row items-center gap-4'>
-            <div className="relative border-2 border-dashed border-muted rounded-lg p-4 flex-grow w-full md:w-auto">
-                {resumeFile ? (
-                    <div className='flex items-center gap-2'>
-                        <FileText className="w-8 h-8 text-accent" />
-                        <div className='flex-grow'>
-                            <p className='text-sm font-medium'>{resumeFile.name}</p>
-                            <Button variant="link" size="sm" asChild className='p-0 h-auto -mt-1'>
-                                <label htmlFor="resume-upload" className="cursor-pointer text-xs">Change file</label>
-                            </Button>
-                        </div>
-                    </div>
-                ) : (
-                    <div className='flex items-center gap-4 text-center'>
-                         <UploadCloud className="w-8 h-8 text-muted-foreground" />
-                         <div>
-                            <label htmlFor="resume-upload" className="font-semibold text-accent cursor-pointer hover:underline">
-                                Upload a resume
-                            </label>
-                            <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 100MB</p>
-                         </div>
-                    </div>
-                )}
-                <Input id="resume-upload" type="file" className="sr-only" onChange={handleResumeFileChange} accept=".pdf,.docx,.txt" />
-            </div>
-            <Button type="button" onClick={handleAutoFill} disabled={isAutoFilling || !resumeFile}>
-                <Wand2 className="mr-2 h-4 w-4" />
-                {isAutoFilling ? 'Analyzing...' : 'Auto-fill Form'}
-            </Button>
+        <CardContent>
+           <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormItem>
+                  <FormLabel>Your Resume</FormLabel>
+                   <FormControl>
+                      <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center">
+                          {resumeFile ? (
+                              <div className='flex flex-col items-center gap-2'>
+                                  <FileText className="w-12 h-12 text-accent" />
+                                  <p className='text-sm font-medium'>{resumeFile.name}</p>
+                                  <Button variant="link" size="sm" asChild className='p-0 h-auto'>
+                                      <label htmlFor="resume-upload" className="cursor-pointer">Change file</label>
+                                  </Button>
+                              </div>
+                          ) : (
+                              <>
+                                  <UploadCloud className="w-12 h-12 text-muted-foreground" />
+                                  <p className="mt-2 text-sm text-muted-foreground">
+                                      <label htmlFor="resume-upload" className="font-semibold text-accent cursor-pointer hover:underline">
+                                          Click to upload
+                                      </label>
+                                      {' '}or drag and drop
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 100MB</p>
+                              </>
+                          )}
+                          <Input id="resume-upload" type="file" className="sr-only" onChange={handleResumeFileChange} accept=".pdf,.docx,.txt" />
+                      </div>
+                   </FormControl>
+                   <FormMessage>{form.formState.errors.resumeDataUri?.message}</FormMessage>
+                </FormItem>
+              <Button type="submit" disabled={isLoading || !form.formState.isValid}>
+                {isLoading ? 'Generating Website...' : 'Generate Website'}
+              </Button>
+            </form>
+          </Form>
         </CardContent>
       </Card>
-
-
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <Card>
-             <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle>Portfolio Content</CardTitle>
-                <CardDescription>Fill out your portfolio details below.</CardDescription>
-              </div>
-              <div className="flex gap-2">
-                  <Button type="button" variant="outline" size="sm" onClick={handleSaveData}>
-                    <Save className="mr-2 h-4 w-4"/>
-                    Save Data
-                  </Button>
-                   <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
-                    <Upload className="mr-2 h-4 w-4"/>
-                    Load Data
-                  </Button>
-                  <input type="file" ref={fileInputRef} onChange={handleLoadData} accept=".json" className="hidden" />
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="fullName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Full Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., Jane Doe" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="headline"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Headline</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., Software Engineer | Tech Enthusiast" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <FormField
-                control={form.control}
-                name="about"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>About Me</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="Tell us a little about yourself..." {...field} rows={4} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-               <FormField
-                  control={form.control}
-                  name="contactEmail"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Contact Email</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., your.email@example.com" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Social Links</CardTitle>
-              <CardDescription>Add links to your social media profiles.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <FormField control={form.control} name="socialLinks.linkedin" render={({ field }) => (<FormItem><FormLabel>LinkedIn</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
-                    <FormField control={form.control} name="socialLinks.github" render={({ field }) => (<FormItem><FormLabel>GitHub</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
-                    <FormField control={form.control} name="socialLinks.twitter" render={({ field }) => (<FormItem><FormLabel>Twitter / X</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
-                </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Experience</CardTitle>
-              <CardDescription>Detail your professional background.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-                {experienceFields.map((field, index) => (
-                    <div key={field.id} className="space-y-4 border p-4 rounded-lg relative">
-                        <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 text-muted-foreground hover:text-destructive" onClick={() => removeExperience(index)}>
-                            <Trash2 className="h-4 w-4" />
-                        </Button>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <FormField control={form.control} name={`experience.${index}.title`} render={({ field }) => (<FormItem><FormLabel>Job Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
-                            <FormField control={form.control} name={`experience.${index}.company`} render={({ field }) => (<FormItem><FormLabel>Company</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
-                        </div>
-                        <FormField control={form.control} name={`experience.${index}.dates`} render={({ field }) => (<FormItem><FormLabel>Dates</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
-                        <FormField control={form.control} name={`experience.${index}.description`} render={({ field }) => (<FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} rows={2} /></FormControl><FormMessage /></FormItem>)} />
-                    </div>
-                ))}
-                <Button type="button" variant="outline" onClick={() => appendExperience({ title: '', company: '', dates: '', description: '' })}>
-                    <PlusCircle className="mr-2 h-4 w-4" /> Add Experience
-                </Button>
-            </CardContent>
-          </Card>
-
-           <Card>
-            <CardHeader>
-              <CardTitle>Education</CardTitle>
-              <CardDescription>List your educational qualifications.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-                {educationFields.map((field, index) => (
-                    <div key={field.id} className="space-y-4 border p-4 rounded-lg relative">
-                        <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 text-muted-foreground hover:text-destructive" onClick={() => removeEducation(index)}>
-                            <Trash2 className="h-4 w-4" />
-                        </Button>
-                        <FormField control={form.control} name={`education.${index}.school`} render={({ field }) => (<FormItem><FormLabel>School / University</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
-                        <FormField control={form.control} name={`education.${index}.degree`} render={({ field }) => (<FormItem><FormLabel>Degree / Certificate</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
-                        <FormField control={form.control} name={`education.${index}.dates`} render={({ field }) => (<FormItem><FormLabel>Dates</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
-                    </div>
-                ))}
-                <Button type="button" variant="outline" onClick={() => appendEducation({ school: '', degree: '', dates: '' })}>
-                    <PlusCircle className="mr-2 h-4 w-4" /> Add Education
-                </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Skills</CardTitle>
-              <CardDescription>Enter your skills, separated by commas.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <FormField
-                    control={form.control}
-                    name="skills"
-                    render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Skills</FormLabel>
-                        <FormControl>
-                        <Textarea placeholder="e.g., JavaScript, React, Node.js, ..." {...field} />
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
-                    )}
-                />
-            </CardContent>
-          </Card>
-
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Projects</CardTitle>
-              <CardDescription>Showcase your best work.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {projectFields.map((field, index) => (
-                <div key={field.id} className="space-y-4 border p-4 rounded-lg relative">
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"
-                        onClick={() => removeProject(index)}
-                    >
-                        <Trash2 className="h-4 w-4" />
-                    </Button>
-                    <FormField
-                    control={form.control}
-                    name={`projects.${index}.title`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Project Title</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name={`projects.${index}.description`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Description</FormLabel>
-                        <FormControl>
-                          <Textarea {...field} rows={3} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                     <FormField
-                        control={form.control}
-                        name={`projects.${index}.imageUrl`}
-                        render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Image URL</FormLabel>
-                            <FormControl>
-                            <Input {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                        )}
-                    />
-                     <FormField
-                        control={form.control}
-                        name={`projects.${index}.projectUrl`}
-                        render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Project URL</FormLabel>
-                            <FormControl>
-                            <Input {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                        )}
-                    />
-                   </div>
-                </div>
-              ))}
-               <Button
-                type="button"
-                variant="outline"
-                onClick={() => appendProject({ title: '', description: '', imageUrl: '', projectUrl: '' })}
-              >
-                <PlusCircle className="mr-2 h-4 w-4" /> Add Project
-              </Button>
-            </CardContent>
-          </Card>
-          
-          <Button type="submit" disabled={isLoading} size="lg">
-            {isLoading ? 'Generating Website...' : 'Generate Website'}
-          </Button>
-        </form>
-      </Form>
 
 
       {(isLoading || result) && (

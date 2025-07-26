@@ -147,6 +147,57 @@ export async function handleManipulateImageTextAction(input: ManipulateImageText
     return handleAction(input, manipulateImageText);
 }
 
-export async function handleGeneratePortfolioWebsiteAction(input: GeneratePortfolioWebsiteInput) {
-    return handleAction(input, generatePortfolioWebsite);
+export async function handleGeneratePortfolioWebsiteAction(resumeDataUri: string) {
+    try {
+        const feedbackResponse = await getResumeFeedback({ resume: resumeDataUri });
+        
+        if (!feedbackResponse.rewrittenResume) {
+            throw new Error('Failed to parse the resume into a structured format.');
+        }
+
+        const { rewrittenResume } = feedbackResponse;
+
+        const portfolioInput: GeneratePortfolioWebsiteInput = {
+            fullName: rewrittenResume.name,
+            headline: rewrittenResume.experience.length > 0 ? `${rewrittenResume.experience[0].title} at ${rewrittenResume.experience[0].company}` : 'Professional Profile',
+            about: rewrittenResume.summary,
+            contactEmail: rewrittenResume.contact.email,
+            socialLinks: {
+                linkedin: rewrittenResume.contact.linkedin,
+                github: rewrittenResume.contact.github,
+            },
+            experience: rewrittenResume.experience.map(exp => ({
+                title: exp.title,
+                company: exp.company,
+                dates: exp.dates,
+                description: exp.bullets.join('. ')
+            })),
+            education: rewrittenResume.education.map(edu => ({
+                degree: edu.degree,
+                school: edu.school,
+                dates: edu.dates,
+            })),
+            skills: [...rewrittenResume.skills.technical, ...(rewrittenResume.skills.other || [])],
+            projects: rewrittenResume.projects.length > 0 ? rewrittenResume.projects.map(p => ({
+                title: p.title,
+                description: p.bullets.join('. '),
+                imageUrl: 'https://placehold.co/600x400.png',
+                projectUrl: rewrittenResume.contact.github ? `${rewrittenResume.contact.github}/${p.title.toLowerCase().replace(/ /g, '-')}` : 'https://github.com'
+            })) : [
+              {
+                title: 'AI Mentor Platform',
+                description: 'A suite of AI-powered tools to help with career development, from resume feedback to interview preparation.',
+                imageUrl: 'https://placehold.co/600x400.png',
+                projectUrl: rewrittenResume.contact.github || 'https://github.com',
+              }
+            ],
+        };
+        
+        const result = await generatePortfolioWebsite(portfolioInput);
+        return { success: true, data: result };
+
+    } catch (e) {
+        const errorMessage = e instanceof Error ? e.message : 'An unexpected error occurred.';
+        return { success: false, error: errorMessage };
+    }
 }
