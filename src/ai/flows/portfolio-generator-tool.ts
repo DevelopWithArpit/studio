@@ -16,6 +16,9 @@ const PortfolioDataSchema = z.object({
   headline: z.string().describe("The user's professional headline (e.g., 'Software Engineer | AI Enthusiast')."),
   contact: z.object({
       email: z.string().describe("The user's email address."),
+      phone: z.string().optional(),
+      linkedin: z.string().optional(),
+      github: z.string().optional(),
       socials: z.array(z.object({
           network: z.string().describe("The social network name (e.g., 'LinkedIn', 'GitHub')."),
           url: z.string().url().describe("The URL to the user's profile."),
@@ -26,7 +29,7 @@ const PortfolioDataSchema = z.object({
       title: z.string(),
       company: z.string(),
       dates: z.string(),
-      description: z.string()
+      bullets: z.array(z.string()),
   })),
   education: z.array(z.object({
       degree: z.string(),
@@ -35,11 +38,12 @@ const PortfolioDataSchema = z.object({
   })),
   projects: z.array(z.object({
       title: z.string(),
-      description: z.string(),
+      bullets: z.array(z.string()),
       link: z.string().url().optional(),
       imageUrl: z.string().url().optional(),
   })),
   skills: z.array(z.string()),
+  achievements: z.array(z.string()).optional(),
 });
 export type GeneratePortfolioWebsiteInput = z.infer<typeof PortfolioDataSchema>;
 
@@ -68,11 +72,11 @@ Your task is to take the user's structured data and generate the complete HTML, 
 - **Animations:** Implement subtle on-scroll reveal animations for sections and project cards. Add a gentle particle effect to the hero section background.
 - **Layout:** The website must be fully responsive and look great on all screen sizes (desktop, tablet, and mobile).
 - **Structure:** Create a single HTML file with a sticky navigation bar and clearly defined sections for:
-    1.  **Homepage (Hero):** A brief introduction with name and headline.
+    1.  **Homepage (Hero):** A brief introduction with name and headline. If headline is empty, create one from the 'about' section.
     2.  **About:** The user's biography.
-    3.  **Experience:** A timeline or list of professional roles.
+    3.  **Experience:** A timeline or list of professional roles. For each role, list the achievements/responsibilities from the 'bullets' array.
     4.  **Education:** A list of educational qualifications.
-    5.  **Projects:** A grid of project cards, each with a title, description, and link. Use placeholder images (e.g., https://placehold.co/600x400) if no image URL is provided.
+    5.  **Projects:** A grid of project cards. For each project, list the details from the 'bullets' array. Each card should have a title, description, and link. Use placeholder images (e.g., https://placehold.co/600x400) if no image URL is provided.
     6.  **Skills:** A section to display technical skills.
     7.  **Contact:** A footer with contact email and social media links.
 - **Code:** Generate clean, well-commented, and separate HTML, CSS, and JavaScript code. The CSS should be self-contained and not rely on external frameworks like Bootstrap. The JS should be vanilla JavaScript, not using jQuery or other libraries.
@@ -82,8 +86,11 @@ Your task is to take the user's structured data and generate the complete HTML, 
 - Name: {{{name}}}
 - Headline: {{{headline}}}
 - Contact Email: {{{contact.email}}}
+- Contact Phone: {{{contact.phone}}}
+- LinkedIn: {{{contact.linkedin}}}
+- GitHub: {{{contact.github}}}
 {{#if contact.socials}}
-- Social Links: 
+- Other Socials: 
 {{#each contact.socials}}
   - {{network}}: {{url}}
 {{/each}}
@@ -91,7 +98,11 @@ Your task is to take the user's structured data and generate the complete HTML, 
 - About Me: {{{about}}}
 - Experience:
 {{#each experience}}
-  - Title: {{title}}, Company: {{company}}, Dates: {{dates}}, Description: {{description}}
+  - Title: {{title}}, Company: {{company}}, Dates: {{dates}}
+  - Bullets: 
+  {{#each bullets}}
+    - {{this}}
+  {{/each}}
 {{/each}}
 - Education:
 {{#each education}}
@@ -99,12 +110,22 @@ Your task is to take the user's structured data and generate the complete HTML, 
 {{/each}}
 - Projects:
 {{#each projects}}
-  - Title: {{title}}, Description: {{description}}, Link: {{link}}, Image: {{imageUrl}}
+  - Title: {{title}}, Link: {{link}}, Image: {{imageUrl}}
+  - Bullets:
+  {{#each bullets}}
+    - {{this}}
+  {{/each}}
 {{/each}}
 - Skills:
 {{#each skills}}
   - {{this}}
 {{/each}}
+{{#if achievements}}
+- Achievements:
+{{#each achievements}}
+  - {{this}}
+{{/each}}
+{{/if}}
 ---
 
 Generate the complete, ready-to-use code now.`,

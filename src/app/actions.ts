@@ -23,7 +23,6 @@ import {
 import {
   getResumeFeedback,
   type GetResumeFeedbackInput,
-  type GetResumeFeedbackOutput,
 } from '@/ai/flows/resume-feedback-tool';
 import {
   generateDiagram,
@@ -173,19 +172,14 @@ export async function handleGeneratePortfolioWebsiteAction(input: GeneratePortfo
             
             portfolioData = {
                 name: resumeData.name,
-                headline: '', // Headline is not in resume data, leave it empty
-                contact: {
-                    email: resumeData.contact.email,
-                    socials: [
-                        { network: 'LinkedIn', url: resumeData.contact.linkedin || '' },
-                        { network: 'GitHub', url: resumeData.contact.github || '' }
-                    ].filter(s => s.url)
-                },
+                headline: '', // AI will generate this from summary
+                contact: resumeData.contact,
                 about: resumeData.summary,
-                experience: resumeData.experience.map(exp => ({ ...exp, description: exp.bullets.join('\\n- ') })),
-                education: resumeData.education.map(edu => ({...edu, degree: edu.degree, school: edu.school, dates: edu.dates})),
-                projects: resumeData.projects.map(p => ({ title: p.title, description: p.bullets.join('\\n- '), link: '', imageUrl: '' })),
+                experience: resumeData.experience,
+                education: resumeData.education,
+                projects: resumeData.projects,
                 skills: [...resumeData.skills.technical, ...(resumeData.skills.other || [])],
+                achievements: resumeData.achievements,
             };
         } else {
             portfolioData = input.data;
