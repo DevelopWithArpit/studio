@@ -29,7 +29,7 @@ const PortfolioDataSchema = z.object({
       title: z.string(),
       company: z.string(),
       dates: z.string(),
-      bullets: z.array(z.string()),
+      description: z.string(),
   })),
   education: z.array(z.object({
       degree: z.string(),
@@ -38,7 +38,7 @@ const PortfolioDataSchema = z.object({
   })),
   projects: z.array(z.object({
       title: z.string(),
-      bullets: z.array(z.string()),
+      description: z.string(),
       link: z.string().url().optional(),
       imageUrl: z.string().url().optional(),
   })),
@@ -74,9 +74,9 @@ Your task is to take the user's structured data and generate the complete HTML, 
 - **Structure:** Create a single HTML file with a sticky navigation bar and clearly defined sections for:
     1.  **Homepage (Hero):** A brief introduction with name and headline. If headline is empty, create one from the 'about' section.
     2.  **About:** The user's biography.
-    3.  **Experience:** A timeline or list of professional roles. For each role, list the achievements/responsibilities from the 'bullets' array.
+    3.  **Experience:** A timeline or list of professional roles. For each role, use the provided description.
     4.  **Education:** A list of educational qualifications.
-    5.  **Projects:** A grid of project cards. For each project, list the details from the 'bullets' array. Each card should have a title, description, and link. Use placeholder images (e.g., https://placehold.co/600x400) if no image URL is provided.
+    5.  **Projects:** A grid of project cards. For each project, use the provided description. Each card should have a title, description, and link. Use placeholder images (e.g., https://placehold.co/600x400) if no image URL is provided.
     6.  **Skills:** A section to display technical skills.
     7.  **Contact:** A footer with contact email and social media links.
 - **Code:** Generate clean, well-commented, and separate HTML, CSS, and JavaScript code. The CSS should be self-contained and not rely on external frameworks like Bootstrap. The JS should be vanilla JavaScript, not using jQuery or other libraries.
@@ -99,10 +99,7 @@ Your task is to take the user's structured data and generate the complete HTML, 
 - Experience:
 {{#each experience}}
   - Title: {{title}}, Company: {{company}}, Dates: {{dates}}
-  - Bullets: 
-  {{#each bullets}}
-    - {{this}}
-  {{/each}}
+  - Description: {{description}}
 {{/each}}
 - Education:
 {{#each education}}
@@ -111,10 +108,7 @@ Your task is to take the user's structured data and generate the complete HTML, 
 - Projects:
 {{#each projects}}
   - Title: {{title}}, Link: {{link}}, Image: {{imageUrl}}
-  - Bullets:
-  {{#each bullets}}
-    - {{this}}
-  {{/each}}
+  - Description: {{description}}
 {{/each}}
 - Skills:
 {{#each skills}}

@@ -175,9 +175,9 @@ export async function handleGeneratePortfolioWebsiteAction(input: GeneratePortfo
                 headline: '', // AI will generate this from summary
                 contact: resumeData.contact,
                 about: resumeData.summary,
-                experience: resumeData.experience,
-                education: resumeData.education,
-                projects: resumeData.projects,
+                experience: resumeData.experience.map(exp => ({...exp, description: exp.bullets.join('\\n- ')})),
+                education: resumeData.education.map(edu => ({...edu, dates: edu.dates || ''})),
+                projects: resumeData.projects.map(proj => ({...proj, description: proj.bullets.join('\\n- ')})),
                 skills: [...resumeData.skills.technical, ...(resumeData.skills.other || [])],
                 achievements: resumeData.achievements,
             };

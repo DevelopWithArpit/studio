@@ -37,6 +37,9 @@ const portfolioSchema = z.object({
     headline: z.string().min(1, "Headline is required."),
     contact: z.object({
         email: z.string().email("Invalid email address."),
+        phone: z.string().optional(),
+        linkedin: z.string().optional(),
+        github: z.string().optional(),
         socials: z.array(z.object({
             network: z.string(),
             url: z.string().url().or(z.literal('')),
@@ -61,6 +64,7 @@ const portfolioSchema = z.object({
         imageUrl: z.string().url("Invalid URL.").optional().or(z.literal('')),
     })),
     skills: z.array(z.string().min(1)).min(1, "At least one skill is required."),
+    achievements: z.array(z.string()).optional(),
 });
 
 type FormData = z.infer<typeof portfolioSchema>;
@@ -94,7 +98,7 @@ export default function PortfolioGeneratorTool() {
   async function onManualSubmit(data: FormData) {
     setIsLoading(true);
     setResult(null);
-    const response = await handleGeneratePortfolioWebsiteAction({type: 'manual', data});
+    const response = await handleGeneratePortfolioWebsiteAction({ type: 'manual', data });
     setIsLoading(false);
 
     if (response.success && response.data) {
@@ -239,7 +243,7 @@ export default function PortfolioGeneratorTool() {
                                     <FormField control={form.control} name="name" render={({ field }) => ( <FormItem> <FormLabel>Full Name</FormLabel> <FormControl><Input placeholder="John Doe" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                                     <FormField control={form.control} name="headline" render={({ field }) => ( <FormItem> <FormLabel>Headline</FormLabel> <FormControl><Input placeholder="Software Engineer | AI Enthusiast" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                                 </div>
-                                <FormField control={form.control} name="contact.email" render={({ field }) => ( <FormItem> <FormLabel>Email</FormLabel> <FormControl><Input placeholder="your.email@example.com" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                 <FormField control={form.control} name="contact.email" render={({ field }) => ( <FormItem> <FormLabel>Email</FormLabel> <FormControl><Input placeholder="your.email@example.com" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                                 <FormField control={form.control} name="about" render={({ field }) => ( <FormItem> <FormLabel>About Me</FormLabel> <FormControl><Textarea placeholder="A short bio about yourself..." {...field} rows={5} /></FormControl> <FormMessage /> </FormItem> )}/>
                             </CardContent>
                         </Card>
@@ -336,6 +340,31 @@ export default function PortfolioGeneratorTool() {
                                             <FormControl>
                                                 <Textarea
                                                     placeholder="e.g., Python, JavaScript, React, AI, Machine Learning"
+                                                    onChange={(e) => field.onChange(e.target.value.split(',').map(s => s.trim()))}
+                                                    value={Array.isArray(field.value) ? field.value.join(', ') : ''}
+                                                    rows={3}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </CardContent>
+                        </Card>
+                        
+                        {/* Achievements */}
+                        <Card>
+                            <CardHeader><CardTitle>Achievements</CardTitle></CardHeader>
+                            <CardContent>
+                                <FormField
+                                    control={form.control}
+                                    name="achievements"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Enter your achievements, separated by commas</FormLabel>
+                                            <FormControl>
+                                                <Textarea
+                                                    placeholder="e.g., Won 1st place in hackathon, Published a paper"
                                                     onChange={(e) => field.onChange(e.target.value.split(',').map(s => s.trim()))}
                                                     value={Array.isArray(field.value) ? field.value.join(', ') : ''}
                                                     rows={3}
