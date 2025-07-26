@@ -226,8 +226,8 @@ export default function PortfolioGeneratorTool() {
   const handleResumeFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 4 * 1024 * 1024) { // 4MB limit
-        toast({ variant: "destructive", title: "File too large", description: "Please upload a document smaller than 4MB."});
+      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+        toast({ variant: "destructive", title: "File too large", description: "Please upload a document smaller than 10MB."});
         return;
       }
       const reader = new FileReader();
@@ -327,7 +327,7 @@ export default function PortfolioGeneratorTool() {
                             <label htmlFor="resume-upload" className="font-semibold text-accent cursor-pointer hover:underline">
                                 Upload a resume
                             </label>
-                            <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 4MB</p>
+                            <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 10MB</p>
                          </div>
                     </div>
                 )}
