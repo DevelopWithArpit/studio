@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
+import dynamic from 'next/dynamic';
 import {
   SidebarProvider,
   Sidebar,
@@ -37,25 +38,28 @@ import {
   FileEdit,
 } from 'lucide-react';
 import { AppLogo } from '@/components/app-logo';
-import AiExplanationTool from '@/components/tools/ai-explanation-tool';
-import CodeAnalyzerTool from '@/components/tools/code-analyzer-tool';
-import CodeGeneratorTool from '@/components/tools/code-generator-tool';
-import SmartSearchTool from '@/components/tools/smart-search-tool';
-import InterviewQuestionGeneratorTool from '@/components/tools/interview-question-generator-tool';
-import ResumeFeedbackTool from '@/components/tools/resume-feedback-tool';
-import DiagramGeneratorTool from '@/components/tools/diagram-generator-tool';
-import TextToSpeechTool from '@/components/tools/text-to-speech-tool';
-import CoverLetterAssistantTool from '@/components/tools/cover-letter-assistant-tool';
-import CareerPathSuggesterTool from '@/components/tools/career-path-suggester-tool';
-import DocumentSummarizerTool from '@/components/tools/document-summarizer-tool';
-import ImageGeneratorTool from '@/components/tools/image-generator-tool';
-import PresentationGeneratorTool from '@/components/tools/presentation-generator-tool';
-import LinkedInVisualsGeneratorTool from '@/components/tools/linkedin-visuals-generator-tool';
-import WatermarkRemoverTool from '@/components/tools/watermark-remover-tool';
-import ImageTextManipulationTool from '@/components/tools/image-text-manipulation-tool';
-import PortfolioGeneratorTool from '@/components/tools/portfolio-generator-tool';
 import { SheetTitle } from '@/components/ui/sheet';
-import ResumeCustomizerTool from '@/components/tools/resume-customizer-tool';
+import ToolSkeleton from '@/components/tools/tool-skeleton';
+
+const AiExplanationTool = dynamic(() => import('@/components/tools/ai-explanation-tool'), { loading: () => <ToolSkeleton /> });
+const CodeAnalyzerTool = dynamic(() => import('@/components/tools/code-analyzer-tool'), { loading: () => <ToolSkeleton /> });
+const CodeGeneratorTool = dynamic(() => import('@/components/tools/code-generator-tool'), { loading: () => <ToolSkeleton /> });
+const SmartSearchTool = dynamic(() => import('@/components/tools/smart-search-tool'), { loading: () => <ToolSkeleton /> });
+const InterviewQuestionGeneratorTool = dynamic(() => import('@/components/tools/interview-question-generator-tool'), { loading: () => <ToolSkeleton /> });
+const ResumeFeedbackTool = dynamic(() => import('@/components/tools/resume-feedback-tool'), { loading: () => <ToolSkeleton /> });
+const DiagramGeneratorTool = dynamic(() => import('@/components/tools/diagram-generator-tool'), { loading: () => <ToolSkeleton /> });
+const TextToSpeechTool = dynamic(() => import('@/components/tools/text-to-speech-tool'), { loading: () => <ToolSkeleton /> });
+const CoverLetterAssistantTool = dynamic(() => import('@/components/tools/cover-letter-assistant-tool'), { loading: () => <ToolSkeleton /> });
+const CareerPathSuggesterTool = dynamic(() => import('@/components/tools/career-path-suggester-tool'), { loading: () => <ToolSkeleton /> });
+const DocumentSummarizerTool = dynamic(() => import('@/components/tools/document-summarizer-tool'), { loading: () => <ToolSkeleton /> });
+const ImageGeneratorTool = dynamic(() => import('@/components/tools/image-generator-tool'), { loading: () => <ToolSkeleton /> });
+const PresentationGeneratorTool = dynamic(() => import('@/components/tools/presentation-generator-tool'), { loading: () => <ToolSkeleton /> });
+const LinkedInVisualsGeneratorTool = dynamic(() => import('@/components/tools/linkedin-visuals-generator-tool'), { loading: () => <ToolSkeleton /> });
+const WatermarkRemoverTool = dynamic(() => import('@/components/tools/watermark-remover-tool'), { loading: () => <ToolSkeleton /> });
+const ImageTextManipulationTool = dynamic(() => import('@/components/tools/image-text-manipulation-tool'), { loading: () => <ToolSkeleton /> });
+const PortfolioGeneratorTool = dynamic(() => import('@/components/tools/portfolio-generator-tool'), { loading: () => <ToolSkeleton /> });
+const ResumeCustomizerTool = dynamic(() => import('@/components/tools/resume-customizer-tool'), { loading: () => <ToolSkeleton /> });
+
 
 type ToolId =
   | 'smart-search'
@@ -239,12 +243,14 @@ export default function Home() {
             <SidebarTrigger />
         </header>
         <main className="p-4 sm:p-6 lg:p-8">
-          {ActiveToolComponent ? <ActiveToolComponent /> : (
-            <div>
-              <h1 className="text-2xl font-bold">Select a tool</h1>
-              <p>Please select a tool from the sidebar to get started.</p>
-            </div>
-          )}
+          <Suspense fallback={<ToolSkeleton />}>
+            {ActiveToolComponent ? <ActiveToolComponent /> : (
+              <div>
+                <h1 className="text-2xl font-bold">Select a tool</h1>
+                <p>Please select a tool from the sidebar to get started.</p>
+              </div>
+            )}
+          </Suspense>
         </main>
       </SidebarInset>
     </SidebarProvider>
