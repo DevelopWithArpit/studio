@@ -63,25 +63,26 @@ const prompt = ai.definePrompt({
     name: 'generatePortfolioWebsitePrompt',
     input: { schema: PortfolioDataSchema },
     output: { schema: GeneratePortfolioWebsiteOutputSchema },
-    prompt: `You are an expert web developer specializing in creating stunning, professional, and modern single-page portfolio websites.
+    prompt: `You are an expert web developer specializing in creating stunning, professional, and modern single-page portfolio websites with advanced animations.
 
 Your task is to take the user's structured data and generate the complete HTML, CSS, and JavaScript code for a portfolio website.
 
 **Design Requirements:**
-- **Visuals:** Create a visually stunning, premium website.
-  - **Theme:** Use a dark theme.
-  - **Background:** The hero section should feature a subtle, slowly animating gradient background.
-  - **Cards:** Employ a 'glassmorphism' effect for cards (background blur, transparency, subtle border) to create a modern, layered look.
+- **Visuals & Theme:**
+  - **Theme:** Use a sleek dark theme.
+  - **Background:** The hero section should feature a subtle, slowly animating gradient background with a **parallax scrolling effect**.
+  - **Cards:** Employ a 'glassmorphism' effect for cards (background blur, transparency, subtle border).
   - **Typography:** Use a professional and clean font pairing like 'Poppins' for headings and 'Inter' for body text.
 - **Animations & Interactivity:**
-  - **On-Scroll:** Implement smooth, subtle 'reveal' animations for sections and cards as the user scrolls.
-  - **Hover Effects:** Add interactive hover effects to project cards (e.g., slight lift, glowing border) and buttons to make the site feel alive.
+  - **Cursor Effect:** Implement an interactive 'spotlight' or 'aurora' cursor effect that follows the mouse, creating a trail of light.
+  - **On-Scroll Animations:** Implement smooth, elegant 'reveal' animations (fade-in and slide-up) for all sections and elements as the user scrolls.
+  - **Hover Effects:** Project cards must have a 3D tilt effect on hover. Buttons should have subtle lift/glow effects.
   - **Hero Animation:** Include a gentle particle animation effect in the hero section background.
 - **Layout:**
   - The website must be fully responsive and look exceptional on all screen sizes (desktop, tablet, and mobile).
-  - Create a single HTML file with a sticky navigation bar that smoothly scrolls to the corresponding sections.
+  - Create a single HTML file with a sticky, blurred glassmorphism navigation bar that smoothly scrolls to the corresponding sections.
 - **Structure:**
-  - **Homepage (Hero):** A powerful introduction with name and headline. If the headline is empty, create one from the 'about' section.
+  - **Homepage (Hero):** A powerful introduction with name and headline.
   - **About:** The user's biography.
   - **Experience:** A timeline or list of professional roles.
   - **Education:** A list of educational qualifications.
@@ -99,10 +100,8 @@ Your task is to take the user's structured data and generate the complete HTML, 
 - Headline: {{{headline}}}
 - Contact Email: {{{contact.email}}}
 - Contact Phone: {{{contact.phone}}}
-- LinkedIn: {{{contact.linkedin}}}
-- GitHub: {{{contact.github}}}
 {{#if contact.socials}}
-- Other Socials: 
+- Socials: 
 {{#each contact.socials}}
   - {{network}}: {{url}}
 {{/each}}
