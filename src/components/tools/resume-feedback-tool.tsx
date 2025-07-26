@@ -38,24 +38,41 @@ const defaultResumeText = `Arpit Pise
 (727) 660-2831 | arpitpise1@gmail.com | linkedin.com/in/arpit-pise-20029a287 | Nagpur, India
 
 SUMMARY
-Enthusiastic B.Tech student in Robotics and Artificial Intelligence seeking an Al Engineer or Robotics Software Engineer role. Expertise in Python, Java, and C++. Proven ability to develop and implement Al solutions, demonstrated by leading the development of an Al Mentor platform and achieving a 30% increase in user engagement. Passionate about leveraging technical skills to develop advanced Al and robotic systems and contribute to innovative solutions.
+Enthusiastic B.Tech student in Robotics and Artificial Intelligence with proven skills in Python, Java, and C++. Seeking an Al Engineer or Robotics Software Engineer role. Expertise in developing and implementing Al solutions, demonstrated by leading the development of an Al Mentor platform and achieving a 30% increase in user engagement. Passionate about leveraging technical skills to develop advanced Al and robotic systems and contribute to innovative solutions.
 
 EXPERIENCE
-Cybersecurity Consulting Team Member | Tata Consultancy Services | June 2023
-• Completed a job simulation involving identity and access management (IAM) for Tata Consultancy Services, collaborating with a Cybersecurity Consulting team.
-• Acquired expertise in IAM principles, cybersecurity best practices, and strategic alignment with business objectives.
-• Delivered comprehensive documentation and presentations, showcasing the ability to communicate complex technical concepts effectively.
-Software Engineer | Electronic Arts | June 2023
-• Proposed a new feature for the EA Sports College Football and wrote a Feature Proposal describing it to other stakeholders.
-• Built a class diagram and created a header file in C++ with class
+Software Engineer | Electronic Arts | June 2025
+* Proposed and documented a new feature for EA Sports College Football, presenting a comprehensive Feature Proposal to stakeholders.
+* Designed and implemented a class diagram and created a C++ header file with class definitions, enhancing code maintainability.
+* Improved the EA Sports College Football codebase by patching bugs and optimizing data structures, resulting in enhanced performance.
+Robotics & Controls Engineering Intern | Johnson & Johnson | June 2025
+* Conducted a job simulation as a robotics & controls engineering intern, focusing on surgical robotic arm performance optimization.
+* Utilized Python-based tools to effectively diagnose control system inefficiencies, pinpoint root causes of delays, and implement targeted optimizations, reducing latency by 15%.
+Cybersecurity Consulting Team Member | Tata Consultancy Services | June 2025
+* Completed a job simulation involving identity and access management (IAM), collaborating within a Cybersecurity Consulting team to enhance security protocols.
+* Acquired expertise in IAM principles, cybersecurity best practices, and strategic alignment with business objectives.
+Technical Member | College Committee (Priyadarshini College of Engineering) | Oct 2024 - May 2025
+* Collaborated in the organization of 5+ technical events and workshops, boosting student participation and engagement with technical subjects.
+
+EDUCATION
+Priyadarshini College of Engineering | Nagpur, India
+B.Tech in Robotics and Artificial Intelligence | 2022 - 2026
+
+PROJECTS
+AI Mentor Platform | Personal Project
+* Developed an AI-powered mentorship platform using Next.js, TypeScript, and Genkit AI.
+* Implemented features for resume feedback, code generation, and interview question preparation.
+Surgical Robot Control System | Coursework Project
+* Designed and simulated a control system for a surgical robot arm using ROS and Python.
+* Implemented path planning algorithms to ensure precision and safety.
 
 SKILLS
 Programming Languages: Python, Java, C++, C, HTML, JavaScript
-AI/ML: TensorFlow, Keras, PyTorch, Scikit-learn, OpenAI API, Machine Learning, Deep Learning, Computer Vision
-Natural Language Processing
-Generative Al (GANs): Transformers, VAEs
-Other: Git, Linux, Docker, ROS (Robot Operating System)
-AWS, Azure, PHP, MySQL, IAM, Cybersecurity, C++ Class Definitions, Robotics, Control Systems, Surgical Robotics`;
+Machine Learning: TensorFlow, Keras, PyTorch, Scikit-learn, OpenAI API, Deep Learning, Computer Vision, Natural Language Processing, Generative Al (GANs), Transformers, VAEs
+Robotics: ROS (Robot Operating System), Control Systems, Surgical Robotics SLAM, Path Planning
+Cloud Computing: AWS, Azure
+Databases: MySQL
+Other: Git, Linux, Docker, Cybersecurity, C++ Class Definitions`;
 
 const formSchema = z.object({
   resume: z.string().min(1, 'Please upload or paste your resume.'),
