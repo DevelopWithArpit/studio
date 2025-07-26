@@ -30,7 +30,7 @@ const prompt = ai.definePrompt({
   name: 'generatePortfolioPrompt',
   input: { schema: GeneratePortfolioInputSchema },
   output: { schema: GeneratePortfolioOutputSchema },
-  prompt: `You are an expert web developer creating a single-page portfolio from resume text. Generate complete, standalone HTML and CSS that precisely matches the provided structure and styling instructions.
+  prompt: `You are an expert web developer creating a single-page portfolio from resume text. Generate complete, standalone HTML and CSS that precisely matches the provided structure and styling instructions. All sections from the resume content must be present in the output.
 
 **Resume Content:**
 ---
@@ -38,7 +38,7 @@ const prompt = ai.definePrompt({
 ---
 
 **Mandatory Instructions:**
-1.  **Overall Layout:** Create a professional, clean, single-page layout.
+1.  **Overall Layout:** Create a professional, clean, single-page layout. The entire resume must fit on a single page.
 2.  **Header Section (Full Width):**
     *   Start with a full-width header.
     *   Display the person's name in a large, bold font.
