@@ -69,13 +69,13 @@ Your task is to take the user's structured data and generate the complete HTML, 
 
 **Design & Animation Requirements:**
 - **Theme:** A sleek, professional dark theme. The primary background color must be #0A0A0A.
-- **Interactive Particle Background:**
-  - Create a full-screen <canvas> element behind all other content.
-  - Implement a JavaScript-based particle animation where particles connect with lines when they are close to each other and to the cursor.
-  - Particles should move subtly and randomly. The background should be interactive and respond to cursor movement.
+- **Greatest of All Time Interactive Background:**
+  - Create a 'magic mouse' effect. A large circular radial gradient should follow the user's cursor, creating a spotlight effect that illuminates the page content.
+  - This effect should be applied to a \`div\` with a class \`interactive-gradient\` that sits behind all other content using a fixed position and a low z-index.
+  - The JavaScript must update the position of this gradient based on the \`mousemove\` event.
 - **On-Scroll Reveal Animations:**
   - All sections (About, Experience, Projects, etc.) must have a smooth 'fade-in-up' animation as the user scrolls them into view.
-  - Use the Intersection Observer API for performance.
+  - Use the Intersection Observer API for performance. Animate elements by adding an 'is-visible' class.
 - **Glassmorphism & 3D Tilt Project Cards in Bento Grid:**
   - Display projects in a modern "bento grid" layout.
   - Project cards must have a "glassmorphism" effect: a semi-transparent, blurred background (\`backdrop-filter: blur(10px)\`) and a subtle white border.
@@ -86,8 +86,7 @@ Your task is to take the user's structured data and generate the complete HTML, 
   - Generate a single, clean HTML file. Do not add comments.
   - All CSS must be inside a <style> tag in the HTML's <head>.
   - All JavaScript must be inside a <script> tag at the end of the <body>. Use vanilla JavaScript only, except for the vanilla-tilt.js CDN import.
-  - The JavaScript must correctly handle the particle background, the on-scroll reveals, and initialize the 3D tilt effect on project cards.
-  - Ensure the canvas is responsive and resizes with the window.
+  - The JavaScript must correctly handle the interactive gradient background, the on-scroll reveals, and initialize the 3D tilt effect on project cards.
 
 **User's Portfolio Data:**
 ---
@@ -125,7 +124,7 @@ Your task is to take the user's structured data and generate the complete HTML, 
 {{#each achievements}}
   - {{this}}
 {{/each}}
-{{/if}}
+"Magic Mouse"{{/if}}
 ---
 
 Generate the complete, ready-to-use portfolio code now.`,
