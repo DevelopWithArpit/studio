@@ -63,28 +63,30 @@ const prompt = ai.definePrompt({
     name: 'generatePortfolioWebsitePrompt',
     input: { schema: PortfolioDataSchema },
     output: { schema: GeneratePortfolioWebsiteOutputSchema },
-    prompt: `You are an expert web developer specializing in creating stunning, professional, and modern single-page portfolio websites with impressive visuals and animations.
+    prompt: `You are an expert web developer specializing in creating ultimate, top-tier, and stunning single-page portfolio websites with the most modern and impressive visuals and animations.
 
-Your task is to take the user's structured data and generate the complete HTML, CSS, and JavaScript code for a portfolio website.
+Your task is to take the user's structured data and generate the complete HTML, CSS, and JavaScript code for a portfolio website that will leave a lasting impression.
 
 **Design Requirements:**
 - **Visuals & Theme:**
-  - **Theme:** Use a sleek dark theme.
-  - **Typography:** Use a professional and clean font pairing like 'Poppins' for headings and 'Inter' for body text.
-  - **Accent Gradients:** Use subtle, elegant gradients for headings and key elements to add visual flair.
+  - **Theme:** Use a sleek, professional dark theme.
+  - **Hero Background:** Create a stunning, slowly animating gradient mesh background for the hero section. It should feel like a subtle, flowing aurora.
+  - **Typography:** Use a professional and clean font pairing like 'Poppins' for headings and 'Inter' for body text. Use Google Fonts.
 - **Animations & Interactivity:**
-  - **On-Scroll Animations:** Implement smooth, elegant 'reveal' animations (fade-in and slide-up) for all sections and elements as the user scrolls.
+  - **Custom Cursor:** Implement a custom "spotlight" cursor effect where a soft, radial gradient follows the mouse, illuminating the content behind it.
+  - **On-Scroll Animations:** Implement smooth, elegant 'reveal' animations (fade-in and slide-up) for all sections as the user scrolls.
   - **Interactive Project Cards:** Project cards should have a modern, interactive 3D tilt effect on hover.
-  - **Hover Effects:** Buttons should have subtle lift/glow effects.
+  - **Hover Effects:** Buttons and links should have subtle, polished hover effects (e.g., lift, glow, or gradient shift).
 - **Layout:**
-  - The website must be fully responsive and look exceptional on all screen sizes (desktop, tablet, and mobile).
+  - The website must be fully responsive and look exceptional on all screen sizes.
   - Create a single HTML file with a sticky navigation bar that smoothly scrolls to the corresponding sections.
+  - **Project Section:** Use a modern "bento grid" layout to display the projects. This layout uses different-sized grid items to create a visually interesting and organized presentation.
 - **Structure:**
   - **Homepage (Hero):** A powerful introduction with name and headline.
   - **About:** The user's biography.
   - **Experience:** A timeline or list of professional roles.
   - **Education:** A list of educational qualifications.
-  - **Projects:** A grid of project cards. Each card should have a title, description, and link. Use placeholder images (e.g., https://placehold.co/600x400) if no image URL is provided.
+  - **Projects:** A bento grid of project cards. Each card should have a title, description, and link. Use placeholder images (e.g., https://placehold.co/600x400) if no image URL is provided.
   - **Skills:** A section to display technical skills.
   - **Contact:** A footer with contact email and social media links.
 - **Code:**
@@ -99,7 +101,7 @@ Your task is to take the user's structured data and generate the complete HTML, 
 - Contact Email: {{{contact.email}}}
 - Contact Phone: {{{contact.phone}}}
 {{#if contact.socials}}
-- Socials: 
+- Socials:
 {{#each contact.socials}}
   - {{network}}: {{url}}
 {{/each}}
