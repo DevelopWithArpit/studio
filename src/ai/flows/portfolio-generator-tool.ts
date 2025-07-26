@@ -20,8 +20,8 @@ const PortfolioDataSchema = z.object({
       linkedin: z.string().optional(),
       github: z.string().optional(),
       socials: z.array(z.object({
-          network: z.string().describe("The social network name (e.g., 'LinkedIn', 'GitHub')."),
-          url: z.string().url().describe("The URL to the user's profile."),
+          network: z.string(),
+          url: z.string().url(),
       })).optional().describe("An array of social media links.")
   }),
   about: z.string().describe("A detailed 'About Me' section."),
@@ -63,24 +63,20 @@ const prompt = ai.definePrompt({
     name: 'generatePortfolioWebsitePrompt',
     input: { schema: PortfolioDataSchema },
     output: { schema: GeneratePortfolioWebsiteOutputSchema },
-    prompt: `You are an expert web developer specializing in creating stunning, professional, and modern single-page portfolio websites with advanced animations.
+    prompt: `You are an expert web developer specializing in creating stunning, professional, and modern single-page portfolio websites.
 
 Your task is to take the user's structured data and generate the complete HTML, CSS, and JavaScript code for a portfolio website.
 
 **Design Requirements:**
 - **Visuals & Theme:**
   - **Theme:** Use a sleek dark theme.
-  - **Background:** The hero section should feature a subtle, slowly animating gradient background with a **parallax scrolling effect**.
-  - **Cards:** Employ a 'glassmorphism' effect for cards (background blur, transparency, subtle border).
   - **Typography:** Use a professional and clean font pairing like 'Poppins' for headings and 'Inter' for body text.
 - **Animations & Interactivity:**
-  - **Cursor Effect:** Implement an interactive 'spotlight' or 'aurora' cursor effect that follows the mouse, creating a trail of light.
   - **On-Scroll Animations:** Implement smooth, elegant 'reveal' animations (fade-in and slide-up) for all sections and elements as the user scrolls.
-  - **Hover Effects:** Project cards must have a 3D tilt effect on hover. Buttons should have subtle lift/glow effects.
-  - **Hero Animation:** Include a gentle particle animation effect in the hero section background.
+  - **Hover Effects:** Buttons should have subtle lift/glow effects.
 - **Layout:**
   - The website must be fully responsive and look exceptional on all screen sizes (desktop, tablet, and mobile).
-  - Create a single HTML file with a sticky, blurred glassmorphism navigation bar that smoothly scrolls to the corresponding sections.
+  - Create a single HTML file with a sticky navigation bar that smoothly scrolls to the corresponding sections.
 - **Structure:**
   - **Homepage (Hero):** A powerful introduction with name and headline.
   - **About:** The user's biography.
