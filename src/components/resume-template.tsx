@@ -46,8 +46,7 @@ const PREDEFINED_SKILLS = [
 ];
 
 const parseResumeText = (text: string): ResumeData => {
-    const cleanedText = text.replace(/^#+\s*/gm, '');
-    const lines = cleanedText.split('\n').map(line => line.trim()).filter(line => line);
+    const lines = text.split('\n').map(line => line.replace(/^#+\s*/, '').trim()).filter(line => line);
 
     const data: ResumeData = {
         name: '',
@@ -67,20 +66,20 @@ const parseResumeText = (text: string): ResumeData => {
     let sectionMap: { [key: string]: number } = {};
     const upperCaseLines = lines.map(l => l.toUpperCase());
 
-    upperCaseLines.forEach((line, index) => {
-        const matchingHeader = sectionHeaders.find(h => line.startsWith(h));
-        if (matchingHeader) {
-            sectionMap[matchingHeader] = index;
+    sectionHeaders.forEach(header => {
+        const index = upperCaseLines.findIndex(line => line === header);
+        if (index !== -1) {
+            sectionMap[header] = index;
         }
     });
 
     const getSectionContent = (sectionName: string): string[] => {
         const start = sectionMap[sectionName];
         if (start === undefined) return [];
-
-        let end = lines.length;
+        
         const sortedHeaders = Object.keys(sectionMap).sort((a, b) => sectionMap[a] - sectionMap[b]);
         const currentHeaderIndex = sortedHeaders.indexOf(sectionName);
+        let end = lines.length;
         if (currentHeaderIndex < sortedHeaders.length - 1) {
             end = sectionMap[sortedHeaders[currentHeaderIndex + 1]];
         }
@@ -120,16 +119,19 @@ const parseResumeText = (text: string): ResumeData => {
     if (educationContent.length > 0) {
         const eduBlocks: Education[] = [];
         for (let i = 0; i < educationContent.length; i++) {
-            if (i + 1 < educationContent.length && !sectionHeaders.some(h => educationContent[i+1].toUpperCase().startsWith(h))) {
+             // Expecting School | Location on one line, and Degree | Dates on the next
+            if (i + 1 < educationContent.length) {
                 const schoolParts = educationContent[i].split('|').map(p => p.trim());
                 const degreeParts = educationContent[i+1].split('|').map(p => p.trim());
-                eduBlocks.push({
-                    school: schoolParts[0] || '',
-                    location: schoolParts[1] || '',
-                    degree: degreeParts[0] || '',
-                    dates: degreeParts[1] || '',
-                });
-                i++;
+                 if(schoolParts.length > 0 && degreeParts.length > 0) {
+                     eduBlocks.push({
+                        school: schoolParts[0] || '',
+                        location: schoolParts[1] || '',
+                        degree: degreeParts[0] || '',
+                        dates: degreeParts[1] || '',
+                    });
+                    i++; // increment to skip the next line as it's processed
+                 }
             }
         }
         data.education = eduBlocks;
@@ -201,7 +203,7 @@ export const ResumeTemplate: React.FC<{ resumeText: string }> = ({ resumeText })
                     <p style={{ fontSize: '9pt', color: '#4b5563', margin: '4px 0 0 0' }}>{contact}</p>
                 </div>
                 <div style={{ flexShrink: 0, width: '60px', height: '60px', borderRadius: '50%', backgroundColor: '#2563eb', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <span style={{ fontSize: '24pt', fontWeight: 'bold' }}>{initials}</span>
+                    <span style={{ fontSize: '24pt', fontWeight: 'bold' }}>{`#${initials}`}</span>
                 </div>
             </header>
 
@@ -235,7 +237,7 @@ export const ResumeTemplate: React.FC<{ resumeText: string }> = ({ resumeText })
                                 <div key={i} style={{ marginBottom: i < education.length - 1 ? '8px' : '0' }}>
                                     <h3 style={{ fontSize: '10pt', fontWeight: 'bold', margin: 0 }}>{edu.school}</h3>
                                     <p style={{ fontSize: '9pt', color: '#4b5563', margin: '2px 0 0 0' }}>{edu.location}</p>
-                                    <p style={{ fontSize: '9pt', color: '#4b5563', margin: '2px 0 0 0' }}>{edu.degree} | {edu.dates}</p>
+                                    <p style={{ fontSize: '9pt', color: '#4b5563', margin: '2px 0 0 0' }}>{`${edu.degree} | ${edu.dates}`}</p>
                                 </div>
                             ))}
                         </section>
@@ -290,5 +292,3 @@ export const ResumeTemplate: React.FC<{ resumeText: string }> = ({ resumeText })
         </div>
     );
 };
-
-    
