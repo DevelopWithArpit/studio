@@ -36,47 +36,47 @@ import { ResumeTemplate } from '@/components/resume-template';
 
 const defaultResumeText = `ARPIT PISE
 AI Engineer / Robotics Software Engineer
-(727) 660-2831 | arpitpise1@gmail.com | linkedin.com/in/arpit-pise-20029a287 | Nagpur, India
+7276602831 | arpitpise1@gmail.com | linkedin.com/in/arpit-pise-20029a287 | Nagpur, India
 
 SUMMARY
-Enthusiastic B.Tech student in Robotics and Artificial Intelligence with expertise in Python, Java, and C++. Led the development of the AI Mentor platform, achieving a 30% increase in user engagement. Seeking an AI Engineer or Robotics Software Engineer role to leverage technical skills in developing advanced AI and robotic systems, contributing to innovative solutions.
+As a B.Tech student specializing in Robotics and Artificial Intelligence, I am dedicated to crafting cutting-edge AI solutions. My expertise in Python, Java, and C++ complements my projects, notably leading the successful development of the AI Mentor platform. I am eager to apply my skills in an AI Engineer or Robotics Software Engineer role to contribute to advanced technological innovations.
 
 EXPERIENCE
-Cybersecurity Consulting Team Member | Tata Consultancy Services | June 2025
-Completed a job simulation involving identity and access management (IAM) for Tata Consultancy Services, collaborating with a Cybersecurity Consulting team.
-Acquired expertise in IAM principles, cybersecurity best practices, and strategic alignment with business objectives.
-Delivered comprehensive documentation and presentations, showcasing the ability to communicate complex technical concepts effectively.
-
-Software Engineer | Electronic Arts | June 2025
-Proposed a new feature for the EA Sports College Football and wrote a Feature Proposal describing it to other stakeholders.
-Built a class diagram and created a header file in C++ with class definitions for each object.
-Patched a bugfix and optimized the EA Sports College Football codebase by implementing an improved data structure.
-
-Robotics & Controls Engineering Intern | Johnson & Johnson | June 2025
-Completed a job simulation as a robotics & controls engineering intern at Johnson & Johnson, focusing on optimizing a surgical robotic arm's performance.
-Used Python-based tools to diagnose control system inefficiencies, identify root causes of delays, and implement targeted optimizations.
-Proposed actionable design modifications using annotated technical visuals, validating their impact on responsiveness and durability through iterative testing.
-Developed a professional design proposal outlining findings, solutions, and recommendations for improving precision and reliability in robotic systems.
-
-Technical Member | College Committee (Priyadarshini College of Engineering) | Oct 2024 - May 2025 | Nagpur, India
-Collaborated in the organization of 5+ technical events and workshops, resulting in increased student participation and boosting engagement with technical subjects.
-Implemented an online registration system using PHP and MySQL, decreasing average registration wait times by 85% (from 20 minutes to 3 minutes) and enhancing user satisfaction.
-Developed and maintained the college committee website using HTML, CSS, and JavaScript, leading to a 30% increase in event promotion click-through rates and improved event visibility.
+Technical Member
+Priyadarshini College of Engineering
+01/2023 - 01/1970 • Nagpur, India
+• Collaborated in the organization of 5+ technical events and workshops, resulting in a 50% increase in student participation and boosting engagement with technical subjects.
+• Implemented an online registration system using PHP and MySQL, decreasing average registration wait times by 85% (from 20 minutes to 3 minutes) and enhancing user satisfaction.
+• Developed and maintained the college committee website using HTML, CSS, and JavaScript, leading to a 30% increase in event promotion click-through rates and improved event visibility.
 
 EDUCATION
-Bachelor of Technology in Robotics and Artificial Intelligence (B.Tech) | Priyadarshini College Of Engineering | Sept 2024 - May 2028 | Nagpur, India
+Bachelor of Technology in Robotics and Artificial Intelligence (B.Tech)
+Priyadarshini College Of Engineering
+08/2024 - 05/2028 • Nagpur, India
+
+HSC
+ST. PAUL PUBLIC SCHOOL & JUNIOR COLLEGE
+01/2021 - 05/2023
+
+SSC
+PURUSHOTTAM DAS BAGLA CONVENT
+01/2019 - 05/2021
 
 KEY ACHIEVEMENTS
-Led the development of the AI Mentor platform, achieving a 30% increase in user engagement.
-Implemented an online registration system using PHP and MySQL, decreasing average registration wait times by 85%.
-Developed and maintained the college committee website using HTML, CSS, and JavaScript, leading to a 30% increase in event promotion click-through rates.
+AI Mentor by AP Platform Development
+Led the development of the AI Mentor by AP platform, achieving a 30% increase in user engagement within the first month through personalized learning experiences.
 
 SKILLS
-Python, Java, C++, C, HTML, JavaScript, TensorFlow, Keras, PyTorch, Scikit-learn, OpenAI API, Deep Learning, Computer Vision, Natural Language Processing (NLP), Generative AI (GANs), Transformers, VAEs, AWS, Azure, ROS (Robot Operating System), Control Systems, Surgical Robotics, Git, Linux, Docker, PHP, MySQL, IAM, Cybersecurity, C++ Class Definitions
+AWS, Azure, C/C++, CSS, Data Structures, Deep Learning, Django, Docker, Flask, GAMS, Git, HTML, Java, JavaScript, Keras, Linux, NLP, Numpy, Pandas, PHP, Python, PyTorch, Robotics, Scikit-Learn, TensorFlow, Gmail
 
 PROJECTS
-AI Mentor by AP | May 2025 - Personal Project
-`;
+AI Mentor by AP
+05/2025 - 01/1970
+AI Mentor by AP - Personal Project
+• Spearheaded the development of an AI-powered platform offering personalized learning and career guidance, resulting in a 30% increase in user engagement within the first month.
+• Engineered and implemented AI-driven tools for resume and cover letter creation, career path recommendations, and code/DSA assistance, boosting user productivity by 25% through reduced task completion times.
+• Integrated AI-powered image generation (Stable Diffusion, DALL-E), text-based image editing, diagram generation, and presentation assistance features, optimizing user workflows and enabling data-driven decision-making.
+• Designed the platform with a user-centric approach, seamlessly integrating diverse AI functionalities into a single, intuitive interface, promoting enhanced learning, creativity, and career progression.`;
 
 const formSchema = z.object({
   resume: z.string().min(1, 'Please upload or paste your resume.'),
@@ -183,10 +183,13 @@ export default function ResumeFeedbackTool() {
 
     setTimeout(async () => {
          try {
-            const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+            const canvas = await html2canvas(element, { scale: 3, useCORS: true, windowWidth: 1200 });
             const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF({ orientation: 'portrait', unit: 'px', format: [canvas.width, canvas.height] });
-            pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+
+            const pdf = new jsPDF({ orientation: 'p', unit: 'px', format: 'a4' });
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
             pdf.save('resume.pdf');
           } catch (error) {
             toast({ variant: 'destructive', title: 'Error Generating PDF', description: error instanceof Error ? error.message : 'An unknown error occurred.' });
@@ -396,8 +399,8 @@ export default function ResumeFeedbackTool() {
                 ) : (
                   result && (
                     <div className="space-y-4">
-                       <div className="border rounded-lg p-4 bg-muted/50 max-h-[500px] overflow-y-auto">
-                        <ResumeTemplate resumeText={result.rewrittenResume} />
+                       <div className="border rounded-lg bg-white max-h-[600px] overflow-y-auto">
+                          <ResumeTemplate resumeText={result.rewrittenResume} />
                       </div>
                       <div className="flex flex-wrap gap-2">
                          <Button
