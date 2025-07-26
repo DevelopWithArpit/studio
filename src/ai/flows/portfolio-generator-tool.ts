@@ -124,7 +124,7 @@ Your task is to take the user's structured data and generate the complete HTML, 
 {{#each achievements}}
   - {{this}}
 {{/each}}
-"Magic Mouse"{{/if}}
+{{/if}}
 ---
 
 Generate the complete, ready-to-use portfolio code now.`,
