@@ -69,17 +69,17 @@ type ToolId =
   | 'interview-question-generator'
   | 'resume-feedback'
   | 'resume-customizer'
+  | 'linkedin-visuals-generator'
+  | 'portfolio-generator'
   | 'cover-letter-assistant'
   | 'career-path-suggester'
   | 'document-summarizer'
   | 'image-generator'
   | 'diagram-generator'
   | 'presentation-generator'
-  | 'linkedin-visuals-generator'
   | 'text-to-speech'
   | 'watermark-remover'
-  | 'image-text-manipulation'
-  | 'portfolio-generator';
+  | 'image-text-manipulation';
 
 type ToolConfig = {
   id: ToolId;
@@ -126,6 +126,18 @@ const tools: ToolConfig[] = [
     component: ResumeFeedbackTool,
   },
   {
+    id: 'linkedin-visuals-generator',
+    name: 'LinkedIn Visuals',
+    icon: Linkedin,
+    component: LinkedInVisualsGeneratorTool,
+  },
+  {
+    id: 'portfolio-generator',
+    name: 'Portfolio Generator',
+    icon: Briefcase,
+    component: PortfolioGeneratorTool,
+  },
+  {
     id: 'resume-customizer',
     name: 'Resume Customizer',
     icon: FileEdit,
@@ -166,18 +178,6 @@ const tools: ToolConfig[] = [
     name: 'Presentation Generator',
     icon: Presentation,
     component: PresentationGeneratorTool,
-  },
-  {
-    id: 'linkedin-visuals-generator',
-    name: 'LinkedIn Visuals',
-    icon: Linkedin,
-    component: LinkedInVisualsGeneratorTool,
-  },
-  {
-    id: 'portfolio-generator',
-    name: 'Portfolio Generator',
-    icon: Briefcase,
-    component: PortfolioGeneratorTool,
   },
   {
     id: 'text-to-speech',
