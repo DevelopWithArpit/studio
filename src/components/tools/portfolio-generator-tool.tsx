@@ -283,7 +283,7 @@ export default function PortfolioGeneratorTool() {
           if (rewrittenResume.projects && rewrittenResume.projects.length > 0) {
             form.setValue('projects', rewrittenResume.projects.map(p => ({
                 title: p.title,
-                description: p.bullets.join(' '),
+                description: p.bullets.join('. '),
                 imageUrl: 'https://placehold.co/600x400.png',
                 projectUrl: rewrittenResume.contact.github || 'https://github.com'
             })));
