@@ -68,16 +68,18 @@ const prompt = ai.definePrompt({
 Your task is to take the user's structured data and generate the complete HTML, CSS, and JavaScript code for an ultimate portfolio website.
 
 **Supreme Design & Animation Requirements:**
-- **Theme:** A sleek, professional dark theme as the base.
-- **Parallax Background:** Implement a multi-layered parallax background using CSS transforms. Create several divs for different layers with geometric shapes (circles, squares) as ::before or ::after pseudo-elements. These layers should move at different speeds on scroll to create a stunning depth effect.
-- **On-Scroll Reveal Animations:** All sections must have a smooth 'reveal' animation (fade-in and slide-up) as the user scrolls them into view. Ensure this is performant.
-- **Glassmorphism Project Cards:** Display projects in a modern "bento grid" layout. The project cards must have a "glassmorphism" effect: a semi-transparent, blurred background (using \`backdrop-filter: blur(...)\`) and a subtle border. This creates a frosted-glass look. On hover, the cards should have a subtle 3D tilt effect.
+- **Theme:** A sleek, professional dark theme as the base. The primary background color must be #0D0D0D.
+- **Aurora Background & Spotlight Cursor:**
+  - Create a stunning, multi-color "aurora" style animated gradient in the background. It should be composed of several large, blurred, colored circles that slowly move and morph over time using CSS animations. The colors should be soft and modern (e.g., shades of teal, purple, and blue).
+  - The body must have a spotlight cursor effect. The background of the entire page should be a radial gradient centered on the mouse position, creating a "spotlight" that follows the cursor. This interacts with the aurora effect.
+- **On-Scroll Reveal Animations:** All sections (About, Experience, Projects, etc.) must have a smooth 'reveal' animation (fade-in and slide-up) as the user scrolls them into view. Use the Intersection Observer API for this for performance.
+- **Glassmorphism Project Cards in Bento Grid:** Display projects in a modern "bento grid" layout. The project cards must have a "glassmorphism" effect: a semi-transparent, blurred background (using \`backdrop-filter: blur(16px)\`) and a subtle border. On hover, the cards must have a subtle 3D tilt effect using transform perspective.
 - **Typography:** Use a professional and clean font pairing. Use 'Poppins' for headings and 'Inter' for body text. Import them from Google Fonts in the HTML file's <head>.
 - **Code Structure:**
   - Generate a single, clean HTML file. Do not add comments.
   - All CSS must be inside a <style> tag in the HTML's <head>. Do not use external CSS files.
   - All JavaScript must be inside a <script> tag at the end of the <body>. Use vanilla JavaScript only. No jQuery or other libraries.
-  - The JavaScript must correctly handle all specified animations: the parallax scroll and the on-scroll reveals.
+  - The JavaScript must correctly handle all specified animations: the spotlight cursor, the 3D tilt, and the on-scroll reveals.
   - Call the reveal function on page load to show elements already in view.
 
 **User's Portfolio Data:**
@@ -134,3 +136,5 @@ const generatePortfolioWebsiteFlow = ai.defineFlow(
     return output!;
   }
 );
+
+    
