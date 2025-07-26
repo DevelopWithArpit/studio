@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { saveAs } from 'file-saver';
 import {
   Card,
   CardContent,
@@ -26,7 +27,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { handleGeneratePortfolioWebsiteAction } from '@/app/actions';
 import type { GeneratePortfolioWebsiteOutput } from '@/ai/flows/portfolio-generator-tool';
-import { PlusCircle, Trash2, Copy } from 'lucide-react';
+import { PlusCircle, Trash2, Copy, Download, Save, Upload } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -53,6 +54,7 @@ export default function PortfolioGeneratorTool() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<GeneratePortfolioWebsiteOutput | null>(null);
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -105,6 +107,47 @@ export default function PortfolioGeneratorTool() {
       description: `The ${type.toLowerCase()} code has been copied to your clipboard.`,
     });
   };
+  
+  const downloadFile = (content: string, filename: string, type: string) => {
+    const blob = new Blob([content], { type });
+    saveAs(blob, filename);
+  };
+  
+  const handleSaveData = () => {
+    const data = form.getValues();
+    const json = JSON.stringify(data, null, 2);
+    downloadFile(json, 'portfolio-data.json', 'application/json');
+     toast({
+      title: 'Data Saved!',
+      description: `Your portfolio data has been saved to portfolio-data.json.`,
+    });
+  };
+
+  const handleLoadData = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const json = e.target?.result as string;
+          const data = JSON.parse(json);
+          const parsedData = formSchema.parse(data);
+          form.reset(parsedData);
+          toast({
+            title: 'Data Loaded!',
+            description: `Your portfolio data has been loaded from ${file.name}.`,
+          });
+        } catch (error) {
+          toast({
+            variant: 'destructive',
+            title: 'Error Loading Data',
+            description: 'The selected file is not valid portfolio data.',
+          });
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -118,8 +161,21 @@ export default function PortfolioGeneratorTool() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <Card>
-            <CardHeader>
-              <CardTitle>Personal Information</CardTitle>
+             <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Personal Information</CardTitle>
+              </div>
+              <div className="flex gap-2">
+                  <Button type="button" variant="outline" size="sm" onClick={handleSaveData}>
+                    <Save className="mr-2 h-4 w-4"/>
+                    Save Data
+                  </Button>
+                   <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+                    <Upload className="mr-2 h-4 w-4"/>
+                    Load Data
+                  </Button>
+                  <input type="file" ref={fileInputRef} onChange={handleLoadData} accept=".json" className="hidden" />
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -320,13 +376,25 @@ export default function PortfolioGeneratorTool() {
                         />
                     </TabsContent>
                     <TabsContent value="html">
-                        <CodeBlock code={result?.html ?? ''} language="HTML" onCopy={() => copyToClipboard(result?.html ?? '', 'HTML')} />
+                        <CodeBlock 
+                          code={result?.html ?? ''} 
+                          onCopy={() => copyToClipboard(result?.html ?? '', 'HTML')} 
+                          onDownload={() => downloadFile(result?.html ?? '', 'index.html', 'text/html')}
+                        />
                     </TabsContent>
                      <TabsContent value="css">
-                        <CodeBlock code={result?.css ?? ''} language="CSS" onCopy={() => copyToClipboard(result?.css ?? '', 'CSS')} />
+                        <CodeBlock 
+                          code={result?.css ?? ''} 
+                          onCopy={() => copyToClipboard(result?.css ?? '', 'CSS')}
+                          onDownload={() => downloadFile(result?.css ?? '', 'style.css', 'text/css')}
+                        />
                     </TabsContent>
                      <TabsContent value="js">
-                        <CodeBlock code={result?.javascript ?? ''} language="JavaScript" onCopy={() => copyToClipboard(result?.javascript ?? '', 'JavaScript')} />
+                        <CodeBlock 
+                          code={result?.javascript ?? ''} 
+                          onCopy={() => copyToClipboard(result?.javascript ?? '', 'JavaScript')}
+                          onDownload={() => downloadFile(result?.javascript ?? '', 'script.js', 'text/javascript')}
+                        />
                     </TabsContent>
                 </Tabs>
              )}
@@ -337,17 +405,27 @@ export default function PortfolioGeneratorTool() {
   );
 }
 
-const CodeBlock = ({ code, language, onCopy }: { code: string; language: string, onCopy: () => void }) => {
+const CodeBlock = ({ code, onCopy, onDownload }: { code: string; onCopy: () => void; onDownload: () => void; }) => {
   return (
     <div className="relative">
-      <Button
-        variant="ghost"
-        size="icon"
-        className="absolute top-2 right-2 h-7 w-7"
-        onClick={onCopy}
-      >
-        <Copy className="h-4 w-4" />
-      </Button>
+      <div className="absolute top-2 right-2 flex gap-2">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-7 w-7"
+          onClick={onCopy}
+        >
+          <Copy className="h-4 w-4" />
+        </Button>
+         <Button
+          variant="ghost"
+          size="icon"
+          className="h-7 w-7"
+          onClick={onDownload}
+        >
+          <Download className="h-4 w-4" />
+        </Button>
+      </div>
       <pre className="bg-muted p-4 rounded-md overflow-x-auto text-sm h-96">
         <code className="text-foreground">{code}</code>
       </pre>
