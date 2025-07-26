@@ -10,7 +10,6 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { getResumeFeedback } from './resume-feedback-tool';
 
 const PortfolioDataSchema = z.object({
   name: z.string().describe("The user's full name."),

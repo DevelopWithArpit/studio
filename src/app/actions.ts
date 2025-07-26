@@ -170,6 +170,7 @@ export async function handleGeneratePortfolioWebsiteAction(input: GeneratePortfo
                 throw new Error("Failed to parse resume.");
             }
             const resumeData = parseResult.rewrittenResume;
+            
             portfolioData = {
                 name: resumeData.name,
                 headline: '', // Headline is not in resume data, leave it empty
