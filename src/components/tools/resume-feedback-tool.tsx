@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { saveAs } from 'file-saver';
 import {
   Card,
   CardContent,
@@ -32,7 +33,6 @@ import {
   handleGeneratePortfolioAction,
 } from '@/app/actions';
 import type { GetResumeFeedbackOutput } from '@/ai/flows/resume-feedback-tool';
-import type { GeneratePortfolioOutput } from '@/ai/flows/portfolio-generator-tool';
 import { FileText, UploadCloud, Download, FileCode } from 'lucide-react';
 
 const defaultResumeText = `ARPIT PISE
@@ -82,12 +82,10 @@ type FormData = z.infer<typeof formSchema>;
 
 export default function ResumeFeedbackTool() {
   const [isLoading, setIsLoading] = useState(false);
-  const [isGeneratingDocument, setIsGeneratingDocument] = useState(false);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [isGeneratingHtml, setIsGeneratingHtml] = useState(false);
   const [result, setResult] = useState<GetResumeFeedbackOutput | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
-  const [portfolio, setPortfolio] = useState<GeneratePortfolioOutput | null>(
-    null
-  );
   const { toast } = useToast();
 
   const form = useForm<FormData>({
@@ -130,7 +128,6 @@ export default function ResumeFeedbackTool() {
     }
     setIsLoading(true);
     setResult(null);
-    setPortfolio(null);
     const response = await handleGetResumeFeedbackAction(data);
     setIsLoading(false);
 
@@ -145,78 +142,66 @@ export default function ResumeFeedbackTool() {
     }
   }
 
-  const handleGenerateDocument = async () => {
-    if (!result?.rewrittenResume) return;
-
-    setIsGeneratingDocument(true);
-
+  const getPortfolioContent = async () => {
+    if (!result?.rewrittenResume) return null;
     const portfolioResponse = await handleGeneratePortfolioAction({
       resumeText: result.rewrittenResume,
     });
-
     if (portfolioResponse.success && portfolioResponse.data) {
-      const fullHtml = `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Resume</title>
-<style>
-${portfolioResponse.data.css}
-</style>
-</head>
-<body>
-${portfolioResponse.data.html}
-</body>
-</html>`;
+      return portfolioResponse.data;
+    }
+    toast({
+      variant: 'destructive',
+      title: 'Error Generating Document',
+      description: portfolioResponse.error,
+    });
+    return null;
+  };
 
+  const handleDownloadPdf = async () => {
+    setIsGeneratingPdf(true);
+    const portfolioContent = await getPortfolioContent();
+    if (portfolioContent) {
+      const fullHtml = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Resume</title><style>${portfolioContent.css}</style></head><body>${portfolioContent.html}</body></html>`;
       const element = document.createElement('div');
       element.innerHTML = fullHtml;
       element.style.position = 'absolute';
       element.style.left = '-9999px';
-      element.style.width = '827px'; // A4 width in pixels at 96 DPI
+      element.style.width = '827px';
       document.body.appendChild(element);
-
       try {
-        const canvas = await html2canvas(element, {
-          scale: 2, // Increase resolution
-          useCORS: true,
-        });
+        const canvas = await html2canvas(element, { scale: 2, useCORS: true });
         const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF({
-          orientation: 'portrait',
-          unit: 'px',
-          format: [canvas.width, canvas.height],
-        });
+        const pdf = new jsPDF({ orientation: 'portrait', unit: 'px', format: [canvas.width, canvas.height] });
         pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
         pdf.save('resume.pdf');
       } catch (error) {
-        toast({
-          variant: 'destructive',
-          title: 'Error Generating PDF',
-          description:
-            error instanceof Error ? error.message : 'An unknown error occurred.',
-        });
+        toast({ variant: 'destructive', title: 'Error Generating PDF', description: error instanceof Error ? error.message : 'An unknown error occurred.' });
       } finally {
         document.body.removeChild(element);
-        setIsGeneratingDocument(false);
       }
-    } else {
-      toast({
-        variant: 'destructive',
-        title: 'Error Generating Document',
-        description: portfolioResponse.error,
-      });
-      setIsGeneratingDocument(false);
     }
+    setIsGeneratingPdf(false);
   };
+
+  const handleDownloadHtml = async () => {
+    setIsGeneratingHtml(true);
+    const portfolioContent = await getPortfolioContent();
+    if (portfolioContent) {
+       const fullHtml = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Resume</title><style>${portfolioContent.css}</style></head><body>${portfolioContent.html}</body></html>`;
+       const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
+       saveAs(blob, 'resume.html');
+    }
+    setIsGeneratingHtml(false);
+  };
+
 
   return (
     <div className="space-y-8">
       <header className="space-y-2">
-        <h1 className="text-3xl font-bold font-headline">Resume Suite</h1>
+        <h1 className="text-3xl font-bold font-headline">Resume Feedback Tool</h1>
         <p className="text-muted-foreground">
-          Get AI feedback, then generate a professional, downloadable document.
+          Get AI feedback on your resume, then download it in multiple formats.
         </p>
       </header>
 
@@ -402,15 +387,27 @@ ${portfolioResponse.data.html}
                       <pre className="bg-muted p-4 rounded-md overflow-x-auto text-sm whitespace-pre-wrap font-sans">
                         {result.rewrittenResume}
                       </pre>
-                      <Button
-                        onClick={handleGenerateDocument}
-                        disabled={isGeneratingDocument}
-                      >
-                        <Download className="mr-2 h-4 w-4" />
-                        {isGeneratingDocument
-                          ? 'Generating PDF...'
-                          : 'Download as PDF'}
-                      </Button>
+                      <div className="flex flex-wrap gap-2">
+                         <Button
+                          onClick={handleDownloadPdf}
+                          disabled={isGeneratingPdf || isGeneratingHtml}
+                        >
+                          <Download className="mr-2 h-4 w-4" />
+                          {isGeneratingPdf
+                            ? 'Generating PDF...'
+                            : 'Download as PDF'}
+                        </Button>
+                         <Button
+                          onClick={handleDownloadHtml}
+                          disabled={isGeneratingPdf || isGeneratingHtml}
+                          variant="secondary"
+                        >
+                          <FileCode className="mr-2 h-4 w-4" />
+                          {isGeneratingHtml
+                            ? 'Generating Doc...'
+                            : 'Download as Editable Doc'}
+                        </Button>
+                      </div>
                     </div>
                   )
                 )}
