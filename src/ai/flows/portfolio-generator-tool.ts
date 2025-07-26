@@ -30,33 +30,43 @@ const prompt = ai.definePrompt({
   name: 'generatePortfolioPrompt',
   input: { schema: GeneratePortfolioInputSchema },
   output: { schema: GeneratePortfolioOutputSchema },
-  prompt: `You are an expert web developer creating a single-page portfolio from resume text. Generate complete, standalone HTML and CSS that precisely matches the provided structure and styling instructions. All sections from the resume content must be present in the output. The entire resume must fit on a single page.
+  prompt: `You are an expert web developer. Your task is to create a single-page resume HTML and CSS document based on the provided resume text. The output must be a perfect, single-page replica of the structure and format described in the instructions. Do not miss any sections.
 
 **Resume Content:**
 ---
 {{{resumeText}}}
 ---
 
-**Mandatory Instructions:**
-1.  **Overall Layout:** Create a professional, clean, single-page layout. The entire resume must fit on a single page.
-2.  **Header Section (Full Width):**
-    *   Start with a full-width header.
-    *   Display the person's name in a large, bold font.
-    *   Below the name, display the job title in a smaller font with a professional blue color.
-    *   Below the title, display all contact information (phone, email, LinkedIn, location) horizontally, each with a simple icon.
-3.  **Main Content (Two-Column Layout):**
-    *   Below the header, the page must split into a two-column layout.
-    *   **Left Column (Wider - approx. 65% width):** This column must contain the 'SUMMARY', 'EXPERIENCE', and 'EDUCATION' sections. Use horizontal lines to separate these main sections.
-    *   **Right Column (Narrower - approx. 35% width):** This column must contain a circular placeholder for a profile picture/initials at the top. Below the placeholder, include the 'KEY ACHIEVEMENTS', 'SKILLS', and 'PROJECTS' sections. All of these sections must be present.
-4.  **Styling:**
-    *   Use a modern, clean, sans-serif font (like Arial or Helvetica).
-    *   Use black or very dark gray for standard text.
-    *   Use a professional blue color (e.g., #007BFF) for section headings and links.
-    *   For the 'SKILLS' section, display each skill as a light-gray-background tag with rounded corners.
-    *   The code must be vanilla HTML and CSS without any external libraries or frameworks (like Bootstrap or Tailwind).
-    *   Ensure the layout is reasonably responsive, stacking to a single column on smaller screens.
+**Mandatory Instructions (Non-negotiable):**
 
-Generate the full HTML and CSS code now.`,
+1.  **Overall Layout:**
+    *   The entire resume must be on a **single page**.
+    *   It must have a full-width header at the top, followed by a two-column layout for the main content.
+
+2.  **Header Section (Full Width):**
+    *   Display the person's name ('ARPIT PISE') in a large, bold, black font.
+    *   Below the name, display the job title ('AI Engineer / Robotics Software Engineer') in a smaller font with a professional blue color.
+    *   Below the title, display all contact information horizontally: phone, email, LinkedIn, and location. Each piece of information must be preceded by a simple, appropriate icon (e.g., phone icon, email icon).
+
+3.  **Main Content (Two-Column Layout):**
+    *   The area below the header must be split into two columns.
+    *   **Left Column (Wider - approx. 65% width):** This column MUST contain the following sections, in this exact order, separated by a solid horizontal line:
+        *   \`SUMMARY\`
+        *   \`EXPERIENCE\`
+        *   \`EDUCATION\`
+    *   **Right Column (Narrower - approx. 35% width):** This column MUST contain the following sections, in this exact order:
+        *   At the very top, a large, circular, blue placeholder for a profile picture with the initials 'AP' inside.
+        *   \`KEY ACHIEVEMENTS\` section, with its content below it.
+        *   \`SKILLS\` section, with each skill displayed as a separate tag with a light-gray background and rounded corners.
+        *   \`PROJECTS\` section, with its content below it.
+
+4.  **Styling Details:**
+    *   **Fonts:** Use a clean, modern, sans-serif font family (like Arial, Helvetica).
+    *   **Colors:** Use black or very dark gray for the main text. Section headings ('SUMMARY', 'EXPERIENCE', etc.) must be bold and black. The job title and any links or highlighted school names should be in a professional blue color (e.g., #007BFF).
+    *   **Code:** The output must be pure, vanilla HTML and CSS. Do not use any external libraries, frameworks (like Bootstrap, Tailwind), or external font imports. All styling must be self-contained in the CSS block.
+    *   **Responsiveness:** Ensure the layout is reasonably responsive, stacking to a single column on smaller screens if necessary.
+
+Generate the complete HTML and CSS code now. Do not omit any sections from the resume content provided.`,
 });
 
 
