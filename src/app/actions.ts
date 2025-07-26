@@ -23,6 +23,7 @@ import {
 import {
   getResumeFeedback,
   type GetResumeFeedbackInput,
+  type GetResumeFeedbackOutput,
 } from '@/ai/flows/resume-feedback-tool';
 import {
   generateDiagram,
@@ -155,6 +156,47 @@ export async function handleCustomizeResumeAction(input: CustomizeResumeInput) {
     return handleAction(input, customizeResume);
 }
 
-export async function handleGeneratePortfolioWebsiteAction(input: GeneratePortfolioWebsiteInput) {
-    return handleAction(input, generatePortfolioWebsite);
+type GeneratePortfolioWebsiteActionInput = 
+    | { type: 'resume'; resumeDataUri: string; }
+    | { type: 'manual'; data: GeneratePortfolioWebsiteInput; };
+
+export async function handleGeneratePortfolioWebsiteAction(input: GeneratePortfolioWebsiteActionInput) {
+    try {
+        let portfolioData: GeneratePortfolioWebsiteInput;
+
+        if (input.type === 'resume') {
+            const parseResult = await getResumeFeedback({ resume: input.resumeDataUri });
+            if (!parseResult.rewrittenResume) {
+                throw new Error("Failed to parse resume.");
+            }
+            const resumeData = parseResult.rewrittenResume;
+            portfolioData = {
+                name: resumeData.name,
+                headline: '', // Headline is not in resume data, leave it empty
+                contact: {
+                    email: resumeData.contact.email,
+                    socials: [
+                        { network: 'LinkedIn', url: resumeData.contact.linkedin || '' },
+                        { network: 'GitHub', url: resumeData.contact.github || '' }
+                    ].filter(s => s.url)
+                },
+                about: resumeData.summary,
+                experience: resumeData.experience.map(exp => ({ ...exp, description: exp.bullets.join('\\n- ') })),
+                education: resumeData.education.map(edu => ({...edu, degree: edu.degree, school: edu.school, dates: edu.dates})),
+                projects: resumeData.projects.map(p => ({ title: p.title, description: p.bullets.join('\\n- '), link: '', imageUrl: '' })),
+                skills: [...resumeData.skills.technical, ...(resumeData.skills.other || [])],
+            };
+             if (!portfolioData.projects || portfolioData.projects.length === 0) {
+                portfolioData.projects = [{ title: 'AI Mentor', description: 'Developed an AI-powered platform.', link: '#', imageUrl: 'https://placehold.co/600x400' }];
+            }
+        } else {
+            portfolioData = input.data;
+        }
+
+        const result = await generatePortfolioWebsite(portfolioData);
+        return { success: true, data: result };
+    } catch (e) {
+        const errorMessage = e instanceof Error ? e.message : 'An unexpected error occurred.';
+        return { success: false, error: errorMessage };
+    }
 }

@@ -28,10 +28,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { handleGeneratePortfolioWebsiteAction, handleGetResumeFeedbackAction } from '@/app/actions';
 import type { GeneratePortfolioWebsiteOutput, GeneratePortfolioWebsiteInput } from '@/ai/flows/portfolio-generator-tool';
-import { Copy, Download, FileArchive, FileText, Loader2, Plus, Trash2, UploadCloud } from 'lucide-react';
+import { Copy, Download, FileArchive, FileText, Loader2, Plus, Trash2, UploadCloud, ChevronDown } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
-import { Separator } from '@/components/ui/separator';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 const portfolioSchema = z.object({
     name: z.string().min(1, "Name is required."),
@@ -68,10 +68,11 @@ type FormData = z.infer<typeof portfolioSchema>;
 
 export default function PortfolioGeneratorTool() {
   const [isLoading, setIsLoading] = useState(false);
-  const [isParsing, setIsParsing] = useState(false);
   const [result, setResult] = useState<GeneratePortfolioWebsiteOutput | null>(null);
   const { toast } = useToast();
+  const [resumeDataUri, setResumeDataUri] = useState<string | null>(null);
   const [resumeFileName, setResumeFileName] = useState<string | null>(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
 
   const form = useForm<FormData>({
     resolver: zodResolver(portfolioSchema),
@@ -92,10 +93,10 @@ export default function PortfolioGeneratorTool() {
   const { fields: projFields, append: appendProj, remove: removeProj } = useFieldArray({ control: form.control, name: "projects" });
 
 
-  async function onSubmit(data: FormData) {
+  async function onManualSubmit(data: FormData) {
     setIsLoading(true);
     setResult(null);
-    const response = await handleGeneratePortfolioWebsiteAction(data);
+    const response = await handleGeneratePortfolioWebsiteAction({type: 'manual', data});
     setIsLoading(false);
 
     if (response.success) {
@@ -108,6 +109,28 @@ export default function PortfolioGeneratorTool() {
         description: response.error,
       });
     }
+  }
+
+  const onResumeSubmit = async () => {
+      if (!resumeDataUri) {
+          toast({ variant: 'destructive', title: 'No Resume Uploaded', description: 'Please upload a resume to generate a website.' });
+          return;
+      }
+      setIsLoading(true);
+      setResult(null);
+      const response = await handleGeneratePortfolioWebsiteAction({ type: 'resume', resumeDataUri });
+      setIsLoading(false);
+
+      if (response.success) {
+        setResult(response.data);
+        toast({ title: 'Website Generated!', description: 'Your portfolio has been successfully generated.' });
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Error Generating Website',
+          description: response.error,
+        });
+      }
   }
   
   const copyToClipboard = (text: string, type: string) => {
@@ -150,32 +173,7 @@ export default function PortfolioGeneratorTool() {
       const reader = new FileReader();
       reader.onload = async (loadEvent) => {
         const dataUri = loadEvent.target?.result as string;
-        setIsParsing(true);
-        const response = await handleGetResumeFeedbackAction({ resume: dataUri });
-        setIsParsing(false);
-
-        if (response.success && response.data.rewrittenResume) {
-            const resumeData = response.data.rewrittenResume;
-            form.reset({
-                name: resumeData.name,
-                headline: '', // Headline is not in resume data, leave it empty
-                contact: {
-                    email: resumeData.contact.email,
-                    socials: [
-                        { network: 'LinkedIn', url: resumeData.contact.linkedin },
-                        { network: 'GitHub', url: resumeData.contact.github || '' }
-                    ]
-                },
-                about: resumeData.summary,
-                experience: resumeData.experience.map(exp => ({ ...exp, description: exp.bullets.join('\n') })),
-                education: resumeData.education.map(edu => ({...edu})),
-                projects: resumeData.projects.map(p => ({ title: p.title, description: p.bullets.join('\n'), link: '', imageUrl: '' })),
-                skills: resumeData.skills.technical,
-            });
-            toast({ title: 'Resume Parsed!', description: 'The form has been auto-filled with your resume data.' });
-        } else {
-            toast({ variant: "destructive", title: "Parsing Failed", description: response.error || "Could not extract data from your resume." });
-        }
+        setResumeDataUri(dataUri);
       };
       reader.readAsDataURL(file);
     }
@@ -187,167 +185,179 @@ export default function PortfolioGeneratorTool() {
       <header className="space-y-2">
         <h1 className="text-3xl font-bold font-headline">Portfolio Website Generator</h1>
         <p className="text-muted-foreground">
-          Enter your details manually, or upload a resume to get started quickly.
+          Generate a website directly from your resume, or fill out the form manually for more control.
         </p>
       </header>
       
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Get Started</CardTitle>
-                    <CardDescription>Upload a resume to auto-fill the form, or fill it out manually below.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center">
-                        {isParsing ? (
-                            <div className='flex flex-col items-center gap-2'>
-                                <Loader2 className="w-12 h-12 text-accent animate-spin" />
-                                <p className='text-sm font-medium'>Parsing Resume...</p>
-                            </div>
-                        ) : resumeFileName ? (
-                            <div className='flex flex-col items-center gap-2'>
-                                <FileText className="w-12 h-12 text-accent" />
-                                <p className='text-sm font-medium'>{resumeFileName}</p>
-                                <Button variant="link" size="sm" asChild className='p-0 h-auto'>
-                                    <label htmlFor="resume-upload" className="cursor-pointer">Change file</label>
-                                </Button>
-                            </div>
-                        ) : (
-                            <>
-                                <UploadCloud className="w-12 h-12 text-muted-foreground" />
-                                <p className="mt-2 text-sm text-muted-foreground">
-                                    <label htmlFor="resume-upload" className="font-semibold text-accent cursor-pointer hover:underline">
-                                        Upload Resume (Optional)
-                                    </label>
-                                </p>
-                                <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 200MB</p>
-                            </>
-                        )}
-                        <Input id="resume-upload" type="file" className="sr-only" onChange={handleResumeFileChange} accept=".pdf,.docx,.txt" disabled={isParsing} />
-                    </div>
-                </CardContent>
-            </Card>
+      <Card>
+          <CardHeader>
+              <CardTitle>Generate from Resume</CardTitle>
+              <CardDescription>This is the fastest way to create your portfolio. Upload your resume and click generate.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+              <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center">
+                  {resumeFileName ? (
+                      <div className='flex flex-col items-center gap-2'>
+                          <FileText className="w-12 h-12 text-accent" />
+                          <p className='text-sm font-medium'>{resumeFileName}</p>
+                          <Button variant="link" size="sm" asChild className='p-0 h-auto'>
+                              <label htmlFor="resume-upload" className="cursor-pointer">Change file</label>
+                          </Button>
+                      </div>
+                  ) : (
+                      <>
+                          <UploadCloud className="w-12 h-12 text-muted-foreground" />
+                          <p className="mt-2 text-sm text-muted-foreground">
+                              <label htmlFor="resume-upload" className="font-semibold text-accent cursor-pointer hover:underline">
+                                  Upload Resume
+                              </label>
+                          </p>
+                          <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 200MB</p>
+                      </>
+                  )}
+                  <Input id="resume-upload" type="file" className="sr-only" onChange={handleResumeFileChange} accept=".pdf,.docx,.txt" />
+              </div>
+              <Button onClick={onResumeSubmit} disabled={isLoading || !resumeDataUri}>
+                  {isLoading ? 'Generating...' : 'Generate Website from Resume'}
+              </Button>
+          </CardContent>
+      </Card>
+      
+      <Collapsible open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <div className="flex items-center justify-center">
+            <CollapsibleTrigger asChild>
+                <Button variant="ghost">
+                    {isFormOpen ? 'Hide' : 'Show'} Manual Form
+                    <ChevronDown className={`ml-2 h-4 w-4 transition-transform ${isFormOpen ? 'rotate-180' : ''}`} />
+                </Button>
+            </CollapsibleTrigger>
+        </div>
 
-            {/* Personal Details */}
-            <Card>
-                <CardHeader><CardTitle>Personal Details</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <FormField control={form.control} name="name" render={({ field }) => ( <FormItem> <FormLabel>Full Name</FormLabel> <FormControl><Input placeholder="John Doe" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-                        <FormField control={form.control} name="headline" render={({ field }) => ( <FormItem> <FormLabel>Headline</FormLabel> <FormControl><Input placeholder="Software Engineer | AI Enthusiast" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-                    </div>
-                    <FormField control={form.control} name="contact.email" render={({ field }) => ( <FormItem> <FormLabel>Email</FormLabel> <FormControl><Input placeholder="your.email@example.com" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-                    <FormField control={form.control} name="about" render={({ field }) => ( <FormItem> <FormLabel>About Me</FormLabel> <FormControl><Textarea placeholder="A short bio about yourself..." {...field} rows={5} /></FormControl> <FormMessage /> </FormItem> )}/>
-                </CardContent>
-            </Card>
+        <CollapsibleContent>
+            <Form {...form}>
+            <form onSubmit={form.handleSubmit(onManualSubmit)} className="space-y-8 mt-4">
 
-            {/* Social Links */}
-            <Card>
-                <CardHeader><CardTitle>Social Links</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
-                    {form.getValues('contact.socials')?.map((social, index) => (
-                        <div key={index} className="flex gap-4 items-end">
-                            <FormField control={form.control} name={`contact.socials.${index}.network`} render={({ field }) => ( <FormItem className="flex-1"> <FormLabel>Network</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-                            <FormField control={form.control} name={`contact.socials.${index}.url`} render={({ field }) => ( <FormItem className="flex-1"> <FormLabel>URL</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                {/* Personal Details */}
+                <Card>
+                    <CardHeader><CardTitle>Personal Details</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField control={form.control} name="name" render={({ field }) => ( <FormItem> <FormLabel>Full Name</FormLabel> <FormControl><Input placeholder="John Doe" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                            <FormField control={form.control} name="headline" render={({ field }) => ( <FormItem> <FormLabel>Headline</FormLabel> <FormControl><Input placeholder="Software Engineer | AI Enthusiast" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                         </div>
-                    ))}
-                </CardContent>
-            </Card>
+                        <FormField control={form.control} name="contact.email" render={({ field }) => ( <FormItem> <FormLabel>Email</FormLabel> <FormControl><Input placeholder="your.email@example.com" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                        <FormField control={form.control} name="about" render={({ field }) => ( <FormItem> <FormLabel>About Me</FormLabel> <FormControl><Textarea placeholder="A short bio about yourself..." {...field} rows={5} /></FormControl> <FormMessage /> </FormItem> )}/>
+                    </CardContent>
+                </Card>
 
-            {/* Experience */}
-            <Card>
-                 <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle>Work Experience</CardTitle>
-                    <Button type="button" variant="outline" size="sm" onClick={() => appendExp({ title: '', company: '', dates: '', description: '' })}><Plus className="mr-2 h-4 w-4" /> Add Experience</Button>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                    {expFields.map((field, index) => (
-                        <div key={field.id} className="space-y-4 border p-4 rounded-md relative">
-                             <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={() => removeExp(index)}><Trash2 className="h-4 w-4" /></Button>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <FormField control={form.control} name={`experience.${index}.title`} render={({ field }) => ( <FormItem> <FormLabel>Job Title</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-                                <FormField control={form.control} name={`experience.${index}.company`} render={({ field }) => ( <FormItem> <FormLabel>Company</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                {/* Social Links */}
+                <Card>
+                    <CardHeader><CardTitle>Social Links</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                        {form.getValues('contact.socials')?.map((social, index) => (
+                            <div key={index} className="flex gap-4 items-end">
+                                <FormField control={form.control} name={`contact.socials.${index}.network`} render={({ field }) => ( <FormItem className="flex-1"> <FormLabel>Network</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                <FormField control={form.control} name={`contact.socials.${index}.url`} render={({ field }) => ( <FormItem className="flex-1"> <FormLabel>URL</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                             </div>
-                            <FormField control={form.control} name={`experience.${index}.dates`} render={({ field }) => ( <FormItem> <FormLabel>Dates</FormLabel> <FormControl><Input {...field} placeholder="e.g., June 2023 - Present" /></FormControl> <FormMessage /> </FormItem> )}/>
-                            <FormField control={form.control} name={`experience.${index}.description`} render={({ field }) => ( <FormItem> <FormLabel>Description</FormLabel> <FormControl><Textarea {...field} rows={4} /></FormControl> <FormMessage /> </FormItem> )}/>
-                        </div>
-                    ))}
-                </CardContent>
-            </Card>
+                        ))}
+                    </CardContent>
+                </Card>
 
-            {/* Education */}
-            <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle>Education</CardTitle>
-                    <Button type="button" variant="outline" size="sm" onClick={() => appendEdu({ degree: '', school: '', dates: '' })}><Plus className="mr-2 h-4 w-4" /> Add Education</Button>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                     {eduFields.map((field, index) => (
-                        <div key={field.id} className="space-y-4 border p-4 rounded-md relative">
-                            <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={() => removeEdu(index)}><Trash2 className="h-4 w-4" /></Button>
-                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <FormField control={form.control} name={`education.${index}.degree`} render={({ field }) => ( <FormItem> <FormLabel>Degree</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-                                <FormField control={form.control} name={`education.${index}.school`} render={({ field }) => ( <FormItem> <FormLabel>School/University</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                {/* Experience */}
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between">
+                        <CardTitle>Work Experience</CardTitle>
+                        <Button type="button" variant="outline" size="sm" onClick={() => appendExp({ title: '', company: '', dates: '', description: '' })}><Plus className="mr-2 h-4 w-4" /> Add Experience</Button>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        {expFields.map((field, index) => (
+                            <div key={field.id} className="space-y-4 border p-4 rounded-md relative">
+                                <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={() => removeExp(index)}><Trash2 className="h-4 w-4" /></Button>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <FormField control={form.control} name={`experience.${index}.title`} render={({ field }) => ( <FormItem> <FormLabel>Job Title</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                    <FormField control={form.control} name={`experience.${index}.company`} render={({ field }) => ( <FormItem> <FormLabel>Company</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                </div>
+                                <FormField control={form.control} name={`experience.${index}.dates`} render={({ field }) => ( <FormItem> <FormLabel>Dates</FormLabel> <FormControl><Input {...field} placeholder="e.g., June 2023 - Present" /></FormControl> <FormMessage /> </FormItem> )}/>
+                                <FormField control={form.control} name={`experience.${index}.description`} render={({ field }) => ( <FormItem> <FormLabel>Description</FormLabel> <FormControl><Textarea {...field} rows={4} /></FormControl> <FormMessage /> </FormItem> )}/>
                             </div>
-                             <FormField control={form.control} name={`education.${index}.dates`} render={({ field }) => ( <FormItem> <FormLabel>Dates</FormLabel> <FormControl><Input {...field} placeholder="e.g., 2022 - 2026" /></FormControl> <FormMessage /> </FormItem> )}/>
-                        </div>
-                    ))}
-                </CardContent>
-            </Card>
+                        ))}
+                    </CardContent>
+                </Card>
 
-            {/* Projects */}
-             <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle>Projects</CardTitle>
-                    <Button type="button" variant="outline" size="sm" onClick={() => appendProj({ title: '', description: '', link: '', imageUrl: '' })}><Plus className="mr-2 h-4 w-4" /> Add Project</Button>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                    {projFields.map((field, index) => (
-                        <div key={field.id} className="space-y-4 border p-4 rounded-md relative">
-                            <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={() => removeProj(index)}><Trash2 className="h-4 w-4" /></Button>
-                            <FormField control={form.control} name={`projects.${index}.title`} render={({ field }) => ( <FormItem> <FormLabel>Project Title</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-                            <FormField control={form.control} name={`projects.${index}.description`} render={({ field }) => ( <FormItem> <FormLabel>Description</FormLabel> <FormControl><Textarea {...field} rows={3} /></FormControl> <FormMessage /> </FormItem> )}/>
-                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <FormField control={form.control} name={`projects.${index}.link`} render={({ field }) => ( <FormItem> <FormLabel>Project Link (Optional)</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-                                <FormField control={form.control} name={`projects.${index}.imageUrl`} render={({ field }) => ( <FormItem> <FormLabel>Image URL (Optional)</FormLabel> <FormControl><Input {...field} placeholder="e.g., https://placehold.co/600x400" /></FormControl> <FormMessage /> </FormItem> )}/>
+                {/* Education */}
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between">
+                        <CardTitle>Education</CardTitle>
+                        <Button type="button" variant="outline" size="sm" onClick={() => appendEdu({ degree: '', school: '', dates: '' })}><Plus className="mr-2 h-4 w-4" /> Add Education</Button>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        {eduFields.map((field, index) => (
+                            <div key={field.id} className="space-y-4 border p-4 rounded-md relative">
+                                <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={() => removeEdu(index)}><Trash2 className="h-4 w-4" /></Button>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <FormField control={form.control} name={`education.${index}.degree`} render={({ field }) => ( <FormItem> <FormLabel>Degree</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                    <FormField control={form.control} name={`education.${index}.school`} render={({ field }) => ( <FormItem> <FormLabel>School/University</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                </div>
+                                <FormField control={form.control} name={`education.${index}.dates`} render={({ field }) => ( <FormItem> <FormLabel>Dates</FormLabel> <FormControl><Input {...field} placeholder="e.g., 2022 - 2026" /></FormControl> <FormMessage /> </FormItem> )}/>
                             </div>
-                        </div>
-                    ))}
-                </CardContent>
-            </Card>
+                        ))}
+                    </CardContent>
+                </Card>
 
-            {/* Skills */}
-            <Card>
-                <CardHeader><CardTitle>Skills</CardTitle></CardHeader>
-                <CardContent>
-                     <FormField
-                        control={form.control}
-                        name="skills"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Enter your skills, separated by commas</FormLabel>
-                                <FormControl>
-                                    <Textarea
-                                        placeholder="e.g., Python, JavaScript, React, AI, Machine Learning"
-                                        {...field}
-                                        onChange={(e) => field.onChange(e.target.value.split(',').map(s => s.trim()))}
-                                        value={Array.isArray(field.value) ? field.value.join(', ') : ''}
-                                        rows={3}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                </CardContent>
-            </Card>
+                {/* Projects */}
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between">
+                        <CardTitle>Projects</CardTitle>
+                        <Button type="button" variant="outline" size="sm" onClick={() => appendProj({ title: '', description: '', link: '', imageUrl: '' })}><Plus className="mr-2 h-4 w-4" /> Add Project</Button>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        {projFields.map((field, index) => (
+                            <div key={field.id} className="space-y-4 border p-4 rounded-md relative">
+                                <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={() => removeProj(index)}><Trash2 className="h-4 w-4" /></Button>
+                                <FormField control={form.control} name={`projects.${index}.title`} render={({ field }) => ( <FormItem> <FormLabel>Project Title</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                <FormField control={form.control} name={`projects.${index}.description`} render={({ field }) => ( <FormItem> <FormLabel>Description</FormLabel> <FormControl><Textarea {...field} rows={3} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <FormField control={form.control} name={`projects.${index}.link`} render={({ field }) => ( <FormItem> <FormLabel>Project Link (Optional)</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                    <FormField control={form.control} name={`projects.${index}.imageUrl`} render={({ field }) => ( <FormItem> <FormLabel>Image URL (Optional)</FormLabel> <FormControl><Input {...field} placeholder="e.g., https://placehold.co/600x400" /></FormControl> <FormMessage /> </FormItem> )}/>
+                                </div>
+                            </div>
+                        ))}
+                    </CardContent>
+                </Card>
 
-            <Button type="submit" disabled={isLoading || isParsing}>
-                {(isLoading || isParsing) ? 'Generating...' : 'Generate Website'}
-            </Button>
-        </form>
-      </Form>
+                {/* Skills */}
+                <Card>
+                    <CardHeader><CardTitle>Skills</CardTitle></CardHeader>
+                    <CardContent>
+                        <FormField
+                            control={form.control}
+                            name="skills"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Enter your skills, separated by commas</FormLabel>
+                                    <FormControl>
+                                        <Textarea
+                                            placeholder="e.g., Python, JavaScript, React, AI, Machine Learning"
+                                            {...field}
+                                            onChange={(e) => field.onChange(e.target.value.split(',').map(s => s.trim()))}
+                                            value={Array.isArray(field.value) ? field.value.join(', ') : ''}
+                                            rows={3}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </CardContent>
+                </Card>
+
+                <Button type="submit" disabled={isLoading}>
+                    {isLoading ? 'Generating...' : 'Generate Website from Form'}
+                </Button>
+            </form>
+        </Form>
+        </CollapsibleContent>
+      </Collapsible>
 
 
       {(isLoading || result) && (
