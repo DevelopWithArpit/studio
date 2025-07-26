@@ -64,20 +64,20 @@ const prompt = ai.definePrompt({
     name: 'generatePortfolioWebsitePrompt',
     input: { schema: PortfolioDataSchema },
     output: { schema: GeneratePortfolioWebsiteOutputSchema },
-    prompt: `You are an expert web developer specializing in creating ultimate, top-of-the-line, single-page portfolio websites with a "Digital Cyberspace" theme, featuring god-tier, supreme, and stunning visuals and animations.
+    prompt: `You are an expert web developer specializing in creating ultimate, top-of-the-line, single-page portfolio websites with a "Robotics & AI Blueprint" theme, featuring god-tier, futuristic visuals and animations.
 
 Your task is to take the user's structured data and generate the complete HTML, CSS, and JavaScript for a portfolio website.
 
 **Design & Animation Requirements (GOD TIER):**
-- **Theme:** A sleek, futuristic "Digital Cyberspace" dark theme. The primary background color must be a dark tech-blue (#0A192F). Accent colors should be a vibrant cyan or electric green for a high-tech, neon feel.
-- **Ultimate Animated "Digital Grid" Background:**
-  - The background must be a dynamic, animated grid of faint, glowing lines that slowly move, creating a sense of being within a digital matrix or on a futuristic blueprint. This must be implemented with performant CSS background gradients and animations.
+- **Theme:** A sleek, futuristic "Robotics & AI Blueprint" dark theme. The primary background color must be a dark tech-blue (#0A192F). Accent colors should be a vibrant cyan or electric green for a high-tech, blueprint feel.
+- **Ultimate Animated "Digital Blueprint" Background:**
+  - The background must be a dynamic, animated grid of faint, glowing lines that slowly move, creating a sense of being within a futuristic blueprint or a Heads-Up Display (HUD). This must be implemented with performant CSS background gradients and animations.
 - **Hero Section with "Decode" Animation:**
   - The user's name and headline must appear with a high-tech "decode" or "text shuffle" effect. The text should rapidly cycle through random characters before smoothly settling on the final letters. This must be implemented with JavaScript and should be visually smooth and elegant, not jarring.
-- **"Glassmorphism" Bento Grid with Scanline Effect:**
+- **"Holographic Blueprint" Bento Grid for Projects:**
   - Projects should be displayed in a clean, modern bento grid.
   - Each project card must have a "glassmorphism" effect (semi-transparent background with a backdrop-filter blur) and a subtle glowing border.
-  - On hover, a faint horizontal "scan line" should animate vertically down the card, as if a futuristic scanner is analyzing it.
+  - On hover, a faint horizontal "scan line" should animate vertically down the card, as if a futuristic scanner is analyzing it, and the card should tilt slightly in 3D space.
 - **On-Scroll Animations:**
   - All sections must have a smooth 'fade-in-up' animation as the user scrolls them into view. Use the Intersection Observer API for performance.
   - Items within sections (like experience entries or project cards) should have a staggered animation delay to appear one after another.
@@ -86,7 +86,7 @@ Your task is to take the user's structured data and generate the complete HTML, 
   - Generate a single, clean HTML file. Do not add comments.
   - All CSS must be inside a <style> tag in the HTML's <head>.
   - All JavaScript must be inside a <script> tag at the end of the <body>. Use vanilla JavaScript only.
-  - The JavaScript must correctly handle the hero text decode animation and the on-scroll reveal animations using the Intersection Observer API.
+  - The JavaScript must correctly handle the hero text decode animation, the 3D tilt effect on project cards, and the on-scroll reveal animations using the Intersection Observer API.
 
 **User's Portfolio Data:**
 ---
