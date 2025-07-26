@@ -35,49 +35,44 @@ import { FileText, UploadCloud, Download, FileCode } from 'lucide-react';
 import { ResumeTemplate } from '@/components/resume-template';
 
 const defaultResumeText = `Arpit Pise
-(727) 660-2831 | arpitpise1@gmail.com | linkedin.com/in/arpit-pise-20029a287 | Nagpur, India
+AI Engineer | Robotics Software Engineer | arpitpise1@gmail.com | (727) 660-2831 | linkedin.com/in/arpit-pise-20029a287 | Nagpur, India
 
 SUMMARY
-Enthusiastic B.Tech student in Robotics and Artificial Intelligence with proven skills in Python, Java, and C++. Seeking an Al Engineer or Robotics Software Engineer role. Expertise in developing and implementing Al solutions, demonstrated by leading the development of an Al Mentor platform and achieving a 30% increase in user engagement. Passionate about leveraging technical skills to develop advanced Al and robotic systems and contribute to innovative solutions.
+Enthusiastic Robotics and AI student with expertise in Python, Java, and C++. Proven ability to develop and implement AI-powered solutions, demonstrated by leading the development of the AI Mentor platform, resulting in a 30% increase in user engagement. Seeking an AI Engineer or Robotics Software Engineer role to leverage technical skills and contribute to innovative AI and robotic systems.
 
 EXPERIENCE
-Software Engineer | Electronic Arts | June 2025
-* Proposed and documented a new feature for EA Sports College Football, presenting a comprehensive Feature Proposal to stakeholders.
-* Designed and implemented a class diagram and created a C++ header file with class definitions, enhancing code maintainability.
-* Improved the EA Sports College Football codebase by patching bugs and optimizing data structures, resulting in enhanced performance.
-Robotics & Controls Engineering Intern | Johnson & Johnson | June 2025
-* Conducted a job simulation as a robotics & controls engineering intern, focusing on surgical robotic arm performance optimization.
-* Utilized Python-based tools to effectively diagnose control system inefficiencies, pinpoint root causes of delays, and implement targeted optimizations, reducing latency by 15%.
-Cybersecurity Consulting Team Member | Tata Consultancy Services | June 2025
-* Completed a job simulation involving identity and access management (IAM), collaborating within a Cybersecurity Consulting team to enhance security protocols.
+Cybersecurity Consulting Team Member | Tata Consultancy Services | June 2023
+* Completed a job simulation focused on identity and access management (IAM), collaborating with a Cybersecurity Consulting team.
 * Acquired expertise in IAM principles, cybersecurity best practices, and strategic alignment with business objectives.
-Technical Member | College Committee (Priyadarshini College of Engineering) | Oct 2024 - May 2025
-* Collaborated in the organization of 5+ technical events and workshops, boosting student participation and engagement with technical subjects.
+* Delivered comprehensive documentation and presentations to articulate complex technical concepts effectively.
+
+Software Engineer Intern | Electronic Arts | June 2023
+* Proposed a new feature for EA Sports College Football, detailing it in a comprehensive feature proposal.
+* Developed a class diagram and corresponding C++ header file, defining class structures for each object.
+* Improved the EA Sports College Football codebase by implementing an enhanced data structure and resolving a critical bug.
+
+Robotics & Controls Engineering Intern | Johnson & Johnson | June 2023
+* Completed a job simulation as a robotics & controls engineering intern, focused on optimizing a surgical robotic arm's performance.
+* Utilized Python-based tools to diagnose control system inefficiencies, pinpointing root causes of delays and implementing targeted optimizations.
+* Proposed actionable design modifications using annotated technical visuals, validating their impact on responsiveness and durability through iterative testing.
+* Developed a professional design proposal outlining findings, solutions, and recommendations for improving precision and reliability in robotic systems.
+
+Technical Member | College Committee (Priyadarshini College of Engineering) | Oct 2022 - May 2023
+* Collaborated in the organization of 5+ technical events and workshops, increasing student participation and engagement with technical subjects.
+
+PROJECTS
+AI Mentor by AP | Personal Project | May 2023
+* Spearheaded the development of an AI-powered platform offering personalized learning and career guidance, resulting in a 30% increase in user engagement within the first month.
+* Engineered and implemented AI-driven tools for resume and cover letter creation, career path recommendations, and code/DSA assistance, boosting user productivity by 25% through reduced task completion times.
+* Integrated AI-powered image generation (Stable Diffusion, DALL-E), text-based image editing, diagram generation, and presentation assistance features, optimizing user workflows and enabling data-driven decision-making.
+* Designed the platform with a user-centric approach, seamlessly integrating diverse AI functionalities into a single, intuitive interface, promoting enhanced learning, creativity, and career progression.
 
 EDUCATION
 Priyadarshini College of Engineering | Nagpur, India
 B.Tech in Robotics and Artificial Intelligence | 2022 - 2026
 
-PROJECTS
-AI Mentor Platform | Personal Project
-* Developed an AI-powered mentorship platform using Next.js, TypeScript, and Genkit AI.
-* Implemented features for resume feedback, code generation, and interview question preparation.
-Surgical Robot Control System | Coursework Project
-* Designed and simulated a control system for a surgical robot arm using ROS and Python.
-* Implemented path planning algorithms to ensure precision and safety.
-
 SKILLS
-Programming Languages: Python, Java, C++, C, HTML, JavaScript
-Machine Learning: TensorFlow, Keras, PyTorch, Scikit-learn, OpenAI API, Deep Learning, Computer Vision, Natural Language Processing, Generative Al (GANs), Transformers, VAEs
-Robotics: ROS (Robot Operating System), Control Systems, Surgical Robotics SLAM, Path Planning
-Cloud Computing: AWS, Azure
-Databases: MySQL
-Other: Git, Linux, Docker, Cybersecurity, C++ Class Definitions
-
-KEY ACHIEVEMENTS
-* Led development of an AI Mentor platform, increasing user engagement by 30%.
-* Reduced surgical robot arm latency by 15% through control system optimizations.
-`;
+Technical Skills: Python, Java, C++, C, HTML, JavaScript, Robotics, MySQL, SQL, Cybersecurity`;
 
 const formSchema = z.object({
   resume: z.string().min(1, 'Please upload or paste your resume.'),

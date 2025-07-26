@@ -46,7 +46,7 @@ const PREDEFINED_SKILLS = [
 ];
 
 const parseResumeText = (text: string): ResumeData => {
-    const lines = text.split('\n').map(line => line.replace(/^#+\s*/, '').trim()).filter(line => line);
+    const lines = text.split('\n').map(line => line.trim()).filter(line => line);
 
     const data: ResumeData = {
         name: '',
@@ -59,7 +59,7 @@ const parseResumeText = (text: string): ResumeData => {
         achievements: [],
     };
 
-    if (lines.length > 0) data.name = lines[0];
+    if (lines.length > 0) data.name = lines[0].replace(/##\s*/, '');
     if (lines.length > 1) data.contact = lines[1];
 
     const sectionHeaders = ['SUMMARY', 'EXPERIENCE', 'EDUCATION', 'PROJECTS', 'SKILLS', 'KEY ACHIEVEMENTS'];
@@ -67,7 +67,7 @@ const parseResumeText = (text: string): ResumeData => {
     const upperCaseLines = lines.map(l => l.toUpperCase());
 
     sectionHeaders.forEach(header => {
-        const index = upperCaseLines.findIndex(line => line === header);
+        const index = upperCaseLines.findIndex(line => line.startsWith(header));
         if (index !== -1) {
             sectionMap[header] = index;
         }
@@ -116,26 +116,24 @@ const parseResumeText = (text: string): ResumeData => {
     
     // Parse Education
     const educationContent = getSectionContent('EDUCATION');
-    if (educationContent.length > 0) {
-        const eduBlocks: Education[] = [];
-        for (let i = 0; i < educationContent.length; i++) {
-             // Expecting School | Location on one line, and Degree | Dates on the next
-            if (i + 1 < educationContent.length) {
-                const schoolParts = educationContent[i].split('|').map(p => p.trim());
-                const degreeParts = educationContent[i+1].split('|').map(p => p.trim());
-                 if(schoolParts.length > 0 && degreeParts.length > 0) {
-                     eduBlocks.push({
-                        school: schoolParts[0] || '',
-                        location: schoolParts[1] || '',
-                        degree: degreeParts[0] || '',
-                        dates: degreeParts[1] || '',
-                    });
-                    i++; // increment to skip the next line as it's processed
-                 }
-            }
+    let currentEducation: Education | null = null;
+    educationContent.forEach(line => {
+        if (!currentEducation) {
+            const parts = line.split('|').map(p => p.trim());
+            currentEducation = {
+                school: parts[0] || '',
+                location: parts[1] || '',
+                degree: '',
+                dates: ''
+            };
+        } else {
+            const parts = line.split('|').map(p => p.trim());
+            currentEducation.degree = parts[0] || '';
+            currentEducation.dates = parts[1] || '';
+            data.education.push(currentEducation);
+            currentEducation = null;
         }
-        data.education = eduBlocks;
-    }
+    });
     
     // Parse Projects
     const projectsContent = getSectionContent('PROJECTS');
@@ -159,17 +157,14 @@ const parseResumeText = (text: string): ResumeData => {
     });
     if (currentProject) data.projects.push(currentProject);
 
-    // Skills are now exclusively extracted from experience.
-    const extractedSkills = new Set<string>();
-    const lowerCaseExperience = experienceTextForSkills.toLowerCase();
-    PREDEFINED_SKILLS.forEach(skill => {
-        if (lowerCaseExperience.includes(skill.toLowerCase())) {
-            extractedSkills.add(skill);
+    // Skills
+    const skillsContent = getSectionContent('SKILLS');
+    if (skillsContent.length > 0) {
+        const skillCategory = skillsContent[0].replace(':', '');
+        const skillsList = skillsContent.slice(1).join('').split(',').map(s => s.trim());
+        if (skillCategory && skillsList.length > 0) {
+            data.skills[skillCategory] = skillsList;
         }
-    });
-    
-    if (extractedSkills.size > 0) {
-        data.skills['Technical Skills'] = Array.from(extractedSkills);
     }
     
     return data;
@@ -229,20 +224,6 @@ export const ResumeTemplate: React.FC<{ resumeText: string }> = ({ resumeText })
                             ))}
                         </section>
                     )}
-
-                    {education && education.length > 0 && (
-                         <section style={{ marginTop: '24px' }}>
-                            <h2 style={{ fontSize: '10pt', fontWeight: 'bold', textTransform: 'uppercase', color: '#374151', letterSpacing: '1px', borderBottom: '2px solid #111827', paddingBottom: '4px', marginBottom: '8px' }}>Education</h2>
-                            {education.map((edu, i) => (
-                                <div key={i} style={{ marginBottom: i < education.length - 1 ? '8px' : '0' }}>
-                                    <h3 style={{ fontSize: '10pt', fontWeight: 'bold', margin: 0 }}>{edu.school}</h3>
-                                    <p style={{ fontSize: '9pt', color: '#4b5563', margin: '2px 0 0 0' }}>{edu.location}</p>
-                                    <p style={{ fontSize: '9pt', color: '#4b5563', margin: '2px 0 0 0' }}>{`${edu.degree} | ${edu.dates}`}</p>
-                                </div>
-                            ))}
-                        </section>
-                    )}
-
                 </div>
 
                 {/* Right Column */}
@@ -283,6 +264,18 @@ export const ResumeTemplate: React.FC<{ resumeText: string }> = ({ resumeText })
                                     <h3 style={{ fontSize: '10pt', fontWeight: 'bold', margin: 0 }}>{proj.title}</h3>
                                     {proj.details && <p style={{ fontSize: '9pt', color: '#4b5563', margin: '2px 0 0 0' }}>{proj.details}</p>}
                                     <BulletList items={proj.bullets} />
+                                </div>
+                            ))}
+                        </section>
+                    )}
+                     {education && education.length > 0 && (
+                         <section style={{ marginTop: '24px' }}>
+                            <h2 style={{ fontSize: '10pt', fontWeight: 'bold', textTransform: 'uppercase', color: '#374151', letterSpacing: '1px', borderBottom: '2px solid #111827', paddingBottom: '4px', marginBottom: '8px' }}>Education</h2>
+                            {education.map((edu, i) => (
+                                <div key={i} style={{ marginBottom: i < education.length - 1 ? '8px' : '0' }}>
+                                    <h3 style={{ fontSize: '10pt', fontWeight: 'bold', margin: 0 }}>{edu.school}</h3>
+                                    <p style={{ fontSize: '9pt', color: '#4b5563', margin: '2px 0 0 0' }}>{edu.location}</p>
+                                    <p style={{ fontSize: '9pt', color: '#4b5563', margin: '2px 0 0 0' }}>{`${edu.degree} | ${edu.dates}`}</p>
                                 </div>
                             ))}
                         </section>
