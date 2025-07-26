@@ -67,14 +67,14 @@ const prompt = ai.definePrompt({
 
 Your task is to take the user's structured data and generate the complete HTML, CSS, and JavaScript code for a professional portfolio website.
 
-**Design Requirements (Top-Tier Edition):**
+**Design Requirements (Ultimate Edition):**
 - **Visuals & Theme:**
   - **Theme:** Use a sleek, professional dark theme.
-  - **Hero Background:** Create an impressive hero section with a stunning, slowly animating gradient mesh background.
-  - **Typography:** Use a professional and clean font pairing like 'Poppins' for headings and 'Inter' for body text. Use Google Fonts.
+  - **Hero Background:** Create an impressive hero section with a stunning, slowly animating gradient mesh background. This should be implemented purely with CSS.
+  - **Typography:** Use a professional and clean font pairing. Use 'Poppins' for headings and 'Inter' for body text. Import them from Google Fonts in the HTML file.
 - **Animations & Interactivity:**
-  - **On-Scroll Animations:** Implement smooth 'reveal' animations (fade-in and slide-up) for all sections as the user scrolls.
-  - **Interactive Project Cards:** Project cards should have a modern, interactive 3D tilt effect on hover.
+  - **On-Scroll Animations:** Implement smooth 'reveal' animations (fade-in and slide-up) for all sections as the user scrolls into view.
+  - **Interactive Project Cards:** Project cards should have a modern, interactive 3D tilt effect on hover. This should be implemented using vanilla JavaScript.
   - **Polished Transitions:** Ensure all hover effects and transitions are smooth and professional.
 - **Layout:**
   - The website must be fully responsive and look exceptional on all screen sizes.
@@ -84,7 +84,8 @@ Your task is to take the user's structured data and generate the complete HTML, 
   - Generate clean, well-commented, and separate HTML, CSS, and JavaScript files.
   - The CSS should be self-contained and not rely on external frameworks.
   - The JavaScript should be vanilla, without external libraries like jQuery.
-  - Ensure the javascript is correctly implemented to handle all animations, including the smooth scroll, reveal on scroll, and the 3D tilt effect for project cards.
+  - The JavaScript must be correctly implemented to handle all animations: the smooth scroll for navigation, the reveal-on-scroll functionality, and the 3D tilt effect for project cards.
+  - Ensure the 'reveal' function is called initially on page load to show elements that are already in view.
 
 **User's Portfolio Data:**
 ---
@@ -125,7 +126,7 @@ Your task is to take the user's structured data and generate the complete HTML, 
 {{/if}}
 ---
 
-Generate the complete, ready-to-use code now. Make sure the 'reveal' function is called initially to show elements that are already in view on page load.`,
+Generate the complete, ready-to-use code now.`,
 });
 
 
