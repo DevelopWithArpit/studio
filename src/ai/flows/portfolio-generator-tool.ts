@@ -70,9 +70,8 @@ Your task is to take the user's structured data and generate the complete HTML, 
 
 **Design & Animation Requirements (GOD TIER):**
 - **Theme:** A sleek, futuristic "Cosmic Tech" dark theme. The primary background color must be a pure black, like #0A0A0A. Accent colors for glowing effects should be a vibrant cyan or electric blue.
-- **Ultimate Interactive Aurora Background:**
-  - The entire page background must have a constantly, slowly morphing animated multicolor "aurora" gradient. This must be implemented with CSS animations on pseudo-elements for maximum performance.
-  - On top of the aurora, a "spotlight" effect must be implemented. A large, soft radial gradient must follow the user's cursor, illuminating the aurora. This is the most important feature. The JavaScript implementation must be performant and only update on 'mousemove'.
+- **Ultimate Animated Aurora Background:**
+  - The entire page background must have a constantly, slowly morphing animated multicolor "aurora" gradient. This must be implemented with CSS animations on pseudo-elements for maximum performance. This is the most important visual feature.
 - **Hero Section with Glitch Animation:**
   - The user's name and headline must appear with a high-tech "glitch" text effect, as if being decoded or materialized on a futuristic display. This must be a pure CSS animation.
 - **Holographic Bento Grid for Projects:**
@@ -87,7 +86,7 @@ Your task is to take the user's structured data and generate the complete HTML, 
   - Generate a single, clean HTML file. Do not add comments.
   - All CSS must be inside a <style> tag in the HTML's <head>.
   - All JavaScript must be inside a <script> tag at the end of the <body>. Use vanilla JavaScript only.
-  - The JavaScript must correctly handle the cursor spotlight and the on-scroll reveal animations using the Intersection Observer API.
+  - The JavaScript must correctly handle the on-scroll reveal animations using the Intersection Observer API.
 
 **User's Portfolio Data:**
 ---
@@ -127,7 +126,7 @@ Your task is to take the user's structured data and generate the complete HTML, 
 {{/if}}
 ---
 
-Generate the complete, ready-to-use portfolio code now. Ensure the JavaScript implementation is robust and correct for the interactive spotlight and Intersection Observer animations.`,
+Generate the complete, ready-to-use portfolio code now. Ensure the JavaScript implementation is robust and correct for the Intersection Observer animations.`,
 });
 
 
@@ -142,4 +141,5 @@ const generatePortfolioWebsiteFlow = ai.defineFlow(
     return output!;
   }
 );
+
 
