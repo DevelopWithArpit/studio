@@ -64,20 +64,20 @@ const prompt = ai.definePrompt({
     name: 'generatePortfolioWebsitePrompt',
     input: { schema: PortfolioDataSchema },
     output: { schema: GeneratePortfolioWebsiteOutputSchema },
-    prompt: `You are an expert web developer specializing in creating ultimate, top-of-the-line, single-page portfolio websites with a "Cosmic Universe" theme, featuring god-tier, supreme, and stunning visuals and animations.
+    prompt: `You are an expert web developer specializing in creating ultimate, top-of-the-line, single-page portfolio websites with a "Digital Cyberspace" theme, featuring god-tier, supreme, and stunning visuals and animations.
 
 Your task is to take the user's structured data and generate the complete HTML, CSS, and JavaScript for a portfolio website.
 
 **Design & Animation Requirements (GOD TIER):**
-- **Theme:** A sleek, futuristic "Cosmic Universe" dark theme. The primary background color must be pure black (#0A0A0A). Accent colors should be a vibrant cyan or electric blue for a high-tech feel.
-- **Ultimate Animated "Cosmic Aurora" Background:**
-  - The background must be a dynamic, multi-color, slowly shifting gradient that resembles a cosmic aurora or nebula. This must be implemented using a large, fixed-position pseudo-element (\`::before\`) on the body, with a CSS animation that continuously transforms the background gradients. This creates a mesmerizing, high-end visual that is also extremely performant. It should not be a static image or a simple two-color gradient.
+- **Theme:** A sleek, futuristic "Digital Cyberspace" dark theme. The primary background color must be a dark tech-blue (#0A192F). Accent colors should be a vibrant cyan or electric green for a high-tech, neon feel.
+- **Ultimate Animated "Digital Grid" Background:**
+  - The background must be a dynamic, animated grid of faint, glowing lines that slowly move, creating a sense of being within a digital matrix or on a futuristic blueprint. This must be implemented with performant CSS background gradients and animations.
 - **Hero Section with "Decode" Animation:**
   - The user's name and headline must appear with a high-tech "decode" or "text shuffle" effect. The text should rapidly cycle through random characters before smoothly settling on the final letters. This must be implemented with JavaScript and should be visually smooth and elegant, not jarring.
-- **Holographic Bento Grid for Projects:**
+- **"Glassmorphism" Bento Grid with Scanline Effect:**
   - Projects should be displayed in a clean, modern bento grid.
-  - Each project card must have a "glassmorphism" effect (semi-transparent background with a backdrop-filter blur).
-  - On hover, each project card must have a "holographic" effect: a glowing, animated border and a subtle 3D tilt. This should be implemented with CSS for performance.
+  - Each project card must have a "glassmorphism" effect (semi-transparent background with a backdrop-filter blur) and a subtle glowing border.
+  - On hover, a faint horizontal "scan line" should animate vertically down the card, as if a futuristic scanner is analyzing it.
 - **On-Scroll Animations:**
   - All sections must have a smooth 'fade-in-up' animation as the user scrolls them into view. Use the Intersection Observer API for performance.
   - Items within sections (like experience entries or project cards) should have a staggered animation delay to appear one after another.
