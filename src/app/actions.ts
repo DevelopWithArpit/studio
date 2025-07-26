@@ -155,12 +155,6 @@ export async function handleCustomizeResumeAction(input: CustomizeResumeInput) {
     return handleAction(input, customizeResume);
 }
 
-export async function handleGeneratePortfolioWebsiteAction(resumeDataUri: string) {
-    try {
-        const result = await generatePortfolioWebsite({ resumeContent: resumeDataUri });
-        return { success: true, data: result };
-    } catch (e) {
-        const errorMessage = e instanceof Error ? e.message : 'An unexpected error occurred.';
-        return { success: false, error: errorMessage };
-    }
+export async function handleGeneratePortfolioWebsiteAction(input: GeneratePortfolioWebsiteInput) {
+    return handleAction(input, generatePortfolioWebsite);
 }
