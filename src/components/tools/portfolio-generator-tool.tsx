@@ -41,10 +41,25 @@ const projectSchema = z.object({
   projectUrl: z.string().url('Must be a valid URL.'),
 });
 
+const experienceSchema = z.object({
+  title: z.string().min(1, 'Title is required.'),
+  company: z.string().min(1, 'Company is required.'),
+  dates: z.string().min(1, 'Dates are required.'),
+  description: z.string().min(1, 'Description is required.'),
+});
+
+const educationSchema = z.object({
+  degree: z.string().min(1, 'Degree is required.'),
+  school: z.string().min(1, 'School is required.'),
+  dates: z.string().min(1, 'Dates are required.'),
+});
+
 const formSchema = z.object({
   fullName: z.string().min(1, 'Full name is required.'),
   headline: z.string().min(1, 'Headline is required.'),
   about: z.string().min(10, 'About section needs at least 10 characters.'),
+  experience: z.array(experienceSchema).min(1, 'At least one experience entry is required.'),
+  education: z.array(educationSchema).min(1, 'At least one education entry is required.'),
   projects: z.array(projectSchema).min(1, 'At least one project is required.'),
   skills: z.string().min(1, 'Please list at least one skill.'),
   contactEmail: z.string().email('Must be a valid email.'),
@@ -66,6 +81,21 @@ export default function PortfolioGeneratorTool() {
       fullName: 'Arpit Pise',
       headline: 'AI & Robotics Engineer',
       about: 'A passionate engineer with a focus on building intelligent systems. I thrive at the intersection of software, hardware, and artificial intelligence.',
+      experience: [
+        {
+            title: 'Software Engineer Intern',
+            company: 'Electronic Arts',
+            dates: 'June 2023 - Present',
+            description: 'Improved the EA Sports College Football codebase by implementing an enhanced data structure and resolving a critical bug.'
+        }
+      ],
+      education: [
+        {
+            school: 'Priyadarshini College of Engineering',
+            degree: 'B.Tech in Robotics and Artificial Intelligence',
+            dates: '2022 - 2026'
+        }
+      ],
       projects: [
         {
           title: 'AI Mentor Platform',
@@ -79,9 +109,17 @@ export default function PortfolioGeneratorTool() {
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields: projectFields, append: appendProject, remove: removeProject } = useFieldArray({
     control: form.control,
     name: 'projects',
+  });
+  const { fields: experienceFields, append: appendExperience, remove: removeExperience } = useFieldArray({
+    control: form.control,
+    name: 'experience',
+  });
+  const { fields: educationFields, append: appendEducation, remove: removeEducation } = useFieldArray({
+    control: form.control,
+    name: 'education',
   });
 
   async function onSubmit(data: FormData) {
@@ -207,7 +245,21 @@ export default function PortfolioGeneratorTool() {
           if(rewrittenResume.experience.length > 0) {
             const headline = `${rewrittenResume.experience[0].title} at ${rewrittenResume.experience[0].company}`;
             form.setValue('headline', headline);
+            form.setValue('experience', rewrittenResume.experience.map(exp => ({
+                title: exp.title,
+                company: exp.company,
+                dates: exp.dates,
+                description: exp.bullets.join('. ')
+            })));
           }
+
+           if(rewrittenResume.education.length > 0) {
+                form.setValue('education', rewrittenResume.education.map(edu => ({
+                    degree: edu.degree,
+                    school: edu.school,
+                    dates: edu.dates,
+                })));
+            }
 
           if (rewrittenResume.skills) {
             const allSkills = [...rewrittenResume.skills.technical, ...(rewrittenResume.skills.other || [])];
@@ -355,6 +407,53 @@ export default function PortfolioGeneratorTool() {
 
           <Card>
             <CardHeader>
+              <CardTitle>Experience</CardTitle>
+              <CardDescription>Detail your professional background.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+                {experienceFields.map((field, index) => (
+                    <div key={field.id} className="space-y-4 border p-4 rounded-lg relative">
+                        <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 text-muted-foreground hover:text-destructive" onClick={() => removeExperience(index)}>
+                            <Trash2 className="h-4 w-4" />
+                        </Button>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField control={form.control} name={`experience.${index}.title`} render={({ field }) => (<FormItem><FormLabel>Job Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
+                            <FormField control={form.control} name={`experience.${index}.company`} render={({ field }) => (<FormItem><FormLabel>Company</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
+                        </div>
+                        <FormField control={form.control} name={`experience.${index}.dates`} render={({ field }) => (<FormItem><FormLabel>Dates</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
+                        <FormField control={form.control} name={`experience.${index}.description`} render={({ field }) => (<FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} rows={2} /></FormControl><FormMessage /></FormItem>)} />
+                    </div>
+                ))}
+                <Button type="button" variant="outline" onClick={() => appendExperience({ title: '', company: '', dates: '', description: '' })}>
+                    <PlusCircle className="mr-2 h-4 w-4" /> Add Experience
+                </Button>
+            </CardContent>
+          </Card>
+
+           <Card>
+            <CardHeader>
+              <CardTitle>Education</CardTitle>
+              <CardDescription>List your educational qualifications.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+                {educationFields.map((field, index) => (
+                    <div key={field.id} className="space-y-4 border p-4 rounded-lg relative">
+                        <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 text-muted-foreground hover:text-destructive" onClick={() => removeEducation(index)}>
+                            <Trash2 className="h-4 w-4" />
+                        </Button>
+                        <FormField control={form.control} name={`education.${index}.school`} render={({ field }) => (<FormItem><FormLabel>School / University</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
+                        <FormField control={form.control} name={`education.${index}.degree`} render={({ field }) => (<FormItem><FormLabel>Degree / Certificate</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
+                        <FormField control={form.control} name={`education.${index}.dates`} render={({ field }) => (<FormItem><FormLabel>Dates</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    </div>
+                ))}
+                <Button type="button" variant="outline" onClick={() => appendEducation({ school: '', degree: '', dates: '' })}>
+                    <PlusCircle className="mr-2 h-4 w-4" /> Add Education
+                </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
               <CardTitle>Skills</CardTitle>
               <CardDescription>Enter your skills, separated by commas.</CardDescription>
             </CardHeader>
@@ -382,14 +481,14 @@ export default function PortfolioGeneratorTool() {
               <CardDescription>Showcase your best work.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {fields.map((field, index) => (
+              {projectFields.map((field, index) => (
                 <div key={field.id} className="space-y-4 border p-4 rounded-lg relative">
                     <Button
                         type="button"
                         variant="ghost"
                         size="icon"
                         className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"
-                        onClick={() => remove(index)}
+                        onClick={() => removeProject(index)}
                     >
                         <Trash2 className="h-4 w-4" />
                     </Button>
@@ -452,7 +551,7 @@ export default function PortfolioGeneratorTool() {
                <Button
                 type="button"
                 variant="outline"
-                onClick={() => append({ title: '', description: '', imageUrl: '', projectUrl: '' })}
+                onClick={() => appendProject({ title: '', description: '', imageUrl: '', projectUrl: '' })}
               >
                 <PlusCircle className="mr-2 h-4 w-4" /> Add Project
               </Button>
