@@ -46,7 +46,7 @@ const PREDEFINED_SKILLS = [
 ];
 
 const parseResumeText = (text: string): ResumeData => {
-    const cleanedText = text.replace(/^##\s*/gm, '');
+    const cleanedText = text.replace(/^#+\s*/gm, '');
     const lines = cleanedText.split('\n').map(line => line.trim()).filter(line => line);
 
     const data: ResumeData = {
@@ -62,7 +62,7 @@ const parseResumeText = (text: string): ResumeData => {
 
     if (lines.length > 0) data.name = lines[0];
     if (lines.length > 1) data.contact = lines[1];
-    
+
     const sectionHeaders = ['SUMMARY', 'EXPERIENCE', 'EDUCATION', 'PROJECTS', 'SKILLS', 'KEY ACHIEVEMENTS'];
     let sectionMap: { [key: string]: number } = {};
     const upperCaseLines = lines.map(l => l.toUpperCase());
@@ -79,11 +79,12 @@ const parseResumeText = (text: string): ResumeData => {
         if (start === undefined) return [];
 
         let end = lines.length;
-        for (const header of sectionHeaders) {
-            if (sectionMap[header] > start && sectionMap[header] < end) {
-                end = sectionMap[header];
-            }
+        const sortedHeaders = Object.keys(sectionMap).sort((a, b) => sectionMap[a] - sectionMap[b]);
+        const currentHeaderIndex = sortedHeaders.indexOf(sectionName);
+        if (currentHeaderIndex < sortedHeaders.length - 1) {
+            end = sectionMap[sortedHeaders[currentHeaderIndex + 1]];
         }
+        
         return lines.slice(start + 1, end);
     };
 
@@ -119,17 +120,17 @@ const parseResumeText = (text: string): ResumeData => {
     if (educationContent.length > 0) {
         const eduBlocks: Education[] = [];
         for (let i = 0; i < educationContent.length; i++) {
-             if (i + 1 < educationContent.length && !sectionHeaders.some(h => educationContent[i+1].toUpperCase().startsWith(h))) {
-                 const schoolParts = educationContent[i].split('|').map(p => p.trim());
-                 const degreeParts = educationContent[i+1].split('|').map(p => p.trim());
-                 eduBlocks.push({
-                     school: schoolParts[0] || '',
-                     location: schoolParts[1] || '',
-                     degree: degreeParts[0] || '',
-                     dates: degreeParts[1] || '',
-                 });
-                 i++;
-             }
+            if (i + 1 < educationContent.length && !sectionHeaders.some(h => educationContent[i+1].toUpperCase().startsWith(h))) {
+                const schoolParts = educationContent[i].split('|').map(p => p.trim());
+                const degreeParts = educationContent[i+1].split('|').map(p => p.trim());
+                eduBlocks.push({
+                    school: schoolParts[0] || '',
+                    location: schoolParts[1] || '',
+                    degree: degreeParts[0] || '',
+                    dates: degreeParts[1] || '',
+                });
+                i++;
+            }
         }
         data.education = eduBlocks;
     }
@@ -166,8 +167,7 @@ const parseResumeText = (text: string): ResumeData => {
     });
     
     if (extractedSkills.size > 0) {
-        // Categorize skills for display if needed, or just use a single category.
-        data.skills['Technical Skills (from Experience)'] = Array.from(extractedSkills);
+        data.skills['Technical Skills'] = Array.from(extractedSkills);
     }
     
     return data;
@@ -290,3 +290,5 @@ export const ResumeTemplate: React.FC<{ resumeText: string }> = ({ resumeText })
         </div>
     );
 };
+
+    

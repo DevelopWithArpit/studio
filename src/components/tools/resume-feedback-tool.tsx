@@ -72,7 +72,12 @@ Machine Learning: TensorFlow, Keras, PyTorch, Scikit-learn, OpenAI API, Deep Lea
 Robotics: ROS (Robot Operating System), Control Systems, Surgical Robotics SLAM, Path Planning
 Cloud Computing: AWS, Azure
 Databases: MySQL
-Other: Git, Linux, Docker, Cybersecurity, C++ Class Definitions`;
+Other: Git, Linux, Docker, Cybersecurity, C++ Class Definitions
+
+KEY ACHIEVEMENTS
+* Led development of an AI Mentor platform, increasing user engagement by 30%.
+* Reduced surgical robot arm latency by 15% through control system optimizations.
+`;
 
 const formSchema = z.object({
   resume: z.string().min(1, 'Please upload or paste your resume.'),
@@ -443,3 +448,5 @@ export default function ResumeFeedbackTool() {
     </div>
   );
 }
+
+    
