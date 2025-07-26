@@ -5,12 +5,14 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { saveAs } from 'file-saver';
+import JSZip from 'jszip';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter
 } from '@/components/ui/card';
 import {
   Form,
@@ -27,7 +29,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { handleGeneratePortfolioWebsiteAction } from '@/app/actions';
 import type { GeneratePortfolioWebsiteOutput } from '@/ai/flows/portfolio-generator-tool';
-import { PlusCircle, Trash2, Copy, Download, Save, Upload } from 'lucide-react';
+import { PlusCircle, Trash2, Copy, Download, Save, Upload, FileArchive } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -112,6 +114,22 @@ export default function PortfolioGeneratorTool() {
     const blob = new Blob([content], { type });
     saveAs(blob, filename);
   };
+
+  const handleDownloadZip = () => {
+    if (!result) return;
+    const zip = new JSZip();
+    zip.file("index.html", result.html);
+    zip.file("style.css", result.css);
+    zip.file("script.js", result.javascript);
+    zip.generateAsync({type:"blob"})
+    .then(function(content) {
+        saveAs(content, "portfolio-website.zip");
+    });
+     toast({
+      title: 'Download Started!',
+      description: `Your portfolio website is being downloaded as a zip file.`,
+    });
+  };
   
   const handleSaveData = () => {
     const data = form.getValues();
@@ -131,6 +149,10 @@ export default function PortfolioGeneratorTool() {
         try {
           const json = e.target?.result as string;
           const data = JSON.parse(json);
+          // Combine skills array back to a string for the form
+          if (Array.isArray(data.skills)) {
+            data.skills = data.skills.join(', ');
+          }
           const parsedData = formSchema.parse(data);
           form.reset(parsedData);
           toast({
@@ -352,7 +374,7 @@ export default function PortfolioGeneratorTool() {
         <Card>
           <CardHeader>
             <CardTitle>Generated Website Code</CardTitle>
-            <CardDescription>Your portfolio code is ready. You can preview it or copy the code for each language.</CardDescription>
+            <CardDescription>Your portfolio code is ready. You can preview it or download the files.</CardDescription>
           </CardHeader>
           <CardContent>
              {isLoading ? (
@@ -399,6 +421,14 @@ export default function PortfolioGeneratorTool() {
                 </Tabs>
              )}
           </CardContent>
+          {result && (
+            <CardFooter>
+                 <Button onClick={handleDownloadZip}>
+                    <FileArchive className="mr-2 h-4 w-4" />
+                    Download Site (.zip)
+                </Button>
+            </CardFooter>
+          )}
         </Card>
       )}
     </div>
