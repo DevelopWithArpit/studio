@@ -116,6 +116,7 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
                                                 <p className="text-xs text-gray-500 font-medium">{edu.dates}</p>
                                             </div>
                                             <p className="text-sm text-gray-700">{edu.degree}</p>
+                                            <p className="text-xs text-gray-500">{edu.location}</p>
                                         </div>
                                     ))}
                                 </div>
@@ -151,6 +152,16 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
                                         ))}
                                     </div>
                                 </div>
+                                {skills.other && skills.other.length > 0 && (
+                                     <div className="mt-2">
+                                        <h3 className="font-bold text-xs mb-1">Other:</h3>
+                                        <div className="flex flex-wrap gap-1">
+                                            {skills.other.map((skill, i) => (
+                                                <span key={i} className="bg-gray-200 text-gray-800 text-[10px] font-medium px-2 py-0.5 rounded-full">{skill}</span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </section>
                         )}
                          {projects && projects.length > 0 && (

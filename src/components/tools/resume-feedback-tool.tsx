@@ -71,6 +71,7 @@ AI Mentor by AP | May 2023
 
 SKILLS
 Technical Skills: Python, Java, C++, C, HTML, JavaScript, Robotics, MySQL, SQL, Cybersecurity, Git, Linux
+Other Skills: Problem Solving, Teamwork, Communication
 
 KEY ACHIEVEMENTS
 - Led development of AI Mentor, increasing user engagement by 30%.
@@ -150,7 +151,6 @@ export default function ResumeFeedbackTool() {
   const getResumeHtml = (resumeData: GetResumeFeedbackOutput['rewrittenResume']): Promise<string> => {
     return new Promise((resolve) => {
         const container = document.createElement('div');
-        // Don't hide the container, just give it a specific size for rendering
         container.style.position = 'absolute';
         container.style.left = '-9999px';
         container.style.width = '8.5in';
@@ -189,7 +189,8 @@ export default function ResumeFeedbackTool() {
     setIsGeneratingPdf(true);
     const element = document.createElement('div');
     element.style.width = '816px'; // 8.5 inches at 96 DPI
-    element.style.height = '1056px'; // 11 inches at 96 DPI
+    element.style.minHeight = '1056px'; // 11 inches at 96 DPI
+    element.style.background = 'white';
     document.body.appendChild(element);
 
     const root = createRoot(element);
@@ -197,12 +198,13 @@ export default function ResumeFeedbackTool() {
 
     setTimeout(async () => {
          try {
-            const canvas = await html2canvas(element, { scale: 3, useCORS: true, windowWidth: element.scrollWidth, windowHeight: element.scrollHeight });
+            const canvas = await html2canvas(element, { scale: 3, useCORS: true, windowWidth: 816, windowHeight: element.scrollHeight });
             const imgData = canvas.toDataURL('image/png');
 
-            const pdf = new jsPDF({ orientation: 'p', unit: 'px', format: 'a4' });
+            const pdf = new jsPDF({ orientation: 'p', unit: 'px', format: [canvas.width, canvas.height]});
             const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+            const pdfHeight = pdf.internal.pageSize.getHeight();
+            
             pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
             pdf.save('resume.pdf');
           } catch (error) {
@@ -407,8 +409,10 @@ export default function ResumeFeedbackTool() {
                 ) : (
                   result && (
                     <div className="space-y-4">
-                       <div className="border rounded-lg bg-white max-h-[700px] overflow-y-auto">
-                          <ResumeTemplate resumeData={result.rewrittenResume} />
+                       <div className="border rounded-lg bg-gray-100 p-4 max-h-[700px] overflow-y-auto">
+                          <div className="scale-[0.9] origin-top-left">
+                            <ResumeTemplate resumeData={result.rewrittenResume} />
+                          </div>
                       </div>
                       <div className="flex flex-wrap gap-2">
                          <Button
