@@ -86,7 +86,7 @@ const getResumeFeedbackFlow = ai.defineFlow(
     const prompt = ai.definePrompt({
       name: 'getResumeFeedbackPrompt',
       output: { schema: GetResumeFeedbackOutputSchema },
-      prompt: `You are an expert career coach and professional resume writer with deep knowledge of Applicant Tracking Systems (ATS). Your task is to provide a comprehensive review of the user's resume and rewrite it into a structured JSON format.
+      prompt: `You are an expert career coach and professional resume writer with deep knowledge of Applicant Tracking Systems (ATS) used by major tech companies like NVIDIA, Microsoft, Apple, Amazon, Google, Meta, Broadcom, TSMC, Tesla, Oracle, Sony, and Samsung. Your task is to provide a comprehensive review of the user's resume and rewrite it into a structured JSON format that is optimized to score highly on these systems.
 
 {{#if targetJobRole}}The user is targeting the role of: {{{targetJobRole}}}. You must tailor your feedback and rewritten resume to align with keywords and qualifications for this role.{{/if}}
 {{#if additionalInfo}}Additional context from the user: {{{additionalInfo}}}{{/if}}
@@ -94,8 +94,15 @@ const getResumeFeedbackFlow = ai.defineFlow(
 ${documentPrompt}
 
 Please perform the following two tasks:
-1.  **Provide Detailed Feedback:** In the 'feedback' field, analyze the resume for clarity, impact, formatting, and ATS compatibility. Give constructive feedback in Markdown format, with clear sections for "Strengths", "Areas for Improvement", and "Actionable Suggestions for ATS Optimization".
-2.  **Rewrite the Resume into JSON:** In the 'rewrittenResume' field, provide a professionally rewritten version of the resume by populating the structured JSON object. Extract all contact information, including phone, email, LinkedIn, and GitHub profile URLs if present. Use strong action verbs, quantify achievements, and integrate relevant keywords. Ensure every field in the JSON schema is populated accurately based on the source resume. For the 'skills.other' field, include professional or soft skills like Teamwork, Communication, etc.
+
+1.  **Provide Detailed Feedback:** In the 'feedback' field, analyze the resume for clarity, impact, formatting, and ATS compatibility. Give constructive feedback in Markdown format, with clear sections for "Strengths", "Areas for Improvement", and "Actionable Suggestions for ATS Optimization". Your suggestions should focus on keyword alignment, quantifying achievements, and using standard, machine-readable formatting.
+
+2.  **Rewrite the Resume into JSON:** In the 'rewrittenResume' field, provide a professionally rewritten version of the resume by populating the structured JSON object. 
+    - Use standard, universally recognized section headers (e.g., 'Experience', 'Education', 'Skills').
+    - Start every bullet point under 'Experience' and 'Projects' with a strong action verb.
+    - Quantify achievements with specific metrics wherever possible (e.g., "Increased user engagement by 30%" instead of "Improved user engagement").
+    - Ensure all contact information, including phone, email, LinkedIn, and GitHub profile URLs, is extracted correctly.
+    - Populate the 'skills.technical' and 'skills.other' fields accurately based on the resume content.
 `,
     });
 
