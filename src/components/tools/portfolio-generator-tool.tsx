@@ -27,9 +27,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { handleGeneratePortfolioWebsiteAction } from '@/app/actions';
+import { handleGeneratePortfolioWebsiteAction, handleGetResumeFeedbackAction } from '@/app/actions';
 import type { GeneratePortfolioWebsiteOutput } from '@/ai/flows/portfolio-generator-tool';
-import { PlusCircle, Trash2, Copy, Download, Save, Upload, FileArchive } from 'lucide-react';
+import { PlusCircle, Trash2, Copy, Download, Save, Upload, FileArchive, FileText, UploadCloud, Wand2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -54,9 +54,11 @@ type FormData = z.infer<typeof formSchema>;
 
 export default function PortfolioGeneratorTool() {
   const [isLoading, setIsLoading] = useState(false);
+  const [isAutoFilling, setIsAutoFilling] = useState(false);
   const [result, setResult] = useState<GeneratePortfolioWebsiteOutput | null>(null);
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [resumeFile, setResumeFile] = useState<{name: string, dataUri: string} | null>(null);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -171,6 +173,61 @@ export default function PortfolioGeneratorTool() {
     }
   };
 
+  const handleResumeFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 4 * 1024 * 1024) { // 4MB limit
+        toast({ variant: "destructive", title: "File too large", description: "Please upload a document smaller than 4MB."});
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (loadEvent) => {
+        const dataUri = loadEvent.target?.result as string;
+        setResumeFile({ name: file.name, dataUri });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleAutoFill = async () => {
+      if (!resumeFile) {
+        toast({ variant: 'destructive', title: 'No Resume', description: 'Please upload a resume file first.' });
+        return;
+      }
+      setIsAutoFilling(true);
+      const response = await handleGetResumeFeedbackAction({ resume: resumeFile.dataUri });
+      setIsAutoFilling(false);
+
+      if (response.success && response.data.rewrittenResume) {
+          const { rewrittenResume } = response.data;
+          form.setValue('fullName', rewrittenResume.name);
+          form.setValue('contactEmail', rewrittenResume.contact.email);
+          form.setValue('about', rewrittenResume.summary);
+          
+          if(rewrittenResume.experience.length > 0) {
+            const headline = `${rewrittenResume.experience[0].title} at ${rewrittenResume.experience[0].company}`;
+            form.setValue('headline', headline);
+          }
+
+          if (rewrittenResume.skills) {
+            const allSkills = [...rewrittenResume.skills.technical, ...(rewrittenResume.skills.other || [])];
+            form.setValue('skills', allSkills.join(', '));
+          }
+
+          if (rewrittenResume.projects && rewrittenResume.projects.length > 0) {
+            form.setValue('projects', rewrittenResume.projects.map(p => ({
+                title: p.title,
+                description: p.bullets.join(' '),
+                imageUrl: 'https://placehold.co/600x400.png',
+                projectUrl: rewrittenResume.contact.github || 'https://github.com'
+            })));
+          }
+          toast({ title: 'Form Auto-filled', description: 'The form has been populated with your resume data.' });
+      } else {
+        toast({ variant: 'destructive', title: 'Auto-fill Failed', description: response.error || 'Could not parse resume.' });
+      }
+  };
+
   return (
     <div className="space-y-8">
       <header className="space-y-2">
@@ -180,12 +237,51 @@ export default function PortfolioGeneratorTool() {
         </p>
       </header>
 
+      <Card>
+        <CardHeader>
+            <CardTitle>Auto-fill from Resume</CardTitle>
+            <CardDescription>Upload your resume to have the AI automatically populate the fields below.</CardDescription>
+        </CardHeader>
+        <CardContent className='flex flex-col md:flex-row items-center gap-4'>
+            <div className="relative border-2 border-dashed border-muted rounded-lg p-4 flex-grow w-full md:w-auto">
+                {resumeFile ? (
+                    <div className='flex items-center gap-2'>
+                        <FileText className="w-8 h-8 text-accent" />
+                        <div className='flex-grow'>
+                            <p className='text-sm font-medium'>{resumeFile.name}</p>
+                            <Button variant="link" size="sm" asChild className='p-0 h-auto -mt-1'>
+                                <label htmlFor="resume-upload" className="cursor-pointer text-xs">Change file</label>
+                            </Button>
+                        </div>
+                    </div>
+                ) : (
+                    <div className='flex items-center gap-4 text-center'>
+                         <UploadCloud className="w-8 h-8 text-muted-foreground" />
+                         <div>
+                            <label htmlFor="resume-upload" className="font-semibold text-accent cursor-pointer hover:underline">
+                                Upload a resume
+                            </label>
+                            <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 4MB</p>
+                         </div>
+                    </div>
+                )}
+                <Input id="resume-upload" type="file" className="sr-only" onChange={handleResumeFileChange} accept=".pdf,.docx,.txt" />
+            </div>
+            <Button type="button" onClick={handleAutoFill} disabled={isAutoFilling || !resumeFile}>
+                <Wand2 className="mr-2 h-4 w-4" />
+                {isAutoFilling ? 'Analyzing...' : 'Auto-fill Form'}
+            </Button>
+        </CardContent>
+      </Card>
+
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <Card>
              <CardHeader className="flex flex-row items-center justify-between">
               <div>
-                <CardTitle>Personal Information</CardTitle>
+                <CardTitle>Portfolio Content</CardTitle>
+                <CardDescription>Fill out your portfolio details below.</CardDescription>
               </div>
               <div className="flex gap-2">
                   <Button type="button" variant="outline" size="sm" onClick={handleSaveData}>
