@@ -186,9 +186,6 @@ export async function handleGeneratePortfolioWebsiteAction(input: GeneratePortfo
                 projects: resumeData.projects.map(p => ({ title: p.title, description: p.bullets.join('\\n- '), link: '', imageUrl: '' })),
                 skills: [...resumeData.skills.technical, ...(resumeData.skills.other || [])],
             };
-             if (!portfolioData.projects || portfolioData.projects.length === 0) {
-                portfolioData.projects = [{ title: 'AI Mentor', description: 'Developed an AI-powered platform.', link: '#', imageUrl: 'https://placehold.co/600x400' }];
-            }
         } else {
             portfolioData = input.data;
         }
