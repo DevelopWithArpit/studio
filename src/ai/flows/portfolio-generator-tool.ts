@@ -74,7 +74,7 @@ Your task is to take the user's structured data and generate the complete HTML, 
 - **Glassmorphism Project Cards:** Display projects in a modern "bento grid" layout. The project cards must have a "glassmorphism" effect: a semi-transparent, blurred background (using \`backdrop-filter: blur(...)\`) and a subtle border. This creates a frosted-glass look. On hover, the cards should have a subtle 3D tilt effect.
 - **Typography:** Use a professional and clean font pairing. Use 'Poppins' for headings and 'Inter' for body text. Import them from Google Fonts in the HTML file's <head>.
 - **Code Structure:**
-  - Generate a single, clean, well-commented HTML file.
+  - Generate a single, clean HTML file. Do not add comments.
   - All CSS must be inside a <style> tag in the HTML's <head>. Do not use external CSS files.
   - All JavaScript must be inside a <script> tag at the end of the <body>. Use vanilla JavaScript only. No jQuery or other libraries.
   - The JavaScript must correctly handle all specified animations: the parallax scroll and the on-scroll reveals.
