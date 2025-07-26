@@ -4,7 +4,8 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { saveAs } from 'file-saver';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import {
   Card,
   CardContent,
@@ -84,7 +85,9 @@ export default function ResumeFeedbackTool() {
   const [isGeneratingDocument, setIsGeneratingDocument] = useState(false);
   const [result, setResult] = useState<GetResumeFeedbackOutput | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
-  const [portfolio, setPortfolio] = useState<GeneratePortfolioOutput | null>(null);
+  const [portfolio, setPortfolio] = useState<GeneratePortfolioOutput | null>(
+    null
+  );
   const { toast } = useToast();
 
   const form = useForm<FormData>({
@@ -146,45 +149,74 @@ export default function ResumeFeedbackTool() {
     if (!result?.rewrittenResume) return;
 
     setIsGeneratingDocument(true);
-    const response = await handleGeneratePortfolioAction({
+
+    const portfolioResponse = await handleGeneratePortfolioAction({
       resumeText: result.rewrittenResume,
     });
-    setIsGeneratingDocument(false);
 
-    if (response.success && response.data) {
-        const fullHtml = `<!DOCTYPE html>
+    if (portfolioResponse.success && portfolioResponse.data) {
+      const fullHtml = `<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Resume</title>
 <style>
-${response.data.css}
+${portfolioResponse.data.css}
 </style>
 </head>
 <body>
-${response.data.html}
+${portfolioResponse.data.html}
 </body>
 </html>`;
-      const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
-      saveAs(blob, 'resume.html');
+
+      const element = document.createElement('div');
+      element.innerHTML = fullHtml;
+      element.style.position = 'absolute';
+      element.style.left = '-9999px';
+      element.style.width = '827px'; // A4 width in pixels at 96 DPI
+      document.body.appendChild(element);
+
+      try {
+        const canvas = await html2canvas(element, {
+          scale: 2, // Increase resolution
+          useCORS: true,
+        });
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'px',
+          format: [canvas.width, canvas.height],
+        });
+        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+        pdf.save('resume.pdf');
+      } catch (error) {
+        toast({
+          variant: 'destructive',
+          title: 'Error Generating PDF',
+          description:
+            error instanceof Error ? error.message : 'An unknown error occurred.',
+        });
+      } finally {
+        document.body.removeChild(element);
+        setIsGeneratingDocument(false);
+      }
     } else {
       toast({
         variant: 'destructive',
         title: 'Error Generating Document',
-        description: response.error,
+        description: portfolioResponse.error,
       });
+      setIsGeneratingDocument(false);
     }
   };
 
   return (
     <div className="space-y-8">
       <header className="space-y-2">
-        <h1 className="text-3xl font-bold font-headline">
-          Resume Suite
-        </h1>
+        <h1 className="text-3xl font-bold font-headline">Resume Suite</h1>
         <p className="text-muted-foreground">
-          Get AI feedback, then generate a professional, editable document to download.
+          Get AI feedback, then generate a professional, downloadable document.
         </p>
       </header>
 
@@ -370,9 +402,14 @@ ${response.data.html}
                       <pre className="bg-muted p-4 rounded-md overflow-x-auto text-sm whitespace-pre-wrap font-sans">
                         {result.rewrittenResume}
                       </pre>
-                      <Button onClick={handleGenerateDocument} disabled={isGeneratingDocument}>
+                      <Button
+                        onClick={handleGenerateDocument}
+                        disabled={isGeneratingDocument}
+                      >
                         <Download className="mr-2 h-4 w-4" />
-                        {isGeneratingDocument ? 'Generating...' : 'Download as Document'}
+                        {isGeneratingDocument
+                          ? 'Generating PDF...'
+                          : 'Download as PDF'}
                       </Button>
                     </div>
                   )
