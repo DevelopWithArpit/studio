@@ -78,7 +78,6 @@ const parseResumeText = (text: string) => {
                     experiences.push(currentExperience);
                 }
                 const parts = line.split('•').map(p => p.trim());
-                // Heuristic: if a line contains date-like patterns or location names, it's likely a details line
                 if (/\d{2}\/\d{4}/.test(line) || parts.length > 1) {
                      if (currentExperience) {
                         currentExperience.date = parts[0] || '';
@@ -92,7 +91,6 @@ const parseResumeText = (text: string) => {
                         location: '',
                         bullets: [],
                     };
-                    // Check for institution on same line or next line
                     const institutionKeywords = ['Priyadarshini College of Engineering'];
                     const foundInstitution = institutionKeywords.find(kw => line.includes(kw));
                     if (foundInstitution) {
@@ -129,7 +127,7 @@ const parseResumeText = (text: string) => {
                  currentProject = {
                     title: line,
                     date: '',
-                    description: '', // Description seems to be part of bullets in the sample
+                    description: '',
                     bullets: [],
                 };
             }
@@ -145,12 +143,12 @@ const parseResumeText = (text: string) => {
         name,
         title,
         contactLine,
-        summary: sections.SUMMARY.join('\n'),
-        experiences: parseExperience(sections.EXPERIENCE),
-        education: sections.EDUCATION,
-        achievements: sections.KEY_ACHIEVEMENTS,
-        skills: sections.SKILLS.join(', ').split(',').map(s => s.trim()).filter(s => s),
-        projects: parseProjects(sections.PROJECTS),
+        summary: (sections.SUMMARY || []).join('\n'),
+        experiences: parseExperience(sections.EXPERIENCE || []),
+        education: sections.EDUCATION || [],
+        achievements: sections.KEY_ACHIEVEMENTS || [],
+        skills: (sections.SKILLS || []).join(', ').split(',').map(s => s.trim()).filter(s => s),
+        projects: parseProjects(sections.PROJECTS || []),
     };
 };
 
