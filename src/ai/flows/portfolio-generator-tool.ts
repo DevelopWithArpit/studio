@@ -84,13 +84,14 @@ Your task is to take the user's structured data and generate the complete HTML, 
   - Generate clean, well-commented, and separate HTML, CSS, and JavaScript files.
   - The CSS should be self-contained and not rely on external frameworks.
   - The JavaScript should be vanilla, without external libraries like jQuery.
+  - Ensure the javascript is correctly implemented to handle all animations, including the smooth scroll, reveal on scroll, and the 3D tilt effect for project cards.
 
 **User's Portfolio Data:**
 ---
 - Name: {{{name}}}
 - Headline: {{{headline}}}
 - Contact Email: {{{contact.email}}}
-- Contact Phone: {{{contact.phone}}}
+{{#if contact.phone}}- Contact Phone: {{{contact.phone}}}{{/if}}
 {{#if contact.socials}}
 - Socials:
 {{#each contact.socials}}
@@ -121,11 +122,10 @@ Your task is to take the user's structured data and generate the complete HTML, 
 {{#each achievements}}
   - {{this}}
 {{/each}}
-//Initial call to reveal function to show elements that are already in view on page load
 {{/if}}
 ---
 
-Generate the complete, ready-to-use code now.`,
+Generate the complete, ready-to-use code now. Make sure the 'reveal' function is called initially to show elements that are already in view on page load.`,
 });
 
 
@@ -140,4 +140,3 @@ const generatePortfolioWebsiteFlow = ai.defineFlow(
     return output!;
   }
 );
-
