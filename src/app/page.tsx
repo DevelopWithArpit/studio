@@ -110,7 +110,7 @@ const tools: ToolConfig[] = [
   },
   {
     id: 'resume-feedback',
-    name: 'Resume & Portfolio',
+    name: 'Resume Feedback',
     icon: FileText,
     component: ResumeFeedbackTool,
   },

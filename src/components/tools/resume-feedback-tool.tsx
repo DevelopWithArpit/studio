@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -10,7 +10,6 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from '@/components/ui/card';
 import {
   Form,
@@ -26,10 +25,9 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { handleGetResumeFeedbackAction, handleGeneratePortfolioAction } from '@/app/actions';
+import { handleGetResumeFeedbackAction } from '@/app/actions';
 import type { GetResumeFeedbackOutput } from '@/ai/flows/resume-feedback-tool';
-import type { GeneratePortfolioOutput } from '@/ai/flows/portfolio-generator-tool';
-import { FileText, UploadCloud, Wand2, Download } from 'lucide-react';
+import { FileText, UploadCloud, Download } from 'lucide-react';
 
 const defaultResumeText = `ARPIT PISE
 AI Engineer / Robotics Software Engineer
@@ -78,11 +76,8 @@ type FormData = z.infer<typeof formSchema>;
 
 export default function ResumeFeedbackTool() {
   const [isLoading, setIsLoading] = useState(false);
-  const [isGeneratingPortfolio, setIsGeneratingPortfolio] = useState(false);
   const [result, setResult] = useState<GetResumeFeedbackOutput | null>(null);
-  const [portfolioResult, setPortfolioResult] = useState<GeneratePortfolioOutput | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
   const { toast } = useToast();
 
   const form = useForm<FormData>({
@@ -118,7 +113,6 @@ export default function ResumeFeedbackTool() {
     }
     setIsLoading(true);
     setResult(null);
-    setPortfolioResult(null);
     const response = await handleGetResumeFeedbackAction(data);
     setIsLoading(false);
 
@@ -133,67 +127,26 @@ export default function ResumeFeedbackTool() {
     }
   }
 
-  async function onGeneratePortfolio() {
-      if (!result?.rewrittenResume) return;
+  const handleDownloadResume = () => {
+    if (!result?.rewrittenResume) return;
 
-      setIsGeneratingPortfolio(true);
-      setPortfolioResult(null);
-      const response = await handleGeneratePortfolioAction({ resumeText: result.rewrittenResume });
-      setIsGeneratingPortfolio(false);
-
-      if (response.success) {
-          setPortfolioResult(response.data);
-      } else {
-          toast({
-              variant: 'destructive',
-              title: 'Error Generating Portfolio',
-              description: response.error,
-          });
-      }
-  }
-
-  const handleDownloadPortfolio = () => {
-    if (!portfolioResult) return;
-
-    const blob = new Blob(
-        [`<!DOCTYPE html>
-<html>
-<head>
-<title>Portfolio</title>
-<style>${portfolioResult.css}</style>
-</head>
-<body>${portfolioResult.html}</body>
-</html>`], 
-        { type: 'text/html' }
-    );
+    const blob = new Blob([result.rewrittenResume], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'portfolio.html';
+    a.download = 'rewritten-resume.txt';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
-  
-  useEffect(() => {
-    if (portfolioResult && iframeRef.current) {
-        iframeRef.current.srcdoc = `
-            <html>
-                <head><style>${portfolioResult.css}</style></head>
-                <body>${portfolioResult.html}</body>
-            </html>
-        `;
-    }
-  }, [portfolioResult]);
-
 
   return (
     <div className="space-y-8">
       <header className="space-y-2">
-        <h1 className="text-3xl font-bold font-headline">Resume & Portfolio Tool</h1>
+        <h1 className="text-3xl font-bold font-headline">Resume Feedback Tool</h1>
         <p className="text-muted-foreground">
-          Get AI-powered feedback to improve your resume, then instantly generate a professional portfolio page.
+          Get AI-powered feedback to improve your resume and boost its ATS score.
         </p>
       </header>
 
@@ -341,9 +294,9 @@ export default function ResumeFeedbackTool() {
                            result && (
                             <div className="space-y-4">
                                 <pre className="bg-muted p-4 rounded-md overflow-x-auto text-sm whitespace-pre-wrap font-sans">{result.rewrittenResume}</pre>
-                                <Button onClick={onGeneratePortfolio} disabled={isGeneratingPortfolio}>
-                                    <Wand2 className="mr-2 h-4 w-4" />
-                                    {isGeneratingPortfolio ? 'Generating Portfolio...' : 'Generate Portfolio from this Resume'}
+                                <Button onClick={handleDownloadResume}>
+                                    <Download className="mr-2 h-4 w-4" />
+                                    Download Rewritten Resume
                                 </Button>
                             </div>
                            )
@@ -351,60 +304,6 @@ export default function ResumeFeedbackTool() {
                     </TabsContent>
                 </Tabs>
             </CardContent>
-        </Card>
-      )}
-
-      {(isGeneratingPortfolio || portfolioResult) && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Generated Portfolio</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="preview">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="preview">Preview</TabsTrigger>
-                <TabsTrigger value="html">HTML</TabsTrigger>
-                <TabsTrigger value="css">CSS</TabsTrigger>
-              </TabsList>
-              <TabsContent value="preview" className="mt-4">
-                {isGeneratingPortfolio ? (
-                  <Skeleton className="w-full h-[600px] rounded-lg" />
-                ) : (
-                  <iframe
-                    ref={iframeRef}
-                    title="Portfolio Preview"
-                    className="w-full h-[600px] rounded-lg border bg-white"
-                  />
-                )}
-              </TabsContent>
-              <TabsContent value="html" className="mt-4">
-                 {isGeneratingPortfolio ? (
-                  <Skeleton className="w-full h-[600px] rounded-lg" />
-                ) : (
-                    <pre className="w-full h-[600px] overflow-auto bg-muted p-4 rounded-md text-sm">
-                        <code className="text-foreground">{portfolioResult?.html}</code>
-                    </pre>
-                )}
-              </TabsContent>
-               <TabsContent value="css" className="mt-4">
-                 {isGeneratingPortfolio ? (
-                  <Skeleton className="w-full h-[600px] rounded-lg" />
-                ) : (
-                    <pre className="w-full h-[600px] overflow-auto bg-muted p-4 rounded-md text-sm">
-                        <code className="text-foreground">{portfolioResult?.css}</code>
-                    </pre>
-                )}
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-          {portfolioResult && (
-            <CardFooter>
-                <Button onClick={handleDownloadPortfolio}>
-                    <Download className="mr-2 h-4 w-4" />
-                    Download Portfolio
-                </Button>
-            </CardFooter>
-          )}
         </Card>
       )}
     </div>
