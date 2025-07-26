@@ -69,40 +69,48 @@ const prompt = ai.definePrompt({
 Your task is to take the user's structured data and generate the complete HTML, CSS, and JavaScript for a portfolio website.
 
 **Design & Animation Requirements:**
-- **Theme:** A sleek, professional dark theme. The primary background color must be #111111.
+- **Theme:** A sleek, professional dark theme. The primary background color must be #0A0A0A.
+- **Ultimate Interactive Particle Background:**
+    - You must create a canvas element that fills the entire background.
+    - On this canvas, you will render a "neural network" or "constellation" of particles.
+    - These particles should drift slowly and randomly.
+    - Crucially, lines must be drawn between particles that are close to each other, and also between particles and the user's cursor. This creates an interactive web effect.
+    - This must be implemented efficiently in vanilla JavaScript to ensure performance.
 - **Kinetic Typography Hero:**
-  - Create a split-screen hero section. The left side will contain large, animated text. The right side will have a silent, autoplaying video background (use a placeholder video: 'https://storage.googleapis.com/gtv-videos-bucket/sample/Abstract_Beauty_15_seconds.mp4').
+  - Create a hero section that takes up the full viewport height.
   - The user's name should be broken into letters, each wrapped in a span. These letters must animate in with a staggered "rise-up" effect.
   - The headline should animate in after the name.
 - **Horizontal Scrolling Projects Section:**
   - This is a critical feature. The projects section must scroll horizontally as the user scrolls vertically.
-  - The section should be pinned while the horizontal content scrolls from right to left.
+  - The section should be "pinned" to the viewport while the horizontal content scrolls from right to left.
   - You must use JavaScript to tie the horizontal scroll position to the vertical scroll progress within that section.
   - Project cards should have a parallax effect, moving at a slightly different speed than the horizontal scroll to create depth.
 - **Magnetic Buttons/Links:**
-  - All major links and buttons must have a "magnetic" effect. When the user's cursor approaches, the button should move slightly towards the cursor.
+  - All major links and buttons (like social media icons or project links) must have a "magnetic" effect. When the user's cursor approaches, the button should move slightly towards the cursor.
   - This requires JavaScript to track the cursor position relative to the button and apply a CSS transform.
 - **General Animations & Polish:**
   - All other sections must have a smooth 'fade-in-up' animation as the user scrolls them into view. Use the Intersection Observer API for performance.
+  - Items within sections (like experience or education entries) should have a staggered animation delay.
   - Create a custom cursor, a small dot that is visible on the page.
 - **Typography:** Use 'Inter' for all text. Import it from Google Fonts in the HTML file's <head>.
 - **Code Structure:**
   - Generate a single, clean HTML file. Do not add comments.
   - All CSS must be inside a <style> tag in the HTML's <head>.
   - All JavaScript must be inside a <script> tag at the end of the <body>. Use vanilla JavaScript only.
-  - The JavaScript must correctly handle the kinetic typography, horizontal scrolling, magnetic elements, custom cursor, and on-scroll reveal animations.
+  - The JavaScript must correctly handle the interactive particle background, kinetic typography, horizontal scrolling, magnetic elements, custom cursor, and on-scroll reveal animations.
 
 **User's Portfolio Data:**
 ---
 - Name: {{{name}}}
 - Headline: {{{headline}}}
 - Contact Email: {{{contact.email}}}
-{{#if contact.phone}}- Contact Phone: {{{contact.phone}}}{{#if contact.socials}}
+{{#if contact.phone}}- Contact Phone: {{{contact.phone}}}{{/if}}
+{{#if contact.socials}}
 - Socials:
 {{#each contact.socials}}
   - {{network}}: {{url}}
 {{/each}}
-{{/if}}{{/if}}
+{{/if}}
 - About Me: {{{about}}}
 - Experience:
 {{#each experience}}
@@ -129,7 +137,7 @@ Your task is to take the user's structured data and generate the complete HTML, 
 {{/if}}
 ---
 
-Generate the complete, ready-to-use portfolio code now. Ensure the JavaScript implementation for horizontal scrolling and magnetic buttons is robust and correct.`,
+Generate the complete, ready-to-use portfolio code now. Ensure the JavaScript implementation for the interactive particle background, horizontal scrolling, and magnetic buttons is robust and correct.`,
 });
 
 
@@ -144,5 +152,3 @@ const generatePortfolioWebsiteFlow = ai.defineFlow(
     return output!;
   }
 );
-
-    
