@@ -60,8 +60,8 @@ export default function DocumentSummarizerTool() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 4 * 1024 * 1024) { // 4MB limit
-        toast({ variant: "destructive", title: "File too large", description: "Please upload a document smaller than 4MB."});
+      if (file.size > 200 * 1024 * 1024) { // 200MB limit
+        toast({ variant: "destructive", title: "File too large", description: "Please upload a document smaller than 200MB."});
         return;
       }
       const reader = new FileReader();
@@ -131,7 +131,7 @@ export default function DocumentSummarizerTool() {
                           </label>
                            {' '}or drag and drop
                         </p>
-                         <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 4MB</p>
+                         <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 200MB</p>
                       </>
                     )}
                     <Input id="file-upload" type="file" className="sr-only" onChange={handleFileChange} />

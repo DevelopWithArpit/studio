@@ -53,8 +53,8 @@ export default function LinkedInVisualsGeneratorTool() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 4 * 1024 * 1024) { // 4MB limit
-        toast({ variant: "destructive", title: "File too large", description: "Please upload an image smaller than 4MB."});
+      if (file.size > 200 * 1024 * 1024) { // 200MB limit
+        toast({ variant: "destructive", title: "File too large", description: "Please upload an image smaller than 200MB."});
         return;
       }
       const reader = new FileReader();
@@ -136,7 +136,7 @@ export default function LinkedInVisualsGeneratorTool() {
                           </label>
                         </p>
                         <Input id="file-upload" type="file" accept="image/*" className="sr-only" onChange={handleFileChange} />
-                         <p className="text-xs text-muted-foreground mt-1">PNG, JPG, GIF up to 4MB</p>
+                         <p className="text-xs text-muted-foreground mt-1">PNG, JPG, GIF up to 200MB</p>
                       </>
                     )}
                   </div>

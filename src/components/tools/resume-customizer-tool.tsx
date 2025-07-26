@@ -68,8 +68,8 @@ export default function ResumeCustomizerTool() {
         setFileName(null);
         form.setValue('resumeDataUri', '');
       
-        if (file.size > 4 * 1024 * 1024) { // 4MB limit
-            toast({ variant: 'destructive', title: 'File too large', description: 'Please upload a file smaller than 4MB.' });
+        if (file.size > 200 * 1024 * 1024) { // 200MB limit
+            toast({ variant: 'destructive', title: 'File too large', description: 'Please upload a file smaller than 200MB.' });
             return;
         }
 
@@ -197,7 +197,7 @@ export default function ResumeCustomizerTool() {
                                 Click to upload
                             </label>
                             </p>
-                            <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 4MB</p>
+                            <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 200MB</p>
                         </>
                         )}
                         <Input id="file-upload" type="file" className="sr-only" onChange={handleFileChange} accept=".pdf,.docx,.doc,.txt" disabled={isParsing} />

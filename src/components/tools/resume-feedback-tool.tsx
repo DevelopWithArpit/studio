@@ -106,11 +106,11 @@ export default function ResumeFeedbackTool() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 4 * 1024 * 1024) {
+      if (file.size > 200 * 1024 * 1024) {
         toast({
           variant: 'destructive',
           title: 'File too large',
-          description: 'Please upload a document smaller than 4MB.',
+          description: 'Please upload a document smaller than 200MB.',
         });
         return;
       }
@@ -311,7 +311,7 @@ export default function ResumeFeedbackTool() {
                               or drag and drop
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              PDF, DOCX, TXT up to 4MB
+                              PDF, DOCX, TXT up to 200MB
                             </p>
                           </>
                         )}
