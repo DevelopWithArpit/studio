@@ -31,16 +31,23 @@ const EducationSchema = z.object({
     dates: z.string().describe("The dates of attendance."),
 });
 
+const SocialLinksSchema = z.object({
+    linkedin: z.string().url().optional().describe("URL to the user's LinkedIn profile."),
+    github: z.string().url().optional().describe("URL to the user's GitHub profile."),
+    twitter: z.string().url().optional().describe("URL to the user's Twitter/X profile."),
+});
+
 
 const GeneratePortfolioWebsiteInputSchema = z.object({
   fullName: z.string().describe('The full name of the user.'),
   headline: z.string().describe('A professional headline (e.g., "Full-Stack Developer | AI Enthusiast").'),
-  about: z.string().describe('A short "About Me" paragraph.'),
+  about: z.string().describe('A detailed "About Me" section, including background, experience, and personal interests.'),
   experience: z.array(ExperienceSchema).describe('An array of the user\'s professional experience.'),
   education: z.array(EducationSchema).describe('An array of the user\'s educational background.'),
   projects: z.array(ProjectSchema).describe('An array of the user\'s projects.'),
-  skills: z.array(z.string()).describe('A list of the user\'s key technical skills.'),
+  skills: z.array(z.string()).describe('A list of the user\'s key technical and professional skills.'),
   contactEmail: z.string().email().describe('The user\'s contact email address.'),
+  socialLinks: SocialLinksSchema.optional().describe("The user's social media links."),
 });
 export type GeneratePortfolioWebsiteInput = z.infer<typeof GeneratePortfolioWebsiteInputSchema>;
 
@@ -67,7 +74,14 @@ Your task is to generate the complete HTML, CSS, and JavaScript code for a portf
 - **Visuals:** Clean, modern aesthetic with a dark theme. Use a professional font like 'Inter' or 'Poppins'.
 - **Animations:** Implement subtle on-scroll reveal animations for sections and project cards. Add a gentle particle effect to the hero section background.
 - **Layout:** The website must be fully responsive and look great on all screen sizes (desktop, tablet, and mobile).
-- **Structure:** Create a single HTML file with sections for Hero (introduction), About, Experience, Education, Projects, Skills, and a Contact footer.
+- **Structure:** Create a single HTML file with a sticky navigation bar and clearly defined sections for:
+    1.  **Hero (Homepage):** A brief introduction with name, headline, and a call-to-action button to the projects section.
+    2.  **About:** A detailed section with biography and personal interests.
+    3.  **Experience:** A timeline or list of professional roles.
+    4.  **Education:** A list of educational qualifications.
+    5.  **Projects:** A grid of project cards, each with an image, title, description, and link.
+    6.  **Skills:** A section to display technical and professional skills.
+    7.  **Contact:** A footer with contact email and social media links.
 - **Code:** Generate clean, well-commented, and separate HTML, CSS, and JavaScript code. The CSS should be self-contained and not rely on external frameworks like Tailwind or Bootstrap. The JS should be vanilla JavaScript, not using jQuery or other libraries.
 
 **User Information:**
@@ -75,6 +89,13 @@ Your task is to generate the complete HTML, CSS, and JavaScript code for a portf
 - **Headline:** {{{headline}}}
 - **About Me:** {{{about}}}
 - **Contact Email:** {{{contactEmail}}}
+{{#if socialLinks}}
+- **Social Links:**
+  {{#if socialLinks.linkedin}}- LinkedIn: {{{socialLinks.linkedin}}}{{/if}}
+  {{#if socialLinks.github}}- GitHub: {{{socialLinks.github}}}{{/if}}
+  {{#if socialLinks.twitter}}- Twitter: {{{socialLinks.twitter}}}{{/if}}
+{{/if}}
+
 
 **Experience:**
 {{#each experience}}

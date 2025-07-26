@@ -54,6 +54,12 @@ const educationSchema = z.object({
   dates: z.string().min(1, 'Dates are required.'),
 });
 
+const socialLinksSchema = z.object({
+    linkedin: z.string().url().optional().or(z.literal('')),
+    github: z.string().url().optional().or(z.literal('')),
+    twitter: z.string().url().optional().or(z.literal('')),
+});
+
 const formSchema = z.object({
   fullName: z.string().min(1, 'Full name is required.'),
   headline: z.string().min(1, 'Headline is required.'),
@@ -63,6 +69,7 @@ const formSchema = z.object({
   projects: z.array(projectSchema).min(1, 'At least one project is required.'),
   skills: z.string().min(1, 'Please list at least one skill.'),
   contactEmail: z.string().email('Must be a valid email.'),
+  socialLinks: socialLinksSchema.optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -106,6 +113,11 @@ export default function PortfolioGeneratorTool() {
       ],
       skills: 'Python, TensorFlow, PyTorch, C++, ROS, Docker, JavaScript',
       contactEmail: 'arpitpise1@gmail.com',
+      socialLinks: {
+        linkedin: 'https://www.linkedin.com/in/arpit-pise-20029a287/',
+        github: 'https://github.com/DevelopWithArpit',
+        twitter: '',
+      }
     },
   });
 
@@ -240,6 +252,8 @@ export default function PortfolioGeneratorTool() {
           const { rewrittenResume } = response.data;
           form.setValue('fullName', rewrittenResume.name);
           form.setValue('contactEmail', rewrittenResume.contact.email);
+          form.setValue('socialLinks.linkedin', rewrittenResume.contact.linkedin);
+          form.setValue('socialLinks.github', rewrittenResume.contact.github);
           form.setValue('about', rewrittenResume.summary);
           
           if(rewrittenResume.experience.length > 0) {
@@ -402,6 +416,20 @@ export default function PortfolioGeneratorTool() {
                     </FormItem>
                   )}
                 />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Social Links</CardTitle>
+              <CardDescription>Add links to your social media profiles.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <FormField control={form.control} name="socialLinks.linkedin" render={({ field }) => (<FormItem><FormLabel>LinkedIn</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField control={form.control} name="socialLinks.github" render={({ field }) => (<FormItem><FormLabel>GitHub</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField control={form.control} name="socialLinks.twitter" render={({ field }) => (<FormItem><FormLabel>Twitter / X</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>)} />
+                </div>
             </CardContent>
           </Card>
 
