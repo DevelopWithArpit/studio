@@ -34,49 +34,28 @@ import type { GetResumeFeedbackOutput } from '@/ai/flows/resume-feedback-tool';
 import { FileText, UploadCloud, Download, FileCode } from 'lucide-react';
 import { ResumeTemplate } from '@/components/resume-template';
 
-const defaultResumeText = `ARPIT PISE
-AI Engineer / Robotics Software Engineer
-7276602831 | arpitpise1@gmail.com | linkedin.com/in/arpit-pise-20029a287 | Nagpur, India
+const defaultResumeText = `Arpit Pise
+(727) 660-2831 | arpitpise1@gmail.com | linkedin.com/in/arpit-pise-20029a287 | Nagpur, India
 
 SUMMARY
-As a B.Tech student specializing in Robotics and Artificial Intelligence, I am dedicated to crafting cutting-edge AI solutions. My expertise in Python, Java, and C++ complements my projects, notably leading the successful development of the AI Mentor platform. I am eager to apply my skills in an AI Engineer or Robotics Software Engineer role to contribute to advanced technological innovations.
+Enthusiastic B.Tech student in Robotics and Artificial Intelligence seeking an Al Engineer or Robotics Software Engineer role. Expertise in Python, Java, and C++. Proven ability to develop and implement Al solutions, demonstrated by leading the development of an Al Mentor platform and achieving a 30% increase in user engagement. Passionate about leveraging technical skills to develop advanced Al and robotic systems and contribute to innovative solutions.
 
 EXPERIENCE
-Technical Member
-Priyadarshini College of Engineering
-01/2023 - 01/1970 • Nagpur, India
-• Collaborated in the organization of 5+ technical events and workshops, resulting in a 50% increase in student participation and boosting engagement with technical subjects.
-• Implemented an online registration system using PHP and MySQL, decreasing average registration wait times by 85% (from 20 minutes to 3 minutes) and enhancing user satisfaction.
-• Developed and maintained the college committee website using HTML, CSS, and JavaScript, leading to a 30% increase in event promotion click-through rates and improved event visibility.
-
-EDUCATION
-Bachelor of Technology in Robotics and Artificial Intelligence (B.Tech)
-Priyadarshini College Of Engineering
-08/2024 - 05/2028 • Nagpur, India
-
-HSC
-ST. PAUL PUBLIC SCHOOL & JUNIOR COLLEGE
-01/2021 - 05/2023
-
-SSC
-PURUSHOTTAM DAS BAGLA CONVENT
-01/2019 - 05/2021
-
-KEY ACHIEVEMENTS
-AI Mentor by AP Platform Development
-Led the development of the AI Mentor by AP platform, achieving a 30% increase in user engagement within the first month through personalized learning experiences.
+Cybersecurity Consulting Team Member | Tata Consultancy Services | June 2023
+• Completed a job simulation involving identity and access management (IAM) for Tata Consultancy Services, collaborating with a Cybersecurity Consulting team.
+• Acquired expertise in IAM principles, cybersecurity best practices, and strategic alignment with business objectives.
+• Delivered comprehensive documentation and presentations, showcasing the ability to communicate complex technical concepts effectively.
+Software Engineer | Electronic Arts | June 2023
+• Proposed a new feature for the EA Sports College Football and wrote a Feature Proposal describing it to other stakeholders.
+• Built a class diagram and created a header file in C++ with class
 
 SKILLS
-AWS, Azure, C/C++, CSS, Data Structures, Deep Learning, Django, Docker, Flask, GAMS, Git, HTML, Java, JavaScript, Keras, Linux, NLP, Numpy, Pandas, PHP, Python, PyTorch, Robotics, Scikit-Learn, TensorFlow, Gmail
-
-PROJECTS
-AI Mentor by AP
-05/2025 - 01/1970
-AI Mentor by AP - Personal Project
-• Spearheaded the development of an AI-powered platform offering personalized learning and career guidance, resulting in a 30% increase in user engagement within the first month.
-• Engineered and implemented AI-driven tools for resume and cover letter creation, career path recommendations, and code/DSA assistance, boosting user productivity by 25% through reduced task completion times.
-• Integrated AI-powered image generation (Stable Diffusion, DALL-E), text-based image editing, diagram generation, and presentation assistance features, optimizing user workflows and enabling data-driven decision-making.
-• Designed the platform with a user-centric approach, seamlessly integrating diverse AI functionalities into a single, intuitive interface, promoting enhanced learning, creativity, and career progression.`;
+Programming Languages: Python, Java, C++, C, HTML, JavaScript
+AI/ML: TensorFlow, Keras, PyTorch, Scikit-learn, OpenAI API, Machine Learning, Deep Learning, Computer Vision
+Natural Language Processing
+Generative Al (GANs): Transformers, VAEs
+Other: Git, Linux, Docker, ROS (Robot Operating System)
+AWS, Azure, PHP, MySQL, IAM, Cybersecurity, C++ Class Definitions, Robotics, Control Systems, Surgical Robotics`;
 
 const formSchema = z.object({
   resume: z.string().min(1, 'Please upload or paste your resume.'),
@@ -151,19 +130,33 @@ export default function ResumeFeedbackTool() {
   const getResumeHtml = (resumeText: string): Promise<string> => {
     return new Promise((resolve) => {
         const container = document.createElement('div');
-        container.style.position = 'absolute';
-        container.style.left = '-9999px';
+        // Don't hide the container, just give it a specific size for rendering
+        container.style.width = '8.5in';
+        container.style.height = '11in';
+
         document.body.appendChild(container);
         
         const root = createRoot(container);
         root.render(<ResumeTemplate resumeText={resumeText} />);
 
-        // Give react time to render
         setTimeout(() => {
             const html = container.innerHTML;
             root.unmount();
             document.body.removeChild(container);
-            resolve(html);
+            resolve(`<!DOCTYPE html>
+<html>
+<head>
+  <title>Resume</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .skill-badge { display: inline-block; background-color: #f3f4f6; color: #374151; font-size: 10px; font-weight: 500; padding: 2px 8px; margin: 2px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  ${html}
+</body>
+</html>`);
         }, 500);
     });
   };
@@ -173,9 +166,8 @@ export default function ResumeFeedbackTool() {
 
     setIsGeneratingPdf(true);
     const element = document.createElement('div');
-    element.style.position = 'absolute';
-    element.style.left = '-9999px';
-    element.style.width = '827px'; // A4 width in pixels at 96 DPI
+    element.style.width = '816px'; // 8.5 inches at 96 DPI
+    element.style.height = '1056px'; // 11 inches at 96 DPI
     document.body.appendChild(element);
 
     const root = createRoot(element);
@@ -183,7 +175,7 @@ export default function ResumeFeedbackTool() {
 
     setTimeout(async () => {
          try {
-            const canvas = await html2canvas(element, { scale: 3, useCORS: true, windowWidth: 1200 });
+            const canvas = await html2canvas(element, { scale: 3, useCORS: true, windowWidth: element.scrollWidth, windowHeight: element.scrollHeight });
             const imgData = canvas.toDataURL('image/png');
 
             const pdf = new jsPDF({ orientation: 'p', unit: 'px', format: 'a4' });
@@ -198,14 +190,14 @@ export default function ResumeFeedbackTool() {
             document.body.removeChild(element);
             setIsGeneratingPdf(false);
           }
-    }, 500)
+    }, 1000) // Increased timeout for rendering
   };
 
   const handleDownloadHtml = async () => {
     if (!result?.rewrittenResume) return;
     setIsGeneratingHtml(true);
     const htmlContent = await getResumeHtml(result.rewrittenResume);
-    const blob = new Blob([`<!DOCTYPE html><html><head><title>Resume</title><link rel="stylesheet" href="https://rsms.me/inter/inter.css"></head><body>${htmlContent}</body></html>`], { type: 'text/html;charset=utf-8' });
+    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
     saveAs(blob, 'resume.html');
     setIsGeneratingHtml(false);
   };
@@ -399,7 +391,7 @@ export default function ResumeFeedbackTool() {
                 ) : (
                   result && (
                     <div className="space-y-4">
-                       <div className="border rounded-lg bg-white max-h-[600px] overflow-y-auto">
+                       <div className="border rounded-lg bg-white max-h-[700px] overflow-y-auto">
                           <ResumeTemplate resumeText={result.rewrittenResume} />
                       </div>
                       <div className="flex flex-wrap gap-2">

@@ -2,321 +2,174 @@
 import React from 'react';
 
 interface Experience {
-    role: string;
-    institution: string;
-    date: string;
-    location: string;
-    bullets: string[];
-}
-
-interface Project {
     title: string;
-    date: string;
-    description: string;
+    details: string;
     bullets: string[];
 }
 
-const parseResumeText = (text: string) => {
-    // 1. Initial Cleaning
-    const lines = text.split('\n')
-        .map(line => line.replace(/^#+\s*/, '').trim())
-        .filter(line => line.trim() !== '');
+interface Skills {
+    [category: string]: string[];
+}
 
-    let name = '';
-    let title = '';
-    let contactLine = '';
-    const sections: Record<string, string[]> = {};
-    const sectionHeaders = [
-        'SUMMARY',
-        'EXPERIENCE',
-        'EDUCATION',
-        'KEY ACHIEVEMENTS',
-        'SKILLS',
-        'PROJECTS',
-    ];
-
-    // Find first section header to separate personal info from the rest
-    let firstSectionIndex = -1;
-    for(let i = 0; i < lines.length; i++) {
-        const upperLine = lines[i].toUpperCase();
-        if(sectionHeaders.includes(upperLine)) {
-            firstSectionIndex = i;
-            break;
-        }
-    }
-
-    if (firstSectionIndex !== -1) {
-        const personalInfoLines = lines.slice(0, firstSectionIndex);
-        name = personalInfoLines[0] || '';
-        title = personalInfoLines[1] || '';
-        contactLine = personalInfoLines[2] || '';
-    } else {
-         // Fallback if no sections are found
-        name = lines[0] || '';
-        title = lines[1] || '';
-        contactLine = lines[2] || '';
-    }
+interface ResumeData {
+    name: string;
+    contact: string;
+    summary: string;
+    experience: Experience[];
+    skills: Skills;
+}
 
 
-    let currentSection: string | null = null;
-    for (const line of lines) {
-        const upperLine = line.trim().toUpperCase();
-        const foundHeader = sectionHeaders.find(h => upperLine === h);
-
-        if (foundHeader) {
-            currentSection = foundHeader;
-            sections[currentSection] = [];
-        } else if (currentSection) {
-            sections[currentSection].push(line);
-        }
-    }
+const parseResumeText = (text: string): ResumeData => {
+    const lines = text.split('\n').map(line => line.trim()).filter(line => line);
     
-    const parseExperience = (expLines: string[]): Experience[] => {
-        if (!expLines) return [];
-        const experiences: Experience[] = [];
-        let currentExperience: Experience | null = null;
-    
-        for (const line of expLines) {
-            if (line.trim().startsWith('•')) {
-                if (currentExperience) {
-                    currentExperience.bullets.push(line.trim().substring(1).trim());
-                }
-            } else { // This line is a header (Role, Institution, Date, Location)
-                if (currentExperience) {
-                    experiences.push(currentExperience);
-                }
-                 const parts = line.split('•').map(p => p.trim());
-                 currentExperience = {
-                    role: parts[0] || '',
-                    institution: parts[0] || '', // Simplified, assuming role is the main identifier
-                    date: parts[1] || '',
-                    location: parts[2] || '',
-                    bullets: [],
-                };
-            }
-        }
-        if (currentExperience) {
-            experiences.push(currentExperience);
-        }
-        return experiences;
+    const data: ResumeData = {
+        name: '',
+        contact: '',
+        summary: '',
+        experience: [],
+        skills: {},
     };
-    
-    const parseProjects = (projLines: string[]): Project[] => {
-         if (!projLines) return [];
-        const projects: Project[] = [];
-        let currentProject: Project | null = null;
 
-        for (const line of projLines) {
-            if (line.trim().startsWith('•')) {
-                 if (currentProject) {
-                    currentProject.bullets.push(line.trim().substring(1).trim());
-                }
-            } else {
-                 if (currentProject) {
-                    projects.push(currentProject);
-                }
-                const dateMatch = line.match(/\d{2}\/\d{4}.*/);
-                let title = line;
-                let date = '';
-                if(dateMatch){
-                    title = line.substring(0, dateMatch.index).trim();
-                    date = dateMatch[0].trim();
-                }
+    let currentSection = '';
+    let currentExperience: Experience | null = null;
+    let currentSkillCategory = '';
 
-                 currentProject = {
-                    title: title,
-                    date: date,
-                    description: '', // Description not clearly separated in source
-                    bullets: [],
-                };
+    const sectionHeaders = ['SUMMARY', 'EXPERIENCE', 'SKILLS'];
+
+    data.name = lines[0] || '';
+    data.contact = lines[1] || '';
+
+    for (let i = 2; i < lines.length; i++) {
+        const line = lines[i];
+        
+        const header = sectionHeaders.find(h => line.toUpperCase().startsWith(h));
+        if (header) {
+            currentSection = header;
+            if (header === 'EXPERIENCE') {
+                currentExperience = null;
             }
+            continue;
         }
-        if (currentProject) {
-            projects.push(currentProject);
+
+        switch (currentSection) {
+            case 'SUMMARY':
+                data.summary += (data.summary ? ' ' : '') + line;
+                break;
+            case 'EXPERIENCE':
+                if (line.startsWith('•') || line.startsWith('*')) {
+                    if (currentExperience) {
+                        currentExperience.bullets.push(line.substring(1).trim());
+                    }
+                } else {
+                    if (currentExperience) {
+                        data.experience.push(currentExperience);
+                    }
+                    const parts = line.split('|').map(p => p.trim());
+                    currentExperience = {
+                        title: parts[0] || '',
+                        details: parts.slice(1).join(' | '),
+                        bullets: [],
+                    };
+                }
+                break;
+            case 'SKILLS':
+                 if (line.includes(':')) {
+                    const parts = line.split(':');
+                    currentSkillCategory = parts[0].trim();
+                    data.skills[currentSkillCategory] = parts[1].split(',').map(s => s.trim()).filter(s => s);
+                 } else if (currentSkillCategory) {
+                    // This line is a continuation of the previous category
+                    const newSkills = line.split(',').map(s => s.trim()).filter(s => s);
+                    data.skills[currentSkillCategory] = [...(data.skills[currentSkillCategory] || []), ...newSkills];
+                 }
+                break;
         }
-        return projects;
     }
 
-
-    return {
-        name,
-        title,
-        contactLine,
-        summary: (sections.SUMMARY || []).join('\n'),
-        experiences: parseExperience(sections.EXPERIENCE || []),
-        education: (sections.EDUCATION || []),
-        achievements: (sections.KEY_ACHIEVEMENTS || []),
-        skills: (sections.SKILLS || []).join(', ').split(',').map(s => s.trim()).filter(s => s),
-        projects: parseProjects(sections.PROJECTS || []),
-    };
+    if (currentExperience) {
+        data.experience.push(currentExperience);
+    }
+    
+    return data;
 };
 
+
 const BulletList = ({ items }: { items: string[] }) => {
-    if(!items) return null;
+    if (!items || items.length === 0) return null;
     return (
-        <ul className="list-disc pl-5 mt-2 space-y-1">
+        <ul style={{ margin: '4px 0 0 20px', paddingLeft: '1em', listStyleType: 'disc' }}>
             {items.map((item, index) => (
-                <li key={index} className="text-gray-700 text-xs leading-snug">{item.replace(/^•\s*/, '')}</li>
+                <li key={index} style={{ fontSize: '9pt', lineHeight: '1.4', color: '#374151', paddingLeft: '0.5em' }}>
+                    {item}
+                </li>
             ))}
         </ul>
-    )
+    );
 };
 
 export const ResumeTemplate: React.FC<{ resumeText: string }> = ({ resumeText }) => {
-    const { name, title, contactLine, summary, experiences, education, achievements, skills, projects } = parseResumeText(resumeText);
-    const contactParts = contactLine.split('|').map(p => p.trim());
-    const [phone, email, linkedin, location] = contactParts;
-
-    const initials = name.split(' ').map(n => n[0]).join('');
+    const data = parseResumeText(resumeText);
+    const initials = data.name.split(' ').map(n => n[0]).join('').substring(0, 2);
 
     return (
-        <div style={{ fontFamily: "'Inter', sans-serif", backgroundColor: '#fff', color: '#1f2937', padding: '2rem' }}>
-            <div className="max-w-4xl mx-auto text-sm">
-                
-                <header className="flex items-start justify-between pb-4">
-                    <div>
-                        <h1 className="text-4xl font-bold tracking-tight text-gray-800">{name}</h1>
-                        <h2 className="text-lg font-semibold text-blue-600 mt-1">{title}</h2>
-                        <div className="flex items-center text-xs text-gray-500 mt-3 space-x-4">
-                            {phone && <span className="flex items-center gap-1.5">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                                {phone}
-                            </span>}
-                            {email && <span className="flex items-center gap-1.5">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-                                {email}
-                            </span>}
-                            {linkedin && <span className="flex items-center gap-1.5">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
-                                {linkedin}
-                            </span>}
-                            {location && <span className="flex items-center gap-1.5">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                                {location}
-                            </span>}
-                        </div>
-                    </div>
-                     <div className="flex-shrink-0">
-                        <div className="w-24 h-24 bg-blue-600 rounded-full flex items-center justify-center">
-                            <span className="text-white text-4xl font-bold">{initials}</span>
-                        </div>
-                    </div>
-                </header>
-                
-                <main className="flex gap-10 pt-5">
-                    <div className="w-[65%]">
-                        {summary && <section>
-                            <h3 className="text-sm font-extrabold uppercase tracking-widest text-gray-700">Summary</h3>
-                            <div className="w-full h-px bg-gray-900 my-1" style={{borderWidth: '1.5px'}}></div>
-                            <p className="mt-2 text-gray-600 leading-relaxed text-xs">{summary}</p>
-                        </section>}
+        <div style={{ fontFamily: "'Inter', sans-serif", backgroundColor: '#fff', color: '#111827', padding: '40px', width: '816px', height: '1056px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column' }}>
+            
+            <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid #e5e7eb', paddingBottom: '16px' }}>
+                <div>
+                    <h1 style={{ fontSize: '28pt', fontWeight: '900', margin: 0, letterSpacing: '-1px' }}>{data.name}</h1>
+                    <p style={{ fontSize: '9pt', color: '#4b5563', margin: '4px 0 0 0' }}>{data.contact}</p>
+                </div>
+                <div style={{ flexShrink: 0, width: '60px', height: '60px', borderRadius: '50%', backgroundColor: '#2563eb', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ fontSize: '24pt', fontWeight: 'bold' }}>{initials}</span>
+                </div>
+            </header>
 
-                        {experiences && experiences.length > 0 && <section className="mt-6">
-                            <h3 className="text-sm font-extrabold uppercase tracking-widest text-gray-700">Experience</h3>
-                            <div className="w-full h-px bg-gray-900 my-1" style={{borderWidth: '1.5px'}}></div>
-                            <div className="mt-2 space-y-4">
-                                {experiences.map((exp, i) => (
-                                    <div key={i} className="text-xs">
-                                        <p className="font-bold text-gray-800 text-sm">{exp.role}</p>
-                                        <p className="font-semibold text-blue-600 text-xs">{exp.institution}</p>
-                                        <div className="flex text-gray-500 my-1 space-x-4">
-                                            {exp.date && <span className='flex items-center gap-1.5'>
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                                                {exp.date}
-                                            </span>}
-                                            {exp.location && <span className='flex items-center gap-1.5'>
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                                                {exp.location}
-                                            </span>}
-                                        </div>
-                                        <BulletList items={exp.bullets} />
-                                    </div>
-                                ))}
-                            </div>
-                        </section>}
+            <main style={{ display: 'flex', flexGrow: 1, paddingTop: '24px', gap: '40px' }}>
+                {/* Left Column */}
+                <div style={{ width: '65%' }}>
+                    {data.summary && (
+                        <section>
+                            <h2 style={{ fontSize: '10pt', fontWeight: 'bold', textTransform: 'uppercase', color: '#374151', letterSpacing: '1px', borderBottom: '2px solid #111827', paddingBottom: '4px', marginBottom: '8px' }}>Summary</h2>
+                            <p style={{ fontSize: '9pt', color: '#374151', lineHeight: '1.5' }}>{data.summary}</p>
+                        </section>
+                    )}
 
-                        {education && education.length > 0 && <section className="mt-6">
-                            <h3 className="text-sm font-extrabold uppercase tracking-widest text-gray-700">Education</h3>
-                            <div className="w-full h-px bg-gray-900 my-1" style={{borderWidth: '1.5px'}}></div>
-                            <div className="mt-2 space-y-4 text-xs">
-                                {education.map((edu, i) => {
-                                    const lines = edu.split('\n');
-                                    const [degree, institution, details] = lines;
-                                    const [date, location] = details ? details.split('•').map(s => s.trim()) : ['', ''];
-                                    return (
-                                        <div key={i}>
-                                            <p className="font-bold text-gray-800 text-sm">{degree}</p>
-                                            <p className="font-semibold text-blue-600 text-xs">{institution}</p>
-                                            {details && <div className="flex text-gray-500 mt-1 space-x-4">
-                                                 <span className='flex items-center gap-1.5'>
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                                                    {date}
-                                                </span>
-                                                <span className='flex items-center gap-1.5'>
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                                                    {location}
-                                                </span>
-                                            </div>}
-                                        </div>
-                                    )
-                                })}
-                            </div>
-                        </section>}
-                    </div>
+                    {data.experience.length > 0 && (
+                        <section style={{ marginTop: '24px' }}>
+                            <h2 style={{ fontSize: '10pt', fontWeight: 'bold', textTransform: 'uppercase', color: '#374151', letterSpacing: '1px', borderBottom: '2px solid #111827', paddingBottom: '4px', marginBottom: '8px' }}>Experience</h2>
+                            {data.experience.map((exp, i) => (
+                                <div key={i} style={{ marginBottom: i < data.experience.length - 1 ? '16px' : '0' }}>
+                                    <h3 style={{ fontSize: '10pt', fontWeight: 'bold', margin: 0 }}>{exp.title}</h3>
+                                    <p style={{ fontSize: '9pt', color: '#4b5563', margin: '2px 0 0 0' }}>{exp.details}</p>
+                                    <BulletList items={exp.bullets} />
+                                </div>
+                            ))}
+                        </section>
+                    )}
+                </div>
 
-                    <div className="w-[35%]">
-                         {achievements && achievements.length > 0 && <section>
-                            <h3 className="text-sm font-extrabold uppercase tracking-widest text-gray-700">Key Achievements</h3>
-                             <div className="w-full h-px bg-gray-900 my-1" style={{borderWidth: '1.5px'}}></div>
-                            <div className="mt-2 space-y-3">
-                                {achievements.map((ach, i) => (
-                                    <div key={i} className="flex items-start gap-3 text-xs">
-                                        <div className="flex-shrink-0 text-blue-500 mt-0.5">
-                                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-                                        </div>
-                                        <div>
-                                            <p className="font-bold text-gray-800">{ach.split('\n')[0]}</p>
-                                            <p className="text-gray-600 leading-snug">{ach.split('\n').slice(1).join('\n')}</p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </section>}
-
-                        {skills && skills.length > 0 && <section className="mt-6">
-                            <h3 className="text-sm font-extrabold uppercase tracking-widest text-gray-700">Skills</h3>
-                            <div className="w-full h-px bg-gray-900 my-1" style={{borderWidth: '1.5px'}}></div>
-                            <div className="mt-2 flex flex-wrap gap-2 text-xs">
-                                {skills.map((skill, i) => (
-                                    <span key={i} className="bg-gray-100 text-gray-700 font-medium px-2.5 py-1 rounded-md border border-gray-200">{skill.trim()}</span>
-                                ))}
-                            </div>
-                        </section>}
-
-                         {projects && projects.length > 0 && <section className="mt-6">
-                            <h3 className="text-sm font-extrabold uppercase tracking-widest text-gray-700">Projects</h3>
-                            <div className="w-full h-px bg-gray-900 my-1" style={{borderWidth: '1.5px'}}></div>
-                            <div className="mt-2 space-y-4">
-                                {projects.map((proj, i) => (
-                                    <div key={i} className="text-xs">
-                                        <p className="font-bold text-gray-800">{proj.title}</p>
-                                        {proj.date && (
-                                            <div className="flex text-gray-500 my-1 space-x-4">
-                                            <span className='flex items-center gap-1.5'>
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                                                {proj.date}
+                {/* Right Column */}
+                <div style={{ width: '35%', borderLeft: '1px solid #e5e7eb', paddingLeft: '40px' }}>
+                     {Object.keys(data.skills).length > 0 && (
+                        <section>
+                            <h2 style={{ fontSize: '10pt', fontWeight: 'bold', textTransform: 'uppercase', color: '#374151', letterSpacing: '1px', borderBottom: '2px solid #111827', paddingBottom: '4px', marginBottom: '8px' }}>Skills</h2>
+                            {Object.entries(data.skills).map(([category, skills]) => (
+                                <div key={category} style={{ marginBottom: '12px' }}>
+                                    <h3 style={{ fontSize: '9pt', fontWeight: 'bold', margin: '0 0 4px 0' }}>{category}:</h3>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                                        {skills.map((skill, i) => (
+                                            <span key={i} className="skill-badge">
+                                                {skill}
                                             </span>
-                                        </div>
-                                        )}
-                                        {proj.description && <p className="text-gray-600 leading-snug">{proj.description}</p>}
-                                        <BulletList items={proj.bullets} />
+                                        ))}
                                     </div>
-                                ))}
-                            </div>
-                        </section>}
-                    </div>
-                </main>
-            </div>
+                                </div>
+                            ))}
+                        </section>
+                    )}
+                </div>
+            </main>
         </div>
     );
 };
