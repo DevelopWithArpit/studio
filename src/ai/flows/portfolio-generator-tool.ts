@@ -68,18 +68,30 @@ const prompt = ai.definePrompt({
 Your task is to take the user's structured data and generate the complete HTML, CSS, and JavaScript code for a portfolio website.
 
 **Design Requirements:**
-- **Visuals:** Clean, modern aesthetic with a dark theme. Use a professional font like 'Inter' or 'Poppins'.
-- **Animations:** Implement subtle on-scroll reveal animations for sections and project cards. Add a gentle particle effect to the hero section background.
-- **Layout:** The website must be fully responsive and look great on all screen sizes (desktop, tablet, and mobile).
-- **Structure:** Create a single HTML file with a sticky navigation bar and clearly defined sections for:
-    1.  **Homepage (Hero):** A brief introduction with name and headline. If headline is empty, create one from the 'about' section.
-    2.  **About:** The user's biography.
-    3.  **Experience:** A timeline or list of professional roles. For each role, use the provided description.
-    4.  **Education:** A list of educational qualifications.
-    5.  **Projects:** A grid of project cards. For each project, use the provided description. Each card should have a title, description, and link. Use placeholder images (e.g., https://placehold.co/600x400) if no image URL is provided.
-    6.  **Skills:** A section to display technical skills.
-    7.  **Contact:** A footer with contact email and social media links.
-- **Code:** Generate clean, well-commented, and separate HTML, CSS, and JavaScript code. The CSS should be self-contained and not rely on external frameworks like Bootstrap. The JS should be vanilla JavaScript, not using jQuery or other libraries.
+- **Visuals:** Create a visually stunning, premium website.
+  - **Theme:** Use a dark theme.
+  - **Background:** The hero section should feature a subtle, slowly animating gradient background.
+  - **Cards:** Employ a 'glassmorphism' effect for cards (background blur, transparency, subtle border) to create a modern, layered look.
+  - **Typography:** Use a professional and clean font pairing like 'Poppins' for headings and 'Inter' for body text.
+- **Animations & Interactivity:**
+  - **On-Scroll:** Implement smooth, subtle 'reveal' animations for sections and cards as the user scrolls.
+  - **Hover Effects:** Add interactive hover effects to project cards (e.g., slight lift, glowing border) and buttons to make the site feel alive.
+  - **Hero Animation:** Include a gentle particle animation effect in the hero section background.
+- **Layout:**
+  - The website must be fully responsive and look exceptional on all screen sizes (desktop, tablet, and mobile).
+  - Create a single HTML file with a sticky navigation bar that smoothly scrolls to the corresponding sections.
+- **Structure:**
+  - **Homepage (Hero):** A powerful introduction with name and headline. If the headline is empty, create one from the 'about' section.
+  - **About:** The user's biography.
+  - **Experience:** A timeline or list of professional roles.
+  - **Education:** A list of educational qualifications.
+  - **Projects:** A grid of project cards. Each card should have a title, description, and link. Use placeholder images (e.g., https://placehold.co/600x400) if no image URL is provided.
+  - **Skills:** A section to display technical skills.
+  - **Contact:** A footer with contact email and social media links.
+- **Code:**
+  - Generate clean, well-commented, and separate HTML, CSS, and JavaScript files.
+  - The CSS should be self-contained and not rely on external frameworks.
+  - The JavaScript should be vanilla, without external libraries like jQuery.
 
 **User's Portfolio Data:**
 ---
