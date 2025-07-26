@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { saveAs } from 'file-saver';
 import {
   Card,
   CardContent,
@@ -25,9 +26,13 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { handleGetResumeFeedbackAction } from '@/app/actions';
+import {
+  handleGetResumeFeedbackAction,
+  handleGeneratePortfolioAction,
+} from '@/app/actions';
 import type { GetResumeFeedbackOutput } from '@/ai/flows/resume-feedback-tool';
-import { FileText, UploadCloud, Download } from 'lucide-react';
+import type { GeneratePortfolioOutput } from '@/ai/flows/portfolio-generator-tool';
+import { FileText, UploadCloud, Download, FileCode } from 'lucide-react';
 
 const defaultResumeText = `ARPIT PISE
 AI Engineer / Robotics Software Engineer
@@ -67,7 +72,7 @@ SKILLS
 AWS, Azure, C/C++, CSS, Data Structures, Deep Learning, Django, Docker, Flask, Git, HTML, Java, JavaScript, Keras, Linux, NLP, Numpy, Pandas, PHP, Python, PyTorch, Robotics, Scikit-Learn, TensorFlow, Gmail`;
 
 const formSchema = z.object({
-  resume: z.string().min(1, "Please upload or paste your resume."),
+  resume: z.string().min(1, 'Please upload or paste your resume.'),
   targetJobRole: z.string().optional(),
   additionalInfo: z.string().optional(),
 });
@@ -76,8 +81,10 @@ type FormData = z.infer<typeof formSchema>;
 
 export default function ResumeFeedbackTool() {
   const [isLoading, setIsLoading] = useState(false);
+  const [isGeneratingDocument, setIsGeneratingDocument] = useState(false);
   const [result, setResult] = useState<GetResumeFeedbackOutput | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
+  const [portfolio, setPortfolio] = useState<GeneratePortfolioOutput | null>(null);
   const { toast } = useToast();
 
   const form = useForm<FormData>({
@@ -92,8 +99,12 @@ export default function ResumeFeedbackTool() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 4 * 1024 * 1024) { // 4MB limit
-        toast({ variant: "destructive", title: "File too large", description: "Please upload a document smaller than 4MB."});
+      if (file.size > 4 * 1024 * 1024) {
+        toast({
+          variant: 'destructive',
+          title: 'File too large',
+          description: 'Please upload a document smaller than 4MB.',
+        });
         return;
       }
       const reader = new FileReader();
@@ -108,11 +119,15 @@ export default function ResumeFeedbackTool() {
 
   async function onSubmit(data: FormData) {
     if (!data.resume) {
-        form.setError("resume", { type: "manual", message: "Please upload or paste your resume." });
-        return;
+      form.setError('resume', {
+        type: 'manual',
+        message: 'Please upload or paste your resume.',
+      });
+      return;
     }
     setIsLoading(true);
     setResult(null);
+    setPortfolio(null);
     const response = await handleGetResumeFeedbackAction(data);
     setIsLoading(false);
 
@@ -127,26 +142,49 @@ export default function ResumeFeedbackTool() {
     }
   }
 
-  const handleDownloadResume = () => {
+  const handleGenerateDocument = async () => {
     if (!result?.rewrittenResume) return;
 
-    const blob = new Blob([result.rewrittenResume], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'rewritten-resume.txt';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    setIsGeneratingDocument(true);
+    const response = await handleGeneratePortfolioAction({
+      resumeText: result.rewrittenResume,
+    });
+    setIsGeneratingDocument(false);
+
+    if (response.success && response.data) {
+        const fullHtml = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resume</title>
+<style>
+${response.data.css}
+</style>
+</head>
+<body>
+${response.data.html}
+</body>
+</html>`;
+      const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
+      saveAs(blob, 'resume.html');
+    } else {
+      toast({
+        variant: 'destructive',
+        title: 'Error Generating Document',
+        description: response.error,
+      });
+    }
   };
 
   return (
     <div className="space-y-8">
       <header className="space-y-2">
-        <h1 className="text-3xl font-bold font-headline">Resume Feedback Tool</h1>
+        <h1 className="text-3xl font-bold font-headline">
+          Resume Suite
+        </h1>
         <p className="text-muted-foreground">
-          Get AI-powered feedback to improve your resume and boost its ATS score.
+          Get AI feedback, then generate a professional, editable document to download.
         </p>
       </header>
 
@@ -154,73 +192,96 @@ export default function ResumeFeedbackTool() {
         <CardHeader>
           <CardTitle>Analyze Your Resume</CardTitle>
           <CardDescription>
-            Upload or paste your resume, then provide some optional context about your job search.
+            Upload or paste your resume, then provide some optional context about
+            your job search.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <Tabs defaultValue="paste">
-                 <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="paste">Paste Text</TabsTrigger>
-                    <TabsTrigger value="upload">Upload File</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="paste">Paste Text</TabsTrigger>
+                  <TabsTrigger value="upload">Upload File</TabsTrigger>
                 </TabsList>
                 <TabsContent value="paste" className="mt-4">
-                     <FormField
-                        control={form.control}
-                        name="resume"
-                        render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Paste your resume content here</FormLabel>
-                            <FormControl>
-                                <Textarea
-                                    placeholder="Summary..."
-                                    rows={15}
-                                    {...field}
-                                    onChange={(e) => {
-                                        field.onChange(e);
-                                        setFileName(null);
-                                    }}
-                                />
-                            </FormControl>
-                            <FormMessage/>
-                        </FormItem>
-                        )}
-                    />
+                  <FormField
+                    control={form.control}
+                    name="resume"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Paste your resume content here</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Summary..."
+                            rows={15}
+                            {...field}
+                            onChange={(e) => {
+                              field.onChange(e);
+                              setFileName(null);
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </TabsContent>
                 <TabsContent value="upload" className="mt-4">
-                     <FormItem>
-                        <FormLabel>Upload Document</FormLabel>
-                        <FormControl>
-                        <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center h-48">
-                            {fileName ? (
-                            <div className='flex flex-col items-center gap-2'>
-                                <FileText className="w-12 h-12 text-accent" />
-                                <p className='text-sm font-medium'>{fileName}</p>
-                                <Button variant="link" size="sm" asChild className='p-0 h-auto'>
-                                <label htmlFor="file-upload" className="cursor-pointer">Change file</label>
-                                </Button>
-                            </div>
-                            ) : (
-                            <>
-                                <UploadCloud className="w-12 h-12 text-muted-foreground" />
-                                <p className="mt-2 text-sm text-muted-foreground">
-                                <label htmlFor="file-upload" className="font-semibold text-accent cursor-pointer hover:underline">
-                                    Click to upload
-                                </label>
-                                {' '}or drag and drop
-                                </p>
-                                <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 4MB</p>
-                            </>
-                            )}
-                            <Input id="file-upload" type="file" className="sr-only" onChange={handleFileChange} />
-                        </div>
-                        </FormControl>
-                        <FormMessage>{form.formState.errors.resume?.message}</FormMessage>
-                    </FormItem>
+                  <FormItem>
+                    <FormLabel>Upload Document</FormLabel>
+                    <FormControl>
+                      <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center h-48">
+                        {fileName ? (
+                          <div className="flex flex-col items-center gap-2">
+                            <FileText className="w-12 h-12 text-accent" />
+                            <p className="text-sm font-medium">{fileName}</p>
+                            <Button
+                              variant="link"
+                              size="sm"
+                              asChild
+                              className="p-0 h-auto"
+                            >
+                              <label
+                                htmlFor="file-upload"
+                                className="cursor-pointer"
+                              >
+                                Change file
+                              </label>
+                            </Button>
+                          </div>
+                        ) : (
+                          <>
+                            <UploadCloud className="w-12 h-12 text-muted-foreground" />
+                            <p className="mt-2 text-sm text-muted-foreground">
+                              <label
+                                htmlFor="file-upload"
+                                className="font-semibold text-accent cursor-pointer hover:underline"
+                              >
+                                Click to upload
+                              </label>{' '}
+                              or drag and drop
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              PDF, DOCX, TXT up to 4MB
+                            </p>
+                          </>
+                        )}
+                        <Input
+                          id="file-upload"
+                          type="file"
+                          className="sr-only"
+                          onChange={handleFileChange}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage>
+                      {form.formState.errors.resume?.message}
+                    </FormMessage>
+                  </FormItem>
                 </TabsContent>
               </Tabs>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -229,19 +290,25 @@ export default function ResumeFeedbackTool() {
                     <FormItem>
                       <FormLabel>Target Job Role (Optional)</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., Software Engineer" {...field} />
+                        <Input
+                          placeholder="e.g., Software Engineer"
+                          {...field}
+                        />
                       </FormControl>
                     </FormItem>
                   )}
                 />
-                 <FormField
+                <FormField
                   control={form.control}
                   name="additionalInfo"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Additional Info (Optional)</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., transitioning from another industry" {...field} />
+                        <Input
+                          placeholder="e.g., transitioning from another industry"
+                          {...field}
+                        />
                       </FormControl>
                     </FormItem>
                   )}
@@ -258,52 +325,61 @@ export default function ResumeFeedbackTool() {
 
       {(isLoading || result) && (
         <Card>
-            <CardHeader>
-                <CardTitle>Your Resume Analysis</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <Tabs defaultValue="feedback">
-                    <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="feedback">Feedback</TabsTrigger>
-                        <TabsTrigger value="rewritten">Rewritten Resume</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="feedback" className="mt-4">
-                        {isLoading ? (
-                             <div className="space-y-4 pt-4">
-                                <Skeleton className="h-4 w-1/4" />
-                                <Skeleton className="h-4 w-full" />
-                                <Skeleton className="h-4 w-3/4" />
-                                <Skeleton className="h-4 w-1/4 mt-4" />
-                                <Skeleton className="h-4 w-full" />
-                                <Skeleton className="h-4 w-5/6" />
-                             </div>
-                        ) : (
-                            result && <div className="prose prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: result.feedback.replace(/\\n/g, '<br />') }} />
-                        )}
-                    </TabsContent>
-                    <TabsContent value="rewritten" className="mt-4">
-                         {isLoading ? (
-                             <div className="space-y-4 pt-4">
-                                <Skeleton className="h-4 w-full" />
-                                <Skeleton className="h-4 w-full" />
-                                <Skeleton className="h-4 w-full" />
-                                <Skeleton className="h-4 w-full" />
-                                <Skeleton className="h-4 w-full" />
-                             </div>
-                        ) : (
-                           result && (
-                            <div className="space-y-4">
-                                <pre className="bg-muted p-4 rounded-md overflow-x-auto text-sm whitespace-pre-wrap font-sans">{result.rewrittenResume}</pre>
-                                <Button onClick={handleDownloadResume}>
-                                    <Download className="mr-2 h-4 w-4" />
-                                    Download Rewritten Resume
-                                </Button>
-                            </div>
-                           )
-                        )}
-                    </TabsContent>
-                </Tabs>
-            </CardContent>
+          <CardHeader>
+            <CardTitle>Your Resume Analysis</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="feedback">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="feedback">Feedback</TabsTrigger>
+                <TabsTrigger value="rewritten">Rewritten Resume</TabsTrigger>
+              </TabsList>
+              <TabsContent value="feedback" className="mt-4">
+                {isLoading ? (
+                  <div className="space-y-4 pt-4">
+                    <Skeleton className="h-4 w-1/4" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-4 w-1/4 mt-4" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-5/6" />
+                  </div>
+                ) : (
+                  result && (
+                    <div
+                      className="prose prose-invert max-w-none"
+                      dangerouslySetInnerHTML={{
+                        __html: result.feedback.replace(/\\n/g, '<br />'),
+                      }}
+                    />
+                  )
+                )}
+              </TabsContent>
+              <TabsContent value="rewritten" className="mt-4">
+                {isLoading ? (
+                  <div className="space-y-4 pt-4">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-full" />
+                  </div>
+                ) : (
+                  result && (
+                    <div className="space-y-4">
+                      <pre className="bg-muted p-4 rounded-md overflow-x-auto text-sm whitespace-pre-wrap font-sans">
+                        {result.rewrittenResume}
+                      </pre>
+                      <Button onClick={handleGenerateDocument} disabled={isGeneratingDocument}>
+                        <Download className="mr-2 h-4 w-4" />
+                        {isGeneratingDocument ? 'Generating...' : 'Download as Document'}
+                      </Button>
+                    </div>
+                  )
+                )}
+              </TabsContent>
+            </Tabs>
+          </CardContent>
         </Card>
       )}
     </div>

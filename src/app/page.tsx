@@ -110,8 +110,8 @@ const tools: ToolConfig[] = [
   },
   {
     id: 'resume-feedback',
-    name: 'Resume Feedback',
-    icon: FileText,
+    name: 'Resume Suite',
+    icon: UserSquare,
     component: ResumeFeedbackTool,
   },
   {
@@ -217,6 +217,7 @@ export default function Home() {
                 AI Mentor
                 </h1>
             </div>
+            <SheetTitle className="sr-only">Sidebar</SheetTitle>
             <SidebarTrigger />
         </header>
         <main className="p-4 sm:p-6 lg:p-8">
