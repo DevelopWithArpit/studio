@@ -63,16 +63,12 @@ const prompt = ai.definePrompt({
     name: 'generatePortfolioWebsitePrompt',
     input: { schema: PortfolioDataSchema },
     output: { schema: GeneratePortfolioWebsiteOutputSchema },
-    prompt: `You are an expert web developer specializing in creating supreme, top-of-the-line, single-page portfolio websites with the greatest of all time visuals and animations.
+    prompt: `You are an expert web developer specializing in creating elegant, professional, single-page portfolio websites with modern visuals and smooth animations.
 
-Your task is to take the user's structured data and generate the complete HTML, CSS, and JavaScript code for an ultimate portfolio website.
+Your task is to take the user's structured data and generate the complete HTML, CSS, and JavaScript code for a portfolio website.
 
-**Supreme Design & Animation Requirements:**
+**Design & Animation Requirements:**
 - **Theme:** A sleek, professional dark theme. The primary background color must be #0A0A0A.
-- **Dynamic Meteoric Background:**
-  - Create a dynamic "meteor shower" background effect using a JavaScript canvas that covers the entire viewport.
-  - Generate 150 small, white, circular particles (meteors) with random initial positions, sizes (1-3px), and velocities.
-  - Animate these particles to move across the screen. When a particle goes off-screen, reset its position to the opposite side to create a continuous looping effect. This creates a subtle, elegant, and constant sense of motion.
 - **On-Scroll Staggered Reveal Animations:**
   - All sections (About, Experience, Projects, etc.) must have a smooth 'reveal' animation as the user scrolls them into view.
   - Use the Intersection Observer API for performance.
@@ -86,7 +82,7 @@ Your task is to take the user's structured data and generate the complete HTML, 
   - Generate a single, clean HTML file. Do not add comments.
   - All CSS must be inside a <style> tag in the HTML's <head>.
   - All JavaScript must be inside a <script> tag at the end of the <body>. Use vanilla JavaScript only.
-  - The JavaScript must correctly handle the canvas animation and the on-scroll staggered reveals.
+  - The JavaScript must correctly handle the on-scroll staggered reveals.
   - Call the reveal function on page load to show elements already in view.
 
 **User's Portfolio Data:**
@@ -128,7 +124,7 @@ Your task is to take the user's structured data and generate the complete HTML, 
 {{/if}}
 ---
 
-Generate the complete, ready-to-use, ultimate portfolio code now.`,
+Generate the complete, ready-to-use portfolio code now.`,
 });
 
 
