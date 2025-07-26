@@ -69,38 +69,40 @@ const prompt = ai.definePrompt({
 Your task is to take the user's structured data and generate the complete HTML, CSS, and JavaScript for a portfolio website.
 
 **Design & Animation Requirements:**
-- **Theme:** A sleek, professional dark theme. The primary background color must be #0A0A0A.
-- **Greatest of All Time Interactive Background:**
-  - Create a 'magic mouse' effect. A large circular radial gradient should follow the user's cursor, creating a spotlight effect that illuminates the page content.
-  - This effect should be applied to a \`div\` with a class \`interactive-gradient\` that sits behind all other content using a fixed position and a low z-index.
-  - The JavaScript must update the position of this gradient based on the \`mousemove\` event.
-- **On-Scroll Reveal Animations:**
-  - All sections (About, Experience, Projects, etc.) must have a smooth 'fade-in-up' animation as the user scrolls them into view.
-  - Use the Intersection Observer API for performance. Animate elements by adding an 'is-visible' class.
-- **Glassmorphism & 3D Tilt Project Cards in Bento Grid:**
-  - Display projects in a modern "bento grid" layout.
-  - Project cards must have a "glassmorphism" effect: a semi-transparent, blurred background (\`backdrop-filter: blur(10px)\`) and a subtle white border.
-  - On hover, the card must have an interactive 3D tilt effect. Use vanilla-tilt.js for this effect by including it from a CDN.
-  - The border should have a subtle glow on hover.
-- **Typography:** Use 'Poppins' for headings and 'Inter' for body text. Import them from Google Fonts in the HTML file's <head>.
+- **Theme:** A sleek, professional dark theme. The primary background color must be #111111.
+- **Kinetic Typography Hero:**
+  - Create a split-screen hero section. The left side will contain large, animated text. The right side will have a silent, autoplaying video background (use a placeholder video: 'https://storage.googleapis.com/gtv-videos-bucket/sample/Abstract_Beauty_15_seconds.mp4').
+  - The user's name should be broken into letters, each wrapped in a span. These letters must animate in with a staggered "rise-up" effect.
+  - The headline should animate in after the name.
+- **Horizontal Scrolling Projects Section:**
+  - This is a critical feature. The projects section must scroll horizontally as the user scrolls vertically.
+  - The section should be pinned while the horizontal content scrolls from right to left.
+  - You must use JavaScript to tie the horizontal scroll position to the vertical scroll progress within that section.
+  - Project cards should have a parallax effect, moving at a slightly different speed than the horizontal scroll to create depth.
+- **Magnetic Buttons/Links:**
+  - All major links and buttons must have a "magnetic" effect. When the user's cursor approaches, the button should move slightly towards the cursor.
+  - This requires JavaScript to track the cursor position relative to the button and apply a CSS transform.
+- **General Animations & Polish:**
+  - All other sections must have a smooth 'fade-in-up' animation as the user scrolls them into view. Use the Intersection Observer API for performance.
+  - Create a custom cursor, a small dot that is visible on the page.
+- **Typography:** Use 'Inter' for all text. Import it from Google Fonts in the HTML file's <head>.
 - **Code Structure:**
   - Generate a single, clean HTML file. Do not add comments.
   - All CSS must be inside a <style> tag in the HTML's <head>.
-  - All JavaScript must be inside a <script> tag at the end of the <body>. Use vanilla JavaScript only, except for the vanilla-tilt.js CDN import.
-  - The JavaScript must correctly handle the interactive gradient background, the on-scroll reveals, and initialize the 3D tilt effect on project cards.
+  - All JavaScript must be inside a <script> tag at the end of the <body>. Use vanilla JavaScript only.
+  - The JavaScript must correctly handle the kinetic typography, horizontal scrolling, magnetic elements, custom cursor, and on-scroll reveal animations.
 
 **User's Portfolio Data:**
 ---
 - Name: {{{name}}}
 - Headline: {{{headline}}}
 - Contact Email: {{{contact.email}}}
-{{#if contact.phone}}- Contact Phone: {{{contact.phone}}}{{/if}}
-{{#if contact.socials}}
+{{#if contact.phone}}- Contact Phone: {{{contact.phone}}}{{#if contact.socials}}
 - Socials:
 {{#each contact.socials}}
   - {{network}}: {{url}}
 {{/each}}
-{{/if}}
+{{/if}}{{/if}}
 - About Me: {{{about}}}
 - Experience:
 {{#each experience}}
@@ -119,8 +121,7 @@ Your task is to take the user's structured data and generate the complete HTML, 
 - Skills:
 {{#each skills}}
   - {{this}}
-{{/each}}
-{{#if achievements}}
+{{/each}}{{#if achievements}}
 - Achievements:
 {{#each achievements}}
   - {{this}}
@@ -128,7 +129,7 @@ Your task is to take the user's structured data and generate the complete HTML, 
 {{/if}}
 ---
 
-Generate the complete, ready-to-use portfolio code now.`,
+Generate the complete, ready-to-use portfolio code now. Ensure the JavaScript implementation for horizontal scrolling and magnetic buttons is robust and correct.`,
 });
 
 
@@ -143,3 +144,5 @@ const generatePortfolioWebsiteFlow = ai.defineFlow(
     return output!;
   }
 );
+
+    
