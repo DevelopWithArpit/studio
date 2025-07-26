@@ -71,7 +71,7 @@ AI Mentor by AP | May 2023
 
 SKILLS
 Technical Skills: Python, Java, C++, C, HTML, JavaScript, Robotics, MySQL, SQL, Cybersecurity, Git, Linux
-Other Skills: Problem Solving, Teamwork, Communication
+Other Skills: Problem Solving, Teamwork, Communication, Leadership, Adaptability
 
 KEY ACHIEVEMENTS
 - Led development of AI Mentor, increasing user engagement by 30%.

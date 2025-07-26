@@ -46,7 +46,7 @@ const RewrittenResumeSchema = z.object({
     })).describe("A list of relevant projects."),
     skills: z.object({
         technical: z.array(z.string()).describe("A list of technical skills (e.g., programming languages, tools, frameworks)."),
-        other: z.array(z.string()).optional().describe("A list of other relevant skills."),
+        other: z.array(z.string()).optional().describe("A list of other relevant skills, such as professional or soft skills (e.g., Teamwork, Communication, Problem Solving)."),
     }).describe("A categorized list of skills."),
     achievements: z.array(z.string()).describe("A list of key achievements."),
 });
@@ -95,7 +95,7 @@ ${documentPrompt}
 
 Please perform the following two tasks:
 1.  **Provide Detailed Feedback:** In the 'feedback' field, analyze the resume for clarity, impact, formatting, and ATS compatibility. Give constructive feedback in Markdown format, with clear sections for "Strengths", "Areas for Improvement", and "Actionable Suggestions for ATS Optimization".
-2.  **Rewrite the Resume into JSON:** In the 'rewrittenResume' field, provide a professionally rewritten version of the resume by populating the structured JSON object. Extract all contact information, including phone, email, LinkedIn, and GitHub profile URLs if present. Use strong action verbs, quantify achievements, and integrate relevant keywords. Ensure every field in the JSON schema is populated accurately based on the source resume.
+2.  **Rewrite the Resume into JSON:** In the 'rewrittenResume' field, provide a professionally rewritten version of the resume by populating the structured JSON object. Extract all contact information, including phone, email, LinkedIn, and GitHub profile URLs if present. Use strong action verbs, quantify achievements, and integrate relevant keywords. Ensure every field in the JSON schema is populated accurately based on the source resume. For the 'skills.other' field, include professional or soft skills like Teamwork, Communication, etc.
 `,
     });
 
