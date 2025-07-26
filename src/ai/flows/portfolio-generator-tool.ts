@@ -30,7 +30,7 @@ const prompt = ai.definePrompt({
   name: 'generatePortfolioPrompt',
   input: { schema: GeneratePortfolioInputSchema },
   output: { schema: GeneratePortfolioOutputSchema },
-  prompt: `You are an expert web developer creating a single-page portfolio from resume text. Generate complete, standalone HTML and CSS that precisely matches the provided structure and styling instructions. All sections from the resume content must be present in the output.
+  prompt: `You are an expert web developer creating a single-page portfolio from resume text. Generate complete, standalone HTML and CSS that precisely matches the provided structure and styling instructions. All sections from the resume content must be present in the output. The entire resume must fit on a single page.
 
 **Resume Content:**
 ---
@@ -47,7 +47,7 @@ const prompt = ai.definePrompt({
 3.  **Main Content (Two-Column Layout):**
     *   Below the header, the page must split into a two-column layout.
     *   **Left Column (Wider - approx. 65% width):** This column must contain the 'SUMMARY', 'EXPERIENCE', and 'EDUCATION' sections. Use horizontal lines to separate these main sections.
-    *   **Right Column (Narrower - approx. 35% width):** This column must contain a circular placeholder for a profile picture/initials at the top. Below the placeholder, include the 'KEY ACHIEVEMENTS', 'SKILLS', and 'PROJECTS' sections.
+    *   **Right Column (Narrower - approx. 35% width):** This column must contain a circular placeholder for a profile picture/initials at the top. Below the placeholder, include the 'KEY ACHIEVEMENTS', 'SKILLS', and 'PROJECTS' sections. All of these sections must be present.
 4.  **Styling:**
     *   Use a modern, clean, sans-serif font (like Arial or Helvetica).
     *   Use black or very dark gray for standard text.
