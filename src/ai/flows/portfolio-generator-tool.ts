@@ -63,24 +63,23 @@ const prompt = ai.definePrompt({
     name: 'generatePortfolioWebsitePrompt',
     input: { schema: PortfolioDataSchema },
     output: { schema: GeneratePortfolioWebsiteOutputSchema },
-    prompt: `You are an expert web developer specializing in creating the greatest of all time, supreme, ultimate, top-tier, and stunning single-page portfolio websites with the most modern and impressive visuals and animations.
+    prompt: `You are an expert web developer specializing in creating stunning, top-tier, single-page portfolio websites with modern visuals and animations.
 
-Your task is to take the user's structured data and generate the complete HTML, CSS, and JavaScript code for a portfolio website that will leave a lasting impression.
+Your task is to take the user's structured data and generate the complete HTML, CSS, and JavaScript code for a professional portfolio website.
 
-**Design Requirements (Supreme & Ultimate Edition):**
+**Design Requirements (Top-Tier Edition):**
 - **Visuals & Theme:**
   - **Theme:** Use a sleek, professional dark theme.
-  - **Hero Background:** Create a supreme, immersive hero section with a stunning, slowly animating gradient mesh background. Overlay this with a subtle particle or "starfield" effect that reacts to mouse movement.
+  - **Hero Background:** Create an impressive hero section with a stunning, slowly animating gradient mesh background.
   - **Typography:** Use a professional and clean font pairing like 'Poppins' for headings and 'Inter' for body text. Use Google Fonts.
 - **Animations & Interactivity:**
-  - **Custom Cursor:** Implement a custom "spotlight" cursor effect where a soft, radial gradient follows the mouse, illuminating the content behind it.
-  - **On-Scroll Animations:** Implement exceptionally smooth, fluid 'reveal' animations (fade-in and slide-up) for all sections as the user scrolls.
+  - **On-Scroll Animations:** Implement smooth 'reveal' animations (fade-in and slide-up) for all sections as the user scrolls.
   - **Interactive Project Cards:** Project cards should have a modern, interactive 3D tilt effect on hover.
-  - **Magnetic Elements:** Buttons and navigation links should have a subtle "magnetic" effect, attracting the cursor when it is nearby.
+  - **Polished Transitions:** Ensure all hover effects and transitions are smooth and professional.
 - **Layout:**
   - The website must be fully responsive and look exceptional on all screen sizes.
-  - Create a single HTML file with a sticky navigation bar that smoothly scrolls to the corresponding sections. The sections should have fluid transitions between them.
-  - **Project Section:** Use a modern "bento grid" layout to display the projects. This layout uses different-sized grid items to create a visually interesting and organized presentation. It should support video embeds if a project link points to a video.
+  - Create a single HTML file with a sticky navigation bar that smoothly scrolls to the corresponding sections.
+  - **Project Section:** Use a modern "bento grid" layout to display the projects. This layout uses different-sized grid items to create a visually interesting and organized presentation.
 - **Code:**
   - Generate clean, well-commented, and separate HTML, CSS, and JavaScript files.
   - The CSS should be self-contained and not rely on external frameworks.
@@ -122,6 +121,7 @@ Your task is to take the user's structured data and generate the complete HTML, 
 {{#each achievements}}
   - {{this}}
 {{/each}}
+//Initial call to reveal function to show elements that are already in view on page load
 {{/if}}
 ---
 
@@ -140,3 +140,4 @@ const generatePortfolioWebsiteFlow = ai.defineFlow(
     return output!;
   }
 );
+
