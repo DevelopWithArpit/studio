@@ -70,16 +70,15 @@ Your task is to take the user's structured data and generate the complete HTML, 
 
 **Design & Animation Requirements (GOD TIER):**
 - **Theme:** A sleek, futuristic "Robotics & AI Blueprint" dark theme. The primary background color must be a dark tech-blue (#0A192F). Accent colors should be a vibrant cyan or electric green for a high-tech, blueprint feel.
-- **AI-Powered "Blueprint" Background:** The background must be a dark, animated grid that resembles a futuristic blueprint or a Heads-Up Display (HUD). As the user scrolls, animated "blueprint lines" and schematic markers (like corner brackets) must draw themselves onto the screen just ahead of the content, making it look like an AI is mapping out the site's structure in real-time.
-- **Hero Section with Robotic Text Assembly:** The user's name and headline must be "assembled" on screen. Each letter should animate into place individually with a precise, quick, and slightly offset robotic motion, as if being set by a high-speed robotic arm. The JavaScript implementation must be robust and handle this staggered character animation.
-- **"Component Placement" On-Scroll Animations:** As the user scrolls, entire sections (like "Experience" or "Projects") must not just fade in. They must slide into place with a subtle "overshoot and settle" easing function, mimicking a robotic arm placing a physical component into its final position. This should be powered by the Intersection Observer API for performance.
-- **Holographic "Activation" Effect for Projects:** Projects should be displayed in a clean, modern bento grid. On hover, each project card must "activate": a glowing holographic border should shimmer into view, and the card should light up slightly, as if a robot has just powered it on for inspection.
+- **AI-Powered "Blueprint" Background:** The background must be a dark, animated grid that resembles a futuristic blueprint or a Heads-Up Display (HUD). As the user scrolls, animated "blueprint lines" and schematic markers (like corner brackets) must draw themselves onto the screen just ahead of the content, making it look like an AI is mapping out the site's structure in real-time. This should be implemented with pure CSS for performance.
+- **Robotic Text Assembly (CSS-Powered):** The user's name and headline must be "assembled" on screen. Each letter should animate into place individually with a precise, quick, and slightly offset robotic motion, as if being set by a high-speed robotic arm. This effect must be achieved using **pure CSS animations** with staggered delays on each character for a high-quality, stable result.
+- **"Component Placement" On-Scroll Animations:** As the user scrolls, entire sections (like "Experience" or "Projects") must not just fade in. They must slide into place with a subtle "overshoot and settle" easing function, mimicking a robotic arm placing a physical component into its final position. This should be powered by the **Intersection Observer API** in JavaScript to add a class to the element, which then triggers a **pure CSS animation**. This is a stable and professional approach.
+- **Holographic "Activation" Effect for Projects:** Projects should be displayed in a clean, modern bento grid. On hover, each project card must "activate": a glowing holographic border should shimmer into view, and the card should light up slightly, as if a robot has just powered it on for inspection. This must be implemented with CSS.
 - **Typography:** Use 'Space Grotesk' for all text. Import it from Google Fonts in the HTML file's <head>.
 - **Code Structure:**
   - Generate a single, clean HTML file. Do not add comments.
   - All CSS must be inside a <style> tag in the HTML's <head>.
-  - All JavaScript must be inside a <script> tag at the end of the <body>. Use vanilla JavaScript only.
-  - The JavaScript must correctly handle the hero text assembly animation and the on-scroll reveal animations using the Intersection Observer API.
+  - All JavaScript must be inside a <script> tag at the end of the <body>. The JavaScript should ONLY be used for the Intersection Observer to trigger the CSS animations. The text assembly animation must be CSS-only.
 
 **User's Portfolio Data:**
 ---
@@ -119,7 +118,7 @@ Your task is to take the user's structured data and generate the complete HTML, 
 {{/if}}
 ---
 
-Generate the complete, ready-to-use portfolio code now. Ensure the JavaScript implementation is robust and correct for all animations.`,
+Generate the complete, ready-to-use portfolio code now. Ensure the implementation is stable, performant, and follows all animation and styling requirements precisely.`,
 });
 
 
@@ -134,5 +133,7 @@ const generatePortfolioWebsiteFlow = ai.defineFlow(
     return output!;
   }
 );
+
+    
 
     
