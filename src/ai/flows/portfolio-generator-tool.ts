@@ -68,18 +68,25 @@ const prompt = ai.definePrompt({
 Your task is to take the user's structured data and generate the complete HTML, CSS, and JavaScript code for an ultimate portfolio website.
 
 **Supreme Design & Animation Requirements:**
-- **Theme:** A sleek, professional dark theme as the base. The primary background color must be #0D0D0D.
-- **Aurora Background & Spotlight Cursor:**
-  - Create a stunning, multi-color "aurora" style animated gradient in the background. It should be composed of several large, blurred, colored circles that slowly move and morph over time using CSS animations. The colors should be soft and modern (e.g., shades of teal, purple, and blue).
-  - The body must have a spotlight cursor effect. The background of the entire page should be a radial gradient centered on the mouse position, creating a "spotlight" that follows the cursor. This interacts with the aurora effect.
-- **On-Scroll Reveal Animations:** All sections (About, Experience, Projects, etc.) must have a smooth 'reveal' animation (fade-in and slide-up) as the user scrolls them into view. Use the Intersection Observer API for this for performance.
-- **Glassmorphism Project Cards in Bento Grid:** Display projects in a modern "bento grid" layout. The project cards must have a "glassmorphism" effect: a semi-transparent, blurred background (using \`backdrop-filter: blur(16px)\`) and a subtle border. On hover, the cards must have a subtle 3D tilt effect using transform perspective.
+- **Theme:** A sleek, professional dark theme. The primary background color must be #0A0A0A.
+- **Dynamic Meteoric Background:**
+  - Create a dynamic "meteor shower" background effect using a JavaScript canvas that covers the entire viewport.
+  - Generate 150 small, white, circular particles (meteors) with random initial positions, sizes (1-3px), and velocities.
+  - Animate these particles to move across the screen. When a particle goes off-screen, reset its position to the opposite side to create a continuous looping effect. This creates a subtle, elegant, and constant sense of motion.
+- **On-Scroll Staggered Reveal Animations:**
+  - All sections (About, Experience, Projects, etc.) must have a smooth 'reveal' animation as the user scrolls them into view.
+  - Use the Intersection Observer API for performance.
+  - Importantly, items within a section (like experience entries, project cards, or skill tags) must have a staggered reveal. They should animate in one after the other with a slight delay (e.g., 100ms), creating a fluid, cascading effect.
+- **Glassmorphism Project Cards in Bento Grid:**
+  - Display projects in a modern "bento grid" layout.
+  - Project cards must have a "glassmorphism" effect: a semi-transparent, blurred background (\`backdrop-filter: blur(10px)\`) and a subtle white border.
+  - On hover, the card's border must have a glowing effect, and the card should scale up slightly (e.g., \`transform: scale(1.03)\`).
 - **Typography:** Use a professional and clean font pairing. Use 'Poppins' for headings and 'Inter' for body text. Import them from Google Fonts in the HTML file's <head>.
 - **Code Structure:**
   - Generate a single, clean HTML file. Do not add comments.
-  - All CSS must be inside a <style> tag in the HTML's <head>. Do not use external CSS files.
-  - All JavaScript must be inside a <script> tag at the end of the <body>. Use vanilla JavaScript only. No jQuery or other libraries.
-  - The JavaScript must correctly handle all specified animations: the spotlight cursor, the 3D tilt, and the on-scroll reveals.
+  - All CSS must be inside a <style> tag in the HTML's <head>.
+  - All JavaScript must be inside a <script> tag at the end of the <body>. Use vanilla JavaScript only.
+  - The JavaScript must correctly handle the canvas animation and the on-scroll staggered reveals.
   - Call the reveal function on page load to show elements already in view.
 
 **User's Portfolio Data:**
@@ -136,5 +143,3 @@ const generatePortfolioWebsiteFlow = ai.defineFlow(
     return output!;
   }
 );
-
-    
