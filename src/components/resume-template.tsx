@@ -67,7 +67,7 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
                         <p className="mt-2 text-xs text-gray-500">
                             {contact.phone} | {contact.email}
                             {contact.github && ` | ${contact.github}`}
-                             | {contact.linkedin} | {contact.location}
+                            {` | ${contact.linkedin} | ${contact.location}`}
                         </p>
                     </div>
                     <div className="flex-shrink-0">
