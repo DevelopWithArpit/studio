@@ -63,27 +63,31 @@ const prompt = ai.definePrompt({
     name: 'generatePortfolioWebsitePrompt',
     input: { schema: PortfolioDataSchema },
     output: { schema: GeneratePortfolioWebsiteOutputSchema },
-    prompt: `You are an expert web developer specializing in creating elegant, professional, single-page portfolio websites with modern visuals and smooth animations.
+    prompt: `You are an expert web developer specializing in creating ultimate, top-of-the-line, single-page portfolio websites with supreme, stunning visuals and animations.
 
-Your task is to take the user's structured data and generate the complete HTML, CSS, and JavaScript code for a portfolio website.
+Your task is to take the user's structured data and generate the complete HTML, CSS, and JavaScript for a portfolio website.
 
 **Design & Animation Requirements:**
 - **Theme:** A sleek, professional dark theme. The primary background color must be #0A0A0A.
-- **On-Scroll Staggered Reveal Animations:**
-  - All sections (About, Experience, Projects, etc.) must have a smooth 'reveal' animation as the user scrolls them into view.
+- **Interactive Particle Background:**
+  - Create a full-screen <canvas> element behind all other content.
+  - Implement a JavaScript-based particle animation where particles connect with lines when they are close to each other and to the cursor.
+  - Particles should move subtly and randomly. The background should be interactive and respond to cursor movement.
+- **On-Scroll Reveal Animations:**
+  - All sections (About, Experience, Projects, etc.) must have a smooth 'fade-in-up' animation as the user scrolls them into view.
   - Use the Intersection Observer API for performance.
-  - Importantly, items within a section (like experience entries, project cards, or skill tags) must have a staggered reveal. They should animate in one after the other with a slight delay (e.g., 100ms), creating a fluid, cascading effect.
-- **Glassmorphism Project Cards in Bento Grid:**
+- **Glassmorphism & 3D Tilt Project Cards in Bento Grid:**
   - Display projects in a modern "bento grid" layout.
   - Project cards must have a "glassmorphism" effect: a semi-transparent, blurred background (\`backdrop-filter: blur(10px)\`) and a subtle white border.
-  - On hover, the card's border must have a glowing effect, and the card should scale up slightly (e.g., \`transform: scale(1.03)\`).
-- **Typography:** Use a professional and clean font pairing. Use 'Poppins' for headings and 'Inter' for body text. Import them from Google Fonts in the HTML file's <head>.
+  - On hover, the card must have an interactive 3D tilt effect. Use vanilla-tilt.js for this effect by including it from a CDN.
+  - The border should have a subtle glow on hover.
+- **Typography:** Use 'Poppins' for headings and 'Inter' for body text. Import them from Google Fonts in the HTML file's <head>.
 - **Code Structure:**
   - Generate a single, clean HTML file. Do not add comments.
   - All CSS must be inside a <style> tag in the HTML's <head>.
-  - All JavaScript must be inside a <script> tag at the end of the <body>. Use vanilla JavaScript only.
-  - The JavaScript must correctly handle the on-scroll staggered reveals.
-  - Call the reveal function on page load to show elements already in view.
+  - All JavaScript must be inside a <script> tag at the end of the <body>. Use vanilla JavaScript only, except for the vanilla-tilt.js CDN import.
+  - The JavaScript must correctly handle the particle background, the on-scroll reveals, and initialize the 3D tilt effect on project cards.
+  - Ensure the canvas is responsive and resizes with the window.
 
 **User's Portfolio Data:**
 ---
