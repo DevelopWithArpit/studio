@@ -34,6 +34,7 @@ import {
   Eraser,
   Type,
   Briefcase,
+  FileEdit,
 } from 'lucide-react';
 import { AppLogo } from '@/components/app-logo';
 import AiExplanationTool from '@/components/tools/ai-explanation-tool';
@@ -54,6 +55,7 @@ import WatermarkRemoverTool from '@/components/tools/watermark-remover-tool';
 import ImageTextManipulationTool from '@/components/tools/image-text-manipulation-tool';
 import PortfolioGeneratorTool from '@/components/tools/portfolio-generator-tool';
 import { SheetTitle } from '@/components/ui/sheet';
+import ResumeCustomizerTool from '@/components/tools/resume-customizer-tool';
 
 type ToolId =
   | 'smart-search'
@@ -62,6 +64,7 @@ type ToolId =
   | 'code-analyzer'
   | 'interview-question-generator'
   | 'resume-feedback'
+  | 'resume-customizer'
   | 'cover-letter-assistant'
   | 'career-path-suggester'
   | 'document-summarizer'
@@ -117,6 +120,12 @@ const tools: ToolConfig[] = [
     name: 'Resume Feedback',
     icon: UserSquare,
     component: ResumeFeedbackTool,
+  },
+  {
+    id: 'resume-customizer',
+    name: 'Resume Customizer',
+    icon: FileEdit,
+    component: ResumeCustomizerTool,
   },
   {
     id: 'cover-letter-assistant',

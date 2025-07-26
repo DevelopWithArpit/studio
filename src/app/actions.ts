@@ -68,6 +68,10 @@ import {
     generatePortfolioWebsite,
     type GeneratePortfolioWebsiteInput,
 } from '@/ai/flows/portfolio-generator-tool';
+import {
+    customizeResume,
+    type CustomizeResumeInput,
+} from '@/ai/flows/resume-customizer-tool';
 
 async function handleAction<T_Input, T_Output>(
   input: T_Input,
@@ -145,6 +149,10 @@ export async function handleRemoveWatermarkAction(input: RemoveWatermarkInput) {
 
 export async function handleManipulateImageTextAction(input: ManipulateImageTextInput) {
     return handleAction(input, manipulateImageText);
+}
+
+export async function handleCustomizeResumeAction(input: CustomizeResumeInput) {
+    return handleAction(input, customizeResume);
 }
 
 export async function handleGeneratePortfolioWebsiteAction(resumeDataUri: string) {

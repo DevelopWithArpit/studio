@@ -19,3 +19,4 @@ import '@/ai/flows/linkedin-visuals-generator-tool.ts';
 import '@/ai/flows/watermark-remover-tool.ts';
 import '@/ai/flows/image-text-manipulation-tool.ts';
 import '@/ai/flows/portfolio-generator-tool.ts';
+import '@/ai/flows/resume-customizer-tool.ts';
