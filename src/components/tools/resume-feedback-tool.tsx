@@ -7,7 +7,7 @@ import { z } from 'zod';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { saveAs } from 'file-saver';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import {
   Card,
   CardContent,
@@ -148,13 +148,24 @@ export default function ResumeFeedbackTool() {
     }
   }
   
-  const getResumeHtml = (resumeText: string) => {
-    const container = document.createElement('div');
-    document.body.appendChild(container);
-    ReactDOM.render(<ResumeTemplate resumeText={resumeText} />, container);
-    const html = container.innerHTML;
-    document.body.removeChild(container);
-    return html;
+  const getResumeHtml = (resumeText: string): Promise<string> => {
+    return new Promise((resolve) => {
+        const container = document.createElement('div');
+        container.style.position = 'absolute';
+        container.style.left = '-9999px';
+        document.body.appendChild(container);
+        
+        const root = createRoot(container);
+        root.render(<ResumeTemplate resumeText={resumeText} />);
+
+        // Give react time to render
+        setTimeout(() => {
+            const html = container.innerHTML;
+            root.unmount();
+            document.body.removeChild(container);
+            resolve(html);
+        }, 500);
+    });
   };
 
   const handleDownloadPdf = async () => {
@@ -167,28 +178,31 @@ export default function ResumeFeedbackTool() {
     element.style.width = '827px'; // A4 width in pixels at 96 DPI
     document.body.appendChild(element);
 
-    ReactDOM.render(<ResumeTemplate resumeText={result.rewrittenResume} />, element, async () => {
-      try {
-        const canvas = await html2canvas(element, { scale: 2, useCORS: true });
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF({ orientation: 'portrait', unit: 'px', format: [canvas.width, canvas.height] });
-        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-        pdf.save('resume.pdf');
-      } catch (error) {
-        toast({ variant: 'destructive', title: 'Error Generating PDF', description: error instanceof Error ? error.message : 'An unknown error occurred.' });
-      } finally {
-        ReactDOM.unmountComponentAtNode(element);
-        document.body.removeChild(element);
-        setIsGeneratingPdf(false);
-      }
-    });
+    const root = createRoot(element);
+    root.render(<ResumeTemplate resumeText={result.rewrittenResume} />);
+
+    setTimeout(async () => {
+         try {
+            const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF({ orientation: 'portrait', unit: 'px', format: [canvas.width, canvas.height] });
+            pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+            pdf.save('resume.pdf');
+          } catch (error) {
+            toast({ variant: 'destructive', title: 'Error Generating PDF', description: error instanceof Error ? error.message : 'An unknown error occurred.' });
+          } finally {
+            root.unmount();
+            document.body.removeChild(element);
+            setIsGeneratingPdf(false);
+          }
+    }, 500)
   };
 
   const handleDownloadHtml = async () => {
     if (!result?.rewrittenResume) return;
     setIsGeneratingHtml(true);
-    const htmlContent = getResumeHtml(result.rewrittenResume);
-    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+    const htmlContent = await getResumeHtml(result.rewrittenResume);
+    const blob = new Blob([`<!DOCTYPE html><html><head><title>Resume</title></head><body>${htmlContent}</body></html>`], { type: 'text/html;charset=utf-8' });
     saveAs(blob, 'resume.html');
     setIsGeneratingHtml(false);
   };
