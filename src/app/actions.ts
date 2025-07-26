@@ -159,11 +159,11 @@ export async function handleGeneratePortfolioWebsiteAction(resumeDataUri: string
     try {
         const feedbackResponse = await getResumeFeedback({ resume: resumeDataUri });
         
-        if (!feedbackResponse.rewrittenResume) {
+        if (!feedbackResponse.success || !feedbackResponse.data?.rewrittenResume) {
             throw new Error('Failed to parse the resume into a structured format.');
         }
 
-        const { rewrittenResume } = feedbackResponse;
+        const { rewrittenResume } = feedbackResponse.data;
 
         const portfolioInput: GeneratePortfolioWebsiteInput = {
             fullName: rewrittenResume.name,
@@ -186,7 +186,7 @@ export async function handleGeneratePortfolioWebsiteAction(resumeDataUri: string
                 dates: edu.dates,
             })),
             skills: [...rewrittenResume.skills.technical, ...(rewrittenResume.skills.other || [])],
-            projects: rewrittenResume.projects.length > 0 ? rewrittenResume.projects.map(p => ({
+            projects: (rewrittenResume.projects && rewrittenResume.projects.length > 0) ? rewrittenResume.projects.map(p => ({
                 title: p.title,
                 description: p.bullets.join('. '),
                 imageUrl: 'https://placehold.co/600x400.png',
