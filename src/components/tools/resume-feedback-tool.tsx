@@ -205,7 +205,7 @@ export default function ResumeFeedbackTool() {
     if (!result?.rewrittenResume) return;
     setIsGeneratingHtml(true);
     const htmlContent = await getResumeHtml(result.rewrittenResume);
-    const blob = new Blob([`<!DOCTYPE html><html><head><title>Resume</title></head><body>${htmlContent}</body></html>`], { type: 'text/html;charset=utf-8' });
+    const blob = new Blob([`<!DOCTYPE html><html><head><title>Resume</title><link rel="stylesheet" href="https://rsms.me/inter/inter.css"></head><body>${htmlContent}</body></html>`], { type: 'text/html;charset=utf-8' });
     saveAs(blob, 'resume.html');
     setIsGeneratingHtml(false);
   };

@@ -26,15 +26,21 @@ const parseResumeText = (text: string) => {
             sections[currentSection].push(line);
         }
     }
+    
+    // A fallback to ensure all sections are arrays
+    for (const key in sections) {
+        if (!Array.isArray(sections[key])) {
+            sections[key] = [];
+        }
+    }
 
     return { name, title, contactLine, sections };
 };
 
-
 const BulletList = ({ items }: { items: string[] }) => (
-    <ul className="list-disc pl-5 mt-1 space-y-1">
+    <ul className="list-disc pl-5 mt-2 space-y-1">
         {items.map((item, index) => (
-            <li key={index} className="text-gray-700 leading-snug">{item.replace(/^•\s*/, '')}</li>
+            <li key={index} className="text-gray-700 text-xs leading-snug">{item.replace(/^•\s*/, '')}</li>
         ))}
     </ul>
 );
@@ -50,8 +56,7 @@ export const ResumeTemplate: React.FC<{ resumeText: string }> = ({ resumeText })
         <div style={{ fontFamily: "'Inter', sans-serif", backgroundColor: '#fff', color: '#1f2937', padding: '2rem' }}>
             <div className="max-w-4xl mx-auto text-sm">
                 
-                {/* Header */}
-                <header className="flex items-start justify-between pb-4 border-b-2 border-gray-200">
+                <header className="flex items-start justify-between pb-4">
                     <div>
                         <h1 className="text-4xl font-bold tracking-tight text-gray-800">{name}</h1>
                         <h2 className="text-lg font-semibold text-blue-600 mt-1">{title}</h2>
@@ -81,61 +86,59 @@ export const ResumeTemplate: React.FC<{ resumeText: string }> = ({ resumeText })
                     </div>
                 </header>
                 
-                {/* Body */}
                 <main className="flex gap-10 pt-5">
-                    {/* Left Column */}
                     <div className="w-[65%]">
                         <section>
                             <h3 className="text-sm font-extrabold uppercase tracking-widest text-gray-700">Summary</h3>
-                            <div className="w-full h-px bg-gray-300 my-1"></div>
-                            <p className="mt-2 text-gray-600 leading-relaxed">{sections.SUMMARY.join('\n')}</p>
+                            <div className="w-full h-px bg-gray-900 my-1" style={{borderWidth: '1.5px'}}></div>
+                            <p className="mt-2 text-gray-600 leading-relaxed text-xs">{sections.SUMMARY.join('\n')}</p>
                         </section>
 
                         <section className="mt-6">
                             <h3 className="text-sm font-extrabold uppercase tracking-widest text-gray-700">Experience</h3>
-                            <div className="w-full h-px bg-gray-300 my-1"></div>
+                            <div className="w-full h-px bg-gray-900 my-1" style={{borderWidth: '1.5px'}}></div>
                             <div className="mt-2 space-y-4">
-                                {sections.EXPERIENCE.map((exp, i) => <div key={i}>{exp}</div>).reduce((acc, curr, i) => {
-                                    if (curr.props.children.startsWith('•')) {
-                                        if (acc.length > 0 && Array.isArray(acc[acc.length - 1])) {
-                                           (acc[acc.length - 1] as JSX.Element[]).push(curr);
-                                        } else {
-                                           acc.push([curr]);
+                                {sections.EXPERIENCE.reduce((acc, line) => {
+                                    if(line.startsWith('•')) {
+                                        if (acc.length > 0) {
+                                            acc[acc.length - 1].bullets.push(line);
                                         }
                                     } else {
-                                        acc.push(curr);
+                                        const [role, institution] = line.split('\n');
+                                        const [date, location] = (lines.find(l => l.includes(institution) && l.includes('•')) || ' • ').split('•').map(s => s.trim());
+                                        acc.push({ role, institution, date, location, bullets: [] });
                                     }
                                     return acc;
-                                }, [] as (JSX.Element | JSX.Element[])[]).map((item, i) => {
-                                    if(Array.isArray(item)) {
-                                        return <BulletList key={i} items={item.map(i => i.props.children)} />
-                                    }
-                                    const lines = item.props.children.split('\n');
-                                    const [role, company, details] = lines;
-                                    const [date, location] = details.split('•').map(s => s.trim());
+                                }, [] as any[]).map((exp, i) => {
+                                    const roleAndInstitution = exp.role.split("Priyadarshini");
+                                    const role = roleAndInstitution[0];
+                                    const institution = "Priyadarshini" + roleAndInstitution[1];
+                                    const detailsLine = sections.EXPERIENCE.find(line => line.includes('•'));
+                                    const [date, location] = detailsLine ? detailsLine.split('•').map(s => s.trim()) : ['',''];
+
                                     return (
-                                        <div key={i} className="text-xs">
-                                            <p className="font-bold text-gray-800">{role}</p>
-                                            <p className="font-semibold text-blue-600">{company}</p>
-                                            <div className="flex text-gray-500 mt-1 space-x-4">
-                                                <span className='flex items-center gap-1.5'>
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                                                    {date}
-                                                </span>
-                                                <span className='flex items-center gap-1.5'>
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                                                    {location}
-                                                </span>
-                                            </div>
+                                    <div key={i} className="text-xs">
+                                        <p className="font-bold text-gray-800 text-sm">{role}</p>
+                                        <p className="font-semibold text-blue-600 text-xs">{institution}</p>
+                                        <div className="flex text-gray-500 my-1 space-x-4">
+                                            <span className='flex items-center gap-1.5'>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                                {date}
+                                            </span>
+                                            <span className='flex items-center gap-1.5'>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                                                {location}
+                                            </span>
                                         </div>
-                                    )
-                                })}
+                                        <BulletList items={exp.bullets} />
+                                    </div>
+                                )})}
                             </div>
                         </section>
 
                         <section className="mt-6">
                             <h3 className="text-sm font-extrabold uppercase tracking-widest text-gray-700">Education</h3>
-                            <div className="w-full h-px bg-gray-300 my-1"></div>
+                            <div className="w-full h-px bg-gray-900 my-1" style={{borderWidth: '1.5px'}}></div>
                             <div className="mt-2 space-y-4 text-xs">
                                 {sections.EDUCATION.map((edu, i) => {
                                     const lines = edu.split('\n');
@@ -143,8 +146,8 @@ export const ResumeTemplate: React.FC<{ resumeText: string }> = ({ resumeText })
                                     const [date, location] = details ? details.split('•').map(s => s.trim()) : ['', ''];
                                     return (
                                         <div key={i}>
-                                            <p className="font-bold text-gray-800">{degree}</p>
-                                            <p className="font-semibold text-blue-600">{institution}</p>
+                                            <p className="font-bold text-gray-800 text-sm">{degree}</p>
+                                            <p className="font-semibold text-blue-600 text-xs">{institution}</p>
                                             {details && <div className="flex text-gray-500 mt-1 space-x-4">
                                                  <span className='flex items-center gap-1.5'>
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -162,16 +165,15 @@ export const ResumeTemplate: React.FC<{ resumeText: string }> = ({ resumeText })
                         </section>
                     </div>
 
-                    {/* Right Column */}
                     <div className="w-[35%]">
                          <section>
                             <h3 className="text-sm font-extrabold uppercase tracking-widest text-gray-700">Key Achievements</h3>
-                             <div className="w-full h-px bg-gray-300 my-1"></div>
+                             <div className="w-full h-px bg-gray-900 my-1" style={{borderWidth: '1.5px'}}></div>
                             <div className="mt-2 space-y-3">
                                 {sections['KEY ACHIEVEMENTS'].map((ach, i) => (
                                     <div key={i} className="flex items-start gap-3 text-xs">
                                         <div className="flex-shrink-0 text-blue-500 mt-0.5">
-                                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10A10 10 0 0 0 12 2zm-1.05 13.95L7.4 12.4a1 1 0 0 1 1.4-1.4l2.15 2.15 4.6-4.6a1 1 0 1 1 1.4 1.4l-5.3 5.3a1 1 0 0 1-1.4 0z"/></svg>
+                                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
                                         </div>
                                         <div>
                                             <p className="font-bold text-gray-800">{ach.split('\n')[0]}</p>
@@ -184,48 +186,43 @@ export const ResumeTemplate: React.FC<{ resumeText: string }> = ({ resumeText })
 
                         <section className="mt-6">
                             <h3 className="text-sm font-extrabold uppercase tracking-widest text-gray-700">Skills</h3>
-                            <div className="w-full h-px bg-gray-300 my-1"></div>
+                            <div className="w-full h-px bg-gray-900 my-1" style={{borderWidth: '1.5px'}}></div>
                             <div className="mt-2 flex flex-wrap gap-2 text-xs">
                                 {sections.SKILLS.join(', ').split(',').map((skill, i) => (
-                                    <span key={i} className="bg-gray-100 text-gray-700 font-medium px-2.5 py-1 rounded-md">{skill.trim()}</span>
+                                    <span key={i} className="bg-gray-100 text-gray-700 font-medium px-2.5 py-1 rounded-md border border-gray-200">{skill.trim()}</span>
                                 ))}
                             </div>
                         </section>
 
                          <section className="mt-6">
                             <h3 className="text-sm font-extrabold uppercase tracking-widest text-gray-700">Projects</h3>
-                            <div className="w-full h-px bg-gray-300 my-1"></div>
+                            <div className="w-full h-px bg-gray-900 my-1" style={{borderWidth: '1.5px'}}></div>
                             <div className="mt-2 space-y-4">
-                                {sections.PROJECTS.map((proj, i) => <div key={i}>{proj}</div>).reduce((acc, curr, i) => {
-                                    if (curr.props.children.startsWith('•')) {
-                                        if (acc.length > 0 && Array.isArray(acc[acc.length - 1])) {
-                                           (acc[acc.length - 1] as JSX.Element[]).push(curr);
-                                        } else {
-                                           acc.push([curr]);
+                                {sections.PROJECTS.reduce((acc, line) => {
+                                     if(line.startsWith('•')) {
+                                        if (acc.length > 0) {
+                                            acc[acc.length - 1].bullets.push(line);
                                         }
                                     } else {
-                                        acc.push(curr);
+                                        const [title, date, description] = line.split('\n');
+                                        acc.push({ title, date, description, bullets: [] });
                                     }
                                     return acc;
-                                }, [] as (JSX.Element | JSX.Element[])[]).map((item, i) => {
-                                    if(Array.isArray(item)) {
-                                        return <BulletList key={i} items={item.map(i => i.props.children)} />
-                                    }
-                                    const lines = item.props.children.split('\n');
-                                    const [title, date, description] = lines;
-                                    return (
-                                        <div key={i} className="text-xs">
-                                            <p className="font-bold text-gray-800">{title}</p>
-                                             <div className="flex text-gray-500 my-1 space-x-4">
-                                                <span className='flex items-center gap-1.5'>
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                                                    {date}
-                                                </span>
-                                            </div>
-                                            <p className="text-gray-600 leading-snug">{description}</p>
+                                }, [] as any[]).map((proj, i) => (
+                                    <div key={i} className="text-xs">
+                                        <p className="font-bold text-gray-800">{proj.title}</p>
+                                        {proj.date && (
+                                            <div className="flex text-gray-500 my-1 space-x-4">
+                                            <span className='flex items-center gap-1.5'>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                                {proj.date}
+                                            </span>
                                         </div>
-                                    )
-                                })}
+                                        )}
+                                        <p className="text-gray-600 leading-snug">{proj.description}</p>
+                                        <BulletList items={proj.bullets} />
+                                    </div>
+                                ))}
                             </div>
                         </section>
                     </div>
