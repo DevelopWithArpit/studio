@@ -386,7 +386,7 @@ export default function ResumeFeedbackTool() {
                   result && (
                     <div className="space-y-4">
                        <div className="border rounded-lg bg-gray-100 p-4 max-h-[700px] overflow-y-auto">
-                          <div className="scale-[0.9] origin-top-left pointer-events-none">
+                          <div className="scale-[0.9] origin-top-left">
                             <ResumeTemplate resumeData={result.rewrittenResume} />
                           </div>
                       </div>
