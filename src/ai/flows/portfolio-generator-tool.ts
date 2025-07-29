@@ -143,11 +143,11 @@ const prompt = ai.definePrompt({
 **Template:**
 
 **HTML:**
-\'\'\'html
+\`\`\`html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-g">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portfolio</title>
     <link rel="stylesheet" href="style.css">
@@ -230,10 +230,10 @@ const prompt = ai.definePrompt({
     <script src="script.js"></script>
 </body>
 </html>
-\'\'\'
+\`\`\`
 
 **CSS:**
-\'\'\'css
+\`\`\`css
 :root {
     --bg-color: #0A192F;
     --text-color: #ccd6f6;
@@ -393,10 +393,10 @@ section.visible {
     justify-content: center;
     gap: 1.5rem;
 }
-\'\'\'
+\`\`\`
 
 **JavaScript:**
-\'\'\'javascript
+\`\`\`javascript
 document.addEventListener('DOMContentLoaded', () => {
     const scrollTargets = document.querySelectorAll('.scroll-target');
 
@@ -427,7 +427,7 @@ document.addEventListener('DOMContentLoaded', () => {
         lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
     }, false);
 });
-\'\'\'`,
+\`\`\``,
 });
 
 
@@ -445,5 +445,3 @@ const generatePortfolioWebsiteFlow = ai.defineFlow(
     return output;
   }
 );
-
-    
