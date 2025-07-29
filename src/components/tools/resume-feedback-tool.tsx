@@ -107,28 +107,27 @@ export default function ResumeFeedbackTool() {
   const getResumeHtml = (resumeData: GetResumeFeedbackOutput['rewrittenResume']): Promise<string> => {
     return new Promise((resolve) => {
         const container = document.createElement('div');
-        container.style.position = 'absolute';
-        container.style.left = '-9999px';
-        container.style.width = '8.5in';
-        container.style.height = '11in';
-
-        document.body.appendChild(container);
-        
+        // The container is not attached to the DOM, so it's not visible.
+        // We render the component into it to get the static HTML.
         const root = createRoot(container);
         root.render(<ResumeTemplate resumeData={resumeData} />);
 
+        // We use a short timeout to allow React to render the component.
         setTimeout(() => {
             const html = container.innerHTML;
             root.unmount();
-            document.body.removeChild(container);
+            // We wrap the component's HTML in a full HTML document structure.
             resolve(`<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>Resume</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
     body { font-family: 'Inter', sans-serif; }
-    .skill-badge { display: inline-block; background-color: #f3f4f6; color: #374151; font-size: 10px; font-weight: 500; padding: 2px 8px; margin: 2px; border-radius: 4px; }
   </style>
 </head>
 <body>
@@ -276,6 +275,7 @@ export default function ResumeFeedbackTool() {
                           type="file"
                           className="sr-only"
                           onChange={handleFileChange}
+                          accept=".pdf,.doc,.docx,.txt"
                         />
                       </div>
                     </FormControl>
@@ -387,8 +387,8 @@ export default function ResumeFeedbackTool() {
                         >
                           <FileCode className="mr-2 h-4 w-4" />
                           {isGeneratingHtml
-                            ? 'Generating Doc...'
-                            : 'Download as Editable Doc'}
+                            ? 'Generating HTML...'
+                            : 'Download as HTML'}
                         </Button>
                       </div>
                     </div>

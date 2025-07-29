@@ -68,16 +68,24 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
                             <span>{contact.phone}</span>
                             <span>|</span>
                             <a href={`mailto:${contact.email}`} className="text-blue-600 hover:underline">{contact.email}</a>
+                             {contact.location && (
+                                <>
+                                    <span>|</span>
+                                    <span>{contact.location}</span>
+                                </>
+                            )}
+                            {contact.linkedin && (
+                                <>
+                                    <span>|</span>
+                                     <a href={contact.linkedin} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">LinkedIn</a>
+                                </>
+                            )}
                             {contact.github && (
                                 <>
                                     <span>|</span>
-                                    <a href={contact.github} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{contact.github}</a>
+                                    <a href={contact.github} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">GitHub</a>
                                 </>
                             )}
-                            <span>|</span>
-                            <a href={contact.linkedin} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{contact.linkedin}</a>
-                            <span>|</span>
-                            <span>{contact.location}</span>
                         </p>
                     </div>
                     <div className="flex-shrink-0">

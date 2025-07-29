@@ -16,6 +16,7 @@ import { z } from 'zod';
 const PortfolioDataSchema = z.object({
   name: z.string().describe("The user's full name."),
   headline: z.string().describe("The user's professional headline (e.g., 'Software Engineer | AI Enthusiast')."),
+  profession: z.string().describe("The user's profession or industry (e.g., 'Software Engineer', 'Graphic Designer', 'Marine Biologist')."),
   contact: z.object({
       email: z.string().describe("The user's email address."),
       phone: z.string().optional(),
@@ -46,7 +47,6 @@ const PortfolioDataSchema = z.object({
   })),
   skills: z.array(z.string()),
   achievements: z.array(z.string()).optional(),
-  profession: z.string().describe("The user's profession or industry (e.g., 'Software Engineer', 'Graphic Designer', 'Marine Biologist')."),
 });
 export type GeneratePortfolioWebsiteInput = z.infer<typeof PortfolioDataSchema>;
 
@@ -116,6 +116,7 @@ const prompt = ai.definePrompt({
 **User's Portfolio Data:**
 - Name: {{{name}}}
 - Headline: {{{headline}}}
+- Profession: {{{profession}}}
 - About Me: {{{about}}}
 - Contact Email: {{{contact.email}}}
 {{#if contact.phone}}- Contact Phone: {{{contact.phone}}}{{/if}}
@@ -608,3 +609,4 @@ const generatePortfolioWebsiteFlow = ai.defineFlow(
     return output!;
   }
 );
+
