@@ -57,7 +57,7 @@ const generateLinkedInVisualsFlow = ai.defineFlow(
         ];
 
     const coverBannerPrompt = [
-        { text: `Generate a professional, abstract background image to be used as a LinkedIn cover banner (1584 x 396 pixels). The design should be modern, clean, and relevant to the user's industry based on their resume. It should not contain any text. It should be visually appealing but not distracting.` },
+        { text: `Analyze the user's resume content provided. Based on their industry, skills, and experience, generate a professional and abstract background image suitable for a LinkedIn cover banner (1584 x 396 pixels). The design should be modern, clean, and visually represent the user's professional field. For example, for a software engineer, it might incorporate subtle code-like patterns or abstract representations of data. For a graphic designer, it could be more artistic. The banner should not contain any text and should be visually appealing but not distracting.` },
         resumeContextPart,
     ];
 
