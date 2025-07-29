@@ -39,26 +39,26 @@ import {
 } from 'lucide-react';
 import { AppLogo } from '@/components/app-logo';
 import { SheetTitle } from '@/components/ui/sheet';
-import ToolSkeleton from '@/components/tools/tool-skeleton';
+import { RobotsBuildingLoader } from '@/components/ui/robots-building-loader';
 
-const AiExplanationTool = dynamic(() => import('@/components/tools/ai-explanation-tool'), { loading: () => <ToolSkeleton /> });
-const CodeAnalyzerTool = dynamic(() => import('@/components/tools/code-analyzer-tool'), { loading: () => <ToolSkeleton /> });
-const CodeGeneratorTool = dynamic(() => import('@/components/tools/code-generator-tool'), { loading: () => <ToolSkeleton /> });
-const SmartSearchTool = dynamic(() => import('@/components/tools/smart-search-tool'), { loading: () => <ToolSkeleton /> });
-const InterviewQuestionGeneratorTool = dynamic(() => import('@/components/tools/interview-question-generator-tool'), { loading: () => <ToolSkeleton /> });
-const ResumeFeedbackTool = dynamic(() => import('@/components/tools/resume-feedback-tool'), { loading: () => <ToolSkeleton /> });
-const DiagramGeneratorTool = dynamic(() => import('@/components/tools/diagram-generator-tool'), { loading: () => <ToolSkeleton /> });
-const TextToSpeechTool = dynamic(() => import('@/components/tools/text-to-speech-tool'), { loading: () => <ToolSkeleton /> });
-const CoverLetterAssistantTool = dynamic(() => import('@/components/tools/cover-letter-assistant-tool'), { loading: () => <ToolSkeleton /> });
-const CareerPathSuggesterTool = dynamic(() => import('@/components/tools/career-path-suggester-tool'), { loading: () => <ToolSkeleton /> });
-const DocumentSummarizerTool = dynamic(() => import('@/components/tools/document-summarizer-tool'), { loading: () => <ToolSkeleton /> });
-const ImageGeneratorTool = dynamic(() => import('@/components/tools/image-generator-tool'), { loading: () => <ToolSkeleton /> });
-const PresentationGeneratorTool = dynamic(() => import('@/components/tools/presentation-generator-tool'), { loading: () => <ToolSkeleton /> });
-const LinkedInVisualsGeneratorTool = dynamic(() => import('@/components/tools/linkedin-visuals-generator-tool'), { loading: () => <ToolSkeleton /> });
-const WatermarkRemoverTool = dynamic(() => import('@/components/tools/watermark-remover-tool'), { loading: () => <ToolSkeleton /> });
-const ImageTextManipulationTool = dynamic(() => import('@/components/tools/image-text-manipulation-tool'), { loading: () => <ToolSkeleton /> });
-const PortfolioGeneratorTool = dynamic(() => import('@/components/tools/portfolio-generator-tool'), { loading: () => <ToolSkeleton /> });
-const ResumeCustomizerTool = dynamic(() => import('@/components/tools/resume-customizer-tool'), { loading: () => <ToolSkeleton /> });
+const AiExplanationTool = dynamic(() => import('@/components/tools/ai-explanation-tool'), { loading: () => <RobotsBuildingLoader /> });
+const CodeAnalyzerTool = dynamic(() => import('@/components/tools/code-analyzer-tool'), { loading: () => <RobotsBuildingLoader /> });
+const CodeGeneratorTool = dynamic(() => import('@/components/tools/code-generator-tool'), { loading: () => <RobotsBuildingLoader /> });
+const SmartSearchTool = dynamic(() => import('@/components/tools/smart-search-tool'), { loading: () => <RobotsBuildingLoader /> });
+const InterviewQuestionGeneratorTool = dynamic(() => import('@/components/tools/interview-question-generator-tool'), { loading: () => <RobotsBuildingLoader /> });
+const ResumeFeedbackTool = dynamic(() => import('@/components/tools/resume-feedback-tool'), { loading: () => <RobotsBuildingLoader /> });
+const DiagramGeneratorTool = dynamic(() => import('@/components/tools/diagram-generator-tool'), { loading: () => <RobotsBuildingLoader /> });
+const TextToSpeechTool = dynamic(() => import('@/components/tools/text-to-speech-tool'), { loading: () => <RobotsBuildingLoader /> });
+const CoverLetterAssistantTool = dynamic(() => import('@/components/tools/cover-letter-assistant-tool'), { loading: () => <RobotsBuildingLoader /> });
+const CareerPathSuggesterTool = dynamic(() => import('@/components/tools/career-path-suggester-tool'), { loading: () => <RobotsBuildingLoader /> });
+const DocumentSummarizerTool = dynamic(() => import('@/components/tools/document-summarizer-tool'), { loading: () => <RobotsBuildingLoader /> });
+const ImageGeneratorTool = dynamic(() => import('@/components/tools/image-generator-tool'), { loading: () => <RobotsBuildingLoader /> });
+const PresentationGeneratorTool = dynamic(() => import('@/components/tools/presentation-generator-tool'), { loading: () => <RobotsBuildingLoader /> });
+const LinkedInVisualsGeneratorTool = dynamic(() => import('@/components/tools/linkedin-visuals-generator-tool'), { loading: () => <RobotsBuildingLoader /> });
+const WatermarkRemoverTool = dynamic(() => import('@/components/tools/watermark-remover-tool'), { loading: () => <RobotsBuildingLoader /> });
+const ImageTextManipulationTool = dynamic(() => import('@/components/tools/image-text-manipulation-tool'), { loading: () => <RobotsBuildingLoader /> });
+const PortfolioGeneratorTool = dynamic(() => import('@/components/tools/portfolio-generator-tool'), { loading: () => <RobotsBuildingLoader /> });
+const ResumeCustomizerTool = dynamic(() => import('@/components/tools/resume-customizer-tool'), { loading: () => <RobotsBuildingLoader /> });
 
 
 type ToolId =
@@ -243,7 +243,7 @@ export default function Home() {
             <SidebarTrigger />
         </header>
         <main className="p-4 sm:p-6 lg:p-8">
-          <Suspense fallback={<ToolSkeleton />}>
+          <Suspense fallback={<RobotsBuildingLoader />}>
             {ActiveToolComponent ? <ActiveToolComponent /> : (
               <div>
                 <h1 className="text-2xl font-bold">Select a tool</h1>
