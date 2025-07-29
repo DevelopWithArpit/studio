@@ -36,6 +36,7 @@ import {
   Type,
   Briefcase,
   FileEdit,
+  Sparkles,
 } from 'lucide-react';
 import { AppLogo } from '@/components/app-logo';
 import { SheetTitle } from '@/components/ui/sheet';
@@ -59,6 +60,7 @@ const WatermarkRemoverTool = dynamic(() => import('@/components/tools/watermark-
 const ImageTextManipulationTool = dynamic(() => import('@/components/tools/image-text-manipulation-tool'), { loading: () => <RobotsBuildingLoader /> });
 const PortfolioGeneratorTool = dynamic(() => import('@/components/tools/portfolio-generator-tool'), { loading: () => <RobotsBuildingLoader /> });
 const ResumeCustomizerTool = dynamic(() => import('@/components/tools/resume-customizer-tool'), { loading: () => <RobotsBuildingLoader /> });
+const TextHumanizerTool = dynamic(() => import('@/components/tools/text-humanizer-tool'), { loading: () => <RobotsBuildingLoader /> });
 
 
 type ToolId =
@@ -78,6 +80,7 @@ type ToolId =
   | 'diagram-generator'
   | 'presentation-generator'
   | 'text-to-speech'
+  | 'text-humanizer'
   | 'watermark-remover'
   | 'image-text-manipulation';
 
@@ -184,6 +187,12 @@ const tools: ToolConfig[] = [
     name: 'Text to Speech',
     icon: Mic,
     component: TextToSpeechTool,
+  },
+  {
+    id: 'text-humanizer',
+    name: 'Text Humanizer',
+    icon: Sparkles,
+    component: TextHumanizerTool,
   },
   {
     id: 'watermark-remover',

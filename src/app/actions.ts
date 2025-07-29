@@ -74,6 +74,10 @@ import {
     customizeResume,
     type CustomizeResumeInput,
 } from '@/ai/flows/resume-customizer-tool';
+import {
+    humanizeText,
+    type HumanizeTextInput,
+} from '@/ai/flows/text-humanizer-tool';
 
 async function handleAction<T_Input, T_Output>(
   input: T_Input,
@@ -155,6 +159,10 @@ export async function handleManipulateImageTextAction(input: ManipulateImageText
 
 export async function handleCustomizeResumeAction(input: CustomizeResumeInput) {
     return handleAction(input, customizeResume);
+}
+
+export async function handleHumanizeTextAction(input: HumanizeTextInput) {
+    return handleAction(input, humanizeText);
 }
 
 type GeneratePortfolioWebsiteActionInput = 
