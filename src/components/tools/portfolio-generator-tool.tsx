@@ -31,6 +31,7 @@ import type { GeneratePortfolioWebsiteOutput, GeneratePortfolioWebsiteInput } fr
 import { Copy, Download, FileArchive, FileText, Loader2, Plus, Trash2, UploadCloud } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 
 const portfolioSchema = z.object({
     name: z.string().min(1, "Name is required."),
