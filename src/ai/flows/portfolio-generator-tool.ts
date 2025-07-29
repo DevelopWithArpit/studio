@@ -320,14 +320,40 @@ section.visible {
     text-align: center;
 }
 
+@keyframes typing {
+    from { width: 0; }
+    to { width: 100%; }
+}
+
+@keyframes blink-caret {
+    from, to { border-color: transparent; }
+    50% { border-color: var(--accent-color); }
+}
+
 .hero-name {
     font-size: 5rem;
+    overflow: hidden;
+    border-right: .15em solid var(--accent-color);
+    white-space: nowrap;
+    margin: 0 auto;
+    letter-spacing: .15em;
+    animation:
+        typing 3.5s steps(40, end),
+        blink-caret .75s step-end infinite;
 }
 
 .hero-headline {
     font-size: 1.5rem;
     margin-top: 1rem;
+    opacity: 0;
+    animation: fadeIn 2s ease-in-out 3.5s forwards;
 }
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
 
 .experience-list .experience-item {
     background-color: var(--card-bg-color);
