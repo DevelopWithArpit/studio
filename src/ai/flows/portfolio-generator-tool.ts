@@ -107,7 +107,9 @@ const prompt = ai.definePrompt({
     *   **For creative roles (e.g., Graphic Designer, Artist):** Use a more creative layout, perhaps with a lighter theme or more vibrant colors. Choose fonts that reflect creativity (e.g., a stylish serif or sans-serif).
     *   **For other professions (e.g., Marketing, Finance):** Choose a professional, clean, and appropriate theme. A light theme with a standard sans-serif font like 'Inter' is a safe and professional choice.
 2.  **Content Injection:** Populate the provided HTML template with the user's structured data.
-3.  **Animations:** Ensure the CSS and JavaScript create a smooth, "assembled by AI" experience. Sections should fade in on scroll. The hero text must have a "typing" animation.
+3.  **Animations & Interactivity:** 
+    * Ensure the CSS and JavaScript create a smooth, "assembled by AI" experience. Sections should fade in on scroll. The hero text must have a "typing" animation.
+    * An interactive particle network background must be implemented using the HTML canvas.
 4.  **Structure:** Do not change the fundamental structure of the HTML (sections, IDs). Only populate it with data and adapt the styles in the CSS.
 5.  **Output:** Return the complete HTML, CSS, and JavaScript as a single JSON object.
 
@@ -161,6 +163,7 @@ const prompt = ai.definePrompt({
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <canvas id="interactive-bg"></canvas>
 
     <header class="header">
         <nav class="nav">
@@ -262,6 +265,20 @@ body {
     transition: background-color 0.5s ease, color 0.5s ease;
 }
 
+#interactive-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+main, .header, .footer {
+    position: relative;
+    z-index: 1;
+}
+
 h1, h2, h3 {
     color: var(--accent-color);
     line-height: 1.2;
@@ -295,6 +312,10 @@ section {
     opacity: 0;
     transform: translateY(30px);
     transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    background-color: rgba(10, 25, 47, 0.8); /* Semi-transparent background for content sections */
+    backdrop-filter: blur(2px);
+    border-radius: 12px;
+    margin-bottom: 2rem;
 }
 
 section.visible {
@@ -326,6 +347,9 @@ section.visible {
     align-items: center;
     justify-content: center;
     text-align: center;
+    background: none;
+    backdrop-filter: none;
+    border-radius: 0;
 }
 
 @keyframes typing {
@@ -419,7 +443,8 @@ section.visible {
 .footer {
     text-align: center;
     padding: 3rem 1rem;
-    background-color: var(--card-bg-color);
+    background-color: rgba(10, 25, 47, 0.85);
+    backdrop-filter: blur(10px);
 }
 
 .social-links {
@@ -433,8 +458,8 @@ section.visible {
 **JavaScript:**
 \`\`\`javascript
 document.addEventListener('DOMContentLoaded', () => {
+    // Scroll animations
     const scrollTargets = document.querySelectorAll('.scroll-target');
-
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -442,14 +467,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 observer.unobserve(entry.target);
             }
         });
-    }, {
-        threshold: 0.1
-    });
+    }, { threshold: 0.1 });
+    scrollTargets.forEach(target => observer.observe(target));
 
-    scrollTargets.forEach(target => {
-        observer.observe(target);
-    });
-
+    // Header visibility on scroll
     let lastScrollTop = 0;
     const header = document.querySelector('.header');
     window.addEventListener('scroll', function() {
@@ -461,9 +482,120 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
     }, false);
+
+    // Interactive background
+    const canvas = document.getElementById('interactive-bg');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    let particlesArray = [];
+    const numberOfParticles = 100;
+    const mouse = { x: null, y: null };
+
+    window.addEventListener('mousemove', (event) => {
+        mouse.x = event.x;
+        mouse.y = event.y;
+    });
+    window.addEventListener('mouseout', () => {
+        mouse.x = null;
+        mouse.y = null;
+    })
+
+
+    class Particle {
+        constructor(x, y, size, color, weight) {
+            this.x = x;
+            this.y = y;
+            this.size = size;
+            this.color = color;
+            this.weight = weight; // Speed
+            this.baseX = this.x;
+            this.baseY = this.y;
+        }
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
+            ctx.fillStyle = this.color;
+            ctx.fill();
+        }
+        update() {
+            // Movement
+            this.x += (Math.random() - 0.5) * this.weight;
+            this.y += (Math.random() - 0.5) * this.weight;
+
+            // Bounce off edges
+            if (this.x > canvas.width || this.x < 0) this.x = Math.random() * canvas.width;
+            if (this.y > canvas.height || this.y < 0) this.y = Math.random() * canvas.height;
+            
+            // Mouse interaction
+            if (mouse.x && mouse.y) {
+                let dx = mouse.x - this.x;
+                let dy = mouse.y - this.y;
+                let distance = Math.sqrt(dx*dx + dy*dy);
+                if (distance < 100) {
+                     this.x -= dx / 20;
+                     this.y -= dy / 20;
+                }
+            }
+
+            this.draw();
+        }
+    }
+
+    function init() {
+        particlesArray = [];
+        for (let i = 0; i < numberOfParticles; i++) {
+            let x = Math.random() * canvas.width;
+            let y = Math.random() * canvas.height;
+            let size = Math.random() * 1.5 + 1;
+            let color = 'rgba(167, 196, 224, 0.7)';
+            let weight = Math.random() * 0.5 + 0.1;
+            particlesArray.push(new Particle(x, y, size, color, weight));
+        }
+    }
+
+    function connect() {
+        let opacityValue = 1;
+        for (let a = 0; a < particlesArray.length; a++) {
+            for (let b = a; b < particlesArray.length; b++) {
+                let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x)) +
+                               ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
+                if (distance < (canvas.width / 7) * (canvas.height / 7)) {
+                    opacityValue = 1 - (distance / 20000);
+                    ctx.strokeStyle = 'rgba(167, 196, 224,' + opacityValue + ')';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                    ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                    ctx.stroke();
+                }
+            }
+        }
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (let i = 0; i < particlesArray.length; i++) {
+            particlesArray[i].update();
+        }
+        connect();
+        requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        init();
+    });
+
+    init();
+    animate();
 });
-\`\`\``,
+\`\`\`
+`,
 });
+
 
 const generatePortfolioWebsiteFlow = ai.defineFlow(
   {
@@ -471,8 +603,8 @@ const generatePortfolioWebsiteFlow = ai.defineFlow(
     inputSchema: PortfolioDataSchema,
     outputSchema: GeneratePortfolioWebsiteOutputSchema,
   },
-  async (input) => {
-    const { output } = await prompt(input);
+  async input => {
+    const {output} = await prompt(input);
     return output!;
   }
 );
