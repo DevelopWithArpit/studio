@@ -5,6 +5,7 @@
  * @fileOverview Generates a complete portfolio website from structured data.
  * 
  * - generatePortfolioWebsite - A function that generates HTML, CSS, and JS for a portfolio.
+ * - extractPortfolioDataFromText - A function that extracts structured portfolio data from a text blob.
  * - GeneratePortfolioWebsiteInput - The input type for the function.
  * - GeneratePortfolioWebsiteOutput - The return type for the function.
  */
@@ -59,6 +60,35 @@ export type GeneratePortfolioWebsiteOutput = z.infer<typeof GeneratePortfolioWeb
 export async function generatePortfolioWebsite(input: GeneratePortfolioWebsiteInput): Promise<GeneratePortfolioWebsiteOutput> {
   return generatePortfolioWebsiteFlow(input);
 }
+
+
+const extractPortfolioDataPrompt = ai.definePrompt({
+    name: 'extractPortfolioDataPrompt',
+    input: { schema: z.object({ text: z.string() }) },
+    output: { schema: PortfolioDataSchema },
+    prompt: `You are an expert at parsing unstructured text and extracting structured information. Analyze the following document, which could be a resume, a LinkedIn profile, or an article about building a portfolio. Your task is to extract all relevant information and structure it according to the provided JSON schema.
+
+- If the document is a guide or article, create a realistic and compelling portfolio for a fictional person (e.g., Alex Doe, a Full-Stack Developer) based on the principles and examples in the text.
+- Infer missing information where it makes sense. For instance, if a job title is "Software Engineer," you can create plausible project descriptions or skill sets.
+- For projects, if no image URL is provided, use a placeholder from 'https://placehold.co/600x400'.
+- Ensure all fields in the schema are populated with high-quality, realistic data.
+
+Document to analyze:
+---
+{{{text}}}
+---
+
+Extract the data now.`,
+});
+
+export async function extractPortfolioDataFromText(text: string): Promise<GeneratePortfolioWebsiteInput> {
+    const { output } = await extractPortfolioDataPrompt({ text });
+    if (!output) {
+        throw new Error("Failed to extract portfolio data from the provided text.");
+    }
+    return output;
+}
+
 
 const prompt = ai.definePrompt({
     name: 'generatePortfolioWebsitePrompt',
@@ -133,7 +163,3 @@ const generatePortfolioWebsiteFlow = ai.defineFlow(
     return output!;
   }
 );
-
-    
-
-    

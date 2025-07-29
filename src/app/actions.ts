@@ -66,6 +66,7 @@ import {
 } from '@/ai/flows/image-text-manipulation-tool';
 import {
     generatePortfolioWebsite,
+    extractPortfolioDataFromText,
     type GeneratePortfolioWebsiteInput,
 } from '@/ai/flows/portfolio-generator-tool';
 import {
@@ -157,13 +158,15 @@ export async function handleCustomizeResumeAction(input: CustomizeResumeInput) {
 
 type GeneratePortfolioWebsiteActionInput = 
     | { type: 'resume'; resumeDataUri: string; }
-    | { type: 'manual'; data: GeneratePortfolioWebsiteInput; };
+    | { type: 'manual'; data: GeneratePortfolioWebsiteInput; }
+    | { type: 'text'; text: string; };
 
 export async function handleGeneratePortfolioWebsiteAction(input: GeneratePortfolioWebsiteActionInput) {
     try {
         let portfolioData: GeneratePortfolioWebsiteInput;
 
         if (input.type === 'resume') {
+            // This path is kept for compatibility but the UI will now use the 'text' path
             const parseResult = await getResumeFeedback({ resume: input.resumeDataUri });
             if (!parseResult.rewrittenResume) {
                 throw new Error("Failed to parse resume.");
@@ -181,6 +184,8 @@ export async function handleGeneratePortfolioWebsiteAction(input: GeneratePortfo
                 skills: [...resumeData.skills.technical, ...(resumeData.skills.other || [])],
                 achievements: resumeData.achievements,
             };
+        } else if (input.type === 'text') {
+            portfolioData = await extractPortfolioDataFromText(input.text);
         } else {
             portfolioData = input.data;
         }
