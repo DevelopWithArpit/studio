@@ -23,7 +23,7 @@ const PortfolioDataSchema = z.object({
       github: z.string().optional(),
       socials: z.array(z.object({
           network: z.string(),
-          url: z.string().url(),
+          url: z.string(),
       })).optional().describe("An array of social media links.")
   }),
   about: z.string().describe("A detailed 'About Me' section."),
