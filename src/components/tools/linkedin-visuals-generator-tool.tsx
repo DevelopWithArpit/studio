@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Image from 'next/image';
+import { saveAs } from 'file-saver';
 import {
   Card,
   CardContent,
@@ -25,12 +26,18 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { handleGenerateLinkedInVisualsAction } from '@/app/actions';
-import type { GenerateLinkedInVisualsOutput } from '@/ai/flows/linkedin-visuals-generator-tool';
-import { FileText, UploadCloud } from 'lucide-react';
+import type { GenerateLinkedInVisualsInput, GenerateLinkedInVisualsOutput } from '@/ai/flows/linkedin-visuals-generator-tool';
+import { Download, FileText, UploadCloud } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
 
 const formSchema = z.object({
-  resumeDataUri: z.string().min(1, 'Please upload your resume.'),
+  resumeDataUri: z.string().optional(),
+  resumeText: z.string().optional(),
   userPhotoUri: z.string().optional(),
+}).refine(data => !!data.resumeDataUri || !!data.resumeText, {
+    message: 'Please either upload a resume or enter text manually.',
+    path: ['resumeDataUri'],
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -46,6 +53,7 @@ export default function LinkedInVisualsGeneratorTool() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       resumeDataUri: '',
+      resumeText: '',
       userPhotoUri: '',
     },
   });
@@ -61,6 +69,7 @@ export default function LinkedInVisualsGeneratorTool() {
       reader.onload = (loadEvent) => {
         const dataUri = loadEvent.target?.result as string;
         form.setValue('resumeDataUri', dataUri);
+        form.setValue('resumeText', ''); // Clear text input if file is uploaded
         setResumeFileName(file.name);
       };
       reader.readAsDataURL(file);
@@ -83,8 +92,16 @@ export default function LinkedInVisualsGeneratorTool() {
       reader.readAsDataURL(file);
     }
   };
+  
+  const handleDownload = (url: string, filename: string) => {
+    saveAs(url, filename);
+    toast({
+      title: 'Download Started',
+      description: `${filename} is downloading.`,
+    });
+  };
 
-  async function onSubmit(data: FormData) {
+  async function onSubmit(data: GenerateLinkedInVisualsInput) {
     setIsLoading(true);
     setResult(null);
     const response = await handleGenerateLinkedInVisualsAction(data);
@@ -114,41 +131,73 @@ export default function LinkedInVisualsGeneratorTool() {
         <CardHeader>
           <CardTitle>Generate Visuals</CardTitle>
           <CardDescription>
-            Upload your resume for context and optionally upload a photo to use as a base.
+            Provide your resume for context and optionally upload a photo to use as a base.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-                <FormItem>
-                  <FormLabel>Your Resume</FormLabel>
-                   <FormControl>
-                     <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center h-[265px]">
-                      {resumeFileName ? (
-                        <div className='flex flex-col items-center gap-2'>
-                          <FileText className="w-12 h-12 text-accent" />
-                          <p className='text-sm font-medium'>{resumeFileName}</p>
-                           <Button variant="link" size="sm" asChild className='p-0 h-auto'>
-                             <label htmlFor="resume-upload" className="cursor-pointer">Change file</label>
-                           </Button>
-                        </div>
-                      ) : (
-                        <>
-                          <UploadCloud className="w-12 h-12 text-muted-foreground" />
-                          <p className="mt-2 text-sm text-muted-foreground">
-                            <label htmlFor="resume-upload" className="font-semibold text-accent cursor-pointer hover:underline">
-                              Click to upload
-                            </label>
-                          </p>
-                           <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 200MB</p>
-                        </>
-                      )}
-                      <Input id="resume-upload" type="file" className="sr-only" onChange={handleResumeFileChange} accept=".pdf,.doc,.docx,.txt"/>
-                    </div>
-                   </FormControl>
-                  <FormMessage>{form.formState.errors.resumeDataUri?.message}</FormMessage>
-                </FormItem>
+                <Tabs defaultValue="upload" className="w-full">
+                    <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="upload">Upload Resume</TabsTrigger>
+                        <TabsTrigger value="manual">Manual Entry</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="upload" className="mt-4">
+                        <FormItem>
+                            <FormLabel>Your Resume</FormLabel>
+                            <FormControl>
+                                <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center h-[265px]">
+                                {resumeFileName ? (
+                                    <div className='flex flex-col items-center gap-2'>
+                                    <FileText className="w-12 h-12 text-accent" />
+                                    <p className='text-sm font-medium'>{resumeFileName}</p>
+                                    <Button variant="link" size="sm" asChild className='p-0 h-auto'>
+                                        <label htmlFor="resume-upload" className="cursor-pointer">Change file</label>
+                                    </Button>
+                                    </div>
+                                ) : (
+                                    <>
+                                    <UploadCloud className="w-12 h-12 text-muted-foreground" />
+                                    <p className="mt-2 text-sm text-muted-foreground">
+                                        <label htmlFor="resume-upload" className="font-semibold text-accent cursor-pointer hover:underline">
+                                        Click to upload
+                                        </label>
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 200MB</p>
+                                    </>
+                                )}
+                                <Input id="resume-upload" type="file" className="sr-only" onChange={handleResumeFileChange} accept=".pdf,.doc,.docx,.txt"/>
+                                </div>
+                            </FormControl>
+                             <FormMessage>{form.formState.errors.resumeDataUri?.message}</FormMessage>
+                        </FormItem>
+                    </TabsContent>
+                    <TabsContent value="manual" className="mt-4">
+                        <FormField
+                            control={form.control}
+                            name="resumeText"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Paste Resume Content</FormLabel>
+                                    <FormControl>
+                                        <Textarea
+                                            placeholder="Paste your resume content here..."
+                                            {...field}
+                                            rows={12}
+                                            onChange={(e) => {
+                                                field.onChange(e);
+                                                form.setValue('resumeDataUri', '');
+                                                setResumeFileName(null);
+                                            }}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </TabsContent>
+                </Tabs>
+                
                 <FormItem>
                   <FormLabel>Your Photo (Optional)</FormLabel>
                    <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center h-[265px]">
@@ -168,7 +217,7 @@ export default function LinkedInVisualsGeneratorTool() {
                     )}
                   </div>
                 </FormItem>
-              </div>
+
               <Button type="submit" disabled={isLoading}>
                 {isLoading ? 'Generating...' : 'Generate Visuals'}
               </Button>
@@ -187,13 +236,29 @@ export default function LinkedInVisualsGeneratorTool() {
                 <h3 className="font-semibold text-center font-headline">Profile Picture</h3>
                 <div className="flex justify-center">
                     {isLoading && !result ? <Skeleton className="w-48 h-48 rounded-full" /> : null}
-                    {result?.profilePictureUrl && <Image src={result.profilePictureUrl} alt="Generated profile picture" width={192} height={192} className="rounded-full border" />}
+                    {result?.profilePictureUrl && (
+                        <div className="flex flex-col items-center gap-4">
+                            <Image src={result.profilePictureUrl} alt="Generated profile picture" width={192} height={192} className="rounded-full border" />
+                            <Button onClick={() => handleDownload(result.profilePictureUrl, 'profile-picture.png')}>
+                                <Download className="mr-2" />
+                                Download
+                            </Button>
+                        </div>
+                    )}
                 </div>
              </div>
              <div className="space-y-4">
                 <h3 className="font-semibold text-center font-headline">Cover Banner</h3>
-                 {isLoading && !result ? <Skeleton className="w-full h-48 rounded-lg" /> : null}
-                 {result?.coverBannerUrl && <Image src={result.coverBannerUrl} alt="Generated cover banner" width={1584} height={396} className="rounded-lg border aspect-[4/1] object-cover" />}
+                 {isLoading && !result ? <Skeleton className="w-full aspect-[4/1] rounded-lg" /> : null}
+                 {result?.coverBannerUrl && (
+                    <div className="flex flex-col items-center gap-4">
+                        <Image src={result.coverBannerUrl} alt="Generated cover banner" width={1584} height={396} className="rounded-lg border aspect-[4/1] object-cover" />
+                        <Button onClick={() => handleDownload(result.coverBannerUrl, 'cover-banner.png')}>
+                           <Download className="mr-2" />
+                            Download
+                        </Button>
+                    </div>
+                 )}
              </div>
           </CardContent>
         </Card>

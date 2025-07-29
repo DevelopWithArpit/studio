@@ -12,7 +12,8 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 
 const GenerateLinkedInVisualsInputSchema = z.object({
-  resumeDataUri: z.string().describe("The user's resume as a data URI. Format: 'data:<mimetype>;base64,<encoded_data>'."),
+  resumeDataUri: z.string().optional().describe("The user's resume as a data URI. Format: 'data:<mimetype>;base64,<encoded_data>'."),
+  resumeText: z.string().optional().describe("The user's resume as plain text."),
   userPhotoUri: z.string().optional().describe("An optional photo of the user, as a data URI. If provided, it will be used as the base for the profile picture. Format: 'data:<mimetype>;base64,<encoded_data>'."),
 });
 export type GenerateLinkedInVisualsInput = z.infer<typeof GenerateLinkedInVisualsInputSchema>;
@@ -33,21 +34,31 @@ const generateLinkedInVisualsFlow = ai.defineFlow(
     inputSchema: GenerateLinkedInVisualsInputSchema,
     outputSchema: GenerateLinkedInVisualsOutputSchema,
   },
-  async ({ resumeDataUri, userPhotoUri }) => {
+  async ({ resumeDataUri, resumeText, userPhotoUri }) => {
+    
+    let resumeContextPart;
+    if (resumeDataUri) {
+        resumeContextPart = { media: { url: resumeDataUri } };
+    } else if (resumeText) {
+        resumeContextPart = { text: `Here is the resume text:\n\n${resumeText}` };
+    } else {
+        throw new Error("Either resumeDataUri or resumeText must be provided.");
+    }
+
     const profilePicturePrompt = userPhotoUri
       ? [
           { media: { url: userPhotoUri } },
           { text: `Based on the user's photo and their resume content, create a professional, high-quality headshot suitable for a LinkedIn profile picture. The background should be simple and professional, not distracting. The person should look friendly and approachable.` },
-          { media: { url: resumeDataUri } },
+          resumeContextPart,
         ]
       : [
           { text: `Generate a professional, high-quality headshot suitable for a LinkedIn profile picture for a person in the software engineering industry. The person should look friendly and approachable. The background should be simple and professional. Use the resume content to guide the style.` },
-          { media: { url: resumeDataUri } },
+          resumeContextPart,
         ];
 
     const coverBannerPrompt = [
         { text: `Generate a professional, abstract background image to be used as a LinkedIn cover banner (1584 x 396 pixels). The design should be modern, clean, and relevant to the user's industry based on their resume. It should not contain any text. It should be visually appealing but not distracting.` },
-        { media: { url: resumeDataUri } },
+        resumeContextPart,
     ];
 
     const [profilePicResult, coverBannerResult] = await Promise.all([
