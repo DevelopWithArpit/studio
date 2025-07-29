@@ -158,34 +158,14 @@ export async function handleCustomizeResumeAction(input: CustomizeResumeInput) {
 
 type GeneratePortfolioWebsiteActionInput = 
     | { type: 'resume'; resumeDataUri: string; }
-    | { type: 'manual'; data: GeneratePortfolioWebsiteInput; }
-    | { type: 'text'; text: string; };
+    | { type: 'manual'; data: GeneratePortfolioWebsiteInput; };
 
 export async function handleGeneratePortfolioWebsiteAction(input: GeneratePortfolioWebsiteActionInput) {
     try {
         let portfolioData: GeneratePortfolioWebsiteInput;
 
         if (input.type === 'resume') {
-            // This path is kept for compatibility but the UI will now use the 'text' path
-            const parseResult = await getResumeFeedback({ resume: input.resumeDataUri });
-            if (!parseResult.rewrittenResume) {
-                throw new Error("Failed to parse resume.");
-            }
-            const resumeData = parseResult.rewrittenResume;
-            
-            portfolioData = {
-                name: resumeData.name,
-                headline: '', // AI will generate this from summary
-                contact: resumeData.contact,
-                about: resumeData.summary,
-                experience: resumeData.experience.map(exp => ({...exp, description: exp.bullets.join('\\n- ')})),
-                education: resumeData.education.map(edu => ({...edu, dates: edu.dates || ''})),
-                projects: resumeData.projects.map(proj => ({...proj, description: proj.bullets.join('\\n- ')})),
-                skills: [...resumeData.skills.technical, ...(resumeData.skills.other || [])],
-                achievements: resumeData.achievements,
-            };
-        } else if (input.type === 'text') {
-            portfolioData = await extractPortfolioDataFromText(input.text);
+            portfolioData = await extractPortfolioDataFromText(input.resumeDataUri);
         } else {
             portfolioData = input.data;
         }

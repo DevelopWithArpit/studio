@@ -76,7 +76,6 @@ export default function PortfolioGeneratorTool() {
   const { toast } = useToast();
   const [resumeDataUri, setResumeDataUri] = useState<string | null>(null);
   const [resumeFileName, setResumeFileName] = useState<string | null>(null);
-  const [pastedText, setPastedText] = useState('');
 
   const form = useForm<FormData>({
     resolver: zodResolver(portfolioSchema),
@@ -115,20 +114,19 @@ export default function PortfolioGeneratorTool() {
     }
   }
 
-  const onTextSubmit = async () => {
-    if (!pastedText && !resumeDataUri) {
-        toast({ variant: 'destructive', title: 'No Content Provided', description: 'Please paste some text or upload a resume.' });
+  const onResumeSubmit = async () => {
+    if (!resumeDataUri) {
+        toast({ variant: 'destructive', title: 'No Resume Provided', description: 'Please upload a resume.' });
         return;
     }
     setIsLoading(true);
     setResult(null);
-    const textToProcess = pastedText || (resumeDataUri as string);
-    const response = await handleGeneratePortfolioWebsiteAction({ type: 'text', text: textToProcess });
+    const response = await handleGeneratePortfolioWebsiteAction({ type: 'resume', resumeDataUri });
     setIsLoading(false);
 
     if (response.success && response.data) {
       setResult(response.data);
-      toast({ title: 'Website Generated!', description: 'Your portfolio has been successfully generated from the provided text.' });
+      toast({ title: 'Website Generated!', description: 'Your portfolio has been successfully generated from the provided resume.' });
     } else {
       toast({
         variant: 'destructive',
@@ -175,7 +173,6 @@ export default function PortfolioGeneratorTool() {
         return;
       }
       setResumeFileName(file.name);
-      setPastedText(''); // Clear pasted text if a file is uploaded
       const reader = new FileReader();
       reader.onload = async (loadEvent) => {
         const dataUri = loadEvent.target?.result as string;
@@ -185,19 +182,13 @@ export default function PortfolioGeneratorTool() {
     }
   };
 
-  const handlePastedTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      setPastedText(e.target.value);
-      setResumeDataUri(null); // Clear file if text is pasted
-      setResumeFileName(null);
-  };
-
 
   return (
     <div className="space-y-8">
       <header className="space-y-2">
         <h1 className="text-3xl font-bold font-headline">Portfolio Website Generator</h1>
         <p className="text-muted-foreground">
-          Generate a website from your resume, an article, or by filling out the form manually.
+          Generate a website from your resume, or by filling out the form manually.
         </p>
       </header>
       
@@ -209,26 +200,12 @@ export default function PortfolioGeneratorTool() {
         <CardContent>
             <Tabs defaultValue="auto-generate">
                 <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="auto-generate">From Text or Resume</TabsTrigger>
+                    <TabsTrigger value="auto-generate">From Resume</TabsTrigger>
                     <TabsTrigger value="manual">Manual Entry</TabsTrigger>
                 </TabsList>
                 <TabsContent value="auto-generate" className="mt-6">
                     <div className="space-y-4">
-                        <Label htmlFor='pasted-text'>Paste an article, resume, or any relevant text</Label>
-                        <Textarea 
-                            id="pasted-text"
-                            value={pastedText}
-                            onChange={handlePastedTextChange}
-                            placeholder="Paste your content here..."
-                            rows={10}
-                        />
-
-                        <div className="relative flex items-center justify-center my-4">
-                            <div className="flex-grow border-t border-muted"></div>
-                            <span className="flex-shrink mx-4 text-muted-foreground text-xs uppercase">Or</span>
-                            <div className="flex-grow border-t border-muted"></div>
-                        </div>
-
+                        <Label>Upload your resume to automatically generate a portfolio.</Label>
                         <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center">
                             {resumeFileName ? (
                                 <div className='flex flex-col items-center gap-2'>
@@ -251,7 +228,7 @@ export default function PortfolioGeneratorTool() {
                             )}
                             <Input id="resume-upload" type="file" className="sr-only" onChange={handleResumeFileChange} accept=".pdf,.docx,.txt" />
                         </div>
-                        <Button onClick={onTextSubmit} disabled={isLoading || (!pastedText && !resumeDataUri)}>
+                        <Button onClick={onResumeSubmit} disabled={isLoading || !resumeDataUri}>
                             {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                             Generate Website
                         </Button>
