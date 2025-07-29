@@ -39,43 +39,19 @@ AI Engineer | Robotics Software Engineer
 arpitpise1@gmail.com | (727) 660-2831 | linkedin.com/in/arpit-pise-20029a287 | https://github.com/DevelopWithArpit | Nagpur, India
 
 SUMMARY
-Enthusiastic Robotics and AI student with expertise in Python, Java, and C++. Proven ability to develop and implement AI-powered solutions, demonstrated by leading the development of the AI Mentor platform, resulting in a 30% increase in user engagement. Seeking an AI Engineer or Robotics Software Engineer role to leverage technical skills and contribute to innovative AI and robotic systems.
+Enthusiastic Robotics and AI student with expertise in Python, Java, and C++. Seeking an AI Engineer or Robotics Software Engineer role to leverage technical skills and contribute to innovative AI and robotic systems.
 
 EXPERIENCE
-Cybersecurity Consulting Team Member | Tata Consultancy Services | June 2023
-- Completed a job simulation focused on identity and access management (IAM), collaborating with a Cybersecurity Consulting team.
-- Acquired expertise in IAM principles, cybersecurity best practices, and strategic alignment with business objectives.
-- Delivered comprehensive documentation and presentations to articulate complex technical concepts effectively.
-
 Software Engineer Intern | Electronic Arts | June 2023
-- Proposed a new feature for EA Sports College Football, detailing it in a comprehensive feature proposal.
-- Developed a class diagram and corresponding C++ header file, defining class structures for each object.
-- Improved the EA Sports College Football codebase by implementing an enhanced data structure and resolving a critical bug.
-
-Robotics & Controls Engineering Intern | Johnson & Johnson | June 2023
-- Completed a job simulation as a robotics & controls engineering intern, focused on optimizing a surgical robotic arm's performance.
-- Utilized Python-based tools to diagnose control system inefficiencies, pinpointing root causes of delays and implementing targeted optimizations.
-- Proposed actionable design modifications using annotated technical visuals, validating their impact on responsiveness and durability through iterative testing.
-
-Technical Member | College Committee (Priyadarshini College of Engineering) | Oct 2022 - May 2023
-- Collaborated in the organization of 5+ technical events and workshops, increasing student participation and engagement with technical subjects.
+- Implemented an enhanced data structure, improving performance.
 
 EDUCATION
 Priyadarshini College of Engineering | Nagpur, India
 B.Tech in Robotics and Artificial Intelligence | 2022 - 2026
 
-PROJECTS
-AI Mentor by AP | May 2023
-- Spearheaded the development of an AI-powered platform offering personalized learning and career guidance, resulting in a 30% increase in user engagement within the first month.
-- Engineered and implemented AI-driven tools for resume and cover letter creation, career path recommendations, and code/DSA assistance, boosting user productivity by 25% through reduced task completion times.
-
 SKILLS
 Technical Skills: Python, Java, C++, C, HTML, JavaScript, Robotics, MySQL, SQL, Cybersecurity, Git, Linux
 Other Skills: Problem Solving, Teamwork, Communication, Leadership, Adaptability
-
-KEY ACHIEVEMENTS
-- Led development of AI Mentor, increasing user engagement by 30%.
-- Boosted user productivity by 25% on AI Mentor through new tools.
 `;
 
 const formSchema = z.object({
@@ -410,7 +386,7 @@ export default function ResumeFeedbackTool() {
                   result && (
                     <div className="space-y-4">
                        <div className="border rounded-lg bg-gray-100 p-4 max-h-[700px] overflow-y-auto">
-                          <div className="scale-[0.9] origin-top-left">
+                          <div className="scale-[0.9] origin-top-left pointer-events-none">
                             <ResumeTemplate resumeData={result.rewrittenResume} />
                           </div>
                       </div>

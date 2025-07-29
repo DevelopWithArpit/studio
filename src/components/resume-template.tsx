@@ -64,10 +64,20 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
                 <header className="flex justify-between items-start pb-4 border-b-2 border-gray-200">
                     <div>
                         <h1 className="text-4xl font-bold text-gray-900 tracking-tight">{name}</h1>
-                        <p className="mt-2 text-xs text-gray-500">
-                            {contact.phone} | {contact.email}
-                            {contact.github && ` | ${contact.github}`}
-                            {` | ${contact.linkedin} | ${contact.location}`}
+                        <p className="mt-2 text-xs text-gray-500 space-x-2">
+                            <span>{contact.phone}</span>
+                            <span>|</span>
+                            <a href={`mailto:${contact.email}`} className="text-blue-600 hover:underline">{contact.email}</a>
+                            {contact.github && (
+                                <>
+                                    <span>|</span>
+                                    <a href={contact.github} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{contact.github}</a>
+                                </>
+                            )}
+                            <span>|</span>
+                            <a href={contact.linkedin} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{contact.linkedin}</a>
+                            <span>|</span>
+                            <span>{contact.location}</span>
                         </p>
                     </div>
                     <div className="flex-shrink-0">
