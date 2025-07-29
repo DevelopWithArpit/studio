@@ -46,6 +46,7 @@ const PortfolioDataSchema = z.object({
   })),
   skills: z.array(z.string()),
   achievements: z.array(z.string()).optional(),
+  profession: z.string().describe("The user's profession or industry (e.g., 'Software Engineer', 'Graphic Designer', 'Marine Biologist')."),
 });
 export type GeneratePortfolioWebsiteInput = z.infer<typeof PortfolioDataSchema>;
 
@@ -68,6 +69,7 @@ const extractPortfolioDataPrompt = ai.definePrompt({
     output: { schema: PortfolioDataSchema },
     prompt: `You are an expert at parsing unstructured text and extracting structured information. Analyze the following document, which could be a resume, a LinkedIn profile, or an article about building a portfolio. Your task is to extract all relevant information and structure it according to the provided JSON schema.
 
+- Based on the content, determine the person's profession (e.g., 'Software Engineer', 'Graphic Designer') and populate the 'profession' field.
 - If the document is a guide or article, create a realistic and compelling portfolio for a fictional person (e.g., Alex Doe, a Full-Stack Developer) based on the principles and examples in the text.
 - Infer missing information where it makes sense. For instance, if a job title is "Software Engineer," you can create plausible project descriptions or skill sets.
 - For projects, if no image URL is provided, use a placeholder from 'https://placehold.co/600x400'.
@@ -94,7 +96,20 @@ const prompt = ai.definePrompt({
     name: 'generatePortfolioWebsitePrompt',
     input: { schema: PortfolioDataSchema },
     output: { schema: GeneratePortfolioWebsiteOutputSchema },
-    prompt: `You are an expert web developer. Your task is to populate the provided HTML, CSS, and JavaScript template with the user's structured data.
+    prompt: `You are an expert web developer and designer, specializing in creating modern, animated portfolio websites. Your task is to generate the complete HTML, CSS, and JavaScript for a portfolio, visually tailored to the user's profession.
+
+**User's Profession:** {{{profession}}}
+
+**Instructions:**
+1.  **Theme Adaptation:**
+    *   Based on the user's profession, adapt the visual theme.
+    *   **For technical roles (e.g., Software Engineer, Data Scientist):** Use a dark theme with a tech-inspired font like 'Space Grotesk'. Use an accent color like teal or electric blue. The overall feel should be modern and clean.
+    *   **For creative roles (e.g., Graphic Designer, Artist):** Use a more creative layout, perhaps with a lighter theme or more vibrant colors. Choose fonts that reflect creativity (e.g., a stylish serif or sans-serif).
+    *   **For other professions (e.g., Marketing, Finance):** Choose a professional, clean, and appropriate theme. A light theme with a standard sans-serif font like 'Inter' is a safe and professional choice.
+2.  **Content Injection:** Populate the provided HTML template with the user's structured data.
+3.  **Animations:** Ensure the CSS and JavaScript create a smooth, animated experience. Sections should fade in on scroll. The hero text should have a "typing" animation.
+4.  **Structure:** Do not change the fundamental structure of the HTML (sections, IDs). Only populate it with data and adapt the styles in the CSS.
+5.  **Output:** Return the complete HTML, CSS, and JavaScript as a single JSON object.
 
 **User's Portfolio Data:**
 - Name: {{{name}}}
@@ -129,16 +144,6 @@ const prompt = ai.definePrompt({
 {{/each}}
 {{/if}}
 
-**Instructions:**
-1.  Take the user's data and insert it into the correct locations in the HTML template below.
-2.  For the hero section, use the user's name and headline.
-3.  For the "About" section, use the user's "about" text.
-4.  For the "Experience" section, create an entry for each item in the user's experience array.
-5.  For the "Projects" section, create a card for each project. Use 'https://placehold.co/600x400' if no image URL is provided.
-6.  For the "Skills" section, list all the user's skills.
-7.  For the footer, include all contact information and social links.
-8.  **Do not change the structure of the HTML, CSS, or JavaScript.** Only insert the data.
-9.  Return the complete HTML, CSS, and JavaScript as a single JSON object.
 
 **Template:**
 
@@ -153,7 +158,7 @@ const prompt = ai.definePrompt({
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -235,10 +240,12 @@ const prompt = ai.definePrompt({
 **CSS:**
 \`\`\`css
 :root {
+    /* DEFAULT THEME (Dark, Tech-focused) - ADAPT THIS BASED ON PROFESSION */
     --bg-color: #0A192F;
     --text-color: #ccd6f6;
     --accent-color: #64ffda;
     --card-bg-color: #112240;
+    --font-family: 'Space Grotesk', sans-serif;
 }
 
 * {
@@ -248,10 +255,11 @@ const prompt = ai.definePrompt({
 }
 
 body {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: var(--font-family);
     background-color: var(--bg-color);
     color: var(--text-color);
     line-height: 1.6;
+    transition: background-color 0.5s ease, color 0.5s ease;
 }
 
 h1, h2, h3 {
@@ -332,13 +340,14 @@ section.visible {
 
 .hero-name {
     font-size: 5rem;
+    font-weight: 700;
     overflow: hidden;
     border-right: .15em solid var(--accent-color);
     white-space: nowrap;
     margin: 0 auto;
-    letter-spacing: .15em;
+    letter-spacing: .1em;
     animation:
-        typing 3.5s steps(40, end),
+        typing 3.5s steps(30, end),
         blink-caret .75s step-end infinite;
 }
 
