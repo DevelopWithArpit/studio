@@ -102,12 +102,12 @@ const prompt = ai.definePrompt({
 
 **Instructions:**
 1.  **Theme Adaptation:**
-    *   Based on the user's profession, adapt the visual theme.
+    *   Based on the user's profession, adapt the visual theme in the CSS.
     *   **For technical roles (e.g., Software Engineer, Data Scientist):** Use a dark theme with a tech-inspired font like 'Space Grotesk'. Use an accent color like teal or electric blue. The overall feel should be modern and clean.
     *   **For creative roles (e.g., Graphic Designer, Artist):** Use a more creative layout, perhaps with a lighter theme or more vibrant colors. Choose fonts that reflect creativity (e.g., a stylish serif or sans-serif).
     *   **For other professions (e.g., Marketing, Finance):** Choose a professional, clean, and appropriate theme. A light theme with a standard sans-serif font like 'Inter' is a safe and professional choice.
 2.  **Content Injection:** Populate the provided HTML template with the user's structured data.
-3.  **Animations:** Ensure the CSS and JavaScript create a smooth, animated experience. Sections should fade in on scroll. The hero text should have a "typing" animation.
+3.  **Animations:** Ensure the CSS and JavaScript create a smooth, "assembled by AI" experience. Sections should fade in on scroll. The hero text must have a "typing" animation.
 4.  **Structure:** Do not change the fundamental structure of the HTML (sections, IDs). Only populate it with data and adapt the styles in the CSS.
 5.  **Output:** Return the complete HTML, CSS, and JavaScript as a single JSON object.
 
@@ -465,7 +465,6 @@ document.addEventListener('DOMContentLoaded', () => {
 \`\`\``,
 });
 
-
 const generatePortfolioWebsiteFlow = ai.defineFlow(
   {
     name: 'generatePortfolioWebsiteFlow',
@@ -474,11 +473,6 @@ const generatePortfolioWebsiteFlow = ai.defineFlow(
   },
   async (input) => {
     const { output } = await prompt(input);
-    if (!output) {
-      throw new Error("The model failed to generate the website code.");
-    }
-    return output;
+    return output!;
   }
 );
-
-    
