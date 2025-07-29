@@ -34,26 +34,6 @@ import type { GetResumeFeedbackOutput } from '@/ai/flows/resume-feedback-tool';
 import { FileText, UploadCloud, Download, FileCode } from 'lucide-react';
 import { ResumeTemplate } from '@/components/resume-template';
 
-const defaultResumeText = `Arpit Pise
-AI Engineer | Robotics Software Engineer
-arpitpise1@gmail.com | (727) 660-2831 | linkedin.com/in/arpit-pise-20029a287 | https://github.com/DevelopWithArpit | Nagpur, India
-
-SUMMARY
-Enthusiastic Robotics and AI student with expertise in Python, Java, and C++. Seeking an AI Engineer or Robotics Software Engineer role to leverage technical skills and contribute to innovative AI and robotic systems.
-
-EXPERIENCE
-Software Engineer Intern | Electronic Arts | June 2023
-- Implemented an enhanced data structure, improving performance.
-
-EDUCATION
-Priyadarshini College of Engineering | Nagpur, India
-B.Tech in Robotics and Artificial Intelligence | 2022 - 2026
-
-SKILLS
-Technical Skills: Python, Java, C++, C, HTML, JavaScript, Robotics, MySQL, SQL, Cybersecurity, Git, Linux
-Other Skills: Problem Solving, Teamwork, Communication, Leadership, Adaptability
-`;
-
 const formSchema = z.object({
   resume: z.string().min(1, 'Please upload or paste your resume.'),
   targetJobRole: z.string().optional(),
@@ -73,7 +53,7 @@ export default function ResumeFeedbackTool() {
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      resume: defaultResumeText,
+      resume: '',
       targetJobRole: '',
       additionalInfo: '',
     },
@@ -237,7 +217,7 @@ export default function ResumeFeedbackTool() {
                         <FormLabel>Paste your resume content here</FormLabel>
                         <FormControl>
                           <Textarea
-                            placeholder="Summary..."
+                            placeholder="Paste your resume here..."
                             rows={15}
                             {...field}
                             onChange={(e) => {
