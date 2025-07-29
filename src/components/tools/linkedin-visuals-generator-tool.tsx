@@ -20,17 +20,16 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { handleGenerateLinkedInVisualsAction } from '@/app/actions';
 import type { GenerateLinkedInVisualsOutput } from '@/ai/flows/linkedin-visuals-generator-tool';
-import { UploadCloud } from 'lucide-react';
+import { FileText, UploadCloud } from 'lucide-react';
 
 const formSchema = z.object({
-  resumeContent: z.string().min(50, 'Please provide at least 50 characters of resume content.'),
+  resumeDataUri: z.string().min(1, 'Please upload your resume.'),
   userPhotoUri: z.string().optional(),
 });
 
@@ -39,18 +38,36 @@ type FormData = z.infer<typeof formSchema>;
 export default function LinkedInVisualsGeneratorTool() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<GenerateLinkedInVisualsOutput | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [resumeFileName, setResumeFileName] = useState<string | null>(null);
   const { toast } = useToast();
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      resumeContent: '',
+      resumeDataUri: '',
       userPhotoUri: '',
     },
   });
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleResumeFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 200 * 1024 * 1024) { // 200MB limit
+        toast({ variant: "destructive", title: "File too large", description: "Please upload a resume smaller than 200MB."});
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (loadEvent) => {
+        const dataUri = loadEvent.target?.result as string;
+        form.setValue('resumeDataUri', dataUri);
+        setResumeFileName(file.name);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handlePhotoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 200 * 1024 * 1024) { // 200MB limit
@@ -61,7 +78,7 @@ export default function LinkedInVisualsGeneratorTool() {
       reader.onload = (loadEvent) => {
         const dataUri = loadEvent.target?.result as string;
         form.setValue('userPhotoUri', dataUri);
-        setPreview(dataUri);
+        setPhotoPreview(dataUri);
       };
       reader.readAsDataURL(file);
     }
@@ -97,45 +114,55 @@ export default function LinkedInVisualsGeneratorTool() {
         <CardHeader>
           <CardTitle>Generate Visuals</CardTitle>
           <CardDescription>
-            Provide your resume content for context and optionally upload a photo to use as a base.
+            Upload your resume for context and optionally upload a photo to use as a base.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-                <FormField
-                  control={form.control}
-                  name="resumeContent"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Resume Content</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Paste your resume or a summary of your professional experience here..."
-                          {...field}
-                          rows={10}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
+                <FormItem>
+                  <FormLabel>Your Resume</FormLabel>
+                   <FormControl>
+                     <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center h-[265px]">
+                      {resumeFileName ? (
+                        <div className='flex flex-col items-center gap-2'>
+                          <FileText className="w-12 h-12 text-accent" />
+                          <p className='text-sm font-medium'>{resumeFileName}</p>
+                           <Button variant="link" size="sm" asChild className='p-0 h-auto'>
+                             <label htmlFor="resume-upload" className="cursor-pointer">Change file</label>
+                           </Button>
+                        </div>
+                      ) : (
+                        <>
+                          <UploadCloud className="w-12 h-12 text-muted-foreground" />
+                          <p className="mt-2 text-sm text-muted-foreground">
+                            <label htmlFor="resume-upload" className="font-semibold text-accent cursor-pointer hover:underline">
+                              Click to upload
+                            </label>
+                          </p>
+                           <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 200MB</p>
+                        </>
+                      )}
+                      <Input id="resume-upload" type="file" className="sr-only" onChange={handleResumeFileChange} accept=".pdf,.doc,.docx,.txt"/>
+                    </div>
+                   </FormControl>
+                  <FormMessage>{form.formState.errors.resumeDataUri?.message}</FormMessage>
+                </FormItem>
                 <FormItem>
                   <FormLabel>Your Photo (Optional)</FormLabel>
                    <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center h-[265px]">
-                    {preview ? (
-                      <Image src={preview} alt="Image preview" layout="fill" objectFit="contain" className="rounded-md" />
+                    {photoPreview ? (
+                      <Image src={photoPreview} alt="Image preview" layout="fill" objectFit="contain" className="rounded-md" />
                     ) : (
                       <>
                         <UploadCloud className="w-12 h-12 text-muted-foreground" />
                         <p className="mt-2 text-sm text-muted-foreground">
-                          <label htmlFor="file-upload" className="font-semibold text-accent cursor-pointer hover:underline">
+                          <label htmlFor="photo-upload" className="font-semibold text-accent cursor-pointer hover:underline">
                              Upload a headshot
                           </label>
                         </p>
-                        <Input id="file-upload" type="file" accept="image/*" className="sr-only" onChange={handleFileChange} />
+                        <Input id="photo-upload" type="file" accept="image/*" className="sr-only" onChange={handlePhotoFileChange} />
                          <p className="text-xs text-muted-foreground mt-1">PNG, JPG, GIF up to 200MB</p>
                       </>
                     )}
@@ -159,13 +186,13 @@ export default function LinkedInVisualsGeneratorTool() {
              <div className="space-y-4">
                 <h3 className="font-semibold text-center font-headline">Profile Picture</h3>
                 <div className="flex justify-center">
-                    {isLoading && !result && <Skeleton className="w-48 h-48 rounded-full" />}
+                    {isLoading && !result ? <Skeleton className="w-48 h-48 rounded-full" /> : null}
                     {result?.profilePictureUrl && <Image src={result.profilePictureUrl} alt="Generated profile picture" width={192} height={192} className="rounded-full border" />}
                 </div>
              </div>
              <div className="space-y-4">
                 <h3 className="font-semibold text-center font-headline">Cover Banner</h3>
-                 {isLoading && !result && <Skeleton className="w-full h-48 rounded-lg" />}
+                 {isLoading && !result ? <Skeleton className="w-full h-48 rounded-lg" /> : null}
                  {result?.coverBannerUrl && <Image src={result.coverBannerUrl} alt="Generated cover banner" width={1584} height={396} className="rounded-lg border aspect-[4/1] object-cover" />}
              </div>
           </CardContent>
