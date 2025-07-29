@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -36,6 +37,7 @@ import { Label } from '@/components/ui/label';
 const portfolioSchema = z.object({
     name: z.string().min(1, "Name is required."),
     headline: z.string().min(1, "Headline is required."),
+    profession: z.string().min(1, "Profession is required."),
     contact: z.object({
         email: z.string().email("Invalid email address."),
         phone: z.string().optional(),
@@ -82,12 +84,14 @@ export default function PortfolioGeneratorTool() {
     defaultValues: {
         name: '',
         headline: '',
+        profession: '',
         contact: { email: '', socials: [{ network: 'LinkedIn', url: '' }, { network: 'GitHub', url: '' }] },
         about: '',
         experience: [{ title: '', company: '', dates: '', description: '' }],
         education: [{ degree: '', school: '', dates: '' }],
         projects: [{ title: '', description: '', link: '', imageUrl: '' }],
         skills: [],
+        achievements: [],
     },
   });
 
@@ -245,6 +249,7 @@ export default function PortfolioGeneratorTool() {
                                     <FormField control={form.control} name="name" render={({ field }) => ( <FormItem> <FormLabel>Full Name</FormLabel> <FormControl><Input placeholder="John Doe" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                                     <FormField control={form.control} name="headline" render={({ field }) => ( <FormItem> <FormLabel>Headline</FormLabel> <FormControl><Input placeholder="Software Engineer | AI Enthusiast" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                                 </div>
+                                <FormField control={form.control} name="profession" render={({ field }) => ( <FormItem> <FormLabel>Profession</FormLabel> <FormControl><Input placeholder="e.g., Software Engineer" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                                  <FormField control={form.control} name="contact.email" render={({ field }) => ( <FormItem> <FormLabel>Email</FormLabel> <FormControl><Input placeholder="your.email@example.com" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                                 <FormField control={form.control} name="about" render={({ field }) => ( <FormItem> <FormLabel>About Me</FormLabel> <FormControl><Textarea placeholder="A short bio about yourself..." {...field} rows={5} /></FormControl> <FormMessage /> </FormItem> )}/>
                             </CardContent>
@@ -342,7 +347,10 @@ export default function PortfolioGeneratorTool() {
                                             <FormControl>
                                                 <Textarea
                                                     placeholder="e.g., Python, JavaScript, React, AI, Machine Learning"
-                                                    onChange={(e) => field.onChange(e.target.value.split(',').map(s => s.trim()))}
+                                                    onChange={(e) => {
+                                                        const skillsArray = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
+                                                        field.onChange(skillsArray);
+                                                    }}
                                                     value={Array.isArray(field.value) ? field.value.join(', ') : ''}
                                                     rows={3}
                                                 />
@@ -367,7 +375,10 @@ export default function PortfolioGeneratorTool() {
                                             <FormControl>
                                                 <Textarea
                                                     placeholder="e.g., Won 1st place in hackathon, Published a paper"
-                                                    onChange={(e) => field.onChange(e.target.value.split(',').map(s => s.trim()))}
+                                                    onChange={(e) => {
+                                                        const achievementsArray = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
+                                                        field.onChange(achievementsArray);
+                                                    }}
                                                     value={Array.isArray(field.value) ? field.value.join(', ') : ''}
                                                     rows={3}
                                                 />

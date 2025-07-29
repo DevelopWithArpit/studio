@@ -1,3 +1,4 @@
+
 'use server';
 
 import {
@@ -165,7 +166,11 @@ export async function handleGeneratePortfolioWebsiteAction(input: GeneratePortfo
         let portfolioData: GeneratePortfolioWebsiteInput;
 
         if (input.type === 'resume') {
-            portfolioData = await extractPortfolioDataFromText(input.resumeDataUri);
+            const extractedData = await extractPortfolioDataFromText(input.resumeDataUri);
+            portfolioData = {
+                ...extractedData,
+                profession: extractedData.profession || 'Not Specified',
+            };
         } else {
             portfolioData = input.data;
         }

@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -7,7 +8,7 @@ import { z } from 'zod';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { saveAs } from 'file-saver';
-import { createRoot } from 'react-dom/client';
+import { renderToStaticMarkup } from 'react-dom/server';
 import {
   Card,
   CardContent,
@@ -104,20 +105,10 @@ export default function ResumeFeedbackTool() {
     }
   }
   
-  const getResumeHtml = (resumeData: GetResumeFeedbackOutput['rewrittenResume']): Promise<string> => {
-    return new Promise((resolve) => {
-        const container = document.createElement('div');
-        // The container is not attached to the DOM, so it's not visible.
-        // We render the component into it to get the static HTML.
-        const root = createRoot(container);
-        root.render(<ResumeTemplate resumeData={resumeData} />);
+  const getResumeHtml = (resumeData: GetResumeFeedbackOutput['rewrittenResume']): string => {
+    const staticMarkup = renderToStaticMarkup(<ResumeTemplate resumeData={resumeData} />);
 
-        // We use a short timeout to allow React to render the component.
-        setTimeout(() => {
-            const html = container.innerHTML;
-            root.unmount();
-            // We wrap the component's HTML in a full HTML document structure.
-            resolve(`<!DOCTYPE html>
+    return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -131,51 +122,42 @@ export default function ResumeFeedbackTool() {
   </style>
 </head>
 <body>
-  ${html}
+  ${staticMarkup}
 </body>
-</html>`);
-        }, 500);
-    });
+</html>`;
   };
 
   const handleDownloadPdf = async () => {
     if (!result?.rewrittenResume) return;
 
     setIsGeneratingPdf(true);
-    const element = document.createElement('div');
-    element.style.width = '816px'; // 8.5 inches at 96 DPI
-    element.style.minHeight = '1056px'; // 11 inches at 96 DPI
-    element.style.background = 'white';
-    document.body.appendChild(element);
+    const resumeContainer = document.getElementById('resume-container-for-pdf');
+    if (!resumeContainer) {
+      setIsGeneratingPdf(false);
+      return;
+    };
 
-    const root = createRoot(element);
-    root.render(<ResumeTemplate resumeData={result.rewrittenResume} />);
+    try {
+        const canvas = await html2canvas(resumeContainer, { scale: 3, useCORS: true, });
+        const imgData = canvas.toDataURL('image/png');
 
-    setTimeout(async () => {
-         try {
-            const canvas = await html2canvas(element, { scale: 3, useCORS: true, windowWidth: 816, windowHeight: element.scrollHeight });
-            const imgData = canvas.toDataURL('image/png');
-
-            const pdf = new jsPDF({ orientation: 'p', unit: 'px', format: [canvas.width, canvas.height]});
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = pdf.internal.pageSize.getHeight();
-            
-            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-            pdf.save('resume.pdf');
-          } catch (error) {
-            toast({ variant: 'destructive', title: 'Error Generating PDF', description: error instanceof Error ? error.message : 'An unknown error occurred.' });
-          } finally {
-            root.unmount();
-            document.body.removeChild(element);
-            setIsGeneratingPdf(false);
-          }
-    }, 1000) // Increased timeout for rendering
+        const pdf = new jsPDF({ orientation: 'p', unit: 'px', format: 'a4'});
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+        
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        pdf.save('resume.pdf');
+      } catch (error) {
+        toast({ variant: 'destructive', title: 'Error Generating PDF', description: error instanceof Error ? error.message : 'An unknown error occurred.' });
+      } finally {
+        setIsGeneratingPdf(false);
+      }
   };
 
   const handleDownloadHtml = async () => {
     if (!result?.rewrittenResume) return;
     setIsGeneratingHtml(true);
-    const htmlContent = await getResumeHtml(result.rewrittenResume);
+    const htmlContent = getResumeHtml(result.rewrittenResume);
     const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
     saveAs(blob, 'resume.html');
     setIsGeneratingHtml(false);
@@ -327,6 +309,13 @@ export default function ResumeFeedbackTool() {
         </CardContent>
       </Card>
 
+      {/* Hidden container for PDF generation */}
+      {result?.rewrittenResume &&
+        <div id="resume-container-for-pdf" style={{ position: 'absolute', left: '-9999px', top: 0, width: '816px', background: 'white' }}>
+            <ResumeTemplate resumeData={result.rewrittenResume} />
+        </div>
+      }
+
       {(isLoading || result) && (
         <Card>
           <CardHeader>
@@ -363,7 +352,7 @@ export default function ResumeFeedbackTool() {
                 {isLoading ? (
                   <div className="border rounded-lg"><Skeleton className="h-[700px] w-full" /></div>
                 ) : (
-                  result && (
+                  result?.rewrittenResume && (
                     <div className="space-y-4">
                        <div className="border rounded-lg bg-gray-100 p-4 max-h-[700px] overflow-y-auto">
                           <div className="scale-[0.9] origin-top-left">

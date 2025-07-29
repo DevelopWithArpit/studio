@@ -223,6 +223,17 @@ const prompt = ai.definePrompt({
                 {{#each skills}}<span class="skill-badge">{{this}}</span>{{/each}}
             </div>
         </section>
+
+        {{#if achievements.length}}
+        <section id="achievements" class="scroll-target">
+            <h2>Achievements</h2>
+            <ul class="achievements-list">
+                {{#each achievements}}
+                <li>{{this}}</li>
+                {{/each}}
+            </ul>
+        </section>
+        {{/if}}
     </main>
 
     <footer id="contact" class="footer">
@@ -454,6 +465,14 @@ section.visible {
     justify-content: center;
     gap: 1.5rem;
 }
+
+.achievements-list {
+    list-style: disc;
+    padding-left: 20px;
+    text-align: left;
+    max-width: 600px;
+    margin: 0 auto;
+}
 \`\`\`
 
 **JavaScript:**
@@ -511,8 +530,6 @@ document.addEventListener('DOMContentLoaded', () => {
             this.size = size;
             this.color = color;
             this.weight = weight; // Speed
-            this.baseX = this.x;
-            this.baseY = this.y;
         }
         draw() {
             ctx.beginPath();
@@ -609,4 +626,3 @@ const generatePortfolioWebsiteFlow = ai.defineFlow(
     return output!;
   }
 );
-
