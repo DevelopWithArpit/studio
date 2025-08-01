@@ -78,6 +78,10 @@ import {
     humanizeText,
     type HumanizeTextInput,
 } from '@/ai/flows/text-humanizer-tool';
+import {
+    generateThesis,
+    type GenerateThesisInput,
+} from '@/ai/flows/thesis-generator-tool';
 
 async function handleAction<T_Input, T_Output>(
   input: T_Input,
@@ -163,6 +167,10 @@ export async function handleCustomizeResumeAction(input: CustomizeResumeInput) {
 
 export async function handleHumanizeTextAction(input: HumanizeTextInput) {
     return handleAction(input, humanizeText);
+}
+
+export async function handleGenerateThesisAction(input: GenerateThesisInput) {
+    return handleAction(input, generateThesis);
 }
 
 type GeneratePortfolioWebsiteActionInput = 

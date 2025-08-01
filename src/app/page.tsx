@@ -61,6 +61,7 @@ const ImageTextManipulationTool = dynamic(() => import('@/components/tools/image
 const PortfolioGeneratorTool = dynamic(() => import('@/components/tools/portfolio-generator-tool'), { loading: () => <RobotsBuildingLoader /> });
 const ResumeCustomizerTool = dynamic(() => import('@/components/tools/resume-customizer-tool'), { loading: () => <RobotsBuildingLoader /> });
 const TextHumanizerTool = dynamic(() => import('@/components/tools/text-humanizer-tool'), { loading: () => <RobotsBuildingLoader /> });
+const ThesisGeneratorTool = dynamic(() => import('@/components/tools/thesis-generator-tool'), { loading: () => <RobotsBuildingLoader /> });
 
 
 type ToolId =
@@ -82,7 +83,8 @@ type ToolId =
   | 'text-to-speech'
   | 'text-humanizer'
   | 'watermark-remover'
-  | 'image-text-manipulation';
+  | 'image-text-manipulation'
+  | 'thesis-generator';
 
 type ToolConfig = {
   id: ToolId;
@@ -163,6 +165,12 @@ const tools: ToolConfig[] = [
     name: 'Document Summarizer',
     icon: FileSearch,
     component: DocumentSummarizerTool,
+  },
+  {
+    id: 'thesis-generator',
+    name: 'Thesis Generator',
+    icon: FileText,
+    component: ThesisGeneratorTool,
   },
   {
     id: 'image-generator',
