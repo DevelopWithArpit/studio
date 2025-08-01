@@ -12,9 +12,7 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 
 const GenerateThesisInputSchema = z.object({
-  topic: z.string().describe('The central topic or title of the thesis.'),
-  researchNotes: z.string().optional().describe('User-provided research notes, sources, or key points to include.'),
-  numChapters: z.number().int().min(1).max(10).describe('The number of chapters to generate for the thesis body.'),
+  documentDataUri: z.string().describe("A document containing the thesis topic, outline, and research notes, as a data URI. Format: 'data:<mimetype>;base64,<encoded_data>'."),
 });
 export type GenerateThesisInput = z.infer<typeof GenerateThesisInputSchema>;
 
@@ -39,26 +37,18 @@ const prompt = ai.definePrompt({
   name: 'generateThesisPrompt',
   input: { schema: GenerateThesisInputSchema },
   output: { schema: GenerateThesisOutputSchema },
-  prompt: `You are an expert academic writer and thesis generator. Your task is to generate a well-structured thesis based on the user's topic and research notes.
+  prompt: `You are an expert academic writer and thesis generator. Your task is to generate a well-structured thesis based on the user's uploaded document, which contains the topic, an outline, and research notes.
 
-**Thesis Topic:** {{{topic}}}
-
-**Number of Body Chapters:** {{{numChapters}}}
-
-{{#if researchNotes}}
-**User's Research Notes & Key Points:**
----
-{{{researchNotes}}}
----
-You must incorporate these notes and points into the thesis content where appropriate.
-{{/if}}
+**Uploaded Document:**
+{{media url=documentDataUri}}
 
 **Instructions:**
-1.  **Title:** Create a compelling and academic title for the thesis.
-2.  **Introduction:** Write a comprehensive introduction that sets the stage, states the problem or thesis statement, and outlines the structure of the document.
-3.  **Body Chapters:** Generate exactly {{{numChapters}}} body chapters. Each chapter must have a clear title and substantial, well-organized content. The content should flow logically from one chapter to the next.
-4.  **Conclusion:** Write a strong conclusion that summarizes the key findings, restates the thesis, and suggests areas for future research.
-5.  **Formatting:** All content for the introduction, chapters, and conclusion must be written in Markdown format, using headings, lists, and bold text as appropriate for academic writing.
+1.  **Analyze the Document:** Carefully analyze the provided document to identify the main topic, the chapter structure, headings, and any key research points or data.
+2.  **Title:** Extract or create a compelling and academic title for the thesis based on the document's content.
+3.  **Introduction:** Write a comprehensive introduction that sets the stage, states the problem or thesis statement, and outlines the structure of the document, following the provided outline.
+4.  **Body Chapters:** Generate the body chapters based on the structure and headings found in the uploaded document. Flesh out each section with detailed, well-organized content, incorporating the research notes and key points provided.
+5.  **Conclusion:** Write a strong conclusion that summarizes the key findings, restates the thesis, and suggests areas for future research.
+6.  **Formatting:** All content for the introduction, chapters, and conclusion must be written in Markdown format, using headings, lists, and bold text as appropriate for academic writing.
 
 Generate the complete thesis structure now.`,
 });

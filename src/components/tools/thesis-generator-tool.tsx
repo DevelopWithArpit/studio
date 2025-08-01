@@ -21,19 +21,16 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { handleGenerateThesisAction } from '@/app/actions';
 import type { GenerateThesisOutput } from '@/ai/flows/thesis-generator-tool';
-import { Download, Loader2 } from 'lucide-react';
+import { Download, FileText, Loader2, UploadCloud } from 'lucide-react';
 
 const formSchema = z.object({
-  topic: z.string().min(10, 'Please enter a topic of at least 10 characters.'),
-  researchNotes: z.string().optional(),
-  numChapters: z.number().int().min(1, "Must be at least 1 chapter.").max(10, "Cannot exceed 10 chapters."),
+  documentDataUri: z.string().min(1, 'Please upload a document.'),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -41,16 +38,33 @@ type FormData = z.infer<typeof formSchema>;
 export default function ThesisGeneratorTool() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<GenerateThesisOutput | null>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
   const { toast } = useToast();
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      topic: '',
-      researchNotes: '',
-      numChapters: 3,
+      documentDataUri: '',
     },
   });
+  
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 200 * 1024 * 1024) { // 200MB limit
+        toast({ variant: "destructive", title: "File too large", description: "Please upload a document smaller than 200MB."});
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (loadEvent) => {
+        const dataUri = loadEvent.target?.result as string;
+        form.setValue('documentDataUri', dataUri);
+        setFileName(file.name);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
 
   async function onSubmit(data: FormData) {
     setIsLoading(true);
@@ -131,7 +145,7 @@ export default function ThesisGeneratorTool() {
       <header className="space-y-2">
         <h1 className="text-3xl font-bold font-headline">Thesis Generator</h1>
         <p className="text-muted-foreground">
-          Generate a structured thesis with an introduction, chapters, and a conclusion.
+          Generate a structured thesis from your outline and research notes.
         </p>
       </header>
 
@@ -139,53 +153,63 @@ export default function ThesisGeneratorTool() {
         <CardHeader>
           <CardTitle>Generate Thesis</CardTitle>
           <CardDescription>
-            Provide your topic, research notes, and desired number of chapters.
+            Upload a document containing your thesis outline, structure, topic, and research notes.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="topic"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Thesis Topic / Title</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="e.g., The Impact of Artificial Intelligence on Modern Software Development"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
                <FormField
                 control={form.control}
-                name="numChapters"
+                name="documentDataUri"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Number of Body Chapters</FormLabel>
-                    <FormControl>
-                       <Input type="number" min="1" max="10" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10))}/>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="researchNotes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Research Notes (Optional)</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Provide any key points, sources, or specific information you want included in the thesis..."
-                        {...field}
-                        rows={10}
-                      />
+                    <FormLabel>Thesis Document</FormLabel>
+                     <FormControl>
+                      <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center h-48">
+                        {fileName ? (
+                          <div className="flex flex-col items-center gap-2">
+                            <FileText className="w-12 h-12 text-accent" />
+                            <p className="text-sm font-medium">{fileName}</p>
+                            <Button
+                              variant="link"
+                              size="sm"
+                              asChild
+                              className="p-0 h-auto"
+                            >
+                              <label
+                                htmlFor="file-upload"
+                                className="cursor-pointer"
+                              >
+                                Change file
+                              </label>
+                            </Button>
+                          </div>
+                        ) : (
+                          <>
+                            <UploadCloud className="w-12 h-12 text-muted-foreground" />
+                            <p className="mt-2 text-sm text-muted-foreground">
+                              <label
+                                htmlFor="file-upload"
+                                className="font-semibold text-accent cursor-pointer hover:underline"
+                              >
+                                Click to upload
+                              </label>{' '}
+                              or drag and drop
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              PDF, DOCX, TXT up to 200MB
+                            </p>
+                          </>
+                        )}
+                        <Input
+                          id="file-upload"
+                          type="file"
+                          className="sr-only"
+                          onChange={handleFileChange}
+                          accept=".pdf,.doc,.docx,.txt"
+                        />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -229,17 +253,17 @@ export default function ThesisGeneratorTool() {
           <CardContent className="prose prose-invert max-w-none space-y-6">
             <div>
                 <h2 className='text-xl font-bold'>Introduction</h2>
-                <p className="whitespace-pre-wrap">{result.introduction}</p>
+                <div dangerouslySetInnerHTML={{ __html: result.introduction.replace(/\n/g, '<br />') }} />
             </div>
             {result.chapters.map((chapter, index) => (
                 <div key={index}>
                     <h2 className='text-xl font-bold'>{chapter.title}</h2>
-                    <p className="whitespace-pre-wrap">{chapter.content}</p>
+                    <div dangerouslySetInnerHTML={{ __html: chapter.content.replace(/\n/g, '<br />') }} />
                 </div>
             ))}
              <div>
                 <h2 className='text-xl font-bold'>Conclusion</h2>
-                <p className="whitespace-pre-wrap">{result.conclusion}</p>
+                <div dangerouslySetInnerHTML={{ __html: result.conclusion.replace(/\n/g, '<br />') }} />
             </div>
           </CardContent>
           <CardFooter>
