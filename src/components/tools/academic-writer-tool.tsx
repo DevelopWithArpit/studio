@@ -25,24 +25,28 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { handleGenerateAcademicDocumentAction, handleGenerateAcademicDocumentFromDocAction } from '@/app/actions';
+import { handleGenerateAcademicDocumentAction } from '@/app/actions';
 import type { GenerateAcademicDocumentOutput } from '@/ai/flows/academic-writer-tool';
 import { Download, Loader2, FileText, UploadCloud } from 'lucide-react';
 import { Textarea } from '../ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 
-const manualFormSchema = z.object({
+const formSchema = z.object({
   topic: z.string().min(5, 'Please enter a topic.'),
-  structure: z.string().min(10, 'Please provide an outline or structure.'),
+  structureType: z.enum(['manual', 'upload']),
+  structureText: z.string().optional(),
+  structureDataUri: z.string().optional(),
+}).refine(data => {
+    if (data.structureType === 'manual') return !!data.structureText && data.structureText.length >= 10;
+    if (data.structureType === 'upload') return !!data.structureDataUri;
+    return false;
+}, {
+    message: "Please provide a structure either by text or by uploading a file.",
+    path: ['structureType'],
 });
 
-type ManualFormData = z.infer<typeof manualFormSchema>;
 
-const docFormSchema = z.object({
-  documentDataUri: z.string().min(1, 'Please upload a document.'),
-});
-
-type DocFormData = z.infer<typeof docFormSchema>;
+type FormData = z.infer<typeof formSchema>;
 
 
 export default function AcademicWriterTool() {
@@ -51,43 +55,27 @@ export default function AcademicWriterTool() {
   const { toast } = useToast();
   const [fileName, setFileName] = useState<string | null>(null);
 
-  const manualForm = useForm<ManualFormData>({
-    resolver: zodResolver(manualFormSchema),
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       topic: '',
-      structure: '',
+      structureType: 'manual',
+      structureText: '',
+      structureDataUri: '',
     },
   });
 
-  const docForm = useForm<DocFormData>({
-    resolver: zodResolver(docFormSchema),
-    defaultValues: {
-      documentDataUri: '',
-    },
-  });
-
-  async function onManualSubmit(data: ManualFormData) {
+  async function onSubmit(data: FormData) {
     setIsLoading(true);
     setResult(null);
-    const response = await handleGenerateAcademicDocumentAction(data);
-    setIsLoading(false);
 
-    if (response.success) {
-      setResult(response.data);
-      toast({ title: 'Document Generated', description: 'Your academic document has been created successfully.' });
-    } else {
-      toast({
-        variant: 'destructive',
-        title: 'Error generating document',
-        description: response.error,
-      });
-    }
-  }
-  
-  async function onDocSubmit(data: DocFormData) {
-    setIsLoading(true);
-    setResult(null);
-    const response = await handleGenerateAcademicDocumentFromDocAction(data);
+    const input = {
+        topic: data.topic,
+        ...(data.structureType === 'manual' ? { structureText: data.structureText } : {}),
+        ...(data.structureType === 'upload' ? { structureDataUri: data.structureDataUri } : {}),
+    };
+
+    const response = await handleGenerateAcademicDocumentAction(input);
     setIsLoading(false);
 
     if (response.success) {
@@ -112,7 +100,7 @@ export default function AcademicWriterTool() {
       const reader = new FileReader();
       reader.onload = (loadEvent) => {
         const dataUri = loadEvent.target?.result as string;
-        docForm.setValue('documentDataUri', dataUri);
+        form.setValue('structureDataUri', dataUri);
         setFileName(file.name);
       };
       reader.readAsDataURL(file);
@@ -132,33 +120,21 @@ export default function AcademicWriterTool() {
     const usableWidth = pageWidth - 2 * margin;
     let y = margin;
 
-    const addText = (text: string, options: any, isHtml = false) => {
+    const addText = (text: string, options: any) => {
         const lines = doc.splitTextToSize(text, usableWidth);
         const textHeight = doc.getTextDimensions(lines).h;
         if (y + textHeight > doc.internal.pageSize.getHeight() - margin) {
             doc.addPage();
             y = margin;
         }
-
-        if (isHtml) {
-            doc.html(text, {
-                x: margin,
-                y: y,
-                width: usableWidth,
-                windowWidth: usableWidth,
-                callback: (doc) => {
-                   // This callback structure is for complex async html rendering
-                }
-            });
-             y += textHeight + 10;
-        } else {
-             doc.text(lines, margin, y, options);
-             y += textHeight + 5;
-        }
+        doc.text(lines, margin, y, options);
+        y += textHeight + 5;
     }
 
+    doc.setFont('times', 'normal');
+
     // Title
-    doc.setFontSize(22).setFont('times', 'bold');
+    doc.setFontSize(22).setFont(undefined, 'bold');
     addText(result.title, { align: 'center' });
     y += 20;
     
@@ -166,16 +142,16 @@ export default function AcademicWriterTool() {
         const sections = markdownText.split(/(#{1,3}\s.*)/g).filter(Boolean);
         sections.forEach(section => {
             if (section.startsWith('### ')) {
-                doc.setFontSize(14).setFont('times', 'bold');
+                doc.setFontSize(14).setFont(undefined, 'bold');
                 addText(section.replace('### ', ''), {});
             } else if (section.startsWith('## ')) {
-                doc.setFontSize(16).setFont('times', 'bold');
+                doc.setFontSize(16).setFont(undefined, 'bold');
                 addText(section.replace('## ', ''), {});
             } else if (section.startsWith('# ')) {
-                 doc.setFontSize(18).setFont('times', 'bold');
+                 doc.setFontSize(18).setFont(undefined, 'bold');
                 addText(section.replace('# ', ''), {});
             } else {
-                doc.setFontSize(12).setFont('times', 'normal');
+                doc.setFontSize(12).setFont(undefined, 'normal');
                 addText(section.trim(), {});
             }
             y += 2;
@@ -183,21 +159,21 @@ export default function AcademicWriterTool() {
     }
 
     // Introduction
-    doc.setFontSize(18).setFont('times', 'bold');
+    doc.setFontSize(18).setFont(undefined, 'bold');
     addText('Introduction', {});
     renderMarkdown(result.introduction);
     y += 10;
 
     // Chapters
     result.chapters.forEach(chapter => {
-        doc.setFontSize(18).setFont('times', 'bold');
+        doc.setFontSize(18).setFont(undefined, 'bold');
         addText(chapter.title, {});
         renderMarkdown(chapter.content);
         y += 10;
     });
 
     // Conclusion
-    doc.setFontSize(18).setFont('times', 'bold');
+    doc.setFontSize(18).setFont(undefined, 'bold');
     addText('Conclusion', {});
     renderMarkdown(result.conclusion);
 
@@ -217,20 +193,14 @@ export default function AcademicWriterTool() {
         <CardHeader>
           <CardTitle>Generate Document</CardTitle>
           <CardDescription>
-            Provide your document details manually or upload a file.
+            Provide your topic and structure, and the AI will research and write the document.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="manual">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="manual">Manual Entry</TabsTrigger>
-              <TabsTrigger value="upload">Upload Document</TabsTrigger>
-            </TabsList>
-            <TabsContent value="manual" className="mt-4">
-              <Form {...manualForm}>
-                <form onSubmit={manualForm.handleSubmit(onManualSubmit)} className="space-y-4">
+             <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                   <FormField
-                    control={manualForm.control}
+                    control={form.control}
                     name="topic"
                     render={({ field }) => (
                       <FormItem>
@@ -242,70 +212,85 @@ export default function AcademicWriterTool() {
                       </FormItem>
                     )}
                   />
+                  
                   <FormField
-                    control={manualForm.control}
-                    name="structure"
+                    control={form.control}
+                    name="structureType"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Structure / Outline</FormLabel>
-                        <FormControl>
-                          <Textarea placeholder="e.g.,&#10;Chapter 1: Introduction&#10;Chapter 2: Literature Review&#10;Chapter 3: Methodology" {...field} rows={5}/>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
+                        <FormItem>
+                            <FormLabel>Structure / Outline</FormLabel>
+                             <FormControl>
+                                <Tabs
+                                    defaultValue={field.value}
+                                    onValueChange={(value) => field.onChange(value as 'manual' | 'upload')}
+                                    className="w-full"
+                                >
+                                    <TabsList className="grid w-full grid-cols-2">
+                                        <TabsTrigger value="manual">Manual Entry</TabsTrigger>
+                                        <TabsTrigger value="upload">Upload File</TabsTrigger>
+                                    </TabsList>
+                                    <TabsContent value="manual" className="mt-4">
+                                        <FormField
+                                            control={form.control}
+                                            name="structureText"
+                                            render={({ field }) => (
+                                            <FormItem>
+                                                <FormControl>
+                                                <Textarea placeholder="e.g.,&#10;Chapter 1: Introduction&#10;Chapter 2: Literature Review&#10;Chapter 3: Methodology" {...field} rows={5}/>
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                            )}
+                                        />
+                                    </TabsContent>
+                                    <TabsContent value="upload" className="mt-4">
+                                        <FormField
+                                            control={form.control}
+                                            name="structureDataUri"
+                                            render={() => (
+                                            <FormItem>
+                                                <FormControl>
+                                                <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center">
+                                                    {fileName ? (
+                                                    <div className='flex flex-col items-center gap-2'>
+                                                        <FileText className="w-12 h-12 text-accent" />
+                                                        <p className='text-sm font-medium'>{fileName}</p>
+                                                        <Button variant="link" size="sm" asChild className='p-0 h-auto'>
+                                                        <label htmlFor="file-upload" className="cursor-pointer">Change file</label>
+                                                        </Button>
+                                                    </div>
+                                                    ) : (
+                                                    <>
+                                                        <UploadCloud className="w-12 h-12 text-muted-foreground" />
+                                                        <p className="mt-2 text-sm text-muted-foreground">
+                                                        <label htmlFor="file-upload" className="font-semibold text-accent cursor-pointer hover:underline">
+                                                            Click to upload
+                                                        </label>
+                                                        {' '}or drag and drop
+                                                        </p>
+                                                        <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 4MB</p>
+                                                    </>
+                                                    )}
+                                                    <Input id="file-upload" type="file" className="sr-only" onChange={handleFileChange} />
+                                                </div>
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                            )}
+                                        />
+                                    </TabsContent>
+                                </Tabs>
+                            </FormControl>
+                            <FormMessage>{form.formState.errors.structureType?.message}</FormMessage>
+                        </FormItem>
                     )}
-                  />
+                    />
+
                   <Button type="submit" disabled={isLoading}>
                     {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating...</> : 'Generate Document'}
                   </Button>
                 </form>
               </Form>
-            </TabsContent>
-            <TabsContent value="upload" className="mt-4">
-               <Form {...docForm}>
-                <form onSubmit={docForm.handleSubmit(onDocSubmit)} className="space-y-4">
-                  <FormField
-                    control={docForm.control}
-                    name="documentDataUri"
-                    render={() => (
-                      <FormItem>
-                        <FormLabel>Document File</FormLabel>
-                        <FormControl>
-                          <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center">
-                            {fileName ? (
-                              <div className='flex flex-col items-center gap-2'>
-                                <FileText className="w-12 h-12 text-accent" />
-                                <p className='text-sm font-medium'>{fileName}</p>
-                                <Button variant="link" size="sm" asChild className='p-0 h-auto'>
-                                  <label htmlFor="file-upload" className="cursor-pointer">Change file</label>
-                                </Button>
-                              </div>
-                            ) : (
-                              <>
-                                <UploadCloud className="w-12 h-12 text-muted-foreground" />
-                                <p className="mt-2 text-sm text-muted-foreground">
-                                  <label htmlFor="file-upload" className="font-semibold text-accent cursor-pointer hover:underline">
-                                    Click to upload
-                                  </label>
-                                  {' '}or drag and drop
-                                </p>
-                                <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 4MB</p>
-                              </>
-                            )}
-                            <Input id="file-upload" type="file" className="sr-only" onChange={handleFileChange} />
-                          </div>
-                        </FormControl>
-                        <FormMessage>{docForm.formState.errors.documentDataUri?.message}</FormMessage>
-                      </FormItem>
-                    )}
-                  />
-                   <Button type="submit" disabled={isLoading}>
-                    {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating...</> : 'Generate from Document'}
-                  </Button>
-                </form>
-              </Form>
-            </TabsContent>
-          </Tabs>
         </CardContent>
       </Card>
 

@@ -82,10 +82,6 @@ import {
     generateAcademicDocument,
     type GenerateAcademicDocumentInput,
 } from '@/ai/flows/academic-writer-tool';
-import {
-    generateAcademicDocumentFromDoc,
-    type GenerateAcademicDocumentFromDocInput,
-} from '@/ai/flows/academic-writer-from-document-tool';
 
 
 async function handleAction<T_Input, T_Output>(
@@ -176,10 +172,6 @@ export async function handleHumanizeTextAction(input: HumanizeTextInput) {
 
 export async function handleGenerateAcademicDocumentAction(input: GenerateAcademicDocumentInput) {
     return handleAction(input, generateAcademicDocument);
-}
-
-export async function handleGenerateAcademicDocumentFromDocAction(input: GenerateAcademicDocumentFromDocInput) {
-    return handleAction(input, generateAcademicDocumentFromDoc);
 }
 
 
