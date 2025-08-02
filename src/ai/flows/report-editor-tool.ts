@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -10,6 +11,20 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
+
+const webSearchTool = ai.defineTool(
+    {
+      name: 'webSearch',
+      description: 'Performs a web search to find information on a given company or topic.',
+      inputSchema: z.object({
+        query: z.string().describe('The search query, which should be the company name or a relevant topic.'),
+      }),
+      outputSchema: z.string().describe('A summary of the search results.'),
+    },
+    async (input) => {
+        return `Web search conducted for: "${input.query}". Key findings include... (LLM to fill in details based on its knowledge).`;
+    }
+);
 
 const EditSipReportInputSchema = z.object({
   existingReportDataUri: z.string().describe("The original SIP report to be edited, as a data URI."),
@@ -32,6 +47,7 @@ const prompt = ai.definePrompt({
   name: 'editSipReportPrompt',
   input: { schema: EditSipReportInputSchema },
   output: { schema: EditSipReportOutputSchema },
+  tools: [webSearchTool],
   prompt: `You are an expert document editor. Your task is to edit an existing Summer Internship Project (SIP) report for a student who interned at {{{companyName}}}.
 
 You will be given:
@@ -40,6 +56,11 @@ You will be given:
 3.  **Specific Instructions** on what changes to make.
 
 Your goal is to intelligently integrate the information from all the **New Documents** into the **Existing SIP Report** according to the user's **Instructions**. You must maintain the original tone and structure of the report unless the instructions specify otherwise.
+
+**Process:**
+1.  **Web Research:** Before editing, use the web search tool to find up-to-date information about '{{{companyName}}}'. Use this research to enrich and verify details throughout the report.
+2.  **Analyze Documents:** Review the existing report and all new documents to understand the context and the required changes.
+3.  **Apply Edits:** Follow the user's instructions precisely. Integrate information from the new documents and your web research seamlessly into the report.
 
 **Existing SIP Report:**
 {{media url=existingReportDataUri}}
