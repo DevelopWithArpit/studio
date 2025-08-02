@@ -242,7 +242,7 @@ const tools: ToolConfig[] = [
 ];
 
 export default function Home() {
-  const [activeTool, setActiveTool] = useState<ToolId>('resume-feedback');
+  const [activeTool, setActiveTool] = useState<ToolId>('resume-customizer');
 
   const ActiveToolComponent = tools.find((tool) => tool.id === activeTool)?.component;
 
