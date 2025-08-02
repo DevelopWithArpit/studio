@@ -26,7 +26,7 @@ const webSearchTool = ai.defineTool(
     }
 );
 
-export const BuildAutomatedReportInputSchema = z.object({
+const BuildAutomatedReportInputSchema = z.object({
   companyName: z.string().describe("The name of the company where the internship was completed."),
   certificateDataUri: z.string().describe("The internship completion certificate, as a data URI."),
   feedbackFormDataUri: z.string().describe("The feedback form from the student intern, as a data URI."),
@@ -39,7 +39,7 @@ const SectionSchema = z.object({
   content: z.string().describe('The full content of the section, written in well-structured Markdown format.'),
 });
 
-export const BuildAutomatedReportOutputSchema = z.object({
+const BuildAutomatedReportOutputSchema = z.object({
   title: z.string().describe('The main title of the generated SIP report.'),
   executiveSummary: z.string().describe('A brief executive summary of the report.'),
   sections: z.array(SectionSchema).describe('An array of generated sections for the report body.'),
