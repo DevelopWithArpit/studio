@@ -67,14 +67,14 @@ const prompt = ai.definePrompt({
 **Your Process:**
 
 1.  **Analyze Documents & Extract Information (Internal Research):**
-    *   **Certificate:** Extract the student's name, internship role, and dates.
+    *   **Certificate:** This is a critical first step. You **must** analyze the certificate to extract the student's name, their official **internship role/title**, and the internship dates. This role is essential for the next steps.
     *   **Feedback Form:** Extract detailed personal reflections, key learnings, skills gained, and challenges faced. This is your primary source for the 'Key Learnings' and 'Challenges' sections.
     *   **Report Format Document:** This is the most important document. You **must** use this as the template for the final report. Identify all the required sections and their order (e.g., Introduction, Company Overview, Project Description, Conclusion, etc.).
 
-2.  **Synthesize and Fill Gaps (External Research):** You will likely have missing information (e.g., project title, objectives, detailed company overview, tasks and responsibilities). Your main task is to fill these gaps using the web search tool.
+2.  **Synthesize and Fill Gaps (External Research):** You will likely have missing information (e.g., project title, objectives, detailed company overview, tasks and responsibilities). Your main task is to fill these gaps using the web search tool, guided by the role extracted from the certificate.
     *   **Company Overview:** Conduct a thorough search on '{{{companyName}}}' to write a detailed overview.
-    *   **Infer Project Details:** Based on the intern's role (from certificate) and feedback, infer a plausible and relevant project title and objectives. Use web search to research common projects for that role at that company.
-    *   **Elaborate on Responsibilities:** Research the typical tasks and responsibilities for the intern's role in the industry and at '{{{companyName}}}'.
+    *   **Infer Project Details:** Based on the intern's **role (from the certificate)** and feedback, infer a plausible and relevant project title and objectives. Use web search to research common projects for that role at that company.
+    *   **Elaborate on Responsibilities:** Research the typical tasks and responsibilities for the **intern's role** in the industry and at '{{{companyName}}}'. This must be detailed and professional.
     *   **Expand on Learnings & Challenges:** Use web search to provide industry context and significance for the learnings and challenges mentioned in the feedback form.
 
 3.  **Generate the Report:**
