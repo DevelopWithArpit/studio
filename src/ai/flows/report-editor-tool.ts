@@ -55,12 +55,15 @@ You will be given:
 2.  A collection of **New Documents** containing additional information (e.g., feedback, updated project details, new learnings, images).
 3.  **Specific Instructions** on what changes to make.
 
-Your goal is to intelligently integrate the information from all the **New Documents** into the **Existing SIP Report** according to the user's **Instructions**. You must maintain the original tone and structure of the report unless the instructions specify otherwise.
+Your goal is to intelligently integrate the information from all the **New Documents** into the **Existing SIP Report** according to the user's **Instructions**, and enrich the report with external research. You must maintain the original tone and structure of the report unless the instructions specify otherwise.
 
 **Process:**
-1.  **Web Research:** Before editing, use the web search tool to find up-to-date information about '{{{companyName}}}'. Use this research to enrich and verify details throughout the report.
+1.  **Web Research:** Your first step is to conduct a web search for '{{{companyName}}}' using the provided tool. This is mandatory.
 2.  **Analyze Documents:** Review the existing report and all new documents to understand the context and the required changes.
-3.  **Apply Edits:** Follow the user's instructions precisely. Integrate information from the new documents and your web research seamlessly into the report.
+3.  **Apply Edits & Enrich Content:**
+    *   Follow the user's instructions precisely to integrate information from the new documents.
+    *   **Crucially, use the information gathered from your web search to update and enrich the 'Company Overview' or 'Introduction' section of the report.** Ensure this section is detailed, current, and provides a comprehensive overview of the company's business, mission, and services.
+    *   Seamlessly blend all new information (from documents and web research) into the report.
 
 **Existing SIP Report:**
 {{media url=existingReportDataUri}}
