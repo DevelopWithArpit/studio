@@ -25,32 +25,48 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { handleGenerateAcademicDocumentAction } from '@/app/actions';
+import { handleGenerateAcademicDocumentAction, handleGenerateAcademicDocumentFromDocAction } from '@/app/actions';
 import type { GenerateAcademicDocumentOutput } from '@/ai/flows/academic-writer-tool';
-import { Download, Loader2 } from 'lucide-react';
+import { Download, Loader2, FileText, UploadCloud } from 'lucide-react';
 import { Textarea } from '../ui/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 
-const formSchema = z.object({
+const manualFormSchema = z.object({
   topic: z.string().min(5, 'Please enter a topic.'),
   structure: z.string().min(10, 'Please provide an outline or structure.'),
 });
 
-type FormData = z.infer<typeof formSchema>;
+type ManualFormData = z.infer<typeof manualFormSchema>;
+
+const docFormSchema = z.object({
+  documentDataUri: z.string().min(1, 'Please upload a document.'),
+});
+
+type DocFormData = z.infer<typeof docFormSchema>;
+
 
 export default function AcademicWriterTool() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<GenerateAcademicDocumentOutput | null>(null);
   const { toast } = useToast();
+  const [fileName, setFileName] = useState<string | null>(null);
 
-  const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
+  const manualForm = useForm<ManualFormData>({
+    resolver: zodResolver(manualFormSchema),
     defaultValues: {
       topic: '',
       structure: '',
     },
   });
 
-  async function onSubmit(data: FormData) {
+  const docForm = useForm<DocFormData>({
+    resolver: zodResolver(docFormSchema),
+    defaultValues: {
+      documentDataUri: '',
+    },
+  });
+
+  async function onManualSubmit(data: ManualFormData) {
     setIsLoading(true);
     setResult(null);
     const response = await handleGenerateAcademicDocumentAction(data);
@@ -67,6 +83,42 @@ export default function AcademicWriterTool() {
       });
     }
   }
+  
+  async function onDocSubmit(data: DocFormData) {
+    setIsLoading(true);
+    setResult(null);
+    const response = await handleGenerateAcademicDocumentFromDocAction(data);
+    setIsLoading(false);
+
+    if (response.success) {
+      setResult(response.data);
+      toast({ title: 'Document Generated', description: 'Your academic document has been created successfully.' });
+    } else {
+      toast({
+        variant: 'destructive',
+        title: 'Error generating document',
+        description: response.error,
+      });
+    }
+  }
+  
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 4 * 1024 * 1024) { // 4MB limit for Genkit
+        toast({ variant: "destructive", title: "File too large", description: "Please upload a document smaller than 4MB."});
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (loadEvent) => {
+        const dataUri = loadEvent.target?.result as string;
+        docForm.setValue('documentDataUri', dataUri);
+        setFileName(file.name);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
 
   const handleDownloadPdf = () => {
     if (!result) return;
@@ -157,7 +209,7 @@ export default function AcademicWriterTool() {
       <header className="space-y-2">
         <h1 className="text-3xl font-bold font-headline">Academic Writer</h1>
         <p className="text-muted-foreground">
-          Generate a structured academic document from your topic and outline, with AI-powered web research.
+          Generate a structured academic document with AI-powered web research.
         </p>
       </header>
 
@@ -165,43 +217,95 @@ export default function AcademicWriterTool() {
         <CardHeader>
           <CardTitle>Generate Document</CardTitle>
           <CardDescription>
-            Provide the key components of your paper and the AI will research and write it for you.
+            Provide your document details manually or upload a file.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="topic"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Topic / Title</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., The Impact of AI on Modern Software Development" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-               <FormField
-                control={form.control}
-                name="structure"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Structure / Outline</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="e.g.,&#10;Chapter 1: Introduction&#10;Chapter 2: Literature Review&#10;Chapter 3: Methodology" {...field} rows={5}/>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating...</> : 'Generate Document'}
-              </Button>
-            </form>
-          </Form>
+          <Tabs defaultValue="manual">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="manual">Manual Entry</TabsTrigger>
+              <TabsTrigger value="upload">Upload Document</TabsTrigger>
+            </TabsList>
+            <TabsContent value="manual" className="mt-4">
+              <Form {...manualForm}>
+                <form onSubmit={manualForm.handleSubmit(onManualSubmit)} className="space-y-4">
+                  <FormField
+                    control={manualForm.control}
+                    name="topic"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Topic / Title</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g., The Impact of AI on Modern Software Development" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={manualForm.control}
+                    name="structure"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Structure / Outline</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="e.g.,&#10;Chapter 1: Introduction&#10;Chapter 2: Literature Review&#10;Chapter 3: Methodology" {...field} rows={5}/>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button type="submit" disabled={isLoading}>
+                    {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating...</> : 'Generate Document'}
+                  </Button>
+                </form>
+              </Form>
+            </TabsContent>
+            <TabsContent value="upload" className="mt-4">
+               <Form {...docForm}>
+                <form onSubmit={docForm.handleSubmit(onDocSubmit)} className="space-y-4">
+                  <FormField
+                    control={docForm.control}
+                    name="documentDataUri"
+                    render={() => (
+                      <FormItem>
+                        <FormLabel>Document File</FormLabel>
+                        <FormControl>
+                          <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center">
+                            {fileName ? (
+                              <div className='flex flex-col items-center gap-2'>
+                                <FileText className="w-12 h-12 text-accent" />
+                                <p className='text-sm font-medium'>{fileName}</p>
+                                <Button variant="link" size="sm" asChild className='p-0 h-auto'>
+                                  <label htmlFor="file-upload" className="cursor-pointer">Change file</label>
+                                </Button>
+                              </div>
+                            ) : (
+                              <>
+                                <UploadCloud className="w-12 h-12 text-muted-foreground" />
+                                <p className="mt-2 text-sm text-muted-foreground">
+                                  <label htmlFor="file-upload" className="font-semibold text-accent cursor-pointer hover:underline">
+                                    Click to upload
+                                  </label>
+                                  {' '}or drag and drop
+                                </p>
+                                <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 4MB</p>
+                              </>
+                            )}
+                            <Input id="file-upload" type="file" className="sr-only" onChange={handleFileChange} />
+                          </div>
+                        </FormControl>
+                        <FormMessage>{docForm.formState.errors.documentDataUri?.message}</FormMessage>
+                      </FormItem>
+                    )}
+                  />
+                   <Button type="submit" disabled={isLoading}>
+                    {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating...</> : 'Generate from Document'}
+                  </Button>
+                </form>
+              </Form>
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
 
