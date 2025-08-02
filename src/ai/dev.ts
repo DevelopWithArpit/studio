@@ -24,3 +24,4 @@ import '@/ai/flows/text-humanizer-tool.ts';
 import '@/ai/flows/academic-writer-tool.ts';
 import '@/ai/flows/sip-report-generator-tool.ts';
 import '@/ai/flows/automated-report-builder-tool.ts';
+import '@/ai/flows/report-editor-tool.ts';

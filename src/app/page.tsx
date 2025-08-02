@@ -65,6 +65,7 @@ const TextHumanizerTool = dynamic(() => import('@/components/tools/text-humanize
 const AcademicWriterTool = dynamic(() => import('@/components/tools/academic-writer-tool'), { loading: () => <RobotsBuildingLoader /> });
 const SipReportGeneratorTool = dynamic(() => import('@/components/tools/sip-report-generator-tool'), { loading: () => <RobotsBuildingLoader /> });
 const AutomatedReportBuilderTool = dynamic(() => import('@/components/tools/automated-report-builder-tool'), { loading: () => <RobotsBuildingLoader /> });
+const ReportEditorTool = dynamic(() => import('@/components/tools/report-editor-tool'), { loading: () => <RobotsBuildingLoader /> });
 
 
 type ToolId =
@@ -89,7 +90,8 @@ type ToolId =
   | 'image-text-manipulation'
   | 'academic-writer'
   | 'sip-report-generator'
-  | 'automated-report-builder';
+  | 'automated-report-builder'
+  | 'report-editor';
 
 type ToolConfig = {
   id: ToolId;
@@ -158,6 +160,12 @@ const tools: ToolConfig[] = [
     name: 'Automated Report Builder',
     icon: Bot,
     component: AutomatedReportBuilderTool,
+  },
+  {
+    id: 'report-editor',
+    name: 'SIP Report Editor',
+    icon: FileEdit,
+    component: ReportEditorTool,
   },
   {
     id: 'resume-customizer',

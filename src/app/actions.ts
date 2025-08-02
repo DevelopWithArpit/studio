@@ -90,6 +90,10 @@ import {
     buildAutomatedReport,
     type BuildAutomatedReportInput,
 } from '@/ai/flows/automated-report-builder-tool';
+import {
+    editSipReport,
+    type EditSipReportInput,
+} from '@/ai/flows/report-editor-tool';
 
 
 async function handleAction<T_Input, T_Output>(
@@ -188,6 +192,10 @@ export async function handleGenerateSipReportAction(input: GenerateSipReportInpu
 
 export async function handleBuildAutomatedReportAction(input: BuildAutomatedReportInput) {
     return handleAction(input, buildAutomatedReport);
+}
+
+export async function handleEditSipReportAction(input: EditSipReportInput) {
+    return handleAction(input, editSipReport);
 }
 
 
