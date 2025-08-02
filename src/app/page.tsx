@@ -61,7 +61,7 @@ const ImageTextManipulationTool = dynamic(() => import('@/components/tools/image
 const PortfolioGeneratorTool = dynamic(() => import('@/components/tools/portfolio-generator-tool'), { loading: () => <RobotsBuildingLoader /> });
 const ResumeCustomizerTool = dynamic(() => import('@/components/tools/resume-customizer-tool'), { loading: () => <RobotsBuildingLoader /> });
 const TextHumanizerTool = dynamic(() => import('@/components/tools/text-humanizer-tool'), { loading: () => <RobotsBuildingLoader /> });
-const ThesisGeneratorTool = dynamic(() => import('@/components/tools/thesis-generator-tool'), { loading: () => <RobotsBuildingLoader /> });
+const AcademicWriterTool = dynamic(() => import('@/components/tools/academic-writer-tool'), { loading: () => <RobotsBuildingLoader /> });
 
 
 type ToolId =
@@ -84,7 +84,7 @@ type ToolId =
   | 'text-humanizer'
   | 'watermark-remover'
   | 'image-text-manipulation'
-  | 'thesis-generator';
+  | 'academic-writer';
 
 type ToolConfig = {
   id: ToolId;
@@ -167,10 +167,10 @@ const tools: ToolConfig[] = [
     component: DocumentSummarizerTool,
   },
   {
-    id: 'thesis-generator',
-    name: 'Thesis Generator',
+    id: 'academic-writer',
+    name: 'Academic Writer',
     icon: FileText,
-    component: ThesisGeneratorTool,
+    component: AcademicWriterTool,
   },
   {
     id: 'image-generator',
