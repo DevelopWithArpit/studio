@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -41,6 +42,7 @@ const GenerateSipReportInputSchema = z.object({
   challengesFaced: z.string().describe("Any challenges faced and how they were overcome."),
   conclusion: z.string().describe("A summary of the internship experience and its impact."),
   feedbackFormDataUri: z.string().optional().describe("An optional uploaded feedback form from the student intern, as a data URI."),
+  reportFormatDataUri: z.string().optional().describe("An optional uploaded document defining the SIP report format/structure, as a data URI."),
 });
 export type GenerateSipReportInput = z.infer<typeof GenerateSipReportInputSchema>;
 
@@ -88,6 +90,11 @@ You must analyze the following uploaded feedback form. Extract key insights, ref
 {{media url=feedbackFormDataUri}}
 {{/if}}
 
+{{#if reportFormatDataUri}}
+**Report Format/Structure Document:**
+You must strictly follow the structure and headings defined in the following uploaded document to format the final report.
+{{media url=reportFormatDataUri}}
+{{/if}}
 
 **Instructions:**
 1.  **Title:** Create a formal title for the report, such as "Summer Internship Project Report at {{{companyName}}}".
@@ -99,7 +106,7 @@ You must analyze the following uploaded feedback form. Extract key insights, ref
     - **Key Learnings and Skill Development:** Expand on the '{{{keyLearnings}}}' by researching their importance and application in the industry. If a feedback form is provided, integrate specific examples and reflections from it.
     - **Challenges and Solutions:** For the '{{{challengesFaced}}}', research common solutions and strategies for those types of challenges. If a feedback form is provided, integrate specific examples and reflections from it.
     - **Conclusion:** Summarize the expanded findings and the user's provided '{{{conclusion}}}' to create a powerful closing statement.
-4.  **Report Sections:** Generate the body of the report as a series of sections. Use the user's input plus your research to create the content for each section.
+4.  **Report Sections:** Generate the body of the report as a series of sections. If a format document was provided, use that structure. Otherwise, use a standard professional report structure (Introduction, Project Description, etc.). Use the user's input plus your research to create the content for each section.
 5.  **Formatting:** Ensure all content is formatted in clear, professional Markdown. Use headings, lists, and bold text appropriately.
 
 Generate the complete, researched SIP report now.`,

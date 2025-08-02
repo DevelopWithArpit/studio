@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -44,6 +45,7 @@ const formSchema = z.object({
   challengesFaced: z.string().min(20, "Please describe the challenges you faced."),
   conclusion: z.string().min(20, "Please provide a conclusion."),
   feedbackFormDataUri: z.string().optional(),
+  reportFormatDataUri: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -53,6 +55,7 @@ export default function SipReportGeneratorTool() {
   const [result, setResult] = useState<GenerateSipReportOutput | null>(null);
   const { toast } = useToast();
   const [feedbackFileName, setFeedbackFileName] = useState<string | null>(null);
+  const [formatFileName, setFormatFileName] = useState<string | null>(null);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -70,10 +73,14 @@ export default function SipReportGeneratorTool() {
         challengesFaced: '',
         conclusion: '',
         feedbackFormDataUri: '',
+        reportFormatDataUri: '',
     },
   });
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    fieldName: 'feedbackFormDataUri' | 'reportFormatDataUri'
+  ) => {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 4 * 1024 * 1024) { // 4MB limit for Genkit
@@ -83,8 +90,12 @@ export default function SipReportGeneratorTool() {
       const reader = new FileReader();
       reader.onload = (loadEvent) => {
         const dataUri = loadEvent.target?.result as string;
-        form.setValue('feedbackFormDataUri', dataUri);
-        setFeedbackFileName(file.name);
+        form.setValue(fieldName, dataUri);
+        if (fieldName === 'feedbackFormDataUri') {
+            setFeedbackFileName(file.name);
+        } else {
+            setFormatFileName(file.name);
+        }
       };
       reader.readAsDataURL(file);
     }
@@ -189,42 +200,78 @@ export default function SipReportGeneratorTool() {
                    <FormField control={form.control} name="challengesFaced" render={({ field }) => ( <FormItem> <FormLabel>Challenges Faced</FormLabel> <FormControl><Textarea rows={4} {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                    <FormField control={form.control} name="conclusion" render={({ field }) => ( <FormItem> <FormLabel>Conclusion</FormLabel> <FormControl><Textarea rows={4} {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                    
-                   <FormField
-                        control={form.control}
-                        name="feedbackFormDataUri"
-                        render={() => (
-                        <FormItem>
-                            <FormLabel>Intern Feedback Form (Optional)</FormLabel>
-                            <FormControl>
-                            <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center">
-                                {feedbackFileName ? (
-                                <div className='flex flex-col items-center gap-2'>
-                                    <FileText className="w-12 h-12 text-accent" />
-                                    <p className='text-sm font-medium'>{feedbackFileName}</p>
-                                    <Button variant="link" size="sm" asChild className='p-0 h-auto'>
-                                    <label htmlFor="feedback-upload" className="cursor-pointer">Change file</label>
-                                    </Button>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                         <FormField
+                            control={form.control}
+                            name="feedbackFormDataUri"
+                            render={() => (
+                            <FormItem>
+                                <FormLabel>Intern Feedback Form (Optional)</FormLabel>
+                                <FormControl>
+                                <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center">
+                                    {feedbackFileName ? (
+                                    <div className='flex flex-col items-center gap-2'>
+                                        <FileText className="w-12 h-12 text-accent" />
+                                        <p className='text-sm font-medium'>{feedbackFileName}</p>
+                                        <Button variant="link" size="sm" asChild className='p-0 h-auto'>
+                                        <label htmlFor="feedback-upload" className="cursor-pointer">Change file</label>
+                                        </Button>
+                                    </div>
+                                    ) : (
+                                    <>
+                                        <UploadCloud className="w-12 h-12 text-muted-foreground" />
+                                        <p className="mt-2 text-sm text-muted-foreground">
+                                        <label htmlFor="feedback-upload" className="font-semibold text-accent cursor-pointer hover:underline">
+                                            Click to upload
+                                        </label>
+                                        {' '}or drag and drop
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 4MB</p>
+                                    </>
+                                    )}
+                                    <Input id="feedback-upload" type="file" className="sr-only" onChange={(e) => handleFileChange(e, 'feedbackFormDataUri')} accept=".pdf,.doc,.docx,.txt" />
                                 </div>
-                                ) : (
-                                <>
-                                    <UploadCloud className="w-12 h-12 text-muted-foreground" />
-                                    <p className="mt-2 text-sm text-muted-foreground">
-                                    <label htmlFor="feedback-upload" className="font-semibold text-accent cursor-pointer hover:underline">
-                                        Click to upload
-                                    </label>
-                                    {' '}or drag and drop
-                                    </p>
-                                    <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 4MB</p>
-                                </>
-                                )}
-                                <Input id="feedback-upload" type="file" className="sr-only" onChange={handleFileChange} accept=".pdf,.doc,.docx,.txt" />
-                            </div>
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                        )}
-                    />
-
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                            )}
+                        />
+                         <FormField
+                            control={form.control}
+                            name="reportFormatDataUri"
+                            render={() => (
+                            <FormItem>
+                                <FormLabel>Report Format (Optional)</FormLabel>
+                                <FormControl>
+                                <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center">
+                                    {formatFileName ? (
+                                    <div className='flex flex-col items-center gap-2'>
+                                        <FileText className="w-12 h-12 text-accent" />
+                                        <p className='text-sm font-medium'>{formatFileName}</p>
+                                        <Button variant="link" size="sm" asChild className='p-0 h-auto'>
+                                        <label htmlFor="format-upload" className="cursor-pointer">Change file</label>
+                                        </Button>
+                                    </div>
+                                    ) : (
+                                    <>
+                                        <UploadCloud className="w-12 h-12 text-muted-foreground" />
+                                        <p className="mt-2 text-sm text-muted-foreground">
+                                        <label htmlFor="format-upload" className="font-semibold text-accent cursor-pointer hover:underline">
+                                            Click to upload
+                                        </label>
+                                        {' '}or drag and drop
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 4MB</p>
+                                    </>
+                                    )}
+                                    <Input id="format-upload" type="file" className="sr-only" onChange={(e) => handleFileChange(e, 'reportFormatDataUri')} accept=".pdf,.doc,.docx,.txt" />
+                                </div>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                            )}
+                        />
+                    </div>
 
                   <Button type="submit" disabled={isLoading}>
                     {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating...</> : 'Generate Report'}
