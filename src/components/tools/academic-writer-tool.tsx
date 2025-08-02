@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -193,7 +194,7 @@ export default function AcademicWriterTool() {
         <CardHeader>
           <CardTitle>Generate Document</CardTitle>
           <CardDescription>
-            Provide your topic and structure, and the AI will research and write the document.
+            Provide your topic and structure. The AI will follow the structure and research the content.
           </CardDescription>
         </CardHeader>
         <CardContent>

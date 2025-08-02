@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -72,15 +73,15 @@ const prompt = ai.definePrompt({
 {{/if}}
 
 **Instructions:**
-1.  **Analyze Structure:** Carefully analyze the provided structure from either the text input or the uploaded document to identify the structure (chapters, sections, headings).
-2.  **Research:** Use the web search tool with the topic to gather relevant information, key points, and data.
+1.  **Analyze Structure:** **Strictly adhere** to the provided structure from either the text input or the uploaded document. Replicate the hierarchy of chapters, sections, and headings exactly as specified.
+2.  **Research:** Use the web search tool with the topic to gather relevant information, key points, and data to flesh out the content.
 3.  **Title:** Use the provided topic as the main title for the document.
-4.  **Introduction:** Write a comprehensive introduction that sets the stage for the topic, states the problem or thesis, and outlines the document's structure.
-5.  **Body Chapters/Sections:** Generate the body based on the provided structure. Flesh out each section with detailed, well-organized content, incorporating the research you have gathered.
-6.  **Conclusion:** Write a strong conclusion that summarizes the key findings, restates the thesis, and suggests areas for future research.
-7.  **Formatting:** All content for the introduction, chapters, and conclusion must be written in Markdown format, using headings, lists, and bold text as appropriate for academic writing.
+4.  **Introduction:** Write a comprehensive introduction that sets the stage for the topic, states the problem or thesis, and outlines the document's structure, following the provided structure.
+5.  **Body Chapters/Sections:** Generate the body content for each section defined in the source structure. Ensure the content is detailed, well-organized, and incorporates the research you have gathered.
+6.  **Conclusion:** Write a strong conclusion that summarizes the key findings, restates the thesis, and suggests areas for future research, as dictated by the structure.
+7.  **Formatting:** All content for the introduction, chapters, and conclusion must be written in Markdown format.
 
-Generate the complete document now.`,
+Generate the complete document now, following the provided structure precisely.`,
 });
 
 const generateAcademicDocumentFlow = ai.defineFlow(
