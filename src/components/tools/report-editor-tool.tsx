@@ -1,13 +1,16 @@
+
 'use client';
 
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import jsPDF from 'jspdf';
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -25,7 +28,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { handleEditSipReportAction } from '@/app/actions';
 import type { EditSipReportOutput } from '@/ai/flows/report-editor-tool';
-import { FileText, Loader2, UploadCloud, X } from 'lucide-react';
+import { Download, FileText, Loader2, UploadCloud, X } from 'lucide-react';
 import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
 import { Badge } from '../ui/badge';
@@ -164,6 +167,49 @@ export default function ReportEditorTool() {
     }
   }
 
+  const handleDownloadPdf = () => {
+    if (!result) return;
+    const doc = new jsPDF();
+    const margin = 15;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const usableWidth = pageWidth - 2 * margin;
+    let y = margin;
+
+    const addText = (text: string, options: any) => {
+      const lines = doc.splitTextToSize(text, usableWidth);
+      const textHeight = doc.getTextDimensions(lines).h;
+      if (y + textHeight > pageHeight - margin) {
+        doc.addPage();
+        y = margin;
+      }
+      doc.text(lines, margin, y, options);
+      y += textHeight + 5;
+    };
+    
+    // Simplistic markdown handling
+    const sections = result.editedReportContent.split(/^(#+ .*\n)/gm).filter(Boolean);
+    sections.forEach(section => {
+        if (section.startsWith('# ')) {
+            doc.setFontSize(22).setFont(undefined, 'bold');
+            addText(section.replace('# ', ''), {});
+        } else if (section.startsWith('## ')) {
+            doc.setFontSize(16).setFont(undefined, 'bold');
+            addText(section.replace('## ', ''), {});
+        } else if (section.startsWith('### ')) {
+            doc.setFontSize(14).setFont(undefined, 'bold');
+            addText(section.replace('### ', ''), {});
+        } else {
+            doc.setFontSize(12).setFont(undefined, 'normal');
+            addText(section, {});
+        }
+        y += 2;
+    })
+    
+    doc.save(`edited_report.pdf`);
+    toast({ title: "Download Started", description: "Your edited report is downloading as a PDF." });
+  };
+
   return (
     <div className="space-y-8">
       <header className="space-y-2">
@@ -268,6 +314,12 @@ export default function ReportEditorTool() {
           <CardContent className="prose prose-invert max-w-none">
             <div className="whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: result.editedReportContent.replace(/\n/g, '<br />') }} />
           </CardContent>
+          <CardFooter>
+            <Button onClick={handleDownloadPdf}>
+              <Download className="mr-2 h-4 w-4" />
+              Download as PDF
+            </Button>
+          </CardFooter>
         </Card>
       )}
     </div>
