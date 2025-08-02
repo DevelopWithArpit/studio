@@ -82,6 +82,10 @@ import {
     generateAcademicDocument,
     type GenerateAcademicDocumentInput,
 } from '@/ai/flows/academic-writer-tool';
+import {
+    generateSipReport,
+    type GenerateSipReportInput,
+} from '@/ai/flows/sip-report-generator-tool';
 
 
 async function handleAction<T_Input, T_Output>(
@@ -172,6 +176,10 @@ export async function handleHumanizeTextAction(input: HumanizeTextInput) {
 
 export async function handleGenerateAcademicDocumentAction(input: GenerateAcademicDocumentInput) {
     return handleAction(input, generateAcademicDocument);
+}
+
+export async function handleGenerateSipReportAction(input: GenerateSipReportInput) {
+    return handleAction(input, generateSipReport);
 }
 
 

@@ -62,6 +62,7 @@ const PortfolioGeneratorTool = dynamic(() => import('@/components/tools/portfoli
 const ResumeCustomizerTool = dynamic(() => import('@/components/tools/resume-customizer-tool'), { loading: () => <RobotsBuildingLoader /> });
 const TextHumanizerTool = dynamic(() => import('@/components/tools/text-humanizer-tool'), { loading: () => <RobotsBuildingLoader /> });
 const AcademicWriterTool = dynamic(() => import('@/components/tools/academic-writer-tool'), { loading: () => <RobotsBuildingLoader /> });
+const SipReportGeneratorTool = dynamic(() => import('@/components/tools/sip-report-generator-tool'), { loading: () => <RobotsBuildingLoader /> });
 
 
 type ToolId =
@@ -84,7 +85,8 @@ type ToolId =
   | 'text-humanizer'
   | 'watermark-remover'
   | 'image-text-manipulation'
-  | 'academic-writer';
+  | 'academic-writer'
+  | 'sip-report-generator';
 
 type ToolConfig = {
   id: ToolId;
@@ -141,6 +143,12 @@ const tools: ToolConfig[] = [
     name: 'Portfolio Generator',
     icon: Briefcase,
     component: PortfolioGeneratorTool,
+  },
+  {
+    id: 'sip-report-generator',
+    name: 'SIP Report Generator',
+    icon: Briefcase,
+    component: SipReportGeneratorTool,
   },
   {
     id: 'resume-customizer',
