@@ -33,7 +33,6 @@ import { Textarea } from '../ui/textarea';
 const formSchema = z.object({
   topic: z.string().min(5, 'Please enter a topic.'),
   structure: z.string().min(10, 'Please provide an outline or structure.'),
-  researchNotes: z.string().min(20, 'Please provide some research notes.'),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -48,7 +47,6 @@ export default function AcademicWriterTool() {
     defaultValues: {
       topic: '',
       structure: '',
-      researchNotes: '',
     },
   });
 
@@ -159,7 +157,7 @@ export default function AcademicWriterTool() {
       <header className="space-y-2">
         <h1 className="text-3xl font-bold font-headline">Academic Writer</h1>
         <p className="text-muted-foreground">
-          Generate a structured academic document from your topic, outline, and research notes.
+          Generate a structured academic document from your topic and outline, with AI-powered web research.
         </p>
       </header>
 
@@ -167,7 +165,7 @@ export default function AcademicWriterTool() {
         <CardHeader>
           <CardTitle>Generate Document</CardTitle>
           <CardDescription>
-            Provide the key components of your paper and the AI will write it for you.
+            Provide the key components of your paper and the AI will research and write it for you.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -199,19 +197,6 @@ export default function AcademicWriterTool() {
                   </FormItem>
                 )}
               />
-               <FormField
-                control={form.control}
-                name="researchNotes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Research Notes & Key Points</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="Paste your research notes, data, and key arguments here..." {...field} rows={8}/>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
               <Button type="submit" disabled={isLoading}>
                 {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating...</> : 'Generate Document'}
               </Button>
@@ -224,6 +209,7 @@ export default function AcademicWriterTool() {
         <Card>
           <CardHeader>
             <CardTitle>Generating Document Content...</CardTitle>
+            <CardDescription>The AI is researching and writing your document. This may take a moment.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <Skeleton className="h-8 w-3/4" />
