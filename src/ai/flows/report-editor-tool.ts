@@ -59,11 +59,11 @@ Your goal is to intelligently integrate the information from all the **New Docum
 
 **Process:**
 1.  **Web Research:** Your first step is to conduct a web search for '{{{companyName}}}' using the provided tool. This is mandatory.
-2.  **Analyze Documents:** Review the existing report and all new documents to understand the context and the required changes.
+2.  **Analyze Documents:** Review the existing report and all new documents to understand the context and the required changes. This includes analyzing text and any images provided. If an image (like a chart or screenshot) is uploaded, describe its contents and integrate that information into the report where it's relevant.
 3.  **Apply Edits & Enrich Content:**
     *   Follow the user's instructions precisely to integrate information from the new documents.
     *   **Crucially, use the information gathered from your web search to update and enrich the 'Company Overview' or 'Introduction' section of the report.** Ensure this section is detailed, current, and provides a comprehensive overview of the company's business, mission, and services.
-    *   Seamlessly blend all new information (from documents and web research) into the report.
+    *   Seamlessly blend all new information (from documents, images, and web research) into the report.
 
 **Existing SIP Report:**
 {{media url=existingReportDataUri}}
