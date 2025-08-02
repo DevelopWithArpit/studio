@@ -25,20 +25,21 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { handleEditSipReportAction } from '@/app/actions';
 import type { EditSipReportOutput } from '@/ai/flows/report-editor-tool';
-import { FileText, Loader2, UploadCloud } from 'lucide-react';
+import { FileText, Loader2, UploadCloud, X } from 'lucide-react';
 import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
+import { Badge } from '../ui/badge';
 
 const formSchema = z.object({
   existingReportDataUri: z.string().min(1, 'Please upload the existing report.'),
-  newDocumentDataUri: z.string().min(1, 'Please upload the new document to analyze.'),
+  newDocumentsDataUris: z.array(z.string()).min(1, 'Please upload at least one new document to analyze.'),
   companyName: z.string().min(1, "Please enter the company name."),
   instructions: z.string().min(10, "Please provide at least 10 characters of instructions."),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
-const FileUploadField = ({ name, label, fileName, onFileChange }: { name: keyof FormData, label: string, fileName: string | null, onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void }) => (
+const FileUploadField = ({ name, label, fileName, onFileChange, accept }: { name: keyof FormData, label: string, fileName: string | null, onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void, accept?: string }) => (
     <FormItem className="space-y-2">
         <Label>{label}</Label>
         <FormControl>
@@ -59,16 +60,15 @@ const FileUploadField = ({ name, label, fileName, onFileChange }: { name: keyof 
                     Click to upload
                 </label>
                 </p>
-                <p className="text-xs text-muted-foreground">PDF, DOCX, TXT</p>
+                <p className="text-xs text-muted-foreground">{accept || "PDF, DOCX, TXT"}</p>
             </>
             )}
-            <Input id={name} type="file" className="sr-only" onChange={onFileChange} accept=".pdf,.doc,.docx,.txt" />
+            <Input id={name} type="file" className="sr-only" onChange={onFileChange} accept={accept || ".pdf,.doc,.docx,.txt"} />
         </div>
         </FormControl>
         <FormMessage />
     </FormItem>
 );
-
 
 export default function ReportEditorTool() {
   const [isLoading, setIsLoading] = useState(false);
@@ -76,24 +76,24 @@ export default function ReportEditorTool() {
   const { toast } = useToast();
   
   const [fileNames, setFileNames] = useState<{
-      existingReportDataUri: string | null,
-      newDocumentDataUri: string | null,
+      existingReport: string | null,
+      newDocuments: { name: string; dataUri: string }[],
   }>({
-      existingReportDataUri: null,
-      newDocumentDataUri: null,
+      existingReport: null,
+      newDocuments: [],
   });
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       existingReportDataUri: '',
-      newDocumentDataUri: '',
+      newDocumentsDataUris: [],
       companyName: '',
       instructions: '',
     },
   });
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fieldName: keyof typeof fileNames) => {
+  const handleExistingReportFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 4 * 1024 * 1024) { 
@@ -103,12 +103,48 @@ export default function ReportEditorTool() {
       const reader = new FileReader();
       reader.onload = (loadEvent) => {
         const dataUri = loadEvent.target?.result as string;
-        form.setValue(fieldName, dataUri, { shouldValidate: true });
-        setFileNames(prev => ({...prev, [fieldName]: file.name}));
+        form.setValue('existingReportDataUri', dataUri, { shouldValidate: true });
+        setFileNames(prev => ({...prev, existingReport: file.name}));
       };
       reader.readAsDataURL(file);
     }
   };
+  
+  const handleNewDocumentsFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+        const newFiles = Array.from(files);
+        let allFilesValid = true;
+        const filePromises = newFiles.map(file => {
+            if (file.size > 4 * 1024 * 1024) { 
+                toast({ variant: "destructive", title: "File too large", description: `${file.name} is larger than 4MB.`});
+                allFilesValid = false;
+                return null;
+            }
+            return new Promise<{ name: string; dataUri: string }>((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (loadEvent) => {
+                    resolve({ name: file.name, dataUri: loadEvent.target?.result as string });
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+
+        if (!allFilesValid) return;
+
+        Promise.all(filePromises.filter(p => p !== null) as Promise<{name: string, dataUri: string}>[]).then(loadedFiles => {
+             const updatedFiles = [...fileNames.newDocuments, ...loadedFiles];
+             setFileNames(prev => ({...prev, newDocuments: updatedFiles}));
+             form.setValue('newDocumentsDataUris', updatedFiles.map(f => f.dataUri), { shouldValidate: true });
+        })
+    }
+  };
+
+  const removeNewDocument = (index: number) => {
+    const updatedFiles = fileNames.newDocuments.filter((_, i) => i !== index);
+    setFileNames(prev => ({ ...prev, newDocuments: updatedFiles }));
+    form.setValue('newDocumentsDataUris', updatedFiles.map(f => f.dataUri), { shouldValidate: true });
+  }
 
   async function onSubmit(data: FormData) {
     setIsLoading(true);
@@ -133,7 +169,7 @@ export default function ReportEditorTool() {
       <header className="space-y-2">
         <h1 className="text-3xl font-bold font-headline">SIP Report Editor</h1>
         <p className="text-muted-foreground">
-          Upload an existing report and a new document, then provide instructions to edit it.
+          Upload an existing report and new documents, then provide instructions to edit it.
         </p>
       </header>
 
@@ -141,15 +177,38 @@ export default function ReportEditorTool() {
         <CardHeader>
           <CardTitle>Edit Your Report</CardTitle>
           <CardDescription>
-            The AI will analyze both documents and apply your requested changes.
+            The AI will analyze all documents and apply your requested changes.
           </CardDescription>
         </CardHeader>
         <CardContent>
              <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <FileUploadField name="existingReportDataUri" label="Existing SIP Report" fileName={fileNames.existingReportDataUri} onFileChange={(e) => handleFileChange(e, 'existingReportDataUri')} />
-                        <FileUploadField name="newDocumentDataUri" label="New Document to Analyze" fileName={fileNames.newDocumentDataUri} onFileChange={(e) => handleFileChange(e, 'newDocumentDataUri')} />
+                        <FileUploadField name="existingReportDataUri" label="Existing SIP Report" fileName={fileNames.existingReport} onFileChange={handleExistingReportFileChange} accept=".pdf,.doc,.docx,.txt"/>
+                        <FormItem className="space-y-2">
+                            <Label>New Documents to Analyze</Label>
+                            <FormControl>
+                                <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center h-48">
+                                    <UploadCloud className="w-12 h-12 text-muted-foreground" />
+                                    <p className="mt-2 text-sm text-muted-foreground">
+                                        <label htmlFor="new-docs-upload" className="font-semibold text-accent cursor-pointer hover:underline">
+                                            Click to upload files
+                                        </label>
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">PDF, DOCX, TXT, JPG, JPEG</p>
+                                    <Input id="new-docs-upload" type="file" multiple className="sr-only" onChange={handleNewDocumentsFileChange} accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg" />
+                                </div>
+                            </FormControl>
+                            <div className="flex flex-wrap gap-2 pt-2">
+                                {fileNames.newDocuments.map((file, index) => (
+                                    <Badge key={index} variant="secondary" className="pl-3 pr-1 py-1">
+                                        {file.name}
+                                        <button onClick={() => removeNewDocument(index)} className="ml-1 rounded-full p-0.5 hover:bg-destructive/20 text-destructive"><X className="h-3 w-3" /></button>
+                                    </Badge>
+                                ))}
+                            </div>
+                            <FormMessage>{form.formState.errors.newDocumentsDataUris?.message}</FormMessage>
+                        </FormItem>
                     </div>
                   
                     <FormField control={form.control} name="companyName" render={({ field }) => ( 

@@ -13,7 +13,7 @@ import { z } from 'zod';
 
 const EditSipReportInputSchema = z.object({
   existingReportDataUri: z.string().describe("The original SIP report to be edited, as a data URI."),
-  newDocumentDataUri: z.string().describe("A new document with information to incorporate, as a data URI."),
+  newDocumentsDataUris: z.array(z.string()).describe("An array of new documents with information to incorporate, each as a data URI."),
   companyName: z.string().describe("The name of the company for context."),
   instructions: z.string().describe("Specific instructions on how to edit the report."),
 });
@@ -36,16 +36,18 @@ const prompt = ai.definePrompt({
 
 You will be given:
 1.  The **Existing SIP Report**.
-2.  A **New Document** containing additional information (e.g., feedback, updated project details, new learnings).
+2.  A collection of **New Documents** containing additional information (e.g., feedback, updated project details, new learnings, images).
 3.  **Specific Instructions** on what changes to make.
 
-Your goal is to intelligently integrate the information from the **New Document** into the **Existing SIP Report** according to the user's **Instructions**. You must maintain the original tone and structure of the report unless the instructions specify otherwise.
+Your goal is to intelligently integrate the information from all the **New Documents** into the **Existing SIP Report** according to the user's **Instructions**. You must maintain the original tone and structure of the report unless the instructions specify otherwise.
 
 **Existing SIP Report:**
 {{media url=existingReportDataUri}}
 
-**New Document to Analyze:**
-{{media url=newDocumentDataUri}}
+**New Documents to Analyze:**
+{{#each newDocumentsDataUris}}
+{{media url=this}}
+{{/each}}
 
 **User Instructions:**
 ---
