@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useForm } from 'react';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import jsPDF from 'jspdf';
@@ -76,7 +76,11 @@ export default function AutomatedReportBuilderTool() {
   const [result, setResult] = useState<BuildAutomatedReportOutput | null>(null);
   const { toast } = useToast();
   
-  const [fileNames, setFileNames] = useState({
+  const [fileNames, setFileNames] = useState<{
+      certificateDataUri: string | null,
+      feedbackFormDataUri: string | null,
+      reportFormatDataUri: string | null,
+  }>({
       certificateDataUri: null,
       feedbackFormDataUri: null,
       reportFormatDataUri: null,
