@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import jsPDF from 'jspdf';
@@ -200,7 +200,7 @@ export default function AutomatedReportBuilderTool() {
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <FileUploadField name="certificateDataUri" label="Internship Certificate" fileName={fileNames.certificateDataUri} onFileChange={(e) => handleFileChange(e, 'certificateDataUri')} accept=".pdf,.doc,.docx,.txt,.jpeg,.jpg" />
-                      <FileUploadField name="feedbackFormDataUri" label="Intern Feedback Form" fileName={fileNames.feedbackFormDataUri} onFileChange={(e) => handleFileChange(e, 'feedbackFormDataUri')} />
+                      <FileUploadField name="feedbackFormDataUri" label="Intern Feedback Form" fileName={fileNames.feedbackFormDataUri} onFileChange={(e) => handleFileChange(e, 'feedbackFormDataUri')} accept=".pdf,.doc,.docx,.txt,.jpeg,.jpg" />
                       <FileUploadField name="reportFormatDataUri" label="Report Format" fileName={fileNames.reportFormatDataUri} onFileChange={(e) => handleFileChange(e, 'reportFormatDataUri')} />
                   </div>
                   
