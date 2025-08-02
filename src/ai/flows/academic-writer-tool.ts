@@ -57,7 +57,7 @@ const prompt = ai.definePrompt({
   input: { schema: GenerateAcademicDocumentInputSchema },
   output: { schema: GenerateAcademicDocumentOutputSchema },
   tools: [webSearchTool],
-  prompt: `You are an expert academic writer and researcher. Your task is to generate a well-structured academic document based on the provided topic and structure.
+  prompt: `You are an expert academic writer and researcher. Your task is to generate a well-structured academic document based on the provided topic and structure. Your highest priority is to replicate the provided structure with absolute precision.
 
 **Topic:**
 {{{topic}}}
@@ -73,8 +73,8 @@ const prompt = ai.definePrompt({
 {{/if}}
 
 **Instructions:**
-1.  **Analyze Structure:** **Strictly adhere** to the provided structure from either the text input or the uploaded document. Replicate the hierarchy of chapters, sections, and headings exactly as specified.
-2.  **Research:** Use the web search tool with the topic to gather relevant information, key points, and data to flesh out the content.
+1.  **Analyze Structure:** This is the most critical step. **You must strictly adhere** to the provided structure from either the text input or the uploaded document. Replicate the hierarchy of chapters, sections, and headings exactly as specified. Do not deviate, add, or remove sections. The output's organization must be a mirror of the input structure.
+2.  **Research:** Use the web search tool with the topic to gather relevant information, key points, and data to flesh out the content for each section defined in the structure.
 3.  **Title:** Use the provided topic as the main title for the document.
 4.  **Introduction:** Write a comprehensive introduction that sets the stage for the topic, states the problem or thesis, and outlines the document's structure, following the provided structure.
 5.  **Body Chapters/Sections:** Generate the body content for each section defined in the source structure. Ensure the content is detailed, well-organized, and incorporates the research you have gathered.
@@ -95,3 +95,4 @@ const generateAcademicDocumentFlow = ai.defineFlow(
     return output!;
   }
 );
+
