@@ -78,6 +78,8 @@ export default function PortfolioGeneratorTool() {
   const { toast } = useToast();
   const [resumeDataUri, setResumeDataUri] = useState<string | null>(null);
   const [resumeFileName, setResumeFileName] = useState<string | null>(null);
+  const [certificateDataUri, setCertificateDataUri] = useState<string | null>(null);
+  const [certificateFileName, setCertificateFileName] = useState<string | null>(null);
 
   const form = useForm<FormData>({
     resolver: zodResolver(portfolioSchema),
@@ -125,7 +127,7 @@ export default function PortfolioGeneratorTool() {
     }
     setIsLoading(true);
     setResult(null);
-    const response = await handleGeneratePortfolioWebsiteAction({ type: 'resume', resumeDataUri });
+    const response = await handleGeneratePortfolioWebsiteAction({ type: 'resume', resumeDataUri, certificateDataUri });
     setIsLoading(false);
 
     if (response.success && response.data) {
@@ -169,18 +171,22 @@ export default function PortfolioGeneratorTool() {
     });
   };
 
-  const handleResumeFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    setFileName: React.Dispatch<React.SetStateAction<string | null>>,
+    setDataUri: React.Dispatch<React.SetStateAction<string | null>>
+  ) => {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 200 * 1024 * 1024) { // 200MB limit
         toast({ variant: "destructive", title: "File too large", description: "Please upload a document smaller than 200MB."});
         return;
       }
-      setResumeFileName(file.name);
+      setFileName(file.name);
       const reader = new FileReader();
       reader.onload = async (loadEvent) => {
         const dataUri = loadEvent.target?.result as string;
-        setResumeDataUri(dataUri);
+        setDataUri(dataUri);
       };
       reader.readAsDataURL(file);
     }
@@ -208,30 +214,60 @@ export default function PortfolioGeneratorTool() {
                     <TabsTrigger value="manual">Manual Entry</TabsTrigger>
                 </TabsList>
                 <TabsContent value="auto-generate" className="mt-6">
-                    <div className="space-y-4">
-                        <Label>Upload your resume to automatically generate a portfolio.</Label>
-                        <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center">
-                            {resumeFileName ? (
-                                <div className='flex flex-col items-center gap-2'>
-                                    <FileText className="w-12 h-12 text-accent" />
-                                    <p className='text-sm font-medium'>{resumeFileName}</p>
-                                    <Button variant="link" size="sm" asChild className='p-0 h-auto'>
-                                        <label htmlFor="resume-upload" className="cursor-pointer">Change file</label>
-                                    </Button>
-                                </div>
-                            ) : (
-                                <>
-                                    <UploadCloud className="w-12 h-12 text-muted-foreground" />
-                                    <p className="mt-2 text-sm text-muted-foreground">
-                                        <label htmlFor="resume-upload" className="font-semibold text-accent cursor-pointer hover:underline">
-                                            Upload Resume
-                                        </label>
-                                    </p>
-                                    <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 200MB</p>
-                                </>
-                            )}
-                            <Input id="resume-upload" type="file" className="sr-only" onChange={handleResumeFileChange} accept=".pdf,.docx,.txt" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <Label>1. Upload Resume</Label>
+                            <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center h-48">
+                                {resumeFileName ? (
+                                    <div className='flex flex-col items-center gap-2'>
+                                        <FileText className="w-12 h-12 text-accent" />
+                                        <p className='text-sm font-medium'>{resumeFileName}</p>
+                                        <Button variant="link" size="sm" asChild className='p-0 h-auto'>
+                                            <label htmlFor="resume-upload" className="cursor-pointer">Change file</label>
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <UploadCloud className="w-12 h-12 text-muted-foreground" />
+                                        <p className="mt-2 text-sm text-muted-foreground">
+                                            <label htmlFor="resume-upload" className="font-semibold text-accent cursor-pointer hover:underline">
+                                                Upload Resume
+                                            </label>
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">PDF, DOCX, TXT</p>
+                                    </>
+                                )}
+                                <Input id="resume-upload" type="file" className="sr-only" onChange={(e) => handleFileChange(e, setResumeFileName, setResumeDataUri)} accept=".pdf,.docx,.txt" />
+                            </div>
                         </div>
+
+                        <div className="space-y-2">
+                            <Label>2. Upload Certificate (Optional)</Label>
+                            <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center h-48">
+                                {certificateFileName ? (
+                                    <div className='flex flex-col items-center gap-2'>
+                                        <FileText className="w-12 h-12 text-accent" />
+                                        <p className='text-sm font-medium'>{certificateFileName}</p>
+                                        <Button variant="link" size="sm" asChild className='p-0 h-auto'>
+                                            <label htmlFor="cert-upload" className="cursor-pointer">Change file</label>
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <UploadCloud className="w-12 h-12 text-muted-foreground" />
+                                        <p className="mt-2 text-sm text-muted-foreground">
+                                            <label htmlFor="cert-upload" className="font-semibold text-accent cursor-pointer hover:underline">
+                                                Upload Certificate
+                                            </label>
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">Image or PDF</p>
+                                    </>
+                                )}
+                                <Input id="cert-upload" type="file" className="sr-only" onChange={(e) => handleFileChange(e, setCertificateFileName, setCertificateDataUri)} accept="image/*,.pdf" />
+                            </div>
+                        </div>
+                    </div>
+                     <div className="mt-6">
                         <Button onClick={onResumeSubmit} disabled={isLoading || !resumeDataUri}>
                             {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                             Generate Website

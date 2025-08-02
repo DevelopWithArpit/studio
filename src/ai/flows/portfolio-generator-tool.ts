@@ -47,6 +47,7 @@ const PortfolioDataSchema = z.object({
   })),
   skills: z.array(z.string()),
   achievements: z.array(z.string()).optional(),
+  certificateDataUri: z.string().optional().describe("An optional internship certificate as a data URI. If provided, analyze it and add an entry to the achievements section."),
 });
 export type GeneratePortfolioWebsiteInput = z.infer<typeof PortfolioDataSchema>;
 
@@ -99,6 +100,11 @@ const prompt = ai.definePrompt({
     prompt: `You are an expert web developer and designer, specializing in creating modern, animated portfolio websites. Your task is to generate the complete HTML, CSS, and JavaScript for a portfolio, visually tailored to the user's profession.
 
 **User's Profession:** {{{profession}}}
+
+{{#if certificateDataUri}}
+**Certificate Analysis:** An internship certificate has been provided. Analyze its contents (text, logos, dates) to verify it and extract the key achievement. Create a concise, one-sentence achievement summary (e.g., "Completed a 3-month web development internship at ExampleCorp") and add it to the beginning of the achievements list.
+Certificate: {{media url=certificateDataUri}}
+{{/if}}
 
 **Instructions:**
 1.  **Theme Adaptation:**

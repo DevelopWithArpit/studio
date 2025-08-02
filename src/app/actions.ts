@@ -176,7 +176,7 @@ export async function handleGenerateAcademicDocumentAction(input: GenerateAcadem
 
 
 type GeneratePortfolioWebsiteActionInput = 
-    | { type: 'resume'; resumeDataUri: string; }
+    | { type: 'resume'; resumeDataUri: string; certificateDataUri?: string | null; }
     | { type: 'manual'; data: GeneratePortfolioWebsiteInput; };
 
 export async function handleGeneratePortfolioWebsiteAction(input: GeneratePortfolioWebsiteActionInput) {
@@ -188,6 +188,7 @@ export async function handleGeneratePortfolioWebsiteAction(input: GeneratePortfo
             portfolioData = {
                 ...extractedData,
                 profession: extractedData.profession || 'Not Specified',
+                certificateDataUri: input.certificateDataUri || undefined,
             };
         } else {
             portfolioData = input.data;
