@@ -75,7 +75,7 @@ Your goal is to intelligently integrate the information from all the **New Docum
 {{{instructions}}}
 ---
 
-Carefully follow the instructions and provide the complete, final version of the edited report in the 'editedReportContent' field. Do not just summarize the changes; provide the full, rewritten document.`,
+Carefully follow the instructions and provide the complete, final version of the edited report in the 'editedReportContent' field. Do not just summarize the changes; provide the full, rewritten document. Your final output must be a JSON object with a single key "editedReportContent" containing the entire report as a string.`,
 });
 
 const editSipReportFlow = ai.defineFlow(
