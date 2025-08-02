@@ -176,39 +176,52 @@ export default function ReportEditorTool() {
     const usableWidth = pageWidth - 2 * margin;
     let y = margin;
 
-    const addText = (text: string, options: any) => {
+    const addTextWithWrap = (text: string, options: any) => {
       const lines = doc.splitTextToSize(text, usableWidth);
       const textHeight = doc.getTextDimensions(lines).h;
+      
       if (y + textHeight > pageHeight - margin) {
         doc.addPage();
         y = margin;
       }
+      
       doc.text(lines, margin, y, options);
-      y += textHeight + 5;
+      y += textHeight;
     };
     
-    // Simplistic markdown handling
-    const sections = result.editedReportContent.split(/^(#+ .*\n)/gm).filter(Boolean);
-    sections.forEach(section => {
-        if (section.startsWith('# ')) {
-            doc.setFontSize(22).setFont(undefined, 'bold');
-            addText(section.replace('# ', ''), {});
-        } else if (section.startsWith('## ')) {
-            doc.setFontSize(16).setFont(undefined, 'bold');
-            addText(section.replace('## ', ''), {});
-        } else if (section.startsWith('### ')) {
-            doc.setFontSize(14).setFont(undefined, 'bold');
-            addText(section.replace('### ', ''), {});
-        } else {
-            doc.setFontSize(12).setFont(undefined, 'normal');
-            addText(section, {});
-        }
+    const lines = result.editedReportContent.split('\n');
+
+    lines.forEach(line => {
+      line = line.trim();
+      if (line.startsWith('# ')) {
+        doc.setFontSize(22).setFont(undefined, 'bold');
+        addTextWithWrap(line.substring(2), {});
+        y += 5; // Extra space after main heading
+      } else if (line.startsWith('## ')) {
+        doc.setFontSize(16).setFont(undefined, 'bold');
+        addTextWithWrap(line.substring(3), {});
+        y += 3; // Extra space after subheading
+      } else if (line.startsWith('### ')) {
+        doc.setFontSize(14).setFont(undefined, 'bold');
+        addTextWithWrap(line.substring(4), {});
         y += 2;
-    })
+      } else if (line.startsWith('* ') || line.startsWith('- ')) {
+        doc.setFontSize(12).setFont(undefined, 'normal');
+        addTextWithWrap(`• ${line.substring(2)}`, { indent: 5 });
+        y += 2;
+      } else if (line) { // It's a paragraph
+        doc.setFontSize(12).setFont(undefined, 'normal');
+        addTextWithWrap(line, {});
+        y += 4; // Paragraph spacing
+      } else { // Empty line
+        y += 4;
+      }
+    });
     
     doc.save(`edited_report.pdf`);
     toast({ title: "Download Started", description: "Your edited report is downloading as a PDF." });
   };
+
 
   return (
     <div className="space-y-8">
