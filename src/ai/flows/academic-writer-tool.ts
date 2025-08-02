@@ -3,7 +3,7 @@
 /**
  * @fileOverview Generates a structured academic document based on a topic and research notes.
  * 
- * - generateAcademicDocument - A function that generates thesis content.
+ * - generateAcademicDocument - A function that generates academic document content.
  * - GenerateAcademicDocumentInput - The input type for the function.
  * - GenerateAcademicDocumentOutput - The return type for the function.
  */
@@ -37,13 +37,13 @@ const prompt = ai.definePrompt({
   name: 'generateAcademicDocumentPrompt',
   input: { schema: GenerateAcademicDocumentInputSchema },
   output: { schema: GenerateAcademicDocumentOutputSchema },
-  prompt: `You are an expert academic writer. Your task is to generate a well-structured academic document (like a thesis, research paper, or SIP report) based on the user's uploaded document, which contains the topic, an outline, and research notes.
+  prompt: `You are an expert academic writer. Your task is to generate a well-structured academic document based on the user's uploaded file, which contains the topic, an outline, and research notes.
 
 **Uploaded Document:**
 {{media url=documentDataUri}}
 
 **Instructions:**
-1.  **Analyze the Document:** Carefully analyze the provided document to identify the main topic, the structure (chapters, sections), headings, and any key research points or data. Determine if it's a thesis, SIP report, or another academic paper and adapt the tone and format accordingly.
+1.  **Analyze the Document:** Carefully analyze the provided document to identify the main topic, the structure (chapters, sections), headings, and any key research points or data. You will adapt the tone and format based on the content of the document.
 2.  **Title:** Extract or create a compelling and academic title for the document based on its content.
 3.  **Introduction:** Write a comprehensive introduction that sets the stage, states the problem or thesis statement, and outlines the structure of the document, following the provided outline.
 4.  **Body Chapters/Sections:** Generate the body based on the structure and headings found in the uploaded document. Flesh out each section with detailed, well-organized content, incorporating the research notes and key points provided.

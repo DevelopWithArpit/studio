@@ -140,7 +140,7 @@ export default function AcademicWriterTool() {
       <header className="space-y-2">
         <h1 className="text-3xl font-bold font-headline">Academic Writer</h1>
         <p className="text-muted-foreground">
-          Generate a structured academic document (e.g., Thesis, SIP Report) from your outline and research notes.
+          Generate a structured academic document from your outline and research notes.
         </p>
       </header>
 
