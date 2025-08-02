@@ -27,7 +27,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { handleGenerateSipReportAction } from '@/app/actions';
 import type { GenerateSipReportOutput } from '@/ai/flows/sip-report-generator-tool';
-import { Download, Loader2 } from 'lucide-react';
+import { Download, FileText, Loader2, UploadCloud } from 'lucide-react';
 import { Textarea } from '../ui/textarea';
 
 const formSchema = z.object({
@@ -43,6 +43,7 @@ const formSchema = z.object({
   keyLearnings: z.string().min(20, "Please describe your key learnings."),
   challengesFaced: z.string().min(20, "Please describe the challenges you faced."),
   conclusion: z.string().min(20, "Please provide a conclusion."),
+  feedbackFormDataUri: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -51,6 +52,7 @@ export default function SipReportGeneratorTool() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<GenerateSipReportOutput | null>(null);
   const { toast } = useToast();
+  const [feedbackFileName, setFeedbackFileName] = useState<string | null>(null);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -67,8 +69,27 @@ export default function SipReportGeneratorTool() {
         keyLearnings: '',
         challengesFaced: '',
         conclusion: '',
+        feedbackFormDataUri: '',
     },
   });
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 4 * 1024 * 1024) { // 4MB limit for Genkit
+        toast({ variant: "destructive", title: "File too large", description: "Please upload a document smaller than 4MB."});
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (loadEvent) => {
+        const dataUri = loadEvent.target?.result as string;
+        form.setValue('feedbackFormDataUri', dataUri);
+        setFeedbackFileName(file.name);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
 
   async function onSubmit(data: FormData) {
     setIsLoading(true);
@@ -167,6 +188,43 @@ export default function SipReportGeneratorTool() {
                    <FormField control={form.control} name="keyLearnings" render={({ field }) => ( <FormItem> <FormLabel>Key Learnings</FormLabel> <FormControl><Textarea rows={4} {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                    <FormField control={form.control} name="challengesFaced" render={({ field }) => ( <FormItem> <FormLabel>Challenges Faced</FormLabel> <FormControl><Textarea rows={4} {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                    <FormField control={form.control} name="conclusion" render={({ field }) => ( <FormItem> <FormLabel>Conclusion</FormLabel> <FormControl><Textarea rows={4} {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                   
+                   <FormField
+                        control={form.control}
+                        name="feedbackFormDataUri"
+                        render={() => (
+                        <FormItem>
+                            <FormLabel>Intern Feedback Form (Optional)</FormLabel>
+                            <FormControl>
+                            <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center">
+                                {feedbackFileName ? (
+                                <div className='flex flex-col items-center gap-2'>
+                                    <FileText className="w-12 h-12 text-accent" />
+                                    <p className='text-sm font-medium'>{feedbackFileName}</p>
+                                    <Button variant="link" size="sm" asChild className='p-0 h-auto'>
+                                    <label htmlFor="feedback-upload" className="cursor-pointer">Change file</label>
+                                    </Button>
+                                </div>
+                                ) : (
+                                <>
+                                    <UploadCloud className="w-12 h-12 text-muted-foreground" />
+                                    <p className="mt-2 text-sm text-muted-foreground">
+                                    <label htmlFor="feedback-upload" className="font-semibold text-accent cursor-pointer hover:underline">
+                                        Click to upload
+                                    </label>
+                                    {' '}or drag and drop
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 4MB</p>
+                                </>
+                                )}
+                                <Input id="feedback-upload" type="file" className="sr-only" onChange={handleFileChange} accept=".pdf,.doc,.docx,.txt" />
+                            </div>
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+
 
                   <Button type="submit" disabled={isLoading}>
                     {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating...</> : 'Generate Report'}

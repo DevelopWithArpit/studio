@@ -40,6 +40,7 @@ const GenerateSipReportInputSchema = z.object({
   keyLearnings: z.string().describe("The key skills and knowledge gained during the internship."),
   challengesFaced: z.string().describe("Any challenges faced and how they were overcome."),
   conclusion: z.string().describe("A summary of the internship experience and its impact."),
+  feedbackFormDataUri: z.string().optional().describe("An optional uploaded feedback form from the student intern, as a data URI."),
 });
 export type GenerateSipReportInput = z.infer<typeof GenerateSipReportInputSchema>;
 
@@ -81,6 +82,13 @@ const prompt = ai.definePrompt({
 6.  **Challenges Faced:** {{{challengesFaced}}}
 7.  **Conclusion:** {{{conclusion}}}
 
+{{#if feedbackFormDataUri}}
+**Intern Feedback Form:**
+You must analyze the following uploaded feedback form. Extract key insights, reflections, and specific examples from it to enrich the 'Key Learnings' and 'Challenges Faced' sections of the report.
+{{media url=feedbackFormDataUri}}
+{{/if}}
+
+
 **Instructions:**
 1.  **Title:** Create a formal title for the report, such as "Summer Internship Project Report at {{{companyName}}}".
 2.  **Executive Summary:** Write a concise executive summary (1-2 paragraphs) that provides an overview of the internship and the report's key contents.
@@ -88,8 +96,8 @@ const prompt = ai.definePrompt({
     - **Introduction:** Research the company '{{{companyName}}}' and combine it with the user's overview to create a comprehensive introduction.
     - **Project Description:** Research the concepts in '{{{projectTitle}}}' and '{{{projectObjectives}}}' to write a detailed project description.
     - **Roles and Responsibilities:** Elaborate on the '{{{tasksAndResponsibilities}}}' by researching standard industry practices for the '{{{internshipRole}}}' role.
-    - **Key Learnings and Skill Development:** Expand on the '{{{keyLearnings}}}' by researching their importance and application in the industry.
-    - **Challenges and Solutions:** For the '{{{challengesFaced}}}', research common solutions and strategies for those types of challenges.
+    - **Key Learnings and Skill Development:** Expand on the '{{{keyLearnings}}}' by researching their importance and application in the industry. If a feedback form is provided, integrate specific examples and reflections from it.
+    - **Challenges and Solutions:** For the '{{{challengesFaced}}}', research common solutions and strategies for those types of challenges. If a feedback form is provided, integrate specific examples and reflections from it.
     - **Conclusion:** Summarize the expanded findings and the user's provided '{{{conclusion}}}' to create a powerful closing statement.
 4.  **Report Sections:** Generate the body of the report as a series of sections. Use the user's input plus your research to create the content for each section.
 5.  **Formatting:** Ensure all content is formatted in clear, professional Markdown. Use headings, lists, and bold text appropriately.
