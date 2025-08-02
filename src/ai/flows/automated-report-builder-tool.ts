@@ -56,7 +56,7 @@ const prompt = ai.definePrompt({
   input: { schema: BuildAutomatedReportInputSchema },
   output: { schema: BuildAutomatedReportOutputSchema },
   tools: [webSearchTool],
-  prompt: `You are an expert AI research assistant tasked with creating a comprehensive and professional Summer Internship Project (SIP) report. You will be given a company name and three key documents. Your job is to analyze the documents, conduct extensive web research to fill in all missing details, and generate a complete report based on the provided format.
+  prompt: `You are an expert AI research assistant tasked with creating a comprehensive and professional Summer Internship Project (SIP) report. You will be given a company name and three key documents. Your job is to analyze the documents, conduct extensive web research to fill in all missing details, and generate a complete report based on the provided format. Your tone must be confident and authoritative; do not use speculative language like "it seems," "it's likely," or "it can be assumed."
 
 **Key Inputs:**
 1.  **Company Name:** {{{companyName}}}
@@ -72,9 +72,9 @@ const prompt = ai.definePrompt({
     *   **Report Format Document:** This is the most important document. You **must** use this as the template for the final report. Identify all the required sections and their order (e.g., Introduction, Company Overview, Project Description, Conclusion, etc.).
 
 2.  **Synthesize and Fill Gaps (External Research):** You will likely have missing information (e.g., project title, objectives, detailed company overview, tasks and responsibilities). Your main task is to fill these gaps using the web search tool, guided by the role extracted from the certificate.
-    *   **Company Overview:** Conduct a thorough search on '{{{companyName}}}' to write a detailed overview.
-    *   **Infer Project Details:** Based on the intern's **role (from the certificate)** and feedback, infer a plausible and relevant project title and objectives. Use web search to research common projects for that role at that company.
-    *   **Elaborate on Responsibilities:** Research the typical tasks and responsibilities for the **intern's role** in the industry and at '{{{companyName}}}'. This must be detailed and professional.
+    *   **Company Overview:** Conduct a thorough search on '{{{companyName}}}' to write a detailed overview. State the company's mission and services definitively.
+    *   **Infer Project Details:** Based on the intern's **role (from the certificate)** and feedback, infer a plausible and relevant project title and objectives. Use web search to research common projects for that role at that company. Present these as the actual project details.
+    *   **Elaborate on Responsibilities:** Research the typical tasks and responsibilities for the **intern's role** in the industry and at '{{{companyName}}}'. Describe these responsibilities as what the intern *did*, not what they *likely* did.
     *   **Expand on Learnings & Challenges:** Use web search to provide industry context and significance for the learnings and challenges mentioned in the feedback form.
 
 3.  **Generate the Report:**
