@@ -40,7 +40,7 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-const FileUploadField = ({ name, label, fileName, onFileChange }: { name: keyof FormData, label: string, fileName: string | null, onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void }) => (
+const FileUploadField = ({ name, label, fileName, onFileChange, accept }: { name: keyof FormData, label: string, fileName: string | null, onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void, accept?: string }) => (
     <FormItem>
         <Label>{label}</Label>
         <FormControl>
@@ -61,10 +61,10 @@ const FileUploadField = ({ name, label, fileName, onFileChange }: { name: keyof 
                     Click to upload
                 </label>
                 </p>
-                <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 4MB</p>
+                <p className="text-xs text-muted-foreground">PDF, DOCX, TXT, JPG up to 4MB</p>
             </>
             )}
-            <Input id={name} type="file" className="sr-only" onChange={onFileChange} accept=".pdf,.doc,.docx,.txt" />
+            <Input id={name} type="file" className="sr-only" onChange={onFileChange} accept={accept || ".pdf,.doc,.docx,.txt"} />
         </div>
         </FormControl>
         <FormMessage />
@@ -199,7 +199,7 @@ export default function AutomatedReportBuilderTool() {
                   )}/>
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <FileUploadField name="certificateDataUri" label="Internship Certificate" fileName={fileNames.certificateDataUri} onFileChange={(e) => handleFileChange(e, 'certificateDataUri')} />
+                      <FileUploadField name="certificateDataUri" label="Internship Certificate" fileName={fileNames.certificateDataUri} onFileChange={(e) => handleFileChange(e, 'certificateDataUri')} accept=".pdf,.doc,.docx,.txt,.jpeg,.jpg" />
                       <FileUploadField name="feedbackFormDataUri" label="Intern Feedback Form" fileName={fileNames.feedbackFormDataUri} onFileChange={(e) => handleFileChange(e, 'feedbackFormDataUri')} />
                       <FileUploadField name="reportFormatDataUri" label="Report Format" fileName={fileNames.reportFormatDataUri} onFileChange={(e) => handleFileChange(e, 'reportFormatDataUri')} />
                   </div>
