@@ -37,6 +37,7 @@ import {
   Briefcase,
   FileEdit,
   Sparkles,
+  Bot,
 } from 'lucide-react';
 import { AppLogo } from '@/components/app-logo';
 import { SheetTitle } from '@/components/ui/sheet';
@@ -63,6 +64,7 @@ const ResumeCustomizerTool = dynamic(() => import('@/components/tools/resume-cus
 const TextHumanizerTool = dynamic(() => import('@/components/tools/text-humanizer-tool'), { loading: () => <RobotsBuildingLoader /> });
 const AcademicWriterTool = dynamic(() => import('@/components/tools/academic-writer-tool'), { loading: () => <RobotsBuildingLoader /> });
 const SipReportGeneratorTool = dynamic(() => import('@/components/tools/sip-report-generator-tool'), { loading: () => <RobotsBuildingLoader /> });
+const AutomatedReportBuilderTool = dynamic(() => import('@/components/tools/automated-report-builder-tool'), { loading: () => <RobotsBuildingLoader /> });
 
 
 type ToolId =
@@ -86,7 +88,8 @@ type ToolId =
   | 'watermark-remover'
   | 'image-text-manipulation'
   | 'academic-writer'
-  | 'sip-report-generator';
+  | 'sip-report-generator'
+  | 'automated-report-builder';
 
 type ToolConfig = {
   id: ToolId;
@@ -149,6 +152,12 @@ const tools: ToolConfig[] = [
     name: 'SIP Report Generator',
     icon: Briefcase,
     component: SipReportGeneratorTool,
+  },
+  {
+    id: 'automated-report-builder',
+    name: 'Automated Report Builder',
+    icon: Bot,
+    component: AutomatedReportBuilderTool,
   },
   {
     id: 'resume-customizer',

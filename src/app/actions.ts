@@ -86,6 +86,10 @@ import {
     generateSipReport,
     type GenerateSipReportInput,
 } from '@/ai/flows/sip-report-generator-tool';
+import {
+    buildAutomatedReport,
+    type BuildAutomatedReportInput,
+} from '@/ai/flows/automated-report-builder-tool';
 
 
 async function handleAction<T_Input, T_Output>(
@@ -180,6 +184,10 @@ export async function handleGenerateAcademicDocumentAction(input: GenerateAcadem
 
 export async function handleGenerateSipReportAction(input: GenerateSipReportInput) {
     return handleAction(input, generateSipReport);
+}
+
+export async function handleBuildAutomatedReportAction(input: BuildAutomatedReportInput) {
+    return handleAction(input, buildAutomatedReport);
 }
 
 
