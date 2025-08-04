@@ -108,46 +108,102 @@ export default function PresentationGeneratorTool() {
     const pptx = new PptxGenJS();
     pptx.layout = 'LAYOUT_WIDE';
 
-    result.slides.forEach((slide, index) => {
-      const pptxSlide = pptx.addSlide();
-
-      // Title
-      pptxSlide.addText(slide.title, { 
-        x: 0.5, 
-        y: 0.25, 
-        w: '90%', 
-        h: 1, 
-        fontSize: 36, 
-        bold: true, 
-        color: '363636' 
-      });
-
-      if (index > 0 && index < result.slides.length -1) {
-         // Image
-        if (slide.imageUrl) {
-            pptxSlide.addImage({
-                data: slide.imageUrl,
-                x: 5.0,
-                y: 1.5,
-                w: 4.5,
-                h: 3.5,
-            });
-        }
-    
-        // Content
-        pptxSlide.addText(slide.content.join('\n\n'), {
-            x: 0.5,
-            y: 1.5,
-            w: 4.0,
-            h: 3.5,
-            fontSize: 18,
-            bullet: true,
-            color: '363636',
-        });
-      }
+    // Define a professional theme
+    pptx.defineSlideMaster({
+        title: "TITLE_SLIDE",
+        background: { color: "F1F1F1" },
+        objects: [
+            { rect: { x: 0, y: 5.2, w: '100%', h: 0.5, fill: { color: '0072C6' } } },
+            {
+                text: {
+                    text: result.title,
+                    options: {
+                        x: 0.5, y: 2.5, w: '90%', h: 1, 
+                        fontFace: 'Arial', fontSize: 44, bold: true, color: '003B64', align: 'center',
+                        // Entrance animation for the title
+                        entrance: { effect: 'fade' }
+                    }
+                }
+            }
+        ],
     });
 
+    pptx.defineSlideMaster({
+        title: "CONTENT_SLIDE",
+        background: { color: "F1F1F1" },
+        objects: [
+             { rect: { x: 0, y: 5.4, w: '100%', h: 0.3, fill: { color: '0072C6' } } },
+            {
+                placeholder: {
+                    options: { name: "title", type: "title", x: 0.5, y: 0.2, w: '90%', h: 0.8, 
+                               fontFace: 'Arial', fontSize: 32, bold: true, color: '003B64',
+                               // Entrance animation for slide titles
+                               entrance: { effect: 'slide', direction: 't' }
+                            },
+                    text: "Default Title",
+                },
+            },
+            {
+                placeholder: {
+                    options: {
+                        name: "body", type: "body", x: 0.5, y: 1.2, w: 5.5, h: 4, 
+                        fontFace: 'Arial', fontSize: 18, color: '383838', bullet: true,
+                        // Entrance animation for body content
+                        entrance: { effect: 'slide', direction: 'l' }
+                    },
+                    text: "Default content",
+                },
+            },
+            {
+                placeholder: {
+                    options: { name: "image", type: "pic", x: 6.5, y: 1.2, w: 4, h: 3,
+                               // Entrance animation for images
+                               entrance: { effect: 'zoom' }
+                            },
+                },
+            },
+        ],
+    });
+
+
+    // Create Title Slide
+    pptx.addSlide({ masterName: "TITLE_SLIDE" });
+
+    // Create Content Slides
+    result.slides.slice(1, result.slides.length -1).forEach((slide) => {
+      const pptxSlide = pptx.addSlide({ masterName: "CONTENT_SLIDE" });
+      
+      pptxSlide.addText(slide.title, { placeholder: "title" });
+
+      if (slide.imageUrl) {
+          pptxSlide.addImage({
+              data: slide.imageUrl,
+              placeholder: "image",
+          });
+           pptxSlide.addText(slide.content.join('\n\n'), { placeholder: "body" });
+      } else {
+        // If no image, use full width for the body
+         pptxSlide.addText(slide.content.join('\n\n'), {
+            x: 0.5, y: 1.2, w: '90%', h: 4,
+            fontFace: 'Arial', fontSize: 18, color: '383838', bullet: true,
+            entrance: { effect: 'slide', direction: 'l' }
+        });
+      }
+
+    });
+
+    // Create Final Slide
+    const lastSlide = pptx.addSlide({ masterName: "TITLE_SLIDE" });
+    const lastSlideData = result.slides[result.slides.length - 1];
+    if (lastSlideData) {
+        lastSlide.addText(lastSlideData.title, {
+            x: 0.5, y: 2.5, w: '90%', h: 1, 
+            fontFace: 'Arial', fontSize: 44, bold: true, color: '003B64', align: 'center'
+        });
+    }
+
     pptx.writeFile({ fileName: `${result.title}.pptx` });
+    toast({ title: 'Download Started', description: `Your presentation "${result.title}.pptx" is downloading.`});
   };
 
 
@@ -190,7 +246,7 @@ export default function PresentationGeneratorTool() {
                             <FormControl><RadioGroupItem value="projectProposal" /></FormControl>
                             <FormLabel className="font-normal">Project Proposal</FormLabel>
                           </FormItem>
-                          <FormItem className="flex items-center space-x-3 space-y-0">
+                           <FormItem className="flex items-center space-x-3 space-y-0">
                             <FormControl><RadioGroupItem value="custom" /></FormControl>
                             <FormLabel className="font-normal">Custom Structure</FormLabel>
                           </FormItem>
