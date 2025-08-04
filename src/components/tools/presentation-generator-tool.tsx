@@ -104,123 +104,100 @@ export default function PresentationGeneratorTool() {
     }
   }
 
-  const handleDownload = () => {
+ const handleDownload = () => {
     if (!result) return;
 
     const pptx = new PptxGenJS();
     pptx.layout = 'LAYOUT_WIDE';
 
-    // Define a professional theme
     pptx.defineSlideMaster({
-        title: "TITLE_SLIDE",
-        background: { color: "F1F1F1" },
-        objects: [
-            { rect: { x: 0, y: '90%', w: '100%', h: '10%', fill: { color: '003B64' } } },
-            { rect: { x: 0, y: '90%', w: '15%', h: '10%', fill: { color: '0072C6' } } },
-            {
-                placeholder: {
-                    options: { name: "title", type: "title", x: 0.5, y: 2.5, w: '90%', h: 1, 
-                        fontFace: 'Arial', fontSize: 44, bold: true, color: '003B64', align: 'center',
-                    },
-                    text: "Default Title",
-                }
-            },
-            {
-                placeholder: {
-                    options: { name: "body", type: "body", x: 0.5, y: 4.0, w: '90%', h: 2, 
-                               fontFace: 'Arial', fontSize: 20, color: '383838', align: 'center',
-                            },
-                    text: "Default content",
-                },
-            }
-        ],
+      title: "TITLE_SLIDE",
+      background: { color: "F1F1F1" },
+      objects: [
+        { rect: { x: 0, y: '90%', w: '100%', h: '10%', fill: { color: '003B64' } } },
+        { rect: { x: 0, y: '90%', w: '15%', h: '10%', fill: { color: '0072C6' } } },
+        {
+          placeholder: {
+            options: { name: "title", type: "title", x: 0.5, y: 2.5, w: 9, h: 1.5, fontFace: 'Arial', fontSize: 44, bold: true, color: '003B64', align: 'center' },
+            text: "Default Title",
+          }
+        },
+        {
+          placeholder: {
+            options: { name: "body", type: "body", x: 0.5, y: 4.0, w: 9, h: 2, fontFace: 'Arial', fontSize: 20, color: '383838', align: 'center' },
+            text: "Default Body",
+          },
+        }
+      ],
     });
 
     pptx.defineSlideMaster({
-        title: "CONTENT_SLIDE",
-        background: { color: "F1F1F1" },
-        objects: [
-             { rect: { x: 0, y: '90%', w: '100%', h: '10%', fill: { color: '003B64' } } },
-             { rect: { x: 0, y: '90%', w: '15%', h: '10%', fill: { color: '0072C6' } } },
-            {
-                placeholder: {
-                    options: { name: "title", type: "title", x: 0.5, y: 0.2, w: '90%', h: 0.8, 
-                               fontFace: 'Arial', fontSize: 32, bold: true, color: '003B64',
-                               entrance: { effect: 'slide', direction: 't' }
-                            },
-                    text: "Default Title",
-                },
-            },
-            {
-                placeholder: {
-                    options: {
-                        name: "body", type: "body", x: 0.5, y: 1.2, w: 5.5, h: 4, 
-                        fontFace: 'Arial', fontSize: 18, color: '383838',
-                    },
-                    text: "Default content",
-                },
-            },
-            {
-                placeholder: {
-                    options: { name: "image", type: "pic", x: 6.5, y: 1.2, w: 4, h: 3,
-                               entrance: { effect: 'zoom' }
-                            },
-                },
-            },
-        ],
+      title: "CONTENT_SLIDE",
+      background: { color: "F1F1F1" },
+      objects: [
+        { rect: { x: 0, y: '90%', w: '100%', h: '10%', fill: { color: '003B64' } } },
+        { rect: { x: 0, y: '90%', w: '15%', h: '10%', fill: { color: '0072C6' } } },
+        {
+          placeholder: {
+            options: { name: "title", type: "title", x: 0.5, y: 0.2, w: 9, h: 0.8, fontFace: 'Arial', fontSize: 32, bold: true, color: '003B64' },
+            text: "Default Title",
+          },
+        },
+        {
+          placeholder: {
+            options: { name: "body", type: "body", x: 0.5, y: 1.2, w: 5, h: 4.5, fontFace: 'Arial', fontSize: 18, color: '383838' },
+            text: "Default Body",
+          },
+        },
+        {
+          placeholder: {
+            options: { name: "image", type: "pic", x: 5.75, y: 1.2, w: 3.75, h: 4.5 },
+          },
+        },
+      ],
     });
-
 
     result.slides.forEach((slide, index) => {
-        const isFirst = index === 0;
-        const isLast = index === result.slides.length - 1;
+      const isFirst = index === 0;
+      const pptxSlide = pptx.addSlide({ masterName: isFirst ? "TITLE_SLIDE" : "CONTENT_SLIDE" });
 
-        if (isFirst || isLast) {
-            const pptxSlide = pptx.addSlide({ masterName: "TITLE_SLIDE" });
-            pptxSlide.addText(slide.title, { 
-                placeholder: "title",
-                entrance: { effect: 'fade' }
-            });
-            const bodyText = slide.content.map(p => p.text || p).join('\n');
-            if (bodyText) {
-                 pptxSlide.addText(bodyText, { placeholder: "body" });
-            }
-        } else {
-             const pptxSlide = pptx.addSlide({ masterName: "CONTENT_SLIDE" });
-      
-            pptxSlide.addText(slide.title, { placeholder: "title" });
-
-            const bodyTextObjects = slide.content.map(point => ({
-                text: point,
-                options: {
-                    bullet: true,
-                    paraSpaceAfter: 10,
-                    anim: {
-                        effect: 'slide',
-                        type: 'in',
-                        direction: 'l',
-                        by: 'paragraph'
-                    }
-                }
-            }));
-
-            if (slide.imageUrl) {
-                pptxSlide.addImage({
-                    data: slide.imageUrl,
-                    placeholder: "image",
-                });
-                pptxSlide.addText(bodyTextObjects, { placeholder: "body" });
-            } else {
-                pptxSlide.addText(bodyTextObjects, {
-                    x: 0.5, y: 1.2, w: '90%', h: 4,
-                    fontFace: 'Arial', fontSize: 18, color: '383838'
-                });
-            }
+      if (isFirst) {
+        pptxSlide.addText(slide.title, { placeholder: "title", anim: { effect: 'wipe', direction: 'l' } });
+        const bodyText = slide.content.join('\n');
+        if (bodyText) {
+          pptxSlide.addText(bodyText, { placeholder: "body", anim: { effect: 'fadeIn' } });
         }
+      } else {
+        pptxSlide.addText(slide.title, { placeholder: "title", anim: { effect: 'wipe', direction: 'l' } });
+
+        const bodyTextObjects = slide.content.map(point => ({
+          text: point,
+          options: {
+            bullet: { type: 'number', style: 'romanLcPeriod' },
+            paraSpaceAfter: 10,
+            fontFace: 'Arial',
+            fontSize: 18,
+            color: '383838',
+          }
+        }));
+
+        pptxSlide.addText(bodyTextObjects, {
+          placeholder: 'body',
+          anim: { effect: 'fly', direction: 'l', by: 'paragraph' }
+        });
+
+        if (slide.imageUrl) {
+          pptxSlide.addImage({
+            data: slide.imageUrl,
+            placeholder: "image",
+            anim: { effect: 'zoom', type: 'in' }
+          });
+        }
+      }
     });
 
     pptx.writeFile({ fileName: `${result.title}.pptx` });
-    toast({ title: 'Download Started', description: `Your presentation "${result.title}.pptx" is downloading.`});
+    toast({ title: 'Download Started', description: `Your presentation "${result.title}.pptx" is downloading.` });
   };
 
 
@@ -319,7 +296,7 @@ export default function PresentationGeneratorTool() {
                       <FormControl>
                         <Input type="number" {...field} onChange={e => {
                             const value = e.target.value;
-                            field.onChange(value === '' ? '' : parseInt(value, 10));
+                            field.onChange(value === '' ? 0 : parseInt(value, 10));
                         }} disabled={contentType === 'projectProposal' || contentType === 'custom'}/>
                       </FormControl>
                        {contentType === 'projectProposal' && <p className="text-xs text-muted-foreground">Fixed at 8 slides for project proposals.</p>}
