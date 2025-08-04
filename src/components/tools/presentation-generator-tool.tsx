@@ -149,54 +149,47 @@ export default function PresentationGeneratorTool() {
     });
 
     result.slides.forEach((slide, index) => {
-        const isFirst = index === 0;
-        const masterName = isFirst ? "TITLE_SLIDE" : "CONTENT_SLIDE";
-        const pptxSlide = pptx.addSlide({ masterName });
+      const isFirstSlide = index === 0;
+      const masterName = isFirstSlide ? 'TITLE_SLIDE' : 'CONTENT_SLIDE';
+      const pptxSlide = pptx.addSlide({ masterName });
+      
+      pptxSlide.transition = { type: "fade", duration: 1 };
+      
+      if (isFirstSlide) {
+        pptxSlide.addText(slide.title, { 
+          placeholder: "title",
+          anim: { effect: "wipe", type: "in", duration: 1, delay: 0.2, from: "bottom" }
+        });
+        const subtitle = slide.content.join(' - ') || result.topic;
+        pptxSlide.addText(subtitle, {
+          placeholder: "subtitle",
+          anim: { effect: "fadeIn", duration: 1, delay: 0.5 }
+        });
+      } else {
+         pptxSlide.addText(slide.title, { 
+           placeholder: "title",
+           anim: { effect: "fadeIn", duration: 0.5, delay: 0.2 }
+         });
 
-        // Add a subtle fade transition to all slides
-        pptxSlide.transition = { type: "fade", duration: 1 };
+        const bodyTextObjects = slide.content.map(point => ({
+          text: point,
+          options: { bullet: true, paraSpaceAfter: 10 }
+        }));
 
-        if (isFirst) {
-            pptxSlide.addText(slide.title, { 
-                placeholder: "title", 
-                anim: { effect: 'wipe', type: 'in', duration: 1, delay: 0.2, from: 'bottom' } 
-            });
-            const subtitle = slide.content.join(' - ') || result.topic;
-            pptxSlide.addText(subtitle, { 
-                placeholder: "subtitle",
-                anim: { effect: 'fadeIn', duration: 1, delay: 0.5 } 
-            });
-        } else {
-            pptxSlide.addText(slide.title, { 
-                placeholder: "title",
-                anim: { effect: 'fadeIn', duration: 0.5, delay: 0.2 } 
-            });
-
-            const bodyTextObjects = slide.content.map(point => ({
-                text: point,
-                options: { 
-                    bullet: true, 
-                    paraSpaceAfter: 10,
-                    fontFace: 'Arial',
-                    fontSize: 18,
-                    color: 'D3D3D3',
-                    anim: { effect: 'fadeIn', by: 'paragraph', duration: 0.5, delay: 0.5 }
-                }
-            }));
-
-            pptxSlide.addText(bodyTextObjects, {
-                placeholder: 'body',
-            });
-
-            if (slide.imageUrl) {
-                pptxSlide.addImage({
-                    data: slide.imageUrl,
-                    placeholder: "image",
-                    sizing: { type: 'cover', w: 3, h: 4.5 },
-                    anim: { effect: 'zoom', type: 'in', duration: 1, delay: 0.3 }
-                });
-            }
+        pptxSlide.addText(bodyTextObjects, {
+          placeholder: 'body',
+          anim: { effect: "fadeIn", by: "paragraph", duration: 0.5, delay: 0.5, stagger: 200 }
+        });
+        
+        if (slide.imageUrl) {
+          pptxSlide.addImage({
+            data: slide.imageUrl,
+            placeholder: "image",
+            sizing: { type: 'cover', w: 3, h: 4.5 },
+            anim: { effect: "zoom", type: 'in', duration: 1, delay: 0.3 }
+          });
         }
+      }
     });
 
     pptx.writeFile({ fileName: `${result.title}.pptx` });
@@ -422,3 +415,5 @@ function PresentationSkeleton() {
         </Card>
     )
 }
+
+    
