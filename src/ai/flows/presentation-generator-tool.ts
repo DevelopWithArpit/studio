@@ -42,18 +42,18 @@ const outlinePrompt = ai.definePrompt({
     name: 'generatePresentationOutlinePrompt',
     input: { schema: GeneratePresentationInputSchema },
     output: { schema: PresentationOutlineSchema },
-    prompt: `You are an expert presentation creator. Your task is to generate a compelling presentation outline based on the user's request.
+    prompt: `You are an expert presentation creator. Your task is to generate a compelling and detailed presentation outline based on the user's request.
 
 For each slide, you must provide:
 1.  A short, engaging title.
-2.  A set of concise bullet points for the content.
+2.  A set of **detailed and comprehensive** bullet points for the content. The content should be thorough and informative.
 3.  A descriptive prompt for an AI image generator to create a relevant visual. The image prompt should be detailed, creative, and aim for a **cinematic, photorealistic, high-contrast, and visually stunning** result. If the user specified an image style, incorporate it into every image prompt. Crucially, the prompt must describe a visual or a concept **without including any text, letters, or numbers** to prevent spelling errors in the final image.
 
 **Presentation Topic/Title:** "{{{topic}}}"
 
 {{#if isCustom}}
 **Instructions for Custom Structure:**
-The user has provided a custom structure. You **must** use these slide titles in the exact order they are given. For each title, generate relevant bullet points and a creative image prompt.
+The user has provided a custom structure. You **must** use these slide titles in the exact order they are given. For each title, generate detailed bullet points and a creative image prompt.
 **Custom Structure:**
 {{{customStructure}}}
 {{/if}}
