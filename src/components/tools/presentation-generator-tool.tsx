@@ -159,7 +159,7 @@ export default function PresentationGeneratorTool() {
         if (isFirst) {
             pptxSlide.addText(slide.title, { 
                 placeholder: "title", 
-                anim: { effect: 'wipe', duration: 1, delay: 0.2, from: 'bottom' } 
+                anim: { effect: 'wipe', type: 'in', duration: 1, delay: 0.2, from: 'bottom' } 
             });
             const subtitle = slide.content.join(' - ') || result.topic;
             pptxSlide.addText(subtitle, { 
@@ -180,12 +180,12 @@ export default function PresentationGeneratorTool() {
                     fontFace: 'Arial',
                     fontSize: 18,
                     color: 'D3D3D3',
+                    anim: { effect: 'fadeIn', by: 'paragraph', duration: 0.5, delay: 0.5 }
                 }
             }));
 
             pptxSlide.addText(bodyTextObjects, {
                 placeholder: 'body',
-                anim: { effect: 'fadeIn', by: 'paragraph', duration: 0.5, delay: 0.5 }
             });
 
             if (slide.imageUrl) {
