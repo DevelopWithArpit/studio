@@ -12,9 +12,10 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 
 const GeneratePresentationInputSchema = z.object({
-  topic: z.string().describe('The topic of the presentation.'),
-  numSlides: z.number().int().min(2).max(10).describe('The number of slides to generate.'),
+  topic: z.string().describe('The topic or title of the presentation.'),
+  numSlides: z.number().int().min(2).max(10).describe('The number of slides to generate (for general topics).'),
   imageStyle: z.string().optional().describe('An optional style for the images (e.g., "photorealistic", "cartoon", "minimalist").'),
+  contentType: z.enum(['general', 'projectProposal']).default('general').describe('The type of content to generate.'),
 });
 export type GeneratePresentationInput = z.infer<typeof GeneratePresentationInputSchema>;
 
@@ -39,16 +40,47 @@ const outlinePrompt = ai.definePrompt({
     name: 'generatePresentationOutlinePrompt',
     input: { schema: GeneratePresentationInputSchema },
     output: { schema: PresentationOutlineSchema },
-    prompt: `You are an expert presentation creator. Generate a compelling presentation outline for the topic: "{{{topic}}}".
-
-The presentation must have exactly {{{numSlides}}} slides, including a title slide and a conclusion slide.
+    prompt: `You are an expert presentation creator. Your task is to generate a compelling presentation outline.
 
 For each slide, provide:
 1.  A short, engaging title.
-2.  3-5 concise bullet points for the content.
-3.  A descriptive prompt for an AI image generator to create a relevant visual. The image prompt should be detailed. If the user specified an image style, incorporate it into the prompt (e.g., "A photorealistic image of...").
+2.  Concise bullet points for the content (3-5 for general topics).
+3.  A descriptive prompt for an AI image generator to create a relevant visual. The image prompt should be detailed. If the user specified an image style, incorporate it into the prompt.
 
-The overall presentation should have a logical flow.`,
+**Topic/Title:** "{{{topic}}}"
+
+{{#if (eq contentType "projectProposal")}}
+**Instructions for Project Proposal:**
+Generate a presentation with exactly 8 slides using the following structure. The user's topic is the project title.
+
+1.  **Introduction:**
+    *   What is the project about?
+    *   Relevance to society/community
+2.  **Objectives:**
+    *   2–3 main goals of the project
+3.  **Problem Statement / Need Analysis:**
+    *   Issue identified in the community/field
+    *   Why this issue is important
+4.  **Target Group / Area:**
+    *   Who will benefit?
+    *   Where will the project be conducted?
+5.  **Proposed Activities:**
+    *   Planned actions (survey, awareness program, teaching, cleanliness drive, etc.)
+    *   Tools or resources needed
+6.  **Methodology:**
+    *   How the project will be implemented
+    *   Steps or timeline
+7.  **Expected Outcomes:**
+    *   What you aim to achieve
+    *   Impact on community
+8.  **Conclusion:**
+    *   Summary of your plan
+    *   Commitment to execute
+{{else}}
+**Instructions for General Topic:**
+The presentation must have exactly {{{numSlides}}} slides, including a title slide and a conclusion slide. The overall presentation should have a logical flow.
+{{/if}}
+`,
 });
 
 

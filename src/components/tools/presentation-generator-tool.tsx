@@ -37,11 +37,14 @@ import {
 } from '@/components/ui/carousel';
 import { Badge } from '@/components/ui/badge';
 import { Download, ImageIcon } from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
+import { cn } from '@/lib/utils';
 
 const formSchema = z.object({
   topic: z.string().min(3, 'Please enter a topic with at least 3 characters.'),
   numSlides: z.number().int().min(2, "Must be at least 2 slides.").max(10, "Cannot exceed 10 slides."),
   imageStyle: z.string().optional(),
+  contentType: z.enum(['general', 'projectProposal']).default('general'),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -57,13 +60,22 @@ export default function PresentationGeneratorTool() {
       topic: '',
       numSlides: 5,
       imageStyle: 'photorealistic',
+      contentType: 'general',
     },
   });
+
+  const contentType = form.watch('contentType');
 
   async function onSubmit(data: FormData) {
     setIsLoading(true);
     setResult(null);
-    const response = await handleGeneratePresentationAction(data);
+
+    const submissionData = {
+        ...data,
+        numSlides: data.contentType === 'projectProposal' ? 8 : data.numSlides,
+    };
+
+    const response = await handleGeneratePresentationAction(submissionData);
     setIsLoading(false);
 
     if (response.success) {
@@ -144,13 +156,40 @@ export default function PresentationGeneratorTool() {
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+               <FormField
+                  control={form.control}
+                  name="contentType"
+                  render={({ field }) => (
+                    <FormItem className="space-y-3">
+                      <FormLabel>Content Type</FormLabel>
+                      <FormControl>
+                        <RadioGroup
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          className="flex flex-col space-y-1"
+                        >
+                          <FormItem className="flex items-center space-x-3 space-y-0">
+                            <FormControl><RadioGroupItem value="general" /></FormControl>
+                            <FormLabel className="font-normal">General Topic</FormLabel>
+                          </FormItem>
+                          <FormItem className="flex items-center space-x-3 space-y-0">
+                            <FormControl><RadioGroupItem value="projectProposal" /></FormControl>
+                            <FormLabel className="font-normal">Project Proposal</FormLabel>
+                          </FormItem>
+                        </RadioGroup>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
               <FormField
                 control={form.control}
                 name="topic"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Presentation Topic</FormLabel>
+                    <FormLabel>Presentation Topic or Project Title</FormLabel>
                     <FormControl>
                       <Input placeholder="e.g., The Future of Renewable Energy" {...field} />
                     </FormControl>
@@ -163,11 +202,12 @@ export default function PresentationGeneratorTool() {
                   control={form.control}
                   name="numSlides"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className={cn("transition-opacity", contentType === 'projectProposal' && "opacity-50")}>
                       <FormLabel>Number of Slides</FormLabel>
                       <FormControl>
-                        <Input type="number" min="2" max="10" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10))}/>
+                        <Input type="number" min="2" max="10" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10))} disabled={contentType === 'projectProposal'}/>
                       </FormControl>
+                       {contentType === 'projectProposal' && <p className="text-xs text-muted-foreground">Fixed at 8 slides for project proposals.</p>}
                       <FormMessage />
                     </FormItem>
                   )}
