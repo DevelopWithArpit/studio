@@ -99,24 +99,28 @@ const generatePresentationFlow = ai.defineFlow(
       throw new Error('Failed to generate presentation outline.');
     }
 
-    // 2. Generate an image for each slide in parallel
-    const imagePromises = outline.slides.map(async (slide) => {
-        let fullImagePrompt = slide.imagePrompt;
-        if (input.imageStyle) {
-            fullImagePrompt = `${slide.imagePrompt}, in a ${input.imageStyle} style.`
-        }
+    // 2. Generate an image for each slide sequentially to avoid rate limiting.
+    const imageUrls: string[] = [];
+    for (const slide of outline.slides) {
+      let fullImagePrompt = slide.imagePrompt;
+      if (input.imageStyle) {
+        fullImagePrompt = `${slide.imagePrompt}, in a ${input.imageStyle} style.`;
+      }
 
+      try {
         const { media } = await ai.generate({
-            model: 'googleai/gemini-2.0-flash-preview-image-generation',
-            prompt: fullImagePrompt,
-            config: {
-                responseModalities: ['TEXT', 'IMAGE'],
-            },
+          model: 'googleai/gemini-2.0-flash-preview-image-generation',
+          prompt: fullImagePrompt,
+          config: {
+            responseModalities: ['TEXT', 'IMAGE'],
+          },
         });
-        return media?.url || ''; // Return empty string if generation fails
-    });
-
-    const imageUrls = await Promise.all(imagePromises);
+        imageUrls.push(media?.url || '');
+      } catch (error) {
+        console.error(`Failed to generate image for slide: "${slide.title}". Pushing empty URL.`, error);
+        imageUrls.push(''); // Push empty string if an individual image fails
+      }
+    }
 
     // 3. Combine the outline with the generated image URLs
     const finalPresentation = {
