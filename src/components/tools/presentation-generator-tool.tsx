@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -205,7 +206,10 @@ export default function PresentationGeneratorTool() {
                     <FormItem className={cn("transition-opacity", contentType === 'projectProposal' && "opacity-50")}>
                       <FormLabel>Number of Slides</FormLabel>
                       <FormControl>
-                        <Input type="number" min="2" max="10" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10))} disabled={contentType === 'projectProposal'}/>
+                        <Input type="number" min="2" max="10" {...field} onChange={e => {
+                            const value = e.target.value;
+                            field.onChange(value === '' ? '' : parseInt(value, 10));
+                        }} disabled={contentType === 'projectProposal'}/>
                       </FormControl>
                        {contentType === 'projectProposal' && <p className="text-xs text-muted-foreground">Fixed at 8 slides for project proposals.</p>}
                       <FormMessage />

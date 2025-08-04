@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -118,7 +119,10 @@ export default function InterviewQuestionGeneratorTool() {
                     <FormItem>
                       <FormLabel>Number of Questions</FormLabel>
                       <FormControl>
-                        <Input type="number" min="1" max="20" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10))}/>
+                        <Input type="number" min="1" max="20" {...field} onChange={e => {
+                            const value = e.target.value;
+                            field.onChange(value === '' ? '' : parseInt(value, 10));
+                        }}/>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
