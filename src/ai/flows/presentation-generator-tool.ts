@@ -14,7 +14,7 @@ import { z } from 'zod';
 
 const GeneratePresentationInputSchema = z.object({
   topic: z.string().describe('The topic or title of the presentation.'),
-  numSlides: z.number().int().min(2).max(10).describe('The number of slides to generate (for general topics).'),
+  numSlides: z.number().int().min(2).max(20).describe('The number of slides to generate (for general topics).'),
   imageStyle: z.string().optional().describe('An optional style for the images (e.g., "photorealistic", "cartoon", "minimalist").'),
   contentType: z.enum(['general', 'projectProposal', 'custom']).default('general').describe('The type of content to generate.'),
   customStructure: z.string().optional().describe("A user-defined structure for the presentation, as a string of slide titles."),
@@ -51,13 +51,13 @@ For each slide, you must provide:
 
 **Presentation Topic/Title:** "{{{topic}}}"
 
-{{#if (eq contentType "custom")}}
+{{#if customStructure}}
 **Instructions for Custom Structure:**
 The user has provided a custom structure. You **must** use these slide titles in the exact order they are given. For each title, generate relevant bullet points and a creative image prompt.
 **Custom Structure:**
 {{{customStructure}}}
-
-{{else if (eq contentType "projectProposal")}}
+{{else}}
+    {{#if (eq contentType "projectProposal")}}
 **Instructions for Project Proposal:**
 Generate a presentation with exactly 8 slides using the following structure. The user's topic is the project title.
 1.  **Introduction:** What is the project about? Relevance to society/community.
@@ -68,10 +68,10 @@ Generate a presentation with exactly 8 slides using the following structure. The
 6.  **Methodology:** How the project will be implemented; Steps or timeline.
 7.  **Expected Outcomes:** What you aim to achieve; Impact on community.
 8.  **Conclusion:** Summary of your plan; Commitment to execute.
-
-{{else}}
+    {{else}}
 **Instructions for General Topic:**
 Generate a presentation with a logical flow. The presentation must have exactly {{{numSlides}}} slides, including a title slide and a conclusion slide.
+    {{/if}}
 {{/if}}
 `,
 });

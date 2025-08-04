@@ -45,7 +45,7 @@ import { Textarea } from '../ui/textarea';
 
 const formSchema = z.object({
   topic: z.string().min(3, 'Please enter a topic with at least 3 characters.'),
-  numSlides: z.number().int().min(2, "Must be at least 2 slides.").max(10, "Cannot exceed 10 slides."),
+  numSlides: z.number().int().min(2, "Must be at least 2 slides.").max(20, "Cannot exceed 20 slides."),
   imageStyle: z.string().optional(),
   contentType: z.enum(['general', 'projectProposal', 'custom']).default('general'),
   customStructure: z.string().optional(),
