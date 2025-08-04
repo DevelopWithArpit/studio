@@ -51,13 +51,14 @@ For each slide, you must provide:
 
 **Presentation Topic/Title:** "{{{topic}}}"
 
-{{#if customStructure}}
+{{#if isCustom}}
 **Instructions for Custom Structure:**
 The user has provided a custom structure. You **must** use these slide titles in the exact order they are given. For each title, generate relevant bullet points and a creative image prompt.
 **Custom Structure:**
 {{{customStructure}}}
-{{else}}
-  {{#if (eq contentType "projectProposal")}}
+{{/if}}
+
+{{#if isProjectProposal}}
 **Instructions for Project Proposal:**
 Generate a presentation with exactly 8 slides using the following structure. The user's topic is the project title.
 1.  **Introduction:** What is the project about? Relevance to society/community.
@@ -68,10 +69,11 @@ Generate a presentation with exactly 8 slides using the following structure. The
 6.  **Methodology:** How the project will be implemented; Steps or timeline.
 7.  **Expected Outcomes:** What you aim to achieve; Impact on community.
 8.  **Conclusion:** Summary of your plan; Commitment to execute.
-  {{else}}
+{{/if}}
+
+{{#if isGeneral}}
 **Instructions for General Topic:**
 Generate a presentation with a logical flow. The presentation must have exactly {{{numSlides}}} slides, including a title slide and a conclusion slide.
-  {{/if}}
 {{/if}}
 `,
 });
@@ -85,7 +87,14 @@ const generatePresentationFlow = ai.defineFlow(
   },
   async (input) => {
     // 1. Generate the text outline first
-    const { output: outline } = await outlinePrompt(input);
+    const promptInput = {
+        ...input,
+        isGeneral: input.contentType === 'general',
+        isProjectProposal: input.contentType === 'projectProposal',
+        isCustom: input.contentType === 'custom',
+    };
+
+    const { output: outline } = await outlinePrompt(promptInput);
     if (!outline) {
       throw new Error('Failed to generate presentation outline.');
     }
