@@ -18,6 +18,7 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -243,7 +244,10 @@ export default function PresentationGeneratorTool() {
                     <FormItem className={cn("transition-opacity", (contentType === 'projectProposal' || contentType === 'custom') && "opacity-50")}>
                       <FormLabel>Number of Slides</FormLabel>
                       <FormControl>
-                        <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || '')} disabled={contentType === 'projectProposal' || contentType === 'custom'}/>
+                        <Input type="number" {...field} onChange={e => {
+                            const value = e.target.value;
+                            field.onChange(value === '' ? '' : parseInt(value, 10));
+                        }} disabled={contentType === 'projectProposal' || contentType === 'custom'}/>
                       </FormControl>
                        {contentType === 'projectProposal' && <p className="text-xs text-muted-foreground">Fixed at 8 slides for project proposals.</p>}
                        {contentType === 'custom' && <p className="text-xs text-muted-foreground">Determined by your custom structure.</p>}
