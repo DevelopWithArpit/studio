@@ -110,13 +110,13 @@ export default function PresentationGeneratorTool() {
       objects: [
         {
             placeholder: {
-                options: { name: "title", type: "title", x: 0.5, y: 2.5, w: 9, h: 1.5, fontFace: 'Arial', fontSize: 44, bold: true, color: 'FFFFFF', align: 'center', valign: 'middle' },
+                options: { name: "title", type: "title", x: 0.5, y: 2.0, w: 9, h: 1.5, fontFace: 'Arial', fontSize: 44, bold: true, color: 'FFFFFF', align: 'center', valign: 'middle' },
                 text: "Default Title",
             }
         },
         {
             placeholder: {
-                options: { name: "subtitle", type: "body", x: 1.0, y: 4.2, w: 8, h: 1.5, fontFace: 'Arial', fontSize: 20, color: 'A9A9A9', align: 'center', valign: 'middle' },
+                options: { name: "subtitle", type: "body", x: 1.0, y: 3.8, w: 8, h: 2, fontFace: 'Arial', fontSize: 20, color: 'A9A9A9', align: 'center', valign: 'middle' },
                 text: "Default Subtitle",
             }
         },
