@@ -153,10 +153,13 @@ export default function PresentationGeneratorTool() {
         const masterName = isFirst ? "TITLE_SLIDE" : "CONTENT_SLIDE";
         const pptxSlide = pptx.addSlide({ masterName });
 
+        // Add a subtle fade transition to all slides
+        pptxSlide.transition = { type: "fade", duration: 1 };
+
         if (isFirst) {
             pptxSlide.addText(slide.title, { 
                 placeholder: "title", 
-                anim: { effect: 'fadeIn', duration: 1, delay: 0.2 } 
+                anim: { effect: 'wipe', duration: 1, delay: 0.2, from: 'bottom' } 
             });
             const subtitle = slide.content.join(' - ') || result.topic;
             pptxSlide.addText(subtitle, { 
@@ -182,7 +185,7 @@ export default function PresentationGeneratorTool() {
 
             pptxSlide.addText(bodyTextObjects, {
                 placeholder: 'body',
-                anim: { effect: 'fadeIn', by: 'paragraph', duration: 0.5, delay: 0.5, sequence: 'simultaneously' }
+                anim: { effect: 'fadeIn', by: 'paragraph', duration: 0.5, delay: 0.5 }
             });
 
             if (slide.imageUrl) {
