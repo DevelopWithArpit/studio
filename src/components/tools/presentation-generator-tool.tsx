@@ -108,15 +108,15 @@ export default function PresentationGeneratorTool() {
       title: "TITLE_SLIDE",
       background: { color: "1A1A1A" }, // Dark background
       objects: [
-        { 
+        {
             placeholder: {
                 options: { name: "title", type: "title", x: 0.5, y: 2.5, w: 9, h: 1.5, fontFace: 'Arial', fontSize: 44, bold: true, color: 'FFFFFF', align: 'center', valign: 'middle' },
                 text: "Default Title",
             }
         },
-        { 
+        {
             placeholder: {
-                options: { name: "subtitle", type: "body", x: 1.0, y: 4.0, w: 8, h: 1, fontFace: 'Arial', fontSize: 20, color: 'A9A9A9', align: 'center', valign: 'middle' },
+                options: { name: "subtitle", type: "body", x: 1.0, y: 4.2, w: 8, h: 1.5, fontFace: 'Arial', fontSize: 20, color: 'A9A9A9', align: 'center', valign: 'middle' },
                 text: "Default Subtitle",
             }
         },
@@ -128,15 +128,15 @@ export default function PresentationGeneratorTool() {
       title: "CONTENT_SLIDE",
       background: { color: "1A1A1A" }, // Dark background
       objects: [
-        { 
+        {
             placeholder: {
                 options: { name: "title", type: "title", x: 0.5, y: 0.2, w: 9, h: 0.8, fontFace: 'Arial', fontSize: 32, bold: true, color: 'FFFFFF', align: 'left', valign: 'middle' },
                 text: "Default Title",
             },
         },
-        { 
+        {
             placeholder: {
-                options: { name: "body", type: "body", x: 0.5, y: 1.2, w: 5.5, h: 4.5, fontFace: 'Arial', fontSize: 18, color: 'D3D3D3' },
+                options: { name: "body", type: "body", x: 0.5, y: 1.2, w: 5.5, h: 4.5, fontFace: 'Arial', fontSize: 18, color: 'D3D3D3', paraSpaceAfter: 15 },
                 text: "Default Body Text",
             },
         },
@@ -156,29 +156,29 @@ export default function PresentationGeneratorTool() {
       pptxSlide.transition = { type: "fade", duration: 1 };
       
       if (isFirstSlide) {
-        pptxSlide.addText(slide.title, { 
+        pptxSlide.addText(slide.title, {
           placeholder: "title",
           anim: { effect: "wipe", type: "in", duration: 1, delay: 0.2, from: "bottom" }
         });
-        const subtitle = slide.content.join(' - ') || result.topic;
+        const subtitle = slide.content.join('\n') || result.topic;
         pptxSlide.addText(subtitle, {
           placeholder: "subtitle",
           anim: { effect: "fadeIn", duration: 1, delay: 0.5 }
         });
       } else {
-         pptxSlide.addText(slide.title, { 
+         pptxSlide.addText(slide.title, {
            placeholder: "title",
            anim: { effect: "fadeIn", duration: 0.5, delay: 0.2 }
          });
 
         const bodyTextObjects = slide.content.map(point => ({
           text: point,
-          options: { bullet: true, paraSpaceAfter: 10 }
+          options: { bullet: true, paraSpaceAfter: 10, breakLine: true }
         }));
 
         pptxSlide.addText(bodyTextObjects, {
           placeholder: 'body',
-          anim: { effect: "fadeIn", by: "paragraph", duration: 0.5, delay: 0.5, stagger: 200 }
+          anim: { effect: "fly", type: 'in', by: "paragraph", duration: 0.5, delay: 0.5, stagger: 200 }
         });
         
         if (slide.imageUrl) {
