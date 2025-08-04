@@ -46,8 +46,8 @@ const outlinePrompt = ai.definePrompt({
 
 For each slide, you must provide:
 1.  A short, engaging title.
-2.  A set of **detailed and comprehensive** bullet points for the content. The content should be thorough and informative.
-3.  A descriptive prompt for an AI image generator. This is a critical step. The image prompt **must be directly inspired by the bullet points you just wrote for the slide**, creating a highly relevant visual. The image prompt should be detailed, creative, and aim for a **cinematic, photorealistic, high-contrast, and visually stunning** result. If the user specified an image style, incorporate it into every image prompt. Crucially, the prompt must describe a visual or a concept **without including any text, letters, or numbers** to prevent spelling errors in the final image.
+2.  A set of **detailed and comprehensive** bullet points for the content. The content must be thorough and informative.
+3.  A descriptive prompt for an AI image generator. This is the most critical step. The image prompt **MUST BE a direct visual representation of the bullet points you just wrote for the slide**, creating a highly relevant visual. The image prompt should be detailed and creative, aiming for a cinematic and visually stunning result, and it must not include any text, letters, or numbers. If the user specified an image style, incorporate it into every image prompt.
 
 **Presentation Topic/Title:** "{{{topic}}}"
 
