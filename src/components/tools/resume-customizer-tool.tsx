@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -94,7 +95,7 @@ export default function ResumeCustomizerTool() {
       setResumeData(response.data.rewrittenResume);
       toast({ title: 'Resume Parsed', description: 'Your resume data has been extracted successfully.' });
       // Trigger generation with default values
-      form.handleSubmit(onSubmit)();
+      await onSubmit(form.getValues());
     } else {
       toast({ variant: 'destructive', title: 'Parsing Failed', description: response.error || 'Could not extract data from the resume.' });
     }
@@ -171,7 +172,7 @@ export default function ResumeCustomizerTool() {
         <div className="lg:col-span-1 space-y-8">
             <Card>
                 <CardHeader>
-                <CardTitle>Upload Resume</CardTitle>
+                <CardTitle>1. Upload Resume</CardTitle>
                 <CardDescription>Start by uploading your resume document.</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -206,10 +207,11 @@ export default function ResumeCustomizerTool() {
             </Card>
 
             <Form {...form}>
-                <form onChange={form.handleSubmit(onSubmit)} className="space-y-8">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                     <Card>
                         <CardHeader>
-                            <CardTitle>Customize</CardTitle>
+                            <CardTitle>2. Customize</CardTitle>
+                            <CardDescription>Adjust the template and color to fit your style.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
                             <FormField
@@ -259,6 +261,12 @@ export default function ResumeCustomizerTool() {
                                 )}
                             />
                         </CardContent>
+                        <CardFooter>
+                            <Button type="submit" disabled={!resumeData || isGenerating || isParsing}>
+                                {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                                Generate
+                            </Button>
+                        </CardFooter>
                     </Card>
                 </form>
             </Form>
@@ -267,7 +275,7 @@ export default function ResumeCustomizerTool() {
         <div className="lg:col-span-2">
             <Card className="sticky top-4">
                 <CardHeader>
-                    <CardTitle>Preview</CardTitle>
+                    <CardTitle>3. Preview</CardTitle>
                 </CardHeader>
                 <CardContent className="min-h-[700px]">
                      {(isGenerating || isParsing) ? (
@@ -289,7 +297,7 @@ export default function ResumeCustomizerTool() {
                     )}
                 </CardContent>
                 <CardFooter>
-                    <Button onClick={handleDownloadPdf} disabled={!generatedHtml || isDownloading || isGenerating}>
+                    <Button onClick={handleDownloadPdf} disabled={!generatedHtml || isDownloading || isGenerating || isParsing}>
                         <Download className="mr-2 h-4 w-4" />
                         {isDownloading ? 'Downloading...' : 'Download as PDF'}
                     </Button>
