@@ -28,7 +28,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { handleGeneratePresentationAction } from '@/app/actions';
+import { handleGeneratePresentationAction, handleGenerateImageAction } from '@/app/actions';
 import type { GeneratePresentationOutput } from '@/ai/flows/presentation-generator-tool';
 import {
   Carousel,
@@ -60,10 +60,11 @@ const formSchema = z.object({
 });
 
 type FormData = z.infer<typeof formSchema>;
+type PresentationWithImages = GeneratePresentationOutput;
 
 export default function PresentationGeneratorTool() {
   const [isLoading, setIsLoading] = useState(false);
-  const [result, setResult] = useState<GeneratePresentationOutput | null>(null);
+  const [result, setResult] = useState<PresentationWithImages | null>(null);
   const { toast } = useToast();
 
   const form = useForm<FormData>({
@@ -83,18 +84,48 @@ export default function PresentationGeneratorTool() {
     setIsLoading(true);
     setResult(null);
 
-    const response = await handleGeneratePresentationAction(data);
-    setIsLoading(false);
+    // 1. Generate the text outline first
+    const outlineResponse = await handleGeneratePresentationAction(data);
 
-    if (response.success) {
-      setResult(response.data);
-    } else {
-      toast({
-        variant: 'destructive',
-        title: 'Error generating presentation',
-        description: response.error,
-      });
+    if (!outlineResponse.success || !outlineResponse.data) {
+        toast({
+            variant: 'destructive',
+            title: 'Error generating presentation outline',
+            description: outlineResponse.error,
+        });
+        setIsLoading(false);
+        return;
     }
+
+    const outline = outlineResponse.data;
+    setResult(outline); // Show the text content immediately
+
+    // 2. Generate images sequentially on the client
+    const slidesWithImages = [...outline.slides];
+    for (let i = 0; i < slidesWithImages.length; i++) {
+        let fullImagePrompt = slidesWithImages[i].imagePrompt;
+        if (data.imageStyle) {
+            fullImagePrompt = `${slidesWithImages[i].imagePrompt}, in a ${data.imageStyle} style.`;
+        }
+
+        try {
+            const imageResponse = await handleGenerateImageAction({ prompt: fullImagePrompt });
+            if (imageResponse.success && imageResponse.data) {
+                slidesWithImages[i].imageUrl = imageResponse.data.imageUrl;
+            } else {
+                slidesWithImages[i].imageUrl = ''; // Mark as failed
+                toast({ variant: "destructive", title: `Failed to generate image for slide ${i+1}`});
+            }
+        } catch (error) {
+            slidesWithImages[i].imageUrl = ''; // Mark as failed
+            toast({ variant: "destructive", title: `An error occurred for slide ${i+1}`});
+        }
+        
+        // Update state to show the new image as it comes in
+        setResult(prev => prev ? ({ ...prev, slides: [...slidesWithImages] }) : null);
+    }
+    
+    setIsLoading(false);
   }
 
  const handleDownload = () => {
@@ -106,17 +137,17 @@ export default function PresentationGeneratorTool() {
     // Master Slide: Title
     pptx.defineSlideMaster({
       title: "TITLE_SLIDE",
-      background: { color: "1A1A1A" }, // Dark background
+      background: { color: "1A1A1A" },
       objects: [
         {
             placeholder: {
-                options: { name: "title", type: "title", x: 0.5, y: 2.0, w: 9, h: 1.5, fontFace: 'Arial', fontSize: 44, bold: true, color: 'FFFFFF', align: 'center', valign: 'middle' },
+                options: { name: "title", type: "title", x: 0.5, y: 2.5, w: 9, h: 1.5, fontFace: 'Arial', fontSize: 44, bold: true, color: 'FFFFFF', align: 'center', valign: 'middle' },
                 text: "Default Title",
             }
         },
         {
             placeholder: {
-                options: { name: "subtitle", type: "body", x: 1.0, y: 3.8, w: 8, h: 2, fontFace: 'Arial', fontSize: 20, color: 'A9A9A9', align: 'center', valign: 'middle' },
+                options: { name: "subtitle", type: "body", x: 1.0, y: 4.0, w: 8, h: 1, fontFace: 'Arial', fontSize: 20, color: 'A9A9A9', align: 'center', valign: 'top' },
                 text: "Default Subtitle",
             }
         },
@@ -126,7 +157,7 @@ export default function PresentationGeneratorTool() {
     // Master Slide: Content
     pptx.defineSlideMaster({
       title: "CONTENT_SLIDE",
-      background: { color: "1A1A1A" }, // Dark background
+      background: { color: "1A1A1A" },
       objects: [
         {
             placeholder: {
@@ -136,7 +167,7 @@ export default function PresentationGeneratorTool() {
         },
         {
             placeholder: {
-                options: { name: "body", type: "body", x: 0.5, y: 1.2, w: 5.5, h: 4.5, fontFace: 'Arial', fontSize: 18, color: 'D3D3D3', paraSpaceAfter: 15 },
+                options: { name: "body", type: "body", x: 0.5, y: 1.2, w: 5.5, h: 4.5, fontFace: 'Arial', fontSize: 18, color: 'D3D3D3', paraSpaceAfter: 15, isTextBox: true },
                 text: "Default Body Text",
             },
         },
@@ -160,7 +191,7 @@ export default function PresentationGeneratorTool() {
           placeholder: "title",
           anim: { effect: "wipe", type: "in", duration: 1, delay: 0.2, from: "bottom" }
         });
-        const subtitle = slide.content.join('\n') || result.topic;
+        const subtitle = slide.content.join('\\n') || result.topic;
         pptxSlide.addText(subtitle, {
           placeholder: "subtitle",
           anim: { effect: "fadeIn", duration: 1, delay: 0.5 }
@@ -176,10 +207,12 @@ export default function PresentationGeneratorTool() {
           options: { bullet: true, paraSpaceAfter: 10, breakLine: true }
         }));
 
-        pptxSlide.addText(bodyTextObjects, {
-          placeholder: 'body',
-          anim: { effect: "fly", type: 'in', by: "paragraph", duration: 0.5, delay: 0.5, stagger: 200 }
-        });
+        if (bodyTextObjects.length > 0) {
+            pptxSlide.addText(bodyTextObjects, {
+                placeholder: 'body',
+                anim: { effect: "fly", type: 'in', by: "paragraph", duration: 0.5, delay: 0.5, stagger: 200 }
+            });
+        }
         
         if (slide.imageUrl) {
           pptxSlide.addImage({
@@ -323,13 +356,13 @@ export default function PresentationGeneratorTool() {
         </CardContent>
       </Card>
 
-      {isLoading && <PresentationSkeleton />}
+      {(isLoading || result) && <PresentationSkeleton />}
 
       {result && (
          <Card>
           <CardHeader>
             <CardTitle>{result.title}</CardTitle>
-            <CardDescription>Your generated presentation is ready.</CardDescription>
+            <CardDescription>Your generated presentation is ready. {isLoading && 'Generating images...'}</CardDescription>
           </CardHeader>
           <CardContent>
              <Carousel className="w-full">
@@ -347,7 +380,12 @@ export default function PresentationGeneratorTool() {
                                     </ul>
                                 </div>
                                 <div className="bg-muted flex items-center justify-center overflow-hidden">
-                                     {slide.imageUrl ? (
+                                     {slide.imageUrl === undefined ? (
+                                        <div className="flex flex-col items-center justify-center text-muted-foreground">
+                                            <Loader2 className="w-16 h-16 animate-spin" />
+                                            <p className="mt-2 text-sm">Generating Image...</p>
+                                        </div>
+                                    ) : slide.imageUrl ? (
                                         <Image
                                             src={slide.imageUrl}
                                             alt={slide.title}
@@ -373,7 +411,7 @@ export default function PresentationGeneratorTool() {
             </Carousel>
           </CardContent>
           <CardFooter>
-            <Button onClick={handleDownload}>
+            <Button onClick={handleDownload} disabled={isLoading}>
                 <Download className="mr-2 h-4 w-4"/>
                 Download Presentation
             </Button>

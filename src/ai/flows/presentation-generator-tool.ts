@@ -11,6 +11,8 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
+import {generateImage} from '@/ai/flows/image-generator-tool';
+
 
 const GeneratePresentationInputSchema = z.object({
   topic: z.string().describe('The topic or title of the presentation.'),
@@ -99,38 +101,8 @@ const generatePresentationFlow = ai.defineFlow(
       throw new Error('Failed to generate presentation outline.');
     }
 
-    // 2. Generate an image for each slide sequentially to avoid rate limiting.
-    const imageUrls: string[] = [];
-    for (const slide of outline.slides) {
-      let fullImagePrompt = slide.imagePrompt;
-      if (input.imageStyle) {
-        fullImagePrompt = `${slide.imagePrompt}, in a ${input.imageStyle} style.`;
-      }
-
-      try {
-        const { media } = await ai.generate({
-          model: 'googleai/gemini-2.0-flash-preview-image-generation',
-          prompt: fullImagePrompt,
-          config: {
-            responseModalities: ['TEXT', 'IMAGE'],
-          },
-        });
-        imageUrls.push(media?.url || '');
-      } catch (error) {
-        console.error(`Failed to generate image for slide: "${slide.title}". Pushing empty URL.`, error);
-        imageUrls.push(''); // Push empty string if an individual image fails
-      }
-    }
-
-    // 3. Combine the outline with the generated image URLs
-    const finalPresentation = {
-      ...outline,
-      slides: outline.slides.map((slide, index) => ({
-        ...slide,
-        imageUrl: imageUrls[index],
-      })),
-    };
-
-    return finalPresentation;
+    // This flow now only generates the text and image prompts.
+    // The image generation itself will be handled by the client.
+    return outline;
   }
 );
