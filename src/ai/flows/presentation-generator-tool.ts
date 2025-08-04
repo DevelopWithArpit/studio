@@ -57,7 +57,7 @@ The user has provided a custom structure. You **must** use these slide titles in
 **Custom Structure:**
 {{{customStructure}}}
 {{else}}
-    {{#if (eq contentType "projectProposal")}}
+  {{#if (eq contentType "projectProposal")}}
 **Instructions for Project Proposal:**
 Generate a presentation with exactly 8 slides using the following structure. The user's topic is the project title.
 1.  **Introduction:** What is the project about? Relevance to society/community.
@@ -68,10 +68,10 @@ Generate a presentation with exactly 8 slides using the following structure. The
 6.  **Methodology:** How the project will be implemented; Steps or timeline.
 7.  **Expected Outcomes:** What you aim to achieve; Impact on community.
 8.  **Conclusion:** Summary of your plan; Commitment to execute.
-    {{else}}
+  {{else}}
 **Instructions for General Topic:**
 Generate a presentation with a logical flow. The presentation must have exactly {{{numSlides}}} slides, including a title slide and a conclusion slide.
-    {{/if}}
+  {{/if}}
 {{/if}}
 `,
 });
