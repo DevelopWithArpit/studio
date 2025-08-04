@@ -124,6 +124,14 @@ export default function PresentationGeneratorTool() {
                     },
                     text: "Default Title",
                 }
+            },
+            {
+                placeholder: {
+                    options: { name: "body", type: "body", x: 0.5, y: 4.0, w: '90%', h: 2, 
+                               fontFace: 'Arial', fontSize: 20, color: '383838', align: 'center',
+                            },
+                    text: "Default content",
+                },
             }
         ],
     });
@@ -163,58 +171,53 @@ export default function PresentationGeneratorTool() {
     });
 
 
-    // Create Title Slide
-    const titleSlide = pptx.addSlide({ masterName: "TITLE_SLIDE" });
-    titleSlide.addText(result.title, { 
-        placeholder: "title",
-        entrance: { effect: 'fade' }
-    });
+    result.slides.forEach((slide, index) => {
+        const isFirst = index === 0;
+        const isLast = index === result.slides.length - 1;
 
-    // Create Content Slides
-    result.slides.slice(1, result.slides.length -1).forEach((slide) => {
-      const pptxSlide = pptx.addSlide({ masterName: "CONTENT_SLIDE" });
+        if (isFirst || isLast) {
+            const pptxSlide = pptx.addSlide({ masterName: "TITLE_SLIDE" });
+            pptxSlide.addText(slide.title, { 
+                placeholder: "title",
+                entrance: { effect: 'fade' }
+            });
+            const bodyText = slide.content.map(p => p.text || p).join('\n');
+            if (bodyText) {
+                 pptxSlide.addText(bodyText, { placeholder: "body" });
+            }
+        } else {
+             const pptxSlide = pptx.addSlide({ masterName: "CONTENT_SLIDE" });
       
-      pptxSlide.addText(slide.title, { placeholder: "title" });
+            pptxSlide.addText(slide.title, { placeholder: "title" });
 
-      const bodyTextObjects = slide.content.map(point => ({
-        text: point,
-        options: {
-            bullet: true,
-            paraSpaceAfter: 10,
-            anim: {
-                effect: 'slide',
-                type: 'in',
-                direction: 'l',
-                by: 'paragraph'
+            const bodyTextObjects = slide.content.map(point => ({
+                text: point,
+                options: {
+                    bullet: true,
+                    paraSpaceAfter: 10,
+                    anim: {
+                        effect: 'slide',
+                        type: 'in',
+                        direction: 'l',
+                        by: 'paragraph'
+                    }
+                }
+            }));
+
+            if (slide.imageUrl) {
+                pptxSlide.addImage({
+                    data: slide.imageUrl,
+                    placeholder: "image",
+                });
+                pptxSlide.addText(bodyTextObjects, { placeholder: "body" });
+            } else {
+                pptxSlide.addText(bodyTextObjects, {
+                    x: 0.5, y: 1.2, w: '90%', h: 4,
+                    fontFace: 'Arial', fontSize: 18, color: '383838'
+                });
             }
         }
-      }));
-
-      if (slide.imageUrl) {
-          pptxSlide.addImage({
-              data: slide.imageUrl,
-              placeholder: "image",
-          });
-          pptxSlide.addText(bodyTextObjects, { placeholder: "body" });
-      } else {
-        // If no image, use full width for the body
-         pptxSlide.addText(bodyTextObjects, {
-            x: 0.5, y: 1.2, w: '90%', h: 4,
-            fontFace: 'Arial', fontSize: 18, color: '383838'
-        });
-      }
-
     });
-
-    // Create Final Slide
-    const lastSlide = pptx.addSlide({ masterName: "TITLE_SLIDE" });
-    const lastSlideData = result.slides[result.slides.length - 1];
-    if (lastSlideData) {
-        lastSlide.addText(lastSlideData.title, {
-            placeholder: "title",
-            entrance: { effect: 'fade' }
-        });
-    }
 
     pptx.writeFile({ fileName: `${result.title}.pptx` });
     toast({ title: 'Download Started', description: `Your presentation "${result.title}.pptx" is downloading.`});
@@ -439,5 +442,3 @@ function PresentationSkeleton() {
         </Card>
     )
 }
-
-    
