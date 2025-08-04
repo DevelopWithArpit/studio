@@ -38,7 +38,7 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel';
 import { Badge } from '@/components/ui/badge';
-import { Download, ImageIcon } from 'lucide-react';
+import { Download, ImageIcon, Loader2 } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { cn } from '@/lib/utils';
 import { Textarea } from '../ui/textarea';
@@ -85,7 +85,9 @@ export default function PresentationGeneratorTool() {
 
     const submissionData = {
         ...data,
-        numSlides: data.contentType === 'projectProposal' ? 8 : data.numSlides,
+        isGeneral: data.contentType === 'general',
+        isProjectProposal: data.contentType === 'projectProposal',
+        isCustom: data.contentType === 'custom',
     };
 
     const response = await handleGeneratePresentationAction(submissionData);
@@ -113,16 +115,14 @@ export default function PresentationGeneratorTool() {
         title: "TITLE_SLIDE",
         background: { color: "F1F1F1" },
         objects: [
-            { rect: { x: 0, y: 5.2, w: '100%', h: 0.5, fill: { color: '0072C6' } } },
+            { rect: { x: 0, y: '90%', w: '100%', h: '10%', fill: { color: '003B64' } } },
+            { rect: { x: 0, y: '90%', w: '15%', h: '10%', fill: { color: '0072C6' } } },
             {
-                text: {
-                    text: result.title,
-                    options: {
-                        x: 0.5, y: 2.5, w: '90%', h: 1, 
+                placeholder: {
+                    options: { name: "title", type: "title", x: 0.5, y: 2.5, w: '90%', h: 1, 
                         fontFace: 'Arial', fontSize: 44, bold: true, color: '003B64', align: 'center',
-                        // Entrance animation for the title
-                        entrance: { effect: 'fade' }
-                    }
+                    },
+                    text: "Default Title",
                 }
             }
         ],
@@ -132,12 +132,12 @@ export default function PresentationGeneratorTool() {
         title: "CONTENT_SLIDE",
         background: { color: "F1F1F1" },
         objects: [
-             { rect: { x: 0, y: 5.4, w: '100%', h: 0.3, fill: { color: '0072C6' } } },
+             { rect: { x: 0, y: '90%', w: '100%', h: '10%', fill: { color: '003B64' } } },
+             { rect: { x: 0, y: '90%', w: '15%', h: '10%', fill: { color: '0072C6' } } },
             {
                 placeholder: {
                     options: { name: "title", type: "title", x: 0.5, y: 0.2, w: '90%', h: 0.8, 
                                fontFace: 'Arial', fontSize: 32, bold: true, color: '003B64',
-                               // Entrance animation for slide titles
                                entrance: { effect: 'slide', direction: 't' }
                             },
                     text: "Default Title",
@@ -147,9 +147,7 @@ export default function PresentationGeneratorTool() {
                 placeholder: {
                     options: {
                         name: "body", type: "body", x: 0.5, y: 1.2, w: 5.5, h: 4, 
-                        fontFace: 'Arial', fontSize: 18, color: '383838', bullet: true,
-                        // Entrance animation for body content
-                        entrance: { effect: 'slide', direction: 'l' }
+                        fontFace: 'Arial', fontSize: 18, color: '383838',
                     },
                     text: "Default content",
                 },
@@ -157,7 +155,6 @@ export default function PresentationGeneratorTool() {
             {
                 placeholder: {
                     options: { name: "image", type: "pic", x: 6.5, y: 1.2, w: 4, h: 3,
-                               // Entrance animation for images
                                entrance: { effect: 'zoom' }
                             },
                 },
@@ -167,7 +164,11 @@ export default function PresentationGeneratorTool() {
 
 
     // Create Title Slide
-    pptx.addSlide({ masterName: "TITLE_SLIDE" });
+    const titleSlide = pptx.addSlide({ masterName: "TITLE_SLIDE" });
+    titleSlide.addText(result.title, { 
+        placeholder: "title",
+        entrance: { effect: 'fade' }
+    });
 
     // Create Content Slides
     result.slides.slice(1, result.slides.length -1).forEach((slide) => {
@@ -175,18 +176,31 @@ export default function PresentationGeneratorTool() {
       
       pptxSlide.addText(slide.title, { placeholder: "title" });
 
+      const bodyTextObjects = slide.content.map(point => ({
+        text: point,
+        options: {
+            bullet: true,
+            paraSpaceAfter: 10,
+            anim: {
+                effect: 'slide',
+                type: 'in',
+                direction: 'l',
+                by: 'paragraph'
+            }
+        }
+      }));
+
       if (slide.imageUrl) {
           pptxSlide.addImage({
               data: slide.imageUrl,
               placeholder: "image",
           });
-           pptxSlide.addText(slide.content.join('\n\n'), { placeholder: "body" });
+          pptxSlide.addText(bodyTextObjects, { placeholder: "body" });
       } else {
         // If no image, use full width for the body
-         pptxSlide.addText(slide.content.join('\n\n'), {
+         pptxSlide.addText(bodyTextObjects, {
             x: 0.5, y: 1.2, w: '90%', h: 4,
-            fontFace: 'Arial', fontSize: 18, color: '383838', bullet: true,
-            entrance: { effect: 'slide', direction: 'l' }
+            fontFace: 'Arial', fontSize: 18, color: '383838'
         });
       }
 
@@ -197,8 +211,8 @@ export default function PresentationGeneratorTool() {
     const lastSlideData = result.slides[result.slides.length - 1];
     if (lastSlideData) {
         lastSlide.addText(lastSlideData.title, {
-            x: 0.5, y: 2.5, w: '90%', h: 1, 
-            fontFace: 'Arial', fontSize: 44, bold: true, color: '003B64', align: 'center'
+            placeholder: "title",
+            entrance: { effect: 'fade' }
         });
     }
 
@@ -326,7 +340,7 @@ export default function PresentationGeneratorTool() {
                 />
               </div>
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? 'Generating...' : 'Generate Presentation'}
+                {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating...</> : 'Generate Presentation'}
               </Button>
             </form>
           </Form>
@@ -425,3 +439,5 @@ function PresentationSkeleton() {
         </Card>
     )
 }
+
+    
