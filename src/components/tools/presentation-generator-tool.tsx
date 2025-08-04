@@ -415,5 +415,3 @@ function PresentationSkeleton() {
         </Card>
     )
 }
-
-    
