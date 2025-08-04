@@ -40,12 +40,22 @@ import { Badge } from '@/components/ui/badge';
 import { Download, ImageIcon } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { cn } from '@/lib/utils';
+import { Textarea } from '../ui/textarea';
 
 const formSchema = z.object({
   topic: z.string().min(3, 'Please enter a topic with at least 3 characters.'),
   numSlides: z.number().int().min(2, "Must be at least 2 slides.").max(10, "Cannot exceed 10 slides."),
   imageStyle: z.string().optional(),
-  contentType: z.enum(['general', 'projectProposal']).default('general'),
+  contentType: z.enum(['general', 'projectProposal', 'custom']).default('general'),
+  customStructure: z.string().optional(),
+}).refine(data => {
+    if (data.contentType === 'custom') {
+        return !!data.customStructure && data.customStructure.length > 10;
+    }
+    return true;
+}, {
+    message: "Please provide a custom structure with at least 10 characters.",
+    path: ['customStructure'],
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -62,6 +72,7 @@ export default function PresentationGeneratorTool() {
       numSlides: 5,
       imageStyle: 'photorealistic',
       contentType: 'general',
+      customStructure: '',
     },
   });
 
@@ -178,6 +189,10 @@ export default function PresentationGeneratorTool() {
                             <FormControl><RadioGroupItem value="projectProposal" /></FormControl>
                             <FormLabel className="font-normal">Project Proposal</FormLabel>
                           </FormItem>
+                          <FormItem className="flex items-center space-x-3 space-y-0">
+                            <FormControl><RadioGroupItem value="custom" /></FormControl>
+                            <FormLabel className="font-normal">Custom Structure</FormLabel>
+                          </FormItem>
                         </RadioGroup>
                       </FormControl>
                       <FormMessage />
@@ -198,20 +213,40 @@ export default function PresentationGeneratorTool() {
                   </FormItem>
                 )}
               />
+
+              {contentType === 'custom' && (
+                <FormField
+                    control={form.control}
+                    name="customStructure"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Custom Structure</FormLabel>
+                        <FormDescription>Enter one slide title per line.</FormDescription>
+                        <FormControl>
+                            <Textarea
+                                placeholder="e.g.,&#10;Slide 1: Introduction to the problem&#10;Slide 2: Our proposed solution&#10;Slide 3: Market Analysis"
+                                {...field}
+                                rows={6}
+                            />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="numSlides"
                   render={({ field }) => (
-                    <FormItem className={cn("transition-opacity", contentType === 'projectProposal' && "opacity-50")}>
+                    <FormItem className={cn("transition-opacity", (contentType === 'projectProposal' || contentType === 'custom') && "opacity-50")}>
                       <FormLabel>Number of Slides</FormLabel>
                       <FormControl>
-                        <Input type="number" min="2" max="10" {...field} onChange={e => {
-                            const value = e.target.value;
-                            field.onChange(value === '' ? '' : parseInt(value, 10));
-                        }} disabled={contentType === 'projectProposal'}/>
+                        <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10) || '')} disabled={contentType === 'projectProposal' || contentType === 'custom'}/>
                       </FormControl>
                        {contentType === 'projectProposal' && <p className="text-xs text-muted-foreground">Fixed at 8 slides for project proposals.</p>}
+                       {contentType === 'custom' && <p className="text-xs text-muted-foreground">Determined by your custom structure.</p>}
                       <FormMessage />
                     </FormItem>
                   )}
