@@ -83,14 +83,7 @@ export default function PresentationGeneratorTool() {
     setIsLoading(true);
     setResult(null);
 
-    const submissionData = {
-        ...data,
-        isGeneral: data.contentType === 'general',
-        isProjectProposal: data.contentType === 'projectProposal',
-        isCustom: data.contentType === 'custom',
-    };
-
-    const response = await handleGeneratePresentationAction(submissionData);
+    const response = await handleGeneratePresentationAction(data);
     setIsLoading(false);
 
     if (response.success) {
@@ -110,90 +103,97 @@ export default function PresentationGeneratorTool() {
     const pptx = new PptxGenJS();
     pptx.layout = 'LAYOUT_WIDE';
 
+    // Master Slide: Title
     pptx.defineSlideMaster({
       title: "TITLE_SLIDE",
-      background: { color: "F1F1F1" },
+      background: { color: "1A1A1A" }, // Dark background
       objects: [
-        { rect: { x: 0, y: '90%', w: '100%', h: '10%', fill: { color: '003B64' } } },
-        { rect: { x: 0, y: '90%', w: '15%', h: '10%', fill: { color: '0072C6' } } },
-        {
-          placeholder: {
-            options: { name: "title", type: "title", x: 0.5, y: 2.5, w: 9, h: 1.5, fontFace: 'Arial', fontSize: 44, bold: true, color: '003B64', align: 'center' },
-            text: "Default Title",
-          }
+        { 
+            placeholder: {
+                options: { name: "title", type: "title", x: 0.5, y: 2.5, w: 9, h: 1.5, fontFace: 'Arial', fontSize: 44, bold: true, color: 'FFFFFF', align: 'center', valign: 'middle' },
+                text: "Default Title",
+            }
         },
-        {
-          placeholder: {
-            options: { name: "body", type: "body", x: 0.5, y: 4.0, w: 9, h: 2, fontFace: 'Arial', fontSize: 20, color: '383838', align: 'center' },
-            text: "Default Body",
-          },
-        }
+        { 
+            placeholder: {
+                options: { name: "subtitle", type: "body", x: 1.0, y: 4.0, w: 8, h: 1, fontFace: 'Arial', fontSize: 20, color: 'A9A9A9', align: 'center', valign: 'middle' },
+                text: "Default Subtitle",
+            }
+        },
       ],
     });
 
+    // Master Slide: Content
     pptx.defineSlideMaster({
       title: "CONTENT_SLIDE",
-      background: { color: "F1F1F1" },
+      background: { color: "1A1A1A" }, // Dark background
       objects: [
-        { rect: { x: 0, y: '90%', w: '100%', h: '10%', fill: { color: '003B64' } } },
-        { rect: { x: 0, y: '90%', w: '15%', h: '10%', fill: { color: '0072C6' } } },
-        {
-          placeholder: {
-            options: { name: "title", type: "title", x: 0.5, y: 0.2, w: 9, h: 0.8, fontFace: 'Arial', fontSize: 32, bold: true, color: '003B64' },
-            text: "Default Title",
-          },
+        { 
+            placeholder: {
+                options: { name: "title", type: "title", x: 0.5, y: 0.2, w: 9, h: 0.8, fontFace: 'Arial', fontSize: 32, bold: true, color: 'FFFFFF', align: 'left', valign: 'middle' },
+                text: "Default Title",
+            },
+        },
+        { 
+            placeholder: {
+                options: { name: "body", type: "body", x: 0.5, y: 1.2, w: 5.5, h: 4.5, fontFace: 'Arial', fontSize: 18, color: 'D3D3D3' },
+                text: "Default Body Text",
+            },
         },
         {
           placeholder: {
-            options: { name: "body", type: "body", x: 0.5, y: 1.2, w: 5, h: 4.5, fontFace: 'Arial', fontSize: 18, color: '383838' },
-            text: "Default Body",
-          },
-        },
-        {
-          placeholder: {
-            options: { name: "image", type: "pic", x: 5.75, y: 1.2, w: 3.75, h: 4.5 },
+            options: { name: "image", type: "pic", x: 6.5, y: 1.2, w: 3, h: 4.5 },
           },
         },
       ],
     });
 
     result.slides.forEach((slide, index) => {
-      const isFirst = index === 0;
-      const pptxSlide = pptx.addSlide({ masterName: isFirst ? "TITLE_SLIDE" : "CONTENT_SLIDE" });
+        const isFirst = index === 0;
+        const masterName = isFirst ? "TITLE_SLIDE" : "CONTENT_SLIDE";
+        const pptxSlide = pptx.addSlide({ masterName });
 
-      if (isFirst) {
-        pptxSlide.addText(slide.title, { placeholder: "title", anim: { effect: 'wipe', direction: 'l' } });
-        const bodyText = slide.content.join('\n');
-        if (bodyText) {
-          pptxSlide.addText(bodyText, { placeholder: "body", anim: { effect: 'fadeIn' } });
+        if (isFirst) {
+            pptxSlide.addText(slide.title, { 
+                placeholder: "title", 
+                anim: { effect: 'fadeIn', duration: 1, delay: 0.2 } 
+            });
+            const subtitle = slide.content.join(' - ') || result.topic;
+            pptxSlide.addText(subtitle, { 
+                placeholder: "subtitle",
+                anim: { effect: 'fadeIn', duration: 1, delay: 0.5 } 
+            });
+        } else {
+            pptxSlide.addText(slide.title, { 
+                placeholder: "title",
+                anim: { effect: 'fadeIn', duration: 0.5, delay: 0.2 } 
+            });
+
+            const bodyTextObjects = slide.content.map(point => ({
+                text: point,
+                options: { 
+                    bullet: true, 
+                    paraSpaceAfter: 10,
+                    fontFace: 'Arial',
+                    fontSize: 18,
+                    color: 'D3D3D3',
+                }
+            }));
+
+            pptxSlide.addText(bodyTextObjects, {
+                placeholder: 'body',
+                anim: { effect: 'fadeIn', by: 'paragraph', duration: 0.5, delay: 0.5, sequence: 'simultaneously' }
+            });
+
+            if (slide.imageUrl) {
+                pptxSlide.addImage({
+                    data: slide.imageUrl,
+                    placeholder: "image",
+                    sizing: { type: 'cover', w: 3, h: 4.5 },
+                    anim: { effect: 'zoom', type: 'in', duration: 1, delay: 0.3 }
+                });
+            }
         }
-      } else {
-        pptxSlide.addText(slide.title, { placeholder: "title", anim: { effect: 'wipe', direction: 'l' } });
-
-        const bodyTextObjects = slide.content.map(point => ({
-          text: point,
-          options: {
-            bullet: { type: 'number', style: 'romanLcPeriod' },
-            paraSpaceAfter: 10,
-            fontFace: 'Arial',
-            fontSize: 18,
-            color: '383838',
-          }
-        }));
-
-        pptxSlide.addText(bodyTextObjects, {
-          placeholder: 'body',
-          anim: { effect: 'fly', direction: 'l', by: 'paragraph' }
-        });
-
-        if (slide.imageUrl) {
-          pptxSlide.addImage({
-            data: slide.imageUrl,
-            placeholder: "image",
-            anim: { effect: 'zoom', type: 'in' }
-          });
-        }
-      }
     });
 
     pptx.writeFile({ fileName: `${result.title}.pptx` });
@@ -294,9 +294,9 @@ export default function PresentationGeneratorTool() {
                     <FormItem className={cn("transition-opacity", (contentType === 'projectProposal' || contentType === 'custom') && "opacity-50")}>
                       <FormLabel>Number of Slides</FormLabel>
                       <FormControl>
-                        <Input type="number" {...field} onChange={e => {
+                        <Input type="number" min="2" max="20" {...field} onChange={e => {
                             const value = e.target.value;
-                            field.onChange(value === '' ? 0 : parseInt(value, 10));
+                            field.onChange(value === '' ? '' : parseInt(value, 10));
                         }} disabled={contentType === 'projectProposal' || contentType === 'custom'}/>
                       </FormControl>
                        {contentType === 'projectProposal' && <p className="text-xs text-muted-foreground">Fixed at 8 slides for project proposals.</p>}
