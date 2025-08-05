@@ -80,7 +80,7 @@ const generatePresentationFlow = ai.defineFlow(
       throw new Error('Failed to generate presentation outline.');
     }
 
-    // 2. Sequentially generate an image for each slide.
+    // 2. Sequentially generate an image for each slide with retries.
     for (let i = 0; i < outline.slides.length; i++) {
       const slide = outline.slides[i];
       let fullImagePrompt = slide.imagePrompt;
@@ -113,10 +113,11 @@ const generatePresentationFlow = ai.defineFlow(
           console.error(`Attempt ${attempts} failed for slide ${i + 1}:`, error);
           if (attempts >= maxAttempts) {
             slide.imageUrl = ''; // Mark as failed after all attempts
-            console.error(`All ${maxAttempts} attempts failed for slide ${i + 1}.`);
+            console.error(`All ${maxAttempts} attempts failed for slide ${i + 1}. Skipping image.`);
           } else {
             // Wait before retrying (e.g., exponential backoff)
             const delay = Math.pow(2, attempts) * 1000;
+            console.log(`Waiting ${delay}ms before next attempt...`);
             await new Promise(resolve => setTimeout(resolve, delay));
           }
         }
