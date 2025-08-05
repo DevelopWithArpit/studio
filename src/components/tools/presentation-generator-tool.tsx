@@ -52,7 +52,7 @@ const formSchema = z.object({
 }).refine(data => {
     if (data.contentType === 'custom') {
         const structure = data.customStructure || '';
-        return structure.length > 10;
+        return structure.trim().length > 10;
     }
     return true;
 }, {
@@ -418,12 +418,12 @@ export default function PresentationGeneratorTool() {
                                         </ul>
                                     </div>
                                     <div className="bg-muted flex items-center justify-center overflow-hidden">
-                                        {!slide.imageUrl ? (
+                                        {isGeneratingImages && !slide.imageUrl ? (
                                              <div className="flex flex-col items-center justify-center text-muted-foreground">
                                                 <Loader2 className="w-16 h-16 animate-spin" />
                                                 <p className="mt-2 text-sm">Generating Image...</p>
                                             </div>
-                                        ) : slide.imageUrl === '' ? (
+                                        ) : !slide.imageUrl ? (
                                             <div className="flex flex-col items-center justify-center text-destructive">
                                                 <ImageIconLucide className="w-16 h-16" />
                                                 <p className="mt-2 text-sm font-semibold">Image failed to generate</p>
