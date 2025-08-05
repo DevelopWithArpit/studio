@@ -95,6 +95,10 @@ const generatePresentationFlow = ai.defineFlow(
                 },
             });
             slide.imageUrl = media?.url || '';
+
+            // Add a 5-second delay to avoid rate limiting
+            await new Promise(resolve => setTimeout(resolve, 5000));
+            
         } catch (error) {
             console.error(`Failed to generate image for slide: "${slide.title}". Reason: ${error instanceof Error ? error.message : 'Unknown error'}`);
             slide.imageUrl = ''; // Mark as failed
