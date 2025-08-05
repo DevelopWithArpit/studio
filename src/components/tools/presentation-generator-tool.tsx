@@ -278,7 +278,7 @@ export default function PresentationGeneratorTool() {
                         <FormDescription>Enter one slide title per line.</FormDescription>
                         <FormControl>
                             <Textarea
-                                placeholder="e.g.,&#10;Slide 1: Introduction to the problem&#10;Slide 2: Our proposed solution&#10;Slide 3: Market Analysis"
+                                placeholder="e.g.,\nSlide 1: Introduction to the problem\nSlide 2: Our proposed solution\nSlide 3: Market Analysis"
                                 {...field}
                                 rows={6}
                             />
