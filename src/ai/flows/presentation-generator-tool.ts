@@ -80,28 +80,42 @@ const generatePresentationFlow = ai.defineFlow(
       throw new Error('Failed to generate presentation outline.');
     }
 
-    // 2. Sequentially generate an image for each slide.
+    // 2. Sequentially generate an image for each slide with retries.
     for (const slide of outline.slides) {
-        try {
-            let fullImagePrompt = slide.imagePrompt;
-            if (input.imageStyle) {
-                fullImagePrompt += `, in a ${input.imageStyle} style`;
+        let fullImagePrompt = slide.imagePrompt;
+        if (input.imageStyle) {
+            fullImagePrompt += `, in a ${input.imageStyle} style`;
+        }
+        
+        const MAX_RETRIES = 3;
+        let attempt = 0;
+        let success = false;
+
+        while (attempt < MAX_RETRIES && !success) {
+            try {
+                const { media } = await ai.generate({
+                    model: 'googleai/gemini-2.0-flash-preview-image-generation',
+                    prompt: fullImagePrompt,
+                    config: {
+                        responseModalities: ['TEXT', 'IMAGE'],
+                    },
+                });
+
+                slide.imageUrl = media?.url || '';
+                if (slide.imageUrl) {
+                    success = true;
+                }
+            } catch (error) {
+                attempt++;
+                console.error(`Attempt ${attempt} failed for slide: "${slide.title}". Reason: ${error instanceof Error ? error.message : 'Unknown error'}`);
+                if (attempt < MAX_RETRIES) {
+                    await new Promise(resolve => setTimeout(resolve, 2000 * attempt)); // wait longer after each failure
+                }
             }
+        }
 
-            const { media } = await ai.generate({
-                model: 'googleai/gemini-2.0-flash-preview-image-generation',
-                prompt: fullImagePrompt,
-                config: {
-                    responseModalities: ['TEXT', 'IMAGE'],
-                },
-            });
-            slide.imageUrl = media?.url || '';
-
-            // Add a delay to avoid rate limiting
-            await new Promise(resolve => setTimeout(resolve, 5000));
-            
-        } catch (error) {
-            console.error(`Failed to generate image for slide: "${slide.title}". Reason: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        if (!success) {
+            console.error(`Failed to generate image for slide "${slide.title}" after ${MAX_RETRIES} attempts.`);
             slide.imageUrl = ''; // Mark as failed
         }
     }
