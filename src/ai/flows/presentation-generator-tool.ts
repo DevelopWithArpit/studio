@@ -40,7 +40,7 @@ export async function generatePresentation(input: GeneratePresentationInput): Pr
 
 const outlinePrompt = ai.definePrompt({
     name: 'generatePresentationOutlinePrompt',
-    input: { schema: GeneratePresentationInputSchema },
+    input: { schema: z.any() }, // Input is now more flexible
     output: { schema: PresentationOutlineSchema },
     prompt: `You are an expert presentation creator. Your task is to generate a compelling and detailed presentation outline based on the user's request.
 
@@ -124,3 +124,4 @@ const generatePresentationFlow = ai.defineFlow(
     return outline;
   }
 );
+
