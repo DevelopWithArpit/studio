@@ -45,7 +45,7 @@ import { Textarea } from '../ui/textarea';
 
 const formSchema = z.object({
   topic: z.string().min(3, 'Please enter a topic with at least 3 characters.'),
-  numSlides: z.number().int().min(2, "Must be at least 2 slides.").max(20, "Cannot exceed 20 slides."),
+  numSlides: z.coerce.number().int().min(2, "Must be at least 2 slides.").max(20, "Cannot exceed 20 slides."),
   imageStyle: z.string().optional(),
   contentType: z.enum(['general', 'projectProposal', 'custom']).default('general'),
   customStructure: z.string().optional(),
@@ -418,24 +418,24 @@ export default function PresentationGeneratorTool() {
                                         </ul>
                                     </div>
                                     <div className="bg-muted flex items-center justify-center overflow-hidden">
-                                        {isGeneratingImages && !slide.imageUrl ? (
-                                             <div className="flex flex-col items-center justify-center text-muted-foreground">
+                                        {result?.slides[index].imageUrl === undefined ? (
+                                            <div className="flex flex-col items-center justify-center text-muted-foreground">
                                                 <Loader2 className="w-16 h-16 animate-spin" />
                                                 <p className="mt-2 text-sm">Generating Image...</p>
                                             </div>
-                                        ) : !slide.imageUrl ? (
-                                            <div className="flex flex-col items-center justify-center text-destructive">
-                                                <ImageIconLucide className="w-16 h-16" />
-                                                <p className="mt-2 text-sm font-semibold">Image failed to generate</p>
-                                            </div>
-                                        ) : (
+                                        ) : result.slides[index].imageUrl ? (
                                             <Image
-                                                src={slide.imageUrl}
+                                                src={result.slides[index].imageUrl!}
                                                 alt={slide.title}
                                                 width={500}
                                                 height={500}
                                                 className="object-cover w-full h-full"
                                             />
+                                        ) : (
+                                            <div className="flex flex-col items-center justify-center text-destructive">
+                                                <ImageIconLucide className="w-16 h-16" />
+                                                <p className="mt-2 text-sm font-semibold">Image failed to generate</p>
+                                            </div>
                                         )}
                                     </div>
                                 </div>
