@@ -40,19 +40,19 @@ export async function generatePresentation(input: GeneratePresentationInput): Pr
 
 const outlinePrompt = ai.definePrompt({
     name: 'generatePresentationOutlinePrompt',
-    input: { schema: z.any() },
+    input: { schema: GeneratePresentationInputSchema },
     output: { schema: PresentationOutlineSchema },
     prompt: `You are an expert presentation creator. Your task is to generate a compelling and detailed presentation outline based on the user's request.
 
-For each slide, you must provide:
+For each slide, you MUST provide:
 1.  A short, engaging title.
-2.  A set of **detailed and comprehensive** bullet points for the content. The content must be thorough and informative.
-3.  A descriptive prompt for an AI image generator. This is the most critical step. The image prompt **MUST BE a direct visual representation of the bullet points you just wrote for the slide**, creating a highly relevant visual. The image prompt should be detailed and creative, aiming for a cinematic and visually stunning result, and it must not include any text, letters, or numbers. If the user specified an image style, incorporate it into every image prompt.
+2.  A set of detailed and comprehensive bullet points for the content.
+3.  A descriptive prompt for an AI image generator. The image prompt MUST BE a direct visual representation of the bullet points you just wrote for the slide, and it must NOT include any text, letters, or numbers.
 
 **Presentation Topic/Title:** "{{{topic}}}"
 
 **Content Generation Instructions:**
-- If the user provides a "Custom Structure," you **must** use those slide titles in the exact order given. For each title, generate detailed bullet points and a creative, relevant image prompt.
+- If the user provides a "Custom Structure," you MUST use those slide titles in the exact order given. For each title, generate detailed bullet points and a relevant image prompt.
 - If the content type is "Project Proposal," generate a presentation with exactly 8 slides using this structure: 1. Introduction, 2. Objectives, 3. Problem Statement / Need Analysis, 4. Target Group / Area, 5. Proposed Activities, 6. Methodology, 7. Expected Outcomes, 8. Conclusion.
 - If the content type is "General," generate a presentation with a logical flow of exactly {{{numSlides}}} slides, including a title slide and a conclusion slide.
 
@@ -62,6 +62,7 @@ For each slide, you must provide:
 - Number of Slides (for General type): {{{numSlides}}}
 - Custom Structure (if provided):
 {{{customStructure}}}
+- Image Style: {{{imageStyle}}}
 `,
 });
 
@@ -96,7 +97,7 @@ const generatePresentationFlow = ai.defineFlow(
             });
             slide.imageUrl = media?.url || '';
 
-            // Add a 5-second delay to avoid rate limiting
+            // Add a delay to avoid rate limiting
             await new Promise(resolve => setTimeout(resolve, 5000));
             
         } catch (error) {
