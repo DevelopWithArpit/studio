@@ -84,7 +84,7 @@ const generatePresentationFlow = ai.defineFlow(
         try {
             let fullImagePrompt = slide.imagePrompt;
             if (input.imageStyle) {
-                fullImageprompt += `, in a ${input.imageStyle} style`;
+                fullImagePrompt += `, in a ${input.imageStyle} style`;
             }
 
             const { media } = await ai.generate({
@@ -96,7 +96,7 @@ const generatePresentationFlow = ai.defineFlow(
             });
             slide.imageUrl = media?.url || '';
         } catch (error) {
-            console.error(`Failed to generate image for slide: "${slide.title}"`, error);
+            console.error(`Failed to generate image for slide: "${slide.title}". Reason: ${error instanceof Error ? error.message : 'Unknown error'}`);
             slide.imageUrl = ''; // Mark as failed
         }
     }
