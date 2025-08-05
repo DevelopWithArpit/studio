@@ -28,7 +28,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { handleGeneratePresentationAction, handleGenerateImageAction } from '@/app/actions';
+import { handleGeneratePresentationAction } from '@/app/actions';
 import type { GeneratePresentationOutput } from '@/ai/flows/presentation-generator-tool';
 import {
   Carousel,
@@ -84,48 +84,22 @@ export default function PresentationGeneratorTool() {
     setIsLoading(true);
     setResult(null);
 
-    // 1. Generate the text outline first
-    const outlineResponse = await handleGeneratePresentationAction(data);
+    const response = await handleGeneratePresentationAction(data);
+    setIsLoading(false);
 
-    if (!outlineResponse.success || !outlineResponse.data) {
+    if (response.success && response.data) {
+        setResult(response.data);
+        toast({
+            title: "Presentation Generated!",
+            description: "Your slides, content, and images have been created.",
+        })
+    } else {
         toast({
             variant: 'destructive',
-            title: 'Error generating presentation outline',
-            description: outlineResponse.error,
+            title: 'Error generating presentation',
+            description: response.error,
         });
-        setIsLoading(false);
-        return;
     }
-
-    const outline = outlineResponse.data;
-    setResult(outline); // Show the text content immediately
-
-    // 2. Generate images sequentially on the client
-    const slidesWithImages = [...outline.slides];
-    for (let i = 0; i < slidesWithImages.length; i++) {
-        let fullImagePrompt = slidesWithImages[i].imagePrompt;
-        if (data.imageStyle) {
-            fullImagePrompt = `${slidesWithImages[i].imagePrompt}, in a ${data.imageStyle} style.`;
-        }
-
-        try {
-            const imageResponse = await handleGenerateImageAction({ prompt: fullImagePrompt });
-            if (imageResponse.success && imageResponse.data) {
-                slidesWithImages[i].imageUrl = imageResponse.data.imageUrl;
-            } else {
-                slidesWithImages[i].imageUrl = ''; // Mark as failed
-                toast({ variant: "destructive", title: `Failed to generate image for slide ${i+1}`});
-            }
-        } catch (error) {
-            slidesWithImages[i].imageUrl = ''; // Mark as failed
-            toast({ variant: "destructive", title: `An error occurred for slide ${i+1}`});
-        }
-        
-        // Update state to show the new image as it comes in
-        setResult(prev => prev ? ({ ...prev, slides: [...slidesWithImages] }) : null);
-    }
-    
-    setIsLoading(false);
   }
 
  const handleDownload = () => {
@@ -141,13 +115,13 @@ export default function PresentationGeneratorTool() {
       objects: [
         {
             placeholder: {
-                options: { name: "title", type: "title", x: 0.5, y: 1.5, w: 9, h: 1.5, fontFace: 'Arial', fontSize: 44, bold: true, color: 'FFFFFF', align: 'center', valign: 'middle' },
+                options: { name: "title", type: "title", x: 0.5, y: 2.5, w: 9, h: 1.5, fontFace: 'Arial', fontSize: 44, bold: true, color: 'FFFFFF', align: 'center', valign: 'middle' },
                 text: "Default Title",
             }
         },
         {
             placeholder: {
-                options: { name: "subtitle", type: "body", x: 1.0, y: 3.5, w: 8, h: 2, fontFace: 'Arial', fontSize: 20, color: 'A9A9A9', align: 'center', valign: 'top' },
+                options: { name: "subtitle", type: "body", x: 1.0, y: 4.0, w: 8, h: 1, fontFace: 'Arial', fontSize: 20, color: 'A9A9A9', align: 'center', valign: 'top' },
                 text: "Default Subtitle",
             }
         },
@@ -167,7 +141,7 @@ export default function PresentationGeneratorTool() {
         },
         {
             placeholder: {
-                options: { name: "body", type: "body", x: 0.5, y: 1.2, w: 5.5, h: 4.5, fontFace: 'Arial', fontSize: 18, color: 'D3D3D3', paraSpaceAfter: 15, isTextBox: true },
+                options: { name: "body", type: "body", x: 0.5, y: 1.2, w: 5.5, h: 4.5, fontFace: 'Arial', fontSize: 18, color: 'D3D3D3', paraSpaceAfter: 20, isTextBox: true },
                 text: "Default Body Text",
             },
         },
@@ -204,7 +178,7 @@ export default function PresentationGeneratorTool() {
 
         const bodyTextObjects = slide.content.map(point => ({
           text: point,
-          options: { bullet: true, paraSpaceAfter: 15, breakLine: true }
+          options: { bullet: true, paraSpaceAfter: 20, breakLine: true }
         }));
 
         if (bodyTextObjects.length > 0) {
@@ -356,13 +330,13 @@ export default function PresentationGeneratorTool() {
         </CardContent>
       </Card>
 
-      {(isLoading || result) && <PresentationSkeleton />}
+      {isLoading && <PresentationSkeleton />}
 
-      {result && (
+      {result && !isLoading && (
          <Card>
           <CardHeader>
             <CardTitle>{result.title}</CardTitle>
-            <CardDescription>Your generated presentation is ready. {isLoading && 'Generating images...'}</CardDescription>
+            <CardDescription>Your generated presentation is ready.</CardDescription>
           </CardHeader>
           <CardContent>
              <Carousel className="w-full">
@@ -380,12 +354,7 @@ export default function PresentationGeneratorTool() {
                                     </ul>
                                 </div>
                                 <div className="bg-muted flex items-center justify-center overflow-hidden">
-                                     {slide.imageUrl === undefined ? (
-                                        <div className="flex flex-col items-center justify-center text-muted-foreground">
-                                            <Loader2 className="w-16 h-16 animate-spin" />
-                                            <p className="mt-2 text-sm">Generating Image...</p>
-                                        </div>
-                                    ) : slide.imageUrl ? (
+                                     {slide.imageUrl ? (
                                         <Image
                                             src={slide.imageUrl}
                                             alt={slide.title}

@@ -46,10 +46,6 @@ import {
     type SummarizeDocumentInput,
 } from '@/ai/flows/document-summarizer-tool';
 import {
-    generateImage,
-    type GenerateImageInput,
-} from '@/ai/flows/image-generator-tool';
-import {
     generatePresentation,
     type GeneratePresentationInput,
 } from '@/ai/flows/presentation-generator-tool';
@@ -152,10 +148,6 @@ export async function handleSuggestCareerPathsAction(input: SuggestCareerPathsIn
 
 export async function handleSummarizeDocumentAction(input: SummarizeDocumentInput) {
     return handleAction(input, summarizeDocument);
-}
-
-export async function handleGenerateImageAction(input: GenerateImageInput) {
-    return handleAction(input, generateImage);
 }
 
 export async function handleGeneratePresentationAction(input: GeneratePresentationInput) {

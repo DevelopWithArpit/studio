@@ -11,8 +11,6 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import {generateImage} from '@/ai/flows/image-generator-tool';
-
 
 const GeneratePresentationInputSchema = z.object({
   topic: z.string().describe('The topic or title of the presentation.'),
@@ -67,7 +65,7 @@ Generate a presentation with exactly 8 slides using the following structure. The
 2.  **Objectives:** 2–3 main goals of the project.
 3.  **Problem Statement / Need Analysis:** Issue identified in the community/field; Why this issue is important.
 4.  **Target Group / Area:** Who will benefit? Where will the project be conducted?
-5.  **Proposed Activities:** Planned actions (survey, awareness program, teaching, cleanliness drive, etc.); Tools or resources needed.
+5.  **Proposed Activities:** Planned actions (survey, awareness program, teaching, cleanliness drive, etc.)* Tools or resources needed.
 6.  **Methodology:** How the project will be implemented; Steps or timeline.
 7.  **Expected Outcomes:** What you aim to achieve; Impact on community.
 8.  **Conclusion:** Summary of your plan; Commitment to execute.
@@ -88,7 +86,7 @@ const generatePresentationFlow = ai.defineFlow(
     outputSchema: PresentationOutlineSchema,
   },
   async (input) => {
-    // 1. Generate the text outline first
+    // 1. Generate the text outline first.
     const promptInput = {
         ...input,
         isGeneral: input.contentType === 'general',
@@ -101,8 +99,28 @@ const generatePresentationFlow = ai.defineFlow(
       throw new Error('Failed to generate presentation outline.');
     }
 
-    // This flow now only generates the text and image prompts.
-    // The image generation itself will be handled by the client.
+    // 2. Sequentially generate an image for each slide.
+    for (const slide of outline.slides) {
+        try {
+            let fullImagePrompt = slide.imagePrompt;
+            if (input.imageStyle) {
+                fullImagePrompt += `, in a ${input.imageStyle} style`;
+            }
+
+            const { media } = await ai.generate({
+                model: 'googleai/gemini-2.0-flash-preview-image-generation',
+                prompt: fullImagePrompt,
+                config: {
+                    responseModalities: ['TEXT', 'IMAGE'],
+                },
+            });
+            slide.imageUrl = media?.url || '';
+        } catch (error) {
+            console.error(`Failed to generate image for slide: "${slide.title}"`, error);
+            slide.imageUrl = ''; // Mark as failed
+        }
+    }
+    
     return outline;
   }
 );
