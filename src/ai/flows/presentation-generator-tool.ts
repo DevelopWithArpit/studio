@@ -2,21 +2,23 @@
 'use server';
 
 /**
- * @fileOverview Generates a presentation outline with titles, content, and image prompts.
+ * @fileOverview Generates a presentation outline with titles, content, and images.
  *
- * - generatePresentation - A function that creates a presentation outline.
+ * - generatePresentation - A function that creates a complete presentation.
  * - GeneratePresentationInput - The input type for the function.
  * - GeneratePresentationOutput - The return type for the function.
  */
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
+import { googleAI } from '@genkit-ai/googleai';
 
 const GeneratePresentationInputSchema = z.object({
   topic: z.string().describe('The topic or title of the presentation.'),
   numSlides: z.number().int().min(2).max(20).describe('The number of slides to generate (for general topics).'),
   contentType: z.enum(['general', 'projectProposal', 'custom']).default('general').describe('The type of content to generate.'),
   customStructure: z.string().optional().describe("A user-defined structure for the presentation, as a string of slide titles."),
+  imageStyle: z.string().optional().describe("An optional style for the images (e.g., 'photorealistic', 'cartoon')."),
 });
 export type GeneratePresentationInput = z.infer<typeof GeneratePresentationInputSchema>;
 
@@ -77,6 +79,54 @@ const generatePresentationFlow = ai.defineFlow(
     if (!outline) {
       throw new Error('Failed to generate presentation outline.');
     }
+
+    // 2. Sequentially generate an image for each slide.
+    for (let i = 0; i < outline.slides.length; i++) {
+      const slide = outline.slides[i];
+      let fullImagePrompt = slide.imagePrompt;
+      if (input.imageStyle) {
+          fullImagePrompt += `, in a ${input.imageStyle} style`;
+      }
+      
+      let success = false;
+      let attempts = 0;
+      const maxAttempts = 3;
+
+      while (!success && attempts < maxAttempts) {
+        try {
+          const { media } = await ai.generate({
+            model: 'googleai/gemini-2.0-flash-preview-image-generation',
+            prompt: fullImagePrompt,
+            config: {
+              responseModalities: ['TEXT', 'IMAGE'],
+            },
+          });
+
+          if (media?.url) {
+            slide.imageUrl = media.url;
+            success = true;
+          } else {
+             throw new Error('No media URL returned from image generation API.');
+          }
+        } catch (error) {
+          attempts++;
+          console.error(`Attempt ${attempts} failed for slide ${i + 1}:`, error);
+          if (attempts >= maxAttempts) {
+            slide.imageUrl = ''; // Mark as failed after all attempts
+            console.error(`All ${maxAttempts} attempts failed for slide ${i + 1}.`);
+          } else {
+            // Wait before retrying (e.g., exponential backoff)
+            const delay = Math.pow(2, attempts) * 1000;
+            await new Promise(resolve => setTimeout(resolve, delay));
+          }
+        }
+      }
+       // Add a fixed delay between successful image generations to avoid overwhelming the service
+      if(success && i < outline.slides.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 2000)); 
+      }
+    }
+
     return outline;
   }
 );
