@@ -101,15 +101,18 @@ const generatePresentationFlow = ai.defineFlow(
                     },
                 });
 
-                slide.imageUrl = media?.url || '';
-                if (slide.imageUrl) {
+                if (media?.url) {
+                    slide.imageUrl = media.url;
                     success = true;
+                } else {
+                    attempt++;
                 }
             } catch (error) {
                 attempt++;
                 console.error(`Attempt ${attempt} failed for slide: "${slide.title}". Reason: ${error instanceof Error ? error.message : 'Unknown error'}`);
                 if (attempt < MAX_RETRIES) {
-                    await new Promise(resolve => setTimeout(resolve, 2000 * attempt)); // wait longer after each failure
+                    // Exponential backoff
+                    await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempt)));
                 }
             }
         }
