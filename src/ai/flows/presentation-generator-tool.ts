@@ -60,8 +60,7 @@ For each slide, you MUST provide:
 - Topic: {{{topic}}}
 - Content Type: {{{contentType}}}
 - Number of Slides (for General type): {{{numSlides}}}
-- Custom Structure (if provided):
-{{{customStructure}}}
+- Custom Structure (if provided): {{{customStructure}}}
 - Image Style: {{{imageStyle}}}
 `,
 });
@@ -80,7 +79,7 @@ const generatePresentationFlow = ai.defineFlow(
       throw new Error('Failed to generate presentation outline.');
     }
 
-    // 2. Sequentially generate an image for each slide with retries.
+    // 2. Sequentially generate an image for each slide with retries and backoff.
     for (const slide of outline.slides) {
         let fullImagePrompt = slide.imagePrompt;
         if (input.imageStyle) {
@@ -105,14 +104,16 @@ const generatePresentationFlow = ai.defineFlow(
                     slide.imageUrl = media.url;
                     success = true;
                 } else {
-                    attempt++;
+                    // This case handles a successful API call that returns no image.
+                    throw new Error('API call succeeded but no image was returned.');
                 }
             } catch (error) {
                 attempt++;
                 console.error(`Attempt ${attempt} failed for slide: "${slide.title}". Reason: ${error instanceof Error ? error.message : 'Unknown error'}`);
                 if (attempt < MAX_RETRIES) {
-                    // Exponential backoff
-                    await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempt)));
+                    // Exponential backoff: wait for 2^attempt seconds before retrying
+                    const delay = 1000 * Math.pow(2, attempt);
+                    await new Promise(resolve => setTimeout(resolve, delay));
                 }
             }
         }
