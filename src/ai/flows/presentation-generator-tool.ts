@@ -40,7 +40,7 @@ export async function generatePresentation(input: GeneratePresentationInput): Pr
 
 const outlinePrompt = ai.definePrompt({
     name: 'generatePresentationOutlinePrompt',
-    input: { schema: z.any() }, // Input is now more flexible
+    input: { schema: z.any() },
     output: { schema: PresentationOutlineSchema },
     prompt: `You are an expert presentation creator. Your task is to generate a compelling and detailed presentation outline based on the user's request.
 
@@ -51,30 +51,17 @@ For each slide, you must provide:
 
 **Presentation Topic/Title:** "{{{topic}}}"
 
-{{#if isCustom}}
-**Instructions for Custom Structure:**
-The user has provided a custom structure. You **must** use these slide titles in the exact order they are given. For each title, generate detailed bullet points and a creative, relevant image prompt.
-**Custom Structure:**
+**Content Generation Instructions:**
+- If the user provides a "Custom Structure," you **must** use those slide titles in the exact order given. For each title, generate detailed bullet points and a creative, relevant image prompt.
+- If the content type is "Project Proposal," generate a presentation with exactly 8 slides using this structure: 1. Introduction, 2. Objectives, 3. Problem Statement / Need Analysis, 4. Target Group / Area, 5. Proposed Activities, 6. Methodology, 7. Expected Outcomes, 8. Conclusion.
+- If the content type is "General," generate a presentation with a logical flow of exactly {{{numSlides}}} slides, including a title slide and a conclusion slide.
+
+**User Input Details:**
+- Topic: {{{topic}}}
+- Content Type: {{{contentType}}}
+- Number of Slides (for General type): {{{numSlides}}}
+- Custom Structure (if provided):
 {{{customStructure}}}
-{{/if}}
-
-{{#if isProjectProposal}}
-**Instructions for Project Proposal:**
-Generate a presentation with exactly 8 slides using the following structure. The user's topic is the project title.
-1.  **Introduction:** What is the project about? Relevance to society/community.
-2.  **Objectives:** 2–3 main goals of the project.
-3.  **Problem Statement / Need Analysis:** Issue identified in the community/field; Why this issue is important.
-4.  **Target Group / Area:** Who will benefit? Where will the project be conducted?
-5.  **Proposed Activities:** Planned actions (survey, awareness program, teaching, cleanliness drive, etc.)* Tools or resources needed.
-6.  **Methodology:** How the project will be implemented; Steps or timeline.
-7.  **Expected Outcomes:** What you aim to achieve; Impact on community.
-8.  **Conclusion:** Summary of your plan; Commitment to execute.
-{{/if}}
-
-{{#if isGeneral}}
-**Instructions for General Topic:**
-Generate a presentation with a logical flow. The presentation must have exactly {{{numSlides}}} slides, including a title slide and a conclusion slide.
-{{/if}}
 `,
 });
 
@@ -87,14 +74,7 @@ const generatePresentationFlow = ai.defineFlow(
   },
   async (input) => {
     // 1. Generate the text outline first.
-    const promptInput = {
-        ...input,
-        isGeneral: input.contentType === 'general',
-        isProjectProposal: input.contentType === 'projectProposal',
-        isCustom: input.contentType === 'custom',
-    };
-
-    const { output: outline } = await outlinePrompt(promptInput);
+    const { output: outline } = await outlinePrompt(input);
     if (!outline) {
       throw new Error('Failed to generate presentation outline.');
     }
@@ -104,7 +84,7 @@ const generatePresentationFlow = ai.defineFlow(
         try {
             let fullImagePrompt = slide.imagePrompt;
             if (input.imageStyle) {
-                fullImagePrompt += `, in a ${input.imageStyle} style`;
+                fullImageprompt += `, in a ${input.imageStyle} style`;
             }
 
             const { media } = await ai.generate({
@@ -124,4 +104,3 @@ const generatePresentationFlow = ai.defineFlow(
     return outline;
   }
 );
-
