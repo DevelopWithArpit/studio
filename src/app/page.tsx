@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, Suspense } from 'react';
@@ -242,7 +243,7 @@ const tools: ToolConfig[] = [
 ];
 
 export default function Home() {
-  const [activeTool, setActiveTool] = useState<ToolId>('resume-customizer');
+  const [activeTool, setActiveTool] = useState<ToolId>('presentation-generator');
 
   const ActiveToolComponent = tools.find((tool) => tool.id === activeTool)?.component;
 

@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -28,8 +28,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { handleGeneratePresentationAction } from '@/app/actions';
-import type { GeneratePresentationOutput } from '@/ai/flows/presentation-generator-tool';
+import { handleGeneratePresentationAction, handleGenerateImageAction } from '@/app/actions';
+import type { GeneratePresentationOutput, GeneratePresentationInput } from '@/ai/flows/presentation-generator-tool';
 import {
   Carousel,
   CarouselContent,
@@ -38,7 +38,7 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel';
 import { Badge } from '@/components/ui/badge';
-import { Download, ImageIcon, Loader2 } from 'lucide-react';
+import { Download, ImageIcon, Loader2, Image as ImageIconLucide } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { cn } from '@/lib/utils';
 import { Textarea } from '../ui/textarea';
@@ -51,7 +51,8 @@ const formSchema = z.object({
   customStructure: z.string().optional(),
 }).refine(data => {
     if (data.contentType === 'custom') {
-        return !!data.customStructure && data.customStructure.length > 10;
+        const structure = data.customStructure || '';
+        return structure.length > 10;
     }
     return true;
 }, {
@@ -64,6 +65,7 @@ type PresentationWithImages = GeneratePresentationOutput;
 
 export default function PresentationGeneratorTool() {
   const [isLoading, setIsLoading] = useState(false);
+  const [isGeneratingImages, setIsGeneratingImages] = useState(false);
   const [result, setResult] = useState<PresentationWithImages | null>(null);
   const { toast } = useToast();
 
@@ -79,28 +81,82 @@ export default function PresentationGeneratorTool() {
   });
 
   const contentType = form.watch('contentType');
+  const imageStyle = form.watch('imageStyle');
 
   async function onSubmit(data: FormData) {
     setIsLoading(true);
     setResult(null);
 
-    const response = await handleGeneratePresentationAction(data);
-    setIsLoading(false);
+    const outlineInput: GeneratePresentationInput = {
+        topic: data.topic,
+        contentType: data.contentType,
+        numSlides: data.numSlides,
+    };
+    if (data.contentType === 'custom' && data.customStructure) {
+        outlineInput.customStructure = data.customStructure;
+    }
 
+    const response = await handleGeneratePresentationAction(outlineInput);
+    
     if (response.success && response.data) {
         setResult(response.data);
         toast({
-            title: "Presentation Generated!",
-            description: "Your slides, content, and images have been created.",
-        })
+            title: "Presentation Outline Generated!",
+            description: "Now generating images for each slide.",
+        });
+        setIsLoading(false); // Finished outline generation
+        setIsGeneratingImages(true); // Start image generation
     } else {
+        setIsLoading(false);
         toast({
             variant: 'destructive',
-            title: 'Error generating presentation',
+            title: 'Error generating presentation outline',
             description: response.error,
         });
     }
   }
+
+  useEffect(() => {
+    const generateImages = async () => {
+        if (!result || !isGeneratingImages) return;
+
+        let allImagesGenerated = true;
+        const slidesWithImages = [...result.slides];
+
+        for (let i = 0; i < slidesWithImages.length; i++) {
+            if (!slidesWithImages[i].imageUrl) {
+                try {
+                    let fullImagePrompt = slidesWithImages[i].imagePrompt;
+                    if (imageStyle) {
+                        fullImagePrompt += `, in a ${imageStyle} style`;
+                    }
+                    const imageResponse = await handleGenerateImageAction({ prompt: fullImagePrompt });
+                    if (imageResponse.success && imageResponse.data.imageUrl) {
+                        slidesWithImages[i].imageUrl = imageResponse.data.imageUrl;
+                    } else {
+                        allImagesGenerated = false;
+                        slidesWithImages[i].imageUrl = ''; // Mark as failed
+                        toast({ variant: 'destructive', title: `Failed to generate image for slide ${i + 1}`, description: imageResponse.error });
+                    }
+                } catch (error) {
+                    allImagesGenerated = false;
+                    slidesWithImages[i].imageUrl = ''; // Mark as failed
+                    toast({ variant: 'destructive', title: `Failed to generate image for slide ${i + 1}`, description: 'An unexpected error occurred.'});
+                }
+                setResult(prev => prev ? { ...prev, slides: [...slidesWithImages] } : null);
+            }
+        }
+        setIsGeneratingImages(false);
+        if (allImagesGenerated) {
+            toast({ title: "All images generated!", description: "Your presentation is complete." });
+        } else {
+            toast({ variant: 'destructive', title: "Some images failed", description: "Not all images could be generated. You can try again." });
+        }
+    };
+
+    generateImages();
+  }, [isGeneratingImages, result, imageStyle, toast]);
+
 
  const handleDownload = () => {
     if (!result) return;
@@ -322,69 +378,85 @@ export default function PresentationGeneratorTool() {
                   )}
                 />
               </div>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating...</> : 'Generate Presentation'}
+              <Button type="submit" disabled={isLoading || isGeneratingImages}>
+                {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating Outline...</> : 'Generate Presentation'}
               </Button>
             </form>
           </Form>
         </CardContent>
       </Card>
 
-      {isLoading && <PresentationSkeleton />}
-
-      {result && !isLoading && (
-         <Card>
+      {(isLoading || result) && (
+        <Card>
           <CardHeader>
-            <CardTitle>{result.title}</CardTitle>
-            <CardDescription>Your generated presentation is ready.</CardDescription>
+            <CardTitle>{result?.title || <Skeleton className="h-8 w-3/5 rounded-md" />}</CardTitle>
+            <CardDescription>
+                {isLoading 
+                    ? <Skeleton className="h-4 w-4/5 rounded-md" />
+                    : isGeneratingImages
+                    ? 'Generating images, please wait...'
+                    : 'Your generated presentation is ready.'
+                }
+            </CardDescription>
           </CardHeader>
           <CardContent>
-             <Carousel className="w-full">
-                <CarouselContent>
-                    {result.slides.map((slide, index) => (
-                    <CarouselItem key={index}>
-                        <div className="p-1">
-                        <Card className="overflow-hidden">
-                            <div className="grid grid-cols-1 md:grid-cols-2 h-[500px]">
-                                <div className="p-6 flex flex-col">
-                                    <Badge variant="outline" className="w-fit mb-4">Slide {index + 1}</Badge>
-                                    <h3 className="text-2xl font-bold font-headline mb-4">{slide.title}</h3>
-                                    <ul className="space-y-3 list-disc pl-5 text-muted-foreground flex-1">
-                                        {slide.content.map((point, i) => <li key={i}>{point}</li>)}
-                                    </ul>
+            {isLoading ? (
+                <PresentationSkeleton />
+            ) : (
+                <Carousel className="w-full">
+                    <CarouselContent>
+                        {result?.slides.map((slide, index) => (
+                        <CarouselItem key={index}>
+                            <div className="p-1">
+                            <Card className="overflow-hidden">
+                                <div className="grid grid-cols-1 md:grid-cols-2 h-[500px]">
+                                    <div className="p-6 flex flex-col">
+                                        <Badge variant="outline" className="w-fit mb-4">Slide {index + 1}</Badge>
+                                        <h3 className="text-2xl font-bold font-headline mb-4">{slide.title}</h3>
+                                        <ul className="space-y-3 list-disc pl-5 text-muted-foreground flex-1">
+                                            {slide.content.map((point, i) => <li key={i}>{point}</li>)}
+                                        </ul>
+                                    </div>
+                                    <div className="bg-muted flex items-center justify-center overflow-hidden">
+                                        {!slide.imageUrl ? (
+                                             <div className="flex flex-col items-center justify-center text-muted-foreground">
+                                                <Loader2 className="w-16 h-16 animate-spin" />
+                                                <p className="mt-2 text-sm">Generating Image...</p>
+                                            </div>
+                                        ) : slide.imageUrl === '' ? (
+                                            <div className="flex flex-col items-center justify-center text-destructive">
+                                                <ImageIconLucide className="w-16 h-16" />
+                                                <p className="mt-2 text-sm font-semibold">Image failed to generate</p>
+                                            </div>
+                                        ) : (
+                                            <Image
+                                                src={slide.imageUrl}
+                                                alt={slide.title}
+                                                width={500}
+                                                height={500}
+                                                className="object-cover w-full h-full"
+                                            />
+                                        )}
+                                    </div>
                                 </div>
-                                <div className="bg-muted flex items-center justify-center overflow-hidden">
-                                     {slide.imageUrl ? (
-                                        <Image
-                                            src={slide.imageUrl}
-                                            alt={slide.title}
-                                            width={500}
-                                            height={500}
-                                            className="object-cover w-full h-full"
-                                        />
-                                    ) : (
-                                        <div className="flex flex-col items-center justify-center text-muted-foreground">
-                                            <ImageIcon className="w-16 h-16" />
-                                            <p className="mt-2 text-sm">Image failed to generate</p>
-                                        </div>
-                                    )}
-                                </div>
+                            </Card>
                             </div>
-                        </Card>
-                        </div>
-                    </CarouselItem>
-                    ))}
-                </CarouselContent>
-                <CarouselPrevious className="ml-12" />
-                <CarouselNext className="mr-12" />
-            </Carousel>
+                        </CarouselItem>
+                        ))}
+                    </CarouselContent>
+                    <CarouselPrevious className="ml-12" />
+                    <CarouselNext className="mr-12" />
+                </Carousel>
+            )}
           </CardContent>
-          <CardFooter>
-            <Button onClick={handleDownload} disabled={isLoading}>
-                <Download className="mr-2 h-4 w-4"/>
-                Download Presentation
-            </Button>
-          </CardFooter>
+          {result && (
+            <CardFooter>
+                <Button onClick={handleDownload} disabled={isGeneratingImages || isLoading}>
+                    <Download className="mr-2 h-4 w-4"/>
+                    {isGeneratingImages ? 'Waiting for images...' : 'Download Presentation'}
+                </Button>
+            </CardFooter>
+          )}
         </Card>
       )}
     </div>
@@ -394,31 +466,23 @@ export default function PresentationGeneratorTool() {
 
 function PresentationSkeleton() {
     return (
-        <Card>
-            <CardHeader>
-                <Skeleton className="h-8 w-3/5 rounded-md" />
-                <Skeleton className="h-4 w-4/5 rounded-md" />
-            </CardHeader>
-            <CardContent>
-                <div className="relative px-12">
-                     <Card className="overflow-hidden">
-                        <div className="grid grid-cols-1 md:grid-cols-2 h-[500px]">
-                            <div className="p-6 flex flex-col">
-                                <Skeleton className="h-6 w-16 mb-4 rounded-full" />
-                                <Skeleton className="h-8 w-4/5 mb-6 rounded-md" />
-                                <div className="space-y-4 flex-1">
-                                    <Skeleton className="h-5 w-full rounded-md" />
-                                    <Skeleton className="h-5 w-5/6 rounded-md" />
-                                    <Skeleton className="h-5 w-full rounded-md" />
-                                </div>
-                            </div>
-                            <div className="bg-muted flex items-center justify-center">
-                                <Skeleton className="w-full h-full" />
-                            </div>
+        <div className="relative px-12">
+             <Card className="overflow-hidden">
+                <div className="grid grid-cols-1 md:grid-cols-2 h-[500px]">
+                    <div className="p-6 flex flex-col">
+                        <Skeleton className="h-6 w-16 mb-4 rounded-full" />
+                        <Skeleton className="h-8 w-4/5 mb-6 rounded-md" />
+                        <div className="space-y-4 flex-1">
+                            <Skeleton className="h-5 w-full rounded-md" />
+                            <Skeleton className="h-5 w-5/6 rounded-md" />
+                            <Skeleton className="h-5 w-full rounded-md" />
                         </div>
-                    </Card>
+                    </div>
+                    <div className="bg-muted flex items-center justify-center">
+                        <Skeleton className="w-full h-full" />
+                    </div>
                 </div>
-            </CardContent>
-        </Card>
+            </Card>
+        </div>
     )
 }

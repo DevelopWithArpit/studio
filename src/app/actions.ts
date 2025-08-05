@@ -90,6 +90,10 @@ import {
     editSipReport,
     type EditSipReportInput,
 } from '@/ai/flows/report-editor-tool';
+import {
+    generateImage,
+    type GenerateImageInput,
+} from '@/ai/flows/image-generator-tool';
 
 
 async function handleAction<T_Input, T_Output>(
@@ -188,6 +192,10 @@ export async function handleBuildAutomatedReportAction(input: BuildAutomatedRepo
 
 export async function handleEditSipReportAction(input: EditSipReportInput) {
     return handleAction(input, editSipReport);
+}
+
+export async function handleGenerateImageAction(input: GenerateImageInput) {
+    return handleAction(input, generateImage);
 }
 
 

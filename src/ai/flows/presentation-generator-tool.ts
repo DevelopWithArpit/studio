@@ -2,7 +2,7 @@
 'use server';
 
 /**
- * @fileOverview Generates a presentation outline with images for each slide.
+ * @fileOverview Generates a presentation outline with titles, content, and image prompts.
  *
  * - generatePresentation - A function that creates a presentation outline.
  * - GeneratePresentationInput - The input type for the function.
@@ -15,7 +15,6 @@ import { z } from 'zod';
 const GeneratePresentationInputSchema = z.object({
   topic: z.string().describe('The topic or title of the presentation.'),
   numSlides: z.number().int().min(2).max(20).describe('The number of slides to generate (for general topics).'),
-  imageStyle: z.string().optional().describe('An optional style for the images (e.g., "photorealistic", "cartoon", "minimalist").'),
   contentType: z.enum(['general', 'projectProposal', 'custom']).default('general').describe('The type of content to generate.'),
   customStructure: z.string().optional().describe("A user-defined structure for the presentation, as a string of slide titles."),
 });
@@ -33,6 +32,7 @@ const PresentationOutlineSchema = z.object({
   slides: z.array(SlideSchema).describe('An array of slide objects.'),
 });
 export type GeneratePresentationOutput = z.infer<typeof PresentationOutlineSchema>;
+
 
 export async function generatePresentation(input: GeneratePresentationInput): Promise<GeneratePresentationOutput> {
   return generatePresentationFlow(input);
@@ -61,7 +61,6 @@ For each slide, you MUST provide:
 - Content Type: {{{contentType}}}
 - Number of Slides (for General type): {{{numSlides}}}
 - Custom Structure (if provided): {{{customStructure}}}
-- Image Style: {{{imageStyle}}}
 `,
 });
 
@@ -78,52 +77,6 @@ const generatePresentationFlow = ai.defineFlow(
     if (!outline) {
       throw new Error('Failed to generate presentation outline.');
     }
-
-    // 2. Sequentially generate an image for each slide with retries and backoff.
-    for (const slide of outline.slides) {
-        let fullImagePrompt = slide.imagePrompt;
-        if (input.imageStyle) {
-            fullImagePrompt += `, in a ${input.imageStyle} style`;
-        }
-        
-        const MAX_RETRIES = 3;
-        let attempt = 0;
-        let success = false;
-
-        while (attempt < MAX_RETRIES && !success) {
-            try {
-                const { media } = await ai.generate({
-                    model: 'googleai/gemini-2.0-flash-preview-image-generation',
-                    prompt: fullImagePrompt,
-                    config: {
-                        responseModalities: ['TEXT', 'IMAGE'],
-                    },
-                });
-
-                if (media?.url) {
-                    slide.imageUrl = media.url;
-                    success = true;
-                } else {
-                    // This case handles a successful API call that returns no image.
-                    throw new Error('API call succeeded but no image was returned.');
-                }
-            } catch (error) {
-                attempt++;
-                console.error(`Attempt ${attempt} failed for slide: "${slide.title}". Reason: ${error instanceof Error ? error.message : 'Unknown error'}`);
-                if (attempt < MAX_RETRIES) {
-                    // Exponential backoff: wait for 2^attempt seconds before retrying
-                    const delay = 1000 * Math.pow(2, attempt);
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                }
-            }
-        }
-
-        if (!success) {
-            console.error(`Failed to generate image for slide "${slide.title}" after ${MAX_RETRIES} attempts.`);
-            slide.imageUrl = ''; // Mark as failed
-        }
-    }
-    
     return outline;
   }
 );
