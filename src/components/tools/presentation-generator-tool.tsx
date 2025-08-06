@@ -132,13 +132,13 @@ export default function PresentationGeneratorTool() {
       objects: [
         {
             placeholder: {
-                options: { name: "title", type: "title", x: 0.5, y: 1.5, w: 9, h: 1.5, fontFace: 'Arial', fontSize: 44, bold: true, color: cleanColor(design.accentColor), align: 'center', valign: 'middle' },
+                options: { name: "title", type: "title", x: 0.5, y: 1.5, w: 9, h: 1.5, fontFace: 'Arial', fontSize: 44, bold: true, color: cleanColor(design.accentColor), align: 'center', valign: 'middle', fill: { color: '000000', transparency: 60 } },
                 text: "Default Title",
             }
         },
         {
             placeholder: {
-                options: { name: "subtitle", type: "body", x: 1.0, y: 3.5, w: 8, h: 2, fontFace: 'Arial', fontSize: 20, color: cleanColor(design.textColor), align: 'center', valign: 'top' },
+                options: { name: "subtitle", type: "body", x: 1.0, y: 3.5, w: 8, h: 2, fontFace: 'Arial', fontSize: 20, color: cleanColor(design.textColor), align: 'center', valign: 'top', fill: { color: '000000', transparency: 60 } },
                 text: "Default Subtitle",
             }
         },
@@ -152,13 +152,13 @@ export default function PresentationGeneratorTool() {
       objects: [
         {
             placeholder: {
-                options: { name: "title", type: "title", x: 0.5, y: 0.2, w: 9, h: 0.8, fontFace: 'Arial', fontSize: 32, bold: true, color: cleanColor(design.accentColor), align: 'left', valign: 'middle' },
+                options: { name: "title", type: "title", x: 0.5, y: 0.2, w: 9, h: 0.8, fontFace: 'Arial', fontSize: 32, bold: true, color: cleanColor(design.accentColor), align: 'left', valign: 'middle', fill: { color: '000000', transparency: 60 } },
                 text: "Default Title",
             },
         },
         {
             placeholder: {
-                options: { name: "body", type: "body", x: 0.5, y: 1.2, w: 5.5, h: 4.5, fontFace: 'Arial', fontSize: 18, color: cleanColor(design.textColor), paraSpaceAfter: 20, isTextBox: true },
+                options: { name: "body", type: "body", x: 0.5, y: 1.2, w: 5.5, h: 4.5, fontFace: 'Arial', fontSize: 18, color: cleanColor(design.textColor), paraSpaceAfter: 20, isTextBox: true, fill: { color: '000000', transparency: 60 } },
                 text: "Default Body Text",
             },
         },
