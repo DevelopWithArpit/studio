@@ -178,8 +178,15 @@ export default function PresentationGeneratorTool() {
         anim: { effect: "wipe", type: "in", duration: 1, delay: 0.2, from: "bottom" }
     });
 
+    const firstSlideContent = result.slides[0]?.content;
+    const subtitleText = firstSlideContent ? firstSlideContent.join('\n') : "A Presentation";
+    titleSlide.addText(subtitleText.replace(/Presented by: \[Username\]/, `Presented by: ${"User"}`), {
+        placeholder: 'subtitle'
+    });
+    
+
     // Content slides
-    result.slides.forEach((slide) => {
+    result.slides.slice(1).forEach((slide) => {
       const pptxSlide = pptx.addSlide({ masterName: 'CONTENT_SLIDE' });
       
       pptxSlide.transition = { type: "fade", duration: 1 };
@@ -414,3 +421,5 @@ export default function PresentationGeneratorTool() {
     </div>
   );
 }
+
+    

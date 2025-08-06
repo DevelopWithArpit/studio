@@ -73,7 +73,7 @@ const outlinePrompt = ai.definePrompt({
 
 **Structure Generation Instructions:**
 - **The very first slide must always be an introduction slide.** Its title should be "Introduction" and it should introduce the main topic and include the phrase "Presented by: [Username]".
-- If the user provides a "Custom Structure," you MUST use those slide titles in the exact order given for the subsequent slides.
+- If the user provides a "Custom Structure," you MUST use those slide titles in the exact order given for the subsequent slides (after the intro slide).
 - If the content type is "Project Proposal," generate the subsequent presentation slides using this structure: 1. Introduction, 2. Objectives, 3. Problem Statement / Need Analysis, 4. Target Group / Area, 5. Proposed Activities, 6. Methodology, 7. Expected Outcomes, 8. Conclusion.
 - If the content type is "General," generate a logical presentation of exactly {{{numSlides}}} slides, which must include a conclusion slide at the end. The introduction slide is extra.
 
@@ -140,3 +140,5 @@ const generatePresentationFlow = ai.defineFlow(
     return outline;
   }
 );
+
+    
