@@ -99,7 +99,7 @@ const generatePresentationFlow = ai.defineFlow(
     }
 
     const imagePrompts = [
-      outline.design.backgroundPrompt,
+      input.imageStyle ? `${outline.design.backgroundPrompt}, in a ${input.imageStyle} style` : outline.design.backgroundPrompt,
       ...outline.slides.map(slide => {
         let fullImagePrompt = slide.imagePrompt;
         if (input.imageStyle) {
@@ -120,19 +120,20 @@ const generatePresentationFlow = ai.defineFlow(
     const settledResults = await Promise.allSettled(imageGenerationPromises);
 
     settledResults.forEach((result, index) => {
-      if (result.status === 'fulfilled' && result.value.media?.url) {
-        if (index === 0) {
+      if (index === 0) { // Handle background image
+        if (result.status === 'fulfilled' && result.value.media?.url) {
           outline.backgroundImageUrl = result.value.media.url;
         } else {
-          outline.slides[index - 1].imageUrl = result.value.media.url;
-        }
-      } else {
-        if (index === 0) {
-          console.error('Background image generation failed.');
+          console.error('Background image generation failed:', result.status === 'rejected' ? result.reason : 'No URL returned');
           outline.backgroundImageUrl = ''; 
+        }
+      } else { // Handle slide images
+        const slideIndex = index - 1;
+        if (result.status === 'fulfilled' && result.value.media?.url) {
+          outline.slides[slideIndex].imageUrl = result.value.media.url;
         } else {
-          console.error(`Slide ${index} image generation failed.`);
-          outline.slides[index - 1].imageUrl = '';
+          console.error(`Slide ${slideIndex + 1} image generation failed:`, result.status === 'rejected' ? result.reason : 'No URL returned');
+          outline.slides[slideIndex].imageUrl = '';
         }
       }
     });
