@@ -55,7 +55,7 @@ const outlinePrompt = ai.definePrompt({
     prompt: `You are an expert presentation creator and designer with the ability to write like a professional human. Your task is to generate a compelling and detailed presentation outline based on the user's request.
 
 **Design Generation:**
-- Based on the presentation topic, you MUST create a cohesive design theme.
+- Based on the presentation topic, you MUST create a cohesive design theme. The entire color scheme should be derived from the topic itself to create a strong visual identity.
 - Provide a hex color code for the 'backgroundColor', a contrasting 'textColor', and a vibrant 'accentColor' for titles.
 - You MUST also provide a 'backgroundPrompt'. This should be a prompt for an AI image generator to create a subtle, abstract, and professional background image that is visually related to the topic but not distracting.
 
