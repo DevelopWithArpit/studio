@@ -99,46 +99,48 @@ const generatePresentationFlow = ai.defineFlow(
       throw new Error('Failed to generate presentation outline.');
     }
 
-    // 2. Generate background and slide images in parallel
-    const imageGenerationPromises = [
-      // Background Image
-      ai.generate({
-        model: 'googleai/gemini-2.0-flash-preview-image-generation',
-        prompt: outline.design.backgroundPrompt,
-        config: { responseModalities: ['TEXT', 'IMAGE'] },
-      }),
-      // Slide Images
-      ...outline.slides.map((slide) => {
+    // 2. Generate all images in parallel (background + one for each slide)
+    const imagePrompts = [
+      outline.design.backgroundPrompt,
+      ...outline.slides.map(slide => {
         let fullImagePrompt = slide.imagePrompt;
         if (input.imageStyle) {
           fullImagePrompt += `, in a ${input.imageStyle} style`;
         }
-        return ai.generate({
-          model: 'googleai/gemini-2.0-flash-preview-image-generation',
-          prompt: fullImagePrompt,
-          config: { responseModalities: ['TEXT', 'IMAGE'] },
-        });
+        return fullImagePrompt;
       }),
     ];
 
-    const results = await Promise.allSettled(imageGenerationPromises);
+    const imageGenerationPromises = imagePrompts.map(prompt => 
+      ai.generate({
+        model: 'googleai/gemini-2.0-flash-preview-image-generation',
+        prompt,
+        config: { responseModalities: ['TEXT', 'IMAGE'] },
+      }).catch(e => {
+        console.error("Image generation failed for prompt:", prompt, e);
+        return null; // Return null on failure to not break Promise.all
+      })
+    );
 
-    // First result is the background image
-    const backgroundResult = results[0];
-    if (backgroundResult.status === 'fulfilled') {
-      outline.backgroundImageUrl = backgroundResult.value.media?.url;
-    } else {
-      console.error('Background image generation failed:', backgroundResult.reason);
-    }
+    const imageResults = await Promise.all(imageGenerationPromises);
     
+    // First result is the background image
+    const backgroundResult = imageResults[0];
+    if (backgroundResult?.media?.url) {
+      outline.backgroundImageUrl = backgroundResult.media.url;
+    } else {
+      console.error('Background image generation failed.');
+    }
+
     // The rest are slide images
-    const slideImageResults = results.slice(1);
-    slideImageResults.forEach((result, index) => {
-      if (result.status === 'fulfilled' && result.value.media?.url) {
-        outline.slides[index].imageUrl = result.value.media.url;
-      } else if (result.status === 'rejected') {
-        console.error(`Slide ${index} image generation failed:`, result.reason);
-        outline.slides[index].imageUrl = ''; // Ensure imageUrl is empty on failure
+    const slideImageResults = imageResults.slice(1);
+    outline.slides.forEach((slide, index) => {
+      const slideResult = slideImageResults[index];
+      if (slideResult?.media?.url) {
+        slide.imageUrl = slideResult.media.url;
+      } else {
+        slide.imageUrl = ''; // Ensure imageUrl is empty on failure
+        console.error(`Slide ${index + 1} image generation failed.`);
       }
     });
 
