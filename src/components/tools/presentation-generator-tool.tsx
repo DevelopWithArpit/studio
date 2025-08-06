@@ -177,13 +177,13 @@ export default function PresentationGeneratorTool() {
         placeholder: "title",
         anim: { effect: "wipe", type: "in", duration: 1, delay: 0.2, from: "bottom" }
     });
+    
+    const introSlideContent = result.slides[0]?.content ?? [];
+    const subtitleText = introSlideContent.join('\n').replace(/Presented by: \[Username\]/, `Presented by: ${"User"}`);
 
-    const firstSlideContent = result.slides[0]?.content;
-    const subtitleText = firstSlideContent ? firstSlideContent.join('\n') : "A Presentation";
-    titleSlide.addText(subtitleText.replace(/Presented by: \[Username\]/, `Presented by: ${"User"}`), {
+    titleSlide.addText(subtitleText, {
         placeholder: 'subtitle'
     });
-    
 
     // Content slides
     result.slides.slice(1).forEach((slide) => {
@@ -385,7 +385,7 @@ export default function PresentationGeneratorTool() {
                                     </ul>
                                 </div>
                                 <div className="bg-muted flex items-center justify-center overflow-hidden">
-                                    {slide.imageUrl ? (
+                                    {slide.imageUrl && slide.imageUrl.startsWith('data:image') ? (
                                         <Image
                                             src={slide.imageUrl}
                                             alt={slide.title}
@@ -421,5 +421,3 @@ export default function PresentationGeneratorTool() {
     </div>
   );
 }
-
-    
