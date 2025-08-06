@@ -24,7 +24,7 @@ export type GeneratePresentationInput = z.infer<typeof GeneratePresentationInput
 
 const SlideSchema = z.object({
   title: z.string().describe('The title of the slide.'),
-  content: z.array(z.string()).describe('An array of exactly 4 short bullet points for the slide content.'),
+  content: z.array(z.string()).describe('An array of exactly 4 short bullet points for the slide content. Each bullet point must have around 8 words.'),
   imagePrompt: z.string().describe('A text prompt to generate a relevant image for this slide.'),
   imageUrl: z.string().optional().describe('The data URI of the generated image for the slide.'),
 });
@@ -56,8 +56,8 @@ const outlinePrompt = ai.definePrompt({
 
 **Core Principles (Non-negotiable):**
 - **Visuals > Text**: Your primary goal is to create a powerful, memorable visual for each slide. The text is secondary and only supports the visual. For every slide, you must first conceive the visual and then write a short title and content to complement it.
-- **One Idea per Slide**: Each slide must focus on a single, core idea. If a point is complex, it MUST be broken down into multiple slides. Do not cram information.
-- **Strict Content Rules**: Each slide must have exactly 4 bullet points. Each bullet point MUST have around 8 words.
+- **One Idea per Slide**: Each slide must focus on a single, core idea. If a point is complex, it MUST be broken down into multiple slides.
+- **Strict Content Rules**: Each content slide must have exactly 4 bullet points. Each bullet point MUST have around 8 words.
 
 **Design Generation:**
 - Based on the presentation topic, create a cohesive and professional design theme that is visually representative of the subject.
@@ -72,9 +72,10 @@ const outlinePrompt = ai.definePrompt({
   3. A descriptive prompt for an AI image generator. This prompt must describe a **stunning, high-quality, and cinematic visual** that powerfully represents the slide's core idea. **Crucially, the generated image should NOT contain any text or words to avoid spelling errors.**
 
 **Structure Generation Instructions:**
-- If the user provides a "Custom Structure," you MUST use those slide titles in the exact order given.
-- If the content type is "Project Proposal," generate a presentation with exactly 8 slides using this structure: 1. Introduction, 2. Objectives, 3. Problem Statement / Need Analysis, 4. Target Group / Area, 5. Proposed Activities, 6. Methodology, 7. Expected Outcomes, 8. Conclusion.
-- If the content type is "General," generate a logical presentation of exactly {{{numSlides}}} slides, including a title and conclusion.
+- **The very first slide must always be an introduction slide.** Its title should be "Introduction" and it should introduce the main topic and include the phrase "Presented by: [Username]".
+- If the user provides a "Custom Structure," you MUST use those slide titles in the exact order given for the subsequent slides.
+- If the content type is "Project Proposal," generate the subsequent presentation slides using this structure: 1. Introduction, 2. Objectives, 3. Problem Statement / Need Analysis, 4. Target Group / Area, 5. Proposed Activities, 6. Methodology, 7. Expected Outcomes, 8. Conclusion.
+- If the content type is "General," generate a logical presentation of exactly {{{numSlides}}} slides, which must include a conclusion slide at the end. The introduction slide is extra.
 
 **User Input Details:**
 - Topic: {{{topic}}}

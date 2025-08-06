@@ -170,57 +170,44 @@ export default function PresentationGeneratorTool() {
       ],
     });
 
-    result.slides.forEach((slide, index) => {
-      const isFirstSlide = index === 0;
-      const masterName = isFirstSlide ? 'TITLE_SLIDE' : 'CONTENT_SLIDE';
-      const pptxSlide = pptx.addSlide({ masterName });
+    // Title slide
+    const titleSlide = pptx.addSlide({ masterName: 'TITLE_SLIDE' });
+    titleSlide.transition = { type: "fade", duration: 1 };
+    titleSlide.addText(result.title, {
+        placeholder: "title",
+        anim: { effect: "wipe", type: "in", duration: 1, delay: 0.2, from: "bottom" }
+    });
+
+    // Content slides
+    result.slides.forEach((slide) => {
+      const pptxSlide = pptx.addSlide({ masterName: 'CONTENT_SLIDE' });
       
       pptxSlide.transition = { type: "fade", duration: 1 };
       
-      if (isFirstSlide) {
-        pptxSlide.addText(slide.title, {
-          placeholder: "title",
-          anim: { effect: "wipe", type: "in", duration: 1, delay: 0.2, from: "bottom" }
-        });
-        
-        const subtitleTextObjects = slide.content.map(point => ({
-            text: point,
-            options: { bullet: {type: 'dot'}, paraSpaceAfter: 10, breakLine: true }
-        }));
+       pptxSlide.addText(slide.title, {
+         placeholder: "title",
+         anim: { effect: "fadeIn", duration: 0.5, delay: 0.2 }
+       });
 
-        if (subtitleTextObjects.length > 0) {
-            pptxSlide.addText(subtitleTextObjects, {
-              placeholder: "subtitle",
-              anim: { effect: "fadeIn", duration: 1, delay: 0.5 }
-            });
-        }
+      const bodyTextObjects = slide.content.map(point => ({
+        text: point,
+        options: { bullet: true, paraSpaceAfter: 20, breakLine: true }
+      }));
 
-      } else {
-         pptxSlide.addText(slide.title, {
-           placeholder: "title",
-           anim: { effect: "fadeIn", duration: 0.5, delay: 0.2 }
-         });
-
-        const bodyTextObjects = slide.content.map(point => ({
-          text: point,
-          options: { bullet: true, paraSpaceAfter: 20, breakLine: true }
-        }));
-
-        if (bodyTextObjects.length > 0) {
-            pptxSlide.addText(bodyTextObjects, {
-                placeholder: 'body',
-                anim: { effect: "fly", type: 'in', by: "paragraph", duration: 0.5, delay: 0.5, stagger: 200 }
-            });
-        }
-        
-        if (slide.imageUrl && slide.imageUrl.startsWith('data:image')) {
-          pptxSlide.addImage({
-            data: slide.imageUrl,
-            placeholder: "image",
-            sizing: { type: 'cover', w: 3, h: 4.5 },
-            anim: { effect: "zoom", type: 'in', duration: 1, delay: 0.3 }
+      if (bodyTextObjects.length > 0) {
+          pptxSlide.addText(bodyTextObjects, {
+              placeholder: 'body',
+              anim: { effect: "fly", type: 'in', by: "paragraph", duration: 0.5, delay: 0.5, stagger: 200 }
           });
-        }
+      }
+      
+      if (slide.imageUrl && slide.imageUrl.startsWith('data:image')) {
+        pptxSlide.addImage({
+          data: slide.imageUrl,
+          placeholder: "image",
+          sizing: { type: 'cover', w: 3, h: 4.5 },
+          anim: { effect: "zoom", type: 'in', duration: 1, delay: 0.3 }
+        });
       }
     });
 
