@@ -68,7 +68,7 @@ const outlinePrompt = ai.definePrompt({
 - **Tone and Style**: The content must be professional and authoritative, yet sound natural and human-written. It should be engaging, clear, and concise. Avoid jargon.
 - For each slide, you MUST provide:
   1. A short, impactful title.
-  2. A set of exactly 4 extremely CONCISE bullet points, strictly adhering to the content rules.
+  2. A set of exactly 4 extremely CONCISE bullet points, strictly adhering to the content rules (6-8 words per point).
   3. A descriptive prompt for an AI image generator. This prompt must describe a **stunning, high-quality, and cinematic visual** that powerfully represents the slide's core idea. **Crucially, the generated image should NOT contain any text or words to avoid spelling errors.**
 
 **Structure Generation Instructions:**
