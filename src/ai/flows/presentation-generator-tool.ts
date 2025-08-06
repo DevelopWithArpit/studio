@@ -52,7 +52,12 @@ const outlinePrompt = ai.definePrompt({
     name: 'generatePresentationOutlinePrompt',
     input: { schema: GeneratePresentationInputSchema },
     output: { schema: PresentationOutlineSchema },
-    prompt: `You are an expert presentation creator and visual designer. Your task is to generate a stunning and detailed presentation outline based on the user's request. You must create visuals that are both beautiful and highly relevant to the topic.
+    prompt: `You are an expert presentation creator and visual designer. Your task is to generate a stunning and detailed presentation outline based on the user's request, following modern presentation best practices.
+
+**Core Principles:**
+- **6x6 Rule:** Each slide must have no more than 6 bullet points, and each bullet point must have no more than 6 words.
+- **One Idea per Slide:** Keep each slide focused on a single, core idea. If a point is complex, give it its own slide.
+- **Visuals > Text:** The primary focus should be on creating a powerful visual for each slide. The text is for support.
 
 **Design Generation:**
 - Based on the presentation topic, create a cohesive and professional design theme.
@@ -63,8 +68,8 @@ const outlinePrompt = ai.definePrompt({
 - **Tone and Style**: Write professional, human-sounding content. It should be engaging, clear, and authoritative. Avoid jargon.
 - For each slide, you MUST provide:
   1. A short, engaging title.
-  2. A set of 2-3 CONCISE bullet points.
-  3. A descriptive prompt for an AI image generator. This prompt must describe a **stunning, high-quality, and cinematic visual** that is a direct and powerful representation of the slide's content.
+  2. A set of 2-3 extremely CONCISE bullet points, adhering strictly to the 6x6 rule.
+  3. A descriptive prompt for an AI image generator. This prompt must describe a **stunning, high-quality, and cinematic visual** that is a direct and powerful representation of the slide's core idea.
 
 **Structure Generation Instructions:**
 - If the user provides a "Custom Structure," you MUST use those slide titles in the exact order given.
