@@ -52,24 +52,24 @@ const outlinePrompt = ai.definePrompt({
     name: 'generatePresentationOutlinePrompt',
     input: { schema: GeneratePresentationInputSchema },
     output: { schema: PresentationOutlineSchema },
-    prompt: `You are an expert presentation creator and designer with the ability to write like a professional human. Your task is to generate a compelling and detailed presentation outline based on the user's request.
+    prompt: `You are an expert presentation creator and visual designer. Your task is to generate a stunning and detailed presentation outline based on the user's request. You must create visuals that are both beautiful and highly relevant to the topic.
 
 **Design Generation:**
-- Based on the presentation topic, you MUST create a cohesive design theme. The entire color scheme should be derived from the topic itself to create a strong visual identity.
-- Provide a hex color code for the 'backgroundColor', a contrasting 'textColor', and a vibrant 'accentColor' for titles.
-- You MUST also provide a 'backgroundPrompt'. This should be a prompt for an AI image generator to create a subtle, abstract, and professional background image that is visually related to the topic but not distracting.
+- Based on the presentation topic, create a cohesive and professional design theme.
+- Provide hex color codes for 'backgroundColor', 'textColor', and 'accentColor' that create a visually appealing and readable palette.
+- You MUST also provide a 'backgroundPrompt'. This should be a prompt for an AI image generator to create a stunning, high-quality, and professional background image. The background should be visually related to the topic but abstract enough not to distract from the content. Think "cinematic," "subtle," "professional."
 
 **Content Generation:**
-- **Tone and Style**: The content must be professional but also sound natural and human-written. Avoid jargon and robotic phrasing. Write in an engaging, clear, and authoritative tone.
+- **Tone and Style**: Write professional, human-sounding content. It should be engaging, clear, and authoritative. Avoid jargon.
 - For each slide, you MUST provide:
   1. A short, engaging title.
-  2. A set of 2-3 CONCISE bullet points. Each bullet point should be a short phrase or sentence that flows well.
-  3. A descriptive prompt for an AI image generator that is a direct visual representation of the bullet points.
+  2. A set of 2-3 CONCISE bullet points.
+  3. A descriptive prompt for an AI image generator. This prompt must describe a **stunning, high-quality, and cinematic visual** that is a direct and powerful representation of the slide's content.
 
 **Structure Generation Instructions:**
-- If the user provides a "Custom Structure," you MUST use those slide titles in the exact order given. For each title, generate detailed bullet points and a relevant image prompt.
+- If the user provides a "Custom Structure," you MUST use those slide titles in the exact order given.
 - If the content type is "Project Proposal," generate a presentation with exactly 8 slides using this structure: 1. Introduction, 2. Objectives, 3. Problem Statement / Need Analysis, 4. Target Group / Area, 5. Proposed Activities, 6. Methodology, 7. Expected Outcomes, 8. Conclusion.
-- If the content type is "General," generate a presentation with a logical flow of exactly {{{numSlides}}} slides, including a title slide and a conclusion slide.
+- If the content type is "General," generate a logical presentation of exactly {{{numSlides}}} slides, including a title and conclusion.
 
 **User Input Details:**
 - Topic: {{{topic}}}
