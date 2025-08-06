@@ -57,7 +57,7 @@ const outlinePrompt = ai.definePrompt({
 **Core Principles (Non-negotiable):**
 - **Visuals > Text**: Your primary goal is to create a powerful, memorable visual for each slide. The text is secondary and only supports the visual. For every slide, you must first conceive the visual and then write a short title and content to complement it.
 - **One Idea per Slide**: Each slide must focus on a single, core idea. If a point is complex, it MUST be broken down into multiple slides. Do not cram information.
-- **Strict Content Rules**: Each slide can have a maximum of 2-4 bullet points. Each bullet point MUST have a maximum of 6-8 words.
+- **Strict Content Rules**: Each slide must have 2-4 bullet points. Each bullet point MUST have a maximum of 6-8 words.
 
 **Design Generation:**
 - Based on the presentation topic, create a cohesive and professional design theme that is visually representative of the subject.
