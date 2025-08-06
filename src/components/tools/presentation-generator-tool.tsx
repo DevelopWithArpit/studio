@@ -118,13 +118,17 @@ export default function PresentationGeneratorTool() {
     const pptx = new PptxGenJS();
     pptx.layout = 'LAYOUT_WIDE';
     
-    const { design } = result;
+    const { design, backgroundImageUrl } = result;
     const cleanColor = (color: string) => color.startsWith('#') ? color.substring(1) : color;
+    const masterBackground = backgroundImageUrl 
+        ? { data: backgroundImageUrl } 
+        : { color: cleanColor(design.backgroundColor) };
+
 
     // Master Slide: Title
     pptx.defineSlideMaster({
       title: "TITLE_SLIDE",
-      background: { color: cleanColor(design.backgroundColor) },
+      background: masterBackground,
       objects: [
         {
             placeholder: {
@@ -144,7 +148,7 @@ export default function PresentationGeneratorTool() {
     // Master Slide: Content
     pptx.defineSlideMaster({
       title: "CONTENT_SLIDE",
-      background: { color: cleanColor(design.backgroundColor) },
+      background: masterBackground,
       objects: [
         {
             placeholder: {

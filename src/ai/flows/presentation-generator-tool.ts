@@ -33,12 +33,14 @@ const DesignSchema = z.object({
   backgroundColor: z.string().describe('A hex color code for the slide background (e.g., "#0B192E").'),
   textColor: z.string().describe('A hex color code for the main text (e.g., "#E6F1FF").'),
   accentColor: z.string().describe('A hex color code for titles and accents (e.g., "#64FFDA").'),
+  backgroundPrompt: z.string().describe("A prompt for an AI image generator to create a subtle, professional background image related to the presentation topic. It should be abstract and not distracting."),
 });
 
 const PresentationOutlineSchema = z.object({
   title: z.string().describe('The main title of the presentation.'),
   slides: z.array(SlideSchema).describe('An array of slide objects.'),
   design: DesignSchema.describe('A design theme for the presentation, inspired by the topic.'),
+  backgroundImageUrl: z.string().optional().describe('The data URI of the generated background image for the presentation.'),
 });
 export type GeneratePresentationOutput = z.infer<typeof PresentationOutlineSchema>;
 
@@ -55,6 +57,7 @@ const outlinePrompt = ai.definePrompt({
 **Design Generation:**
 - Based on the presentation topic, you MUST create a cohesive design theme.
 - Provide a hex color code for the 'backgroundColor', a contrasting 'textColor', and a vibrant 'accentColor' for titles.
+- You MUST also provide a 'backgroundPrompt'. This should be a prompt for an AI image generator to create a subtle, abstract, and professional background image that is visually related to the topic but not distracting.
 
 **Content Generation:**
 - **Tone and Style**: The content must be professional but also sound natural and human-written. Avoid jargon and robotic phrasing. Write in an engaging, clear, and authoritative tone.
@@ -90,48 +93,43 @@ const generatePresentationFlow = ai.defineFlow(
       throw new Error('Failed to generate presentation outline.');
     }
 
-    // 2. Generate an image for each slide sequentially.
-    for (let i = 0; i < outline.slides.length; i++) {
-        const slide = outline.slides[i];
-        let fullImagePrompt = slide.imagePrompt;
-        if (input.imageStyle) {
-            fullImagePrompt += `, in a ${input.imageStyle} style`;
-        }
-        
-        const maxRetries = 2;
-        let success = false;
-        for (let attempt = 0; attempt <= maxRetries; attempt++) {
-            try {
-                const { media } = await ai.generate({
-                    model: 'googleai/gemini-2.0-flash-preview-image-generation',
-                    prompt: fullImagePrompt,
-                    config: {
-                      responseModalities: ['TEXT', 'IMAGE'],
-                    },
-                });
+    // 2. Generate background and slide images in parallel
+    const imageGenerationPromises = [
+        // Background Image
+        ai.generate({
+            model: 'googleai/gemini-2.0-flash-preview-image-generation',
+            prompt: outline.design.backgroundPrompt,
+            config: { responseModalities: ['TEXT', 'IMAGE'] },
+        }).then(result => ({ type: 'background', url: result.media?.url })),
 
-                if (media?.url) {
-                    slide.imageUrl = media.url;
-                    success = true;
-                    if (i < outline.slides.length -1) {
-                      await new Promise(resolve => setTimeout(resolve, 2000));
-                    }
-                    break; 
-                }
-            } catch (error) {
-                console.error(`Attempt ${attempt + 1} failed for slide: "${slide.title}". Error:`, error);
-                if (attempt < maxRetries) {
-                    const delay = Math.pow(2, attempt) * 1000;
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                }
+        // Slide Images
+        ...outline.slides.map((slide, index) => {
+            let fullImagePrompt = slide.imagePrompt;
+            if (input.imageStyle) {
+                fullImagePrompt += `, in a ${input.imageStyle} style`;
             }
+            return ai.generate({
+                model: 'googleai/gemini-2.0-flash-preview-image-generation',
+                prompt: fullImagePrompt,
+                config: { responseModalities: ['TEXT', 'IMAGE'] },
+            }).then(result => ({ type: 'slide', index, url: result.media?.url }));
+        })
+    ];
+    
+    const results = await Promise.allSettled(imageGenerationPromises);
+
+    results.forEach(result => {
+        if (result.status === 'fulfilled' && result.value) {
+            const { type, url } = result.value;
+            if (type === 'background') {
+                outline.backgroundImageUrl = url;
+            } else if (type === 'slide' && result.value.index !== undefined) {
+                outline.slides[result.value.index].imageUrl = url;
+            }
+        } else if (result.status === 'rejected') {
+            console.error('An image generation request failed:', result.reason);
         }
-        
-        if (!success) {
-            console.error(`Failed to generate image for slide: "${slide.title}" after all retries.`);
-            slide.imageUrl = '';
-        }
-    }
+    });
 
     return outline;
   }
