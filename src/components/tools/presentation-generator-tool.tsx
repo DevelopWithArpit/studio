@@ -182,11 +182,19 @@ export default function PresentationGeneratorTool() {
           placeholder: "title",
           anim: { effect: "wipe", type: "in", duration: 1, delay: 0.2, from: "bottom" }
         });
-        const subtitle = (slide.content.join('\\n') || result.topic).replace(/\\n/g, '\n');
-        pptxSlide.addText(subtitle, {
-          placeholder: "subtitle",
-          anim: { effect: "fadeIn", duration: 1, delay: 0.5 }
-        });
+        
+        const subtitleTextObjects = slide.content.map(point => ({
+            text: point,
+            options: { bullet: {type: 'dot'}, paraSpaceAfter: 10, breakLine: true }
+        }));
+
+        if (subtitleTextObjects.length > 0) {
+            pptxSlide.addText(subtitleTextObjects, {
+              placeholder: "subtitle",
+              anim: { effect: "fadeIn", duration: 1, delay: 0.5 }
+            });
+        }
+
       } else {
          pptxSlide.addText(slide.title, {
            placeholder: "title",
