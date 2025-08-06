@@ -117,21 +117,24 @@ export default function PresentationGeneratorTool() {
 
     const pptx = new PptxGenJS();
     pptx.layout = 'LAYOUT_WIDE';
+    
+    const { design } = result;
+    const cleanColor = (color: string) => color.startsWith('#') ? color.substring(1) : color;
 
     // Master Slide: Title
     pptx.defineSlideMaster({
       title: "TITLE_SLIDE",
-      background: { color: "1A1A1A" },
+      background: { color: cleanColor(design.backgroundColor) },
       objects: [
         {
             placeholder: {
-                options: { name: "title", type: "title", x: 0.5, y: 1.5, w: 9, h: 1.5, fontFace: 'Arial', fontSize: 44, bold: true, color: 'FFFFFF', align: 'center', valign: 'middle' },
+                options: { name: "title", type: "title", x: 0.5, y: 1.5, w: 9, h: 1.5, fontFace: 'Arial', fontSize: 44, bold: true, color: cleanColor(design.accentColor), align: 'center', valign: 'middle' },
                 text: "Default Title",
             }
         },
         {
             placeholder: {
-                options: { name: "subtitle", type: "body", x: 1.0, y: 3.5, w: 8, h: 2, fontFace: 'Arial', fontSize: 20, color: 'A9A9A9', align: 'center', valign: 'top' },
+                options: { name: "subtitle", type: "body", x: 1.0, y: 3.5, w: 8, h: 2, fontFace: 'Arial', fontSize: 20, color: cleanColor(design.textColor), align: 'center', valign: 'top' },
                 text: "Default Subtitle",
             }
         },
@@ -141,17 +144,17 @@ export default function PresentationGeneratorTool() {
     // Master Slide: Content
     pptx.defineSlideMaster({
       title: "CONTENT_SLIDE",
-      background: { color: "1A1A1A" },
+      background: { color: cleanColor(design.backgroundColor) },
       objects: [
         {
             placeholder: {
-                options: { name: "title", type: "title", x: 0.5, y: 0.2, w: 9, h: 0.8, fontFace: 'Arial', fontSize: 32, bold: true, color: 'FFFFFF', align: 'left', valign: 'middle' },
+                options: { name: "title", type: "title", x: 0.5, y: 0.2, w: 9, h: 0.8, fontFace: 'Arial', fontSize: 32, bold: true, color: cleanColor(design.accentColor), align: 'left', valign: 'middle' },
                 text: "Default Title",
             },
         },
         {
             placeholder: {
-                options: { name: "body", type: "body", x: 0.5, y: 1.2, w: 5.5, h: 4.5, fontFace: 'Arial', fontSize: 18, color: 'D3D3D3', paraSpaceAfter: 20, isTextBox: true },
+                options: { name: "body", type: "body", x: 0.5, y: 1.2, w: 5.5, h: 4.5, fontFace: 'Arial', fontSize: 18, color: cleanColor(design.textColor), paraSpaceAfter: 20, isTextBox: true },
                 text: "Default Body Text",
             },
         },
