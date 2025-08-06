@@ -11,7 +11,6 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { googleAI } from '@genkit-ai/googleai';
 
 const GeneratePresentationInputSchema = z.object({
   topic: z.string().describe('The topic or title of the presentation.'),
@@ -48,7 +47,7 @@ const outlinePrompt = ai.definePrompt({
 
 For each slide, you MUST provide:
 1.  A short, engaging title.
-2.  A set of detailed and comprehensive bullet points for the content.
+2.  A set of 2-3 concise bullet points for the content. Each bullet point should be a short phrase or sentence.
 3.  A descriptive prompt for an AI image generator. The image prompt MUST BE a direct visual representation of the bullet points you just wrote for the slide, and it must NOT include any text, letters, or numbers.
 
 **Presentation Topic/Title:** "{{{topic}}}"
@@ -82,12 +81,12 @@ const generatePresentationFlow = ai.defineFlow(
 
     // 2. Generate an image for each slide sequentially.
     for (const slide of outline.slides) {
+      let fullImagePrompt = slide.imagePrompt;
+      if (input.imageStyle) {
+          fullImagePrompt += `, in a ${input.imageStyle} style`;
+      }
+      
       try {
-        let fullImagePrompt = slide.imagePrompt;
-        if (input.imageStyle) {
-            fullImagePrompt += `, in a ${input.imageStyle} style`;
-        }
-        
         const { media } = await ai.generate({
           model: 'googleai/gemini-2.0-flash-preview-image-generation',
           prompt: fullImagePrompt,
@@ -99,11 +98,11 @@ const generatePresentationFlow = ai.defineFlow(
         if (media?.url) {
           slide.imageUrl = media.url;
         } else {
-          slide.imageUrl = ''; // Mark as failed
+          slide.imageUrl = ''; 
         }
       } catch (error) {
         console.error(`Failed to generate image for slide: "${slide.title}". Error:`, error);
-        slide.imageUrl = ''; // Mark as failed on error
+        slide.imageUrl = ''; 
       }
     }
 
