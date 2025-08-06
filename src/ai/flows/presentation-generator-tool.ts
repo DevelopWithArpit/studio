@@ -80,51 +80,30 @@ const generatePresentationFlow = ai.defineFlow(
       throw new Error('Failed to generate presentation outline.');
     }
 
-    // 2. Sequentially generate an image for each slide with retries.
-    for (let i = 0; i < outline.slides.length; i++) {
-      const slide = outline.slides[i];
-      let fullImagePrompt = slide.imagePrompt;
-      if (input.imageStyle) {
-          fullImagePrompt += `, in a ${input.imageStyle} style`;
-      }
-      
-      let success = false;
-      let attempts = 0;
-      const maxAttempts = 3;
-
-      while (!success && attempts < maxAttempts) {
-        try {
-          const { media } = await ai.generate({
-            model: 'googleai/gemini-2.0-flash-preview-image-generation',
-            prompt: fullImagePrompt,
-            config: {
-              responseModalities: ['TEXT', 'IMAGE'],
-            },
-          });
-
-          if (media?.url) {
-            slide.imageUrl = media.url;
-            success = true;
-          } else {
-             throw new Error('No media URL returned from image generation API.');
-          }
-        } catch (error) {
-          attempts++;
-          console.error(`Attempt ${attempts} failed for slide ${i + 1}:`, error);
-          if (attempts >= maxAttempts) {
-            slide.imageUrl = ''; // Mark as failed after all attempts
-            console.error(`All ${maxAttempts} attempts failed for slide ${i + 1}. Skipping image.`);
-          } else {
-            // Wait before retrying (e.g., exponential backoff)
-            const delay = Math.pow(2, attempts) * 1000;
-            console.log(`Waiting ${delay}ms before next attempt...`);
-            await new Promise(resolve => setTimeout(resolve, delay));
-          }
+    // 2. Generate an image for each slide sequentially.
+    for (const slide of outline.slides) {
+      try {
+        let fullImagePrompt = slide.imagePrompt;
+        if (input.imageStyle) {
+            fullImagePrompt += `, in a ${input.imageStyle} style`;
         }
-      }
-       // Add a fixed delay between successful image generations to avoid overwhelming the service
-      if(success && i < outline.slides.length - 1) {
-          await new Promise(resolve => setTimeout(resolve, 2000)); 
+        
+        const { media } = await ai.generate({
+          model: 'googleai/gemini-2.0-flash-preview-image-generation',
+          prompt: fullImagePrompt,
+          config: {
+            responseModalities: ['TEXT', 'IMAGE'],
+          },
+        });
+
+        if (media?.url) {
+          slide.imageUrl = media.url;
+        } else {
+          slide.imageUrl = ''; // Mark as failed
+        }
+      } catch (error) {
+        console.error(`Failed to generate image for slide: "${slide.title}". Error:`, error);
+        slide.imageUrl = ''; // Mark as failed on error
       }
     }
 
