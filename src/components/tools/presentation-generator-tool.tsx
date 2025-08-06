@@ -205,7 +205,7 @@ export default function PresentationGeneratorTool() {
             });
         }
         
-        if (slide.imageUrl) {
+        if (slide.imageUrl && slide.imageUrl.startsWith('data:image')) {
           pptxSlide.addImage({
             data: slide.imageUrl,
             placeholder: "image",
