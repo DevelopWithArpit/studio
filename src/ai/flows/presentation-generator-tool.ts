@@ -24,7 +24,7 @@ export type GeneratePresentationInput = z.infer<typeof GeneratePresentationInput
 
 const SlideSchema = z.object({
   title: z.string().describe('The title of the slide.'),
-  content: z.array(z.string()).describe('An array of short bullet points for the slide content.'),
+  content: z.array(z.string()).describe('An array of exactly 4 short bullet points for the slide content.'),
   imagePrompt: z.string().describe('A text prompt to generate a relevant image for this slide.'),
   imageUrl: z.string().optional().describe('The data URI of the generated image for the slide.'),
 });
@@ -57,7 +57,7 @@ const outlinePrompt = ai.definePrompt({
 **Core Principles (Non-negotiable):**
 - **Visuals > Text**: Your primary goal is to create a powerful, memorable visual for each slide. The text is secondary and only supports the visual. For every slide, you must first conceive the visual and then write a short title and content to complement it.
 - **One Idea per Slide**: Each slide must focus on a single, core idea. If a point is complex, it MUST be broken down into multiple slides. Do not cram information.
-- **Strict Content Rules**: Each slide must have 2-4 bullet points. Each bullet point MUST have a maximum of 6-8 words.
+- **Strict Content Rules**: Each slide must have exactly 4 bullet points. Each bullet point MUST have a maximum of 6-8 words.
 
 **Design Generation:**
 - Based on the presentation topic, create a cohesive and professional design theme that is visually representative of the subject.
@@ -68,7 +68,7 @@ const outlinePrompt = ai.definePrompt({
 - **Tone and Style**: The content must be professional and authoritative, yet sound natural and human-written. It should be engaging, clear, and concise. Avoid jargon.
 - For each slide, you MUST provide:
   1. A short, impactful title.
-  2. A set of 2-4 extremely CONCISE bullet points, strictly adhering to the content rules.
+  2. A set of exactly 4 extremely CONCISE bullet points, strictly adhering to the content rules.
   3. A descriptive prompt for an AI image generator. This prompt must describe a **stunning, high-quality, and cinematic visual** that powerfully represents the slide's core idea. **Crucially, the generated image should NOT contain any text or words to avoid spelling errors.**
 
 **Structure Generation Instructions:**
