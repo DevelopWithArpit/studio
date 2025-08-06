@@ -82,6 +82,7 @@ const outlinePrompt = ai.definePrompt({
 - Content Type: {{{contentType}}}
 - Number of Slides (for General type): {{{numSlides}}}
 - Custom Structure (if provided): {{{customStructure}}}
+- Image Style: {{{imageStyle}}}
 `,
 });
 
@@ -98,44 +99,48 @@ const generatePresentationFlow = ai.defineFlow(
       throw new Error('Failed to generate presentation outline.');
     }
 
-    const imagePrompts = [
-      input.imageStyle ? `${outline.design.backgroundPrompt}, in a ${input.imageStyle} style` : outline.design.backgroundPrompt,
-      ...outline.slides.map(slide => {
-        let fullImagePrompt = slide.imagePrompt;
+    const applyStyle = (prompt: string) => {
         if (input.imageStyle) {
-          fullImagePrompt += `, in a ${input.imageStyle} style`;
+            return `${prompt}, in a ${input.imageStyle} style`;
         }
-        return fullImagePrompt;
-      }),
-    ];
-
-    const imageGenerationPromises = imagePrompts.map(prompt =>
-      ai.generate({
+        return prompt;
+    }
+    
+    // Create all image generation promises
+    const backgroundPromise = ai.generate({
         model: 'googleai/gemini-2.0-flash-preview-image-generation',
-        prompt,
+        prompt: applyStyle(outline.design.backgroundPrompt),
         config: { responseModalities: ['TEXT', 'IMAGE'] },
-      })
-    );
+    });
 
-    const settledResults = await Promise.allSettled(imageGenerationPromises);
+    const slideImagePromises = outline.slides.map(slide => ai.generate({
+        model: 'googleai/gemini-2.0-flash-preview-image-generation',
+        prompt: applyStyle(slide.imagePrompt),
+        config: { responseModalities: ['TEXT', 'IMAGE'] },
+    }));
 
-    settledResults.forEach((result, index) => {
-      if (index === 0) { // Handle background image
+    // Settle all promises
+    const [backgroundResult, ...slideImageResults] = await Promise.allSettled([
+        backgroundPromise,
+        ...slideImagePromises
+    ]);
+
+    // Handle background image result
+    if (backgroundResult.status === 'fulfilled' && backgroundResult.value.media?.url) {
+        outline.backgroundImageUrl = backgroundResult.value.media.url;
+    } else {
+        console.error('Background image generation failed:', backgroundResult.status === 'rejected' ? backgroundResult.reason : 'No URL returned');
+        outline.backgroundImageUrl = ''; 
+    }
+
+    // Handle slide image results
+    slideImageResults.forEach((result, index) => {
         if (result.status === 'fulfilled' && result.value.media?.url) {
-          outline.backgroundImageUrl = result.value.media.url;
+            outline.slides[index].imageUrl = result.value.media.url;
         } else {
-          console.error('Background image generation failed:', result.status === 'rejected' ? result.reason : 'No URL returned');
-          outline.backgroundImageUrl = ''; 
+            console.error(`Slide ${index + 1} image generation failed:`, result.status === 'rejected' ? result.reason : 'No URL returned');
+            outline.slides[index].imageUrl = '';
         }
-      } else { // Handle slide images
-        const slideIndex = index - 1;
-        if (result.status === 'fulfilled' && result.value.media?.url) {
-          outline.slides[slideIndex].imageUrl = result.value.media.url;
-        } else {
-          console.error(`Slide ${slideIndex + 1} image generation failed:`, result.status === 'rejected' ? result.reason : 'No URL returned');
-          outline.slides[slideIndex].imageUrl = '';
-        }
-      }
     });
 
     return outline;
