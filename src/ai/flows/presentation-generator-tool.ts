@@ -6,7 +6,7 @@
  *
  * - generatePresentation - A function that creates a complete presentation.
  * - GeneratePresentationInput - The input type for the function.
- * - GeneratePresentationOutput - The return type for the function.
+ * - GeneratePresentationOutput - The return type for a single slide's image.
  */
 
 import { ai } from '@/ai/genkit';
@@ -50,16 +50,17 @@ const outlinePrompt = ai.definePrompt({
     name: 'generatePresentationOutlinePrompt',
     input: { schema: GeneratePresentationInputSchema },
     output: { schema: PresentationOutlineSchema },
-    prompt: `You are an expert presentation creator and designer. Your task is to generate a compelling and detailed presentation outline based on the user's request.
+    prompt: `You are an expert presentation creator and designer with the ability to write like a professional human. Your task is to generate a compelling and detailed presentation outline based on the user's request.
 
 **Design Generation:**
 - Based on the presentation topic, you MUST create a cohesive design theme.
 - Provide a hex color code for the 'backgroundColor', a contrasting 'textColor', and a vibrant 'accentColor' for titles.
 
 **Content Generation:**
+- **Tone and Style**: The content must be professional but also sound natural and human-written. Avoid jargon and robotic phrasing. Write in an engaging, clear, and authoritative tone.
 - For each slide, you MUST provide:
   1. A short, engaging title.
-  2. A set of 2-3 CONCISE bullet points for the content. Each bullet point should be a short phrase or sentence.
+  2. A set of 2-3 CONCISE bullet points. Each bullet point should be a short phrase or sentence that flows well.
   3. A descriptive prompt for an AI image generator that is a direct visual representation of the bullet points.
 
 **Structure Generation Instructions:**
@@ -112,6 +113,9 @@ const generatePresentationFlow = ai.defineFlow(
                 if (media?.url) {
                     slide.imageUrl = media.url;
                     success = true;
+                    if (i < outline.slides.length -1) {
+                      await new Promise(resolve => setTimeout(resolve, 2000));
+                    }
                     break; 
                 }
             } catch (error) {
