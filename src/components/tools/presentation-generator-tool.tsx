@@ -43,11 +43,13 @@ import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { cn } from '@/lib/utils';
 import { Textarea } from '../ui/textarea';
 import { RobotsBuildingLoader } from '../ui/robots-building-loader';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 const formSchema = z.object({
   topic: z.string().min(3, 'Please enter a topic with at least 3 characters.'),
   numSlides: z.coerce.number().int().min(2, "Must be at least 2 slides.").max(20, "Cannot exceed 20 slides."),
   imageStyle: z.string().optional(),
+  language: z.string().optional(),
   contentType: z.enum(['general', 'projectProposal', 'custom']).default('general'),
   customStructure: z.string().optional(),
 }).refine(data => {
@@ -73,6 +75,7 @@ export default function PresentationGeneratorTool() {
       topic: '',
       numSlides: 5,
       imageStyle: 'photorealistic',
+      language: 'English',
       contentType: 'general',
       customStructure: '',
     },
@@ -89,6 +92,7 @@ export default function PresentationGeneratorTool() {
         contentType: data.contentType,
         numSlides: data.numSlides,
         imageStyle: data.imageStyle,
+        language: data.language,
     };
     if (data.contentType === 'custom' && data.customStructure) {
         input.customStructure = data.customStructure;
@@ -120,7 +124,7 @@ export default function PresentationGeneratorTool() {
     
     const { design, backgroundImageUrl } = result;
     const cleanColor = (color: string) => color.startsWith('#') ? color.substring(1) : color;
-    const masterBackground = backgroundImageUrl 
+    const masterBackground = backgroundImageUrl && backgroundImageUrl.startsWith('data:image')
         ? { data: backgroundImageUrl } 
         : { color: cleanColor(design.backgroundColor) };
 
@@ -179,7 +183,7 @@ export default function PresentationGeneratorTool() {
     });
     
     const introSlideContent = result.slides[0]?.content ?? [];
-    const subtitleText = introSlideContent.join('\n').replace(/Presented by: \[Username\]/, `Presented by: ${"User"}`);
+    const subtitleText = introSlideContent.join('\\n');
 
     titleSlide.addText(subtitleText, {
         placeholder: 'subtitle'
@@ -308,7 +312,7 @@ export default function PresentationGeneratorTool() {
                 />
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <FormField
                   control={form.control}
                   name="numSlides"
@@ -336,6 +340,28 @@ export default function PresentationGeneratorTool() {
                       <FormControl>
                         <Input placeholder="e.g., minimalist, cartoon, abstract" {...field} />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="language"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Language</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a language" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="English">English</SelectItem>
+                          <SelectItem value="Hindi">Hindi</SelectItem>
+                          <SelectItem value="Marathi">Marathi</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}

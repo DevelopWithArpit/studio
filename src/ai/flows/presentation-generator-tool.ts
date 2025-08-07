@@ -19,6 +19,7 @@ const GeneratePresentationInputSchema = z.object({
   contentType: z.enum(['general', 'projectProposal', 'custom']).default('general').describe('The type of content to generate.'),
   customStructure: z.string().optional().describe("A user-defined structure for the presentation, as a string of slide titles."),
   imageStyle: z.string().optional().describe("An optional style for the images (e.g., 'photorealistic', 'cartoon')."),
+  language: z.string().optional().describe("The language for the presentation content (e.g., 'English', 'Hindi', 'Marathi')."),
 });
 export type GeneratePresentationInput = z.infer<typeof GeneratePresentationInputSchema>;
 
@@ -59,22 +60,25 @@ const outlinePrompt = ai.definePrompt({
 - **One Idea per Slide**: Each slide must focus on a single, core idea. If a point is complex, it MUST be broken down into multiple slides.
 - **Strict Content Rules**: Each content slide must have exactly 4 bullet points. Each bullet point MUST have around 8 words.
 
+**Language Requirement:**
+- You MUST generate all text content (titles and bullet points) in the requested language: **{{#if language}}{{language}}{{else}}English{{/if}}**.
+
 **Design Generation:**
 - Based on the presentation topic, create a cohesive and professional design theme that is visually representative of the subject.
 - You MUST derive and provide hex color codes for 'backgroundColor', 'textColor', and 'accentColor' that are visually harmonious and reflect the topic's mood.
-- You MUST also provide a 'backgroundPrompt'. This prompt should describe a stunning, high-quality, professional background image (e.g., abstract, subtle, cinematic) that is visually related to the topic but does not distract from the content.
+- You MUST also provide a 'backgroundPrompt'. This prompt should describe a stunning, high-quality, professional background image (e.g., abstract, subtle, cinematic) that is visually related to the topic but does not distract from the content. The image prompt itself must be in English.
 
 **Content Generation:**
 - **Tone and Style**: The content must be professional and authoritative, yet sound natural and human-written. It should be engaging, clear, and concise. Avoid jargon.
 - For each slide, you MUST provide:
   1. A short, impactful title.
   2. A set of exactly 4 extremely CONCISE bullet points, strictly adhering to the content rules (around 8 words per point).
-  3. A descriptive prompt for an AI image generator. This prompt must describe a **stunning, high-quality, and cinematic visual** that powerfully represents the slide's core idea. **Crucially, the generated image should NOT contain any text or words to avoid spelling errors.**
+  3. A descriptive prompt for an AI image generator. This prompt must describe a **stunning, high-quality, and cinematic visual** that powerfully represents the slide's core idea. **Crucially, the generated image should NOT contain any text or words to avoid spelling errors. All image prompts must be in English.**
 
 **Structure Generation Instructions:**
-- **The very first slide must always be an introduction slide.** Its title should be "Introduction" and it should introduce the main topic and include the phrase "Presented by: [Username]".
+- **The very first slide must always be an introduction slide.** Its title should be "Introduction" (or its equivalent in the target language) and it should introduce the main topic and include the phrase "Presented by: [Username]".
 - If the user provides a "Custom Structure," you MUST use those slide titles in the exact order given for the subsequent slides (after the intro slide).
-- If the content type is "Project Proposal," generate the subsequent presentation slides using this structure: 1. Introduction, 2. Objectives, 3. Problem Statement / Need Analysis, 4. Target Group / Area, 5. Proposed Activities, 6. Methodology, 7. Expected Outcomes, 8. Conclusion.
+- If the content type is "Project Proposal," generate the subsequent presentation slides using this structure: 1. Introduction, 2. Objectives, 3. Problem Statement / Need Analysis, 4. Target Group / Area, 5. Proposed Activities, 6. Methodology, 7. Expected Outcomes, 8. Conclusion. (Translated to the target language).
 - If the content type is "General," generate a logical presentation of exactly {{{numSlides}}} slides, which must include a conclusion slide at the end. The introduction slide is extra.
 
 **User Input Details:**
@@ -100,47 +104,55 @@ const generatePresentationFlow = ai.defineFlow(
     }
 
     const applyStyle = (prompt: string) => {
-        if (input.imageStyle) {
-            return `${prompt}, in a ${input.imageStyle} style`;
-        }
-        return prompt;
-    }
+      if (input.imageStyle) {
+        return `${prompt}, in a ${input.imageStyle} style`;
+      }
+      return prompt;
+    };
     
-    // Create all image generation promises
-    const backgroundPromise = ai.generate({
+    // Generate all images in parallel.
+    const imageGenerationPromises = [];
+
+    // Background Image Promise
+    imageGenerationPromises.push(
+      ai.generate({
         model: 'googleai/gemini-2.0-flash-preview-image-generation',
         prompt: applyStyle(outline.design.backgroundPrompt),
         config: { responseModalities: ['TEXT', 'IMAGE'] },
+      })
+    );
+
+    // Slide Image Promises
+    outline.slides.forEach(slide => {
+        imageGenerationPromises.push(
+            ai.generate({
+                model: 'googleai/gemini-2.0-flash-preview-image-generation',
+                prompt: applyStyle(slide.imagePrompt),
+                config: { responseModalities: ['TEXT', 'IMAGE'] },
+            })
+        );
     });
 
-    const slideImagePromises = outline.slides.map(slide => ai.generate({
-        model: 'googleai/gemini-2.0-flash-preview-image-generation',
-        prompt: applyStyle(slide.imagePrompt),
-        config: { responseModalities: ['TEXT', 'IMAGE'] },
-    }));
+    const results = await Promise.allSettled(imageGenerationPromises);
 
-    // Settle all promises
-    const [backgroundResult, ...slideImageResults] = await Promise.allSettled([
-        backgroundPromise,
-        ...slideImagePromises
-    ]);
-
-    // Handle background image result
+    // Process background image result
+    const backgroundResult = results[0];
     if (backgroundResult.status === 'fulfilled' && backgroundResult.value.media?.url) {
-        outline.backgroundImageUrl = backgroundResult.value.media.url;
+      outline.backgroundImageUrl = backgroundResult.value.media.url;
     } else {
-        console.error('Background image generation failed:', backgroundResult.status === 'rejected' ? backgroundResult.reason : 'No URL returned');
-        outline.backgroundImageUrl = ''; 
+      console.error('Background image generation failed:', backgroundResult.status === 'rejected' ? backgroundResult.reason : 'No URL returned');
+      outline.backgroundImageUrl = ''; 
     }
-
-    // Handle slide image results
+    
+    // Process slide image results
+    const slideImageResults = results.slice(1);
     slideImageResults.forEach((result, index) => {
-        if (result.status === 'fulfilled' && result.value.media?.url) {
-            outline.slides[index].imageUrl = result.value.media.url;
-        } else {
-            console.error(`Slide ${index + 1} image generation failed:`, result.status === 'rejected' ? result.reason : 'No URL returned');
-            outline.slides[index].imageUrl = '';
-        }
+      if (result.status === 'fulfilled' && result.value.media?.url) {
+        outline.slides[index].imageUrl = result.value.media.url;
+      } else {
+        console.error(`Slide ${index + 1} image generation failed:`, result.status === 'rejected' ? result.reason : 'No URL returned');
+        outline.slides[index].imageUrl = '';
+      }
     });
 
     return outline;
