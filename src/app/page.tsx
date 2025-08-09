@@ -39,6 +39,7 @@ import {
   FileEdit,
   Sparkles,
   Bot,
+  Leaf,
 } from 'lucide-react';
 import { AppLogo } from '@/components/app-logo';
 import { SheetTitle } from '@/components/ui/sheet';
@@ -67,6 +68,7 @@ const AcademicWriterTool = dynamic(() => import('@/components/tools/academic-wri
 const SipReportGeneratorTool = dynamic(() => import('@/components/tools/sip-report-generator-tool'), { loading: () => <RobotsBuildingLoader /> });
 const AutomatedReportBuilderTool = dynamic(() => import('@/components/tools/automated-report-builder-tool'), { loading: () => <RobotsBuildingLoader /> });
 const ReportEditorTool = dynamic(() => import('@/components/tools/report-editor-tool'), { loading: () => <RobotsBuildingLoader /> });
+const EvsReportGeneratorTool = dynamic(() => import('@/components/tools/evs-report-generator-tool'), { loading: () => <RobotsBuildingLoader /> });
 
 
 type ToolId =
@@ -92,7 +94,8 @@ type ToolId =
   | 'academic-writer'
   | 'sip-report-generator'
   | 'automated-report-builder'
-  | 'report-editor';
+  | 'report-editor'
+  | 'evs-report-generator';
 
 type ToolConfig = {
   id: ToolId;
@@ -169,6 +172,12 @@ const tools: ToolConfig[] = [
     component: ReportEditorTool,
   },
   {
+    id: 'evs-report-generator',
+    name: 'EVS Report Generator',
+    icon: Leaf,
+    component: EvsReportGeneratorTool,
+  },
+  {
     id: 'resume-customizer',
     name: 'Resume Customizer',
     icon: FileEdit,
@@ -243,7 +252,7 @@ const tools: ToolConfig[] = [
 ];
 
 export default function Home() {
-  const [activeTool, setActiveTool] = useState<ToolId>('presentation-generator');
+  const [activeTool, setActiveTool] = useState<ToolId>('evs-report-generator');
 
   const ActiveToolComponent = tools.find((tool) => tool.id === activeTool)?.component;
 
