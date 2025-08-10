@@ -130,8 +130,6 @@ export default function ResumeCustomizerTool() {
     const container = document.createElement('div');
     container.style.position = 'absolute';
     container.style.left = '-9999px';
-    // Ensure the container has a defined size to match A4 aspect ratio for consistent rendering
-    container.style.width = '8.27in'; // A4 width
     container.innerHTML = generatedHtml;
     document.body.appendChild(container);
 
@@ -139,7 +137,8 @@ export default function ResumeCustomizerTool() {
     await new Promise(resolve => setTimeout(resolve, 500));
 
     try {
-        const canvas = await html2canvas(container.firstElementChild as HTMLElement, {
+        const resumeElement = container.firstElementChild as HTMLElement;
+        const canvas = await html2canvas(resumeElement, {
             scale: 2, // Use a reasonable scale for good quality
             useCORS: true,
         });
@@ -152,7 +151,7 @@ export default function ResumeCustomizerTool() {
         const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
         
         // Use JPEG compression with a low quality setting for a much smaller file size
-        const imgData = canvas.toDataURL('image/jpeg', 0.7); // 0.7 is a good balance of size and quality
+        const imgData = canvas.toDataURL('image/jpeg', 0.1); 
         
         pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
         pdf.save(`${fileName?.split('.')[0] || 'resume'}-${form.getValues('template')}.pdf`);
