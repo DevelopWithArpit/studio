@@ -130,6 +130,8 @@ export default function ResumeCustomizerTool() {
     const container = document.createElement('div');
     container.style.position = 'absolute';
     container.style.left = '-9999px';
+    // Ensure the container has a defined size to match A4 aspect ratio for consistent rendering
+    container.style.width = '8.27in'; // A4 width
     container.innerHTML = generatedHtml;
     document.body.appendChild(container);
 
@@ -138,7 +140,7 @@ export default function ResumeCustomizerTool() {
 
     try {
         const canvas = await html2canvas(container.firstElementChild as HTMLElement, {
-            scale: 1.5, // Reduced scale from 2 to 1.5
+            scale: 2, // Use a reasonable scale for good quality
             useCORS: true,
         });
         const pdf = new jsPDF({
@@ -148,10 +150,14 @@ export default function ResumeCustomizerTool() {
         });
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-        // Use JPEG compression for smaller file size
-        pdf.addImage(canvas.toDataURL('image/jpeg', 0.9), 'JPEG', 0, 0, pdfWidth, pdfHeight);
+        
+        // Use JPEG compression with a low quality setting for a much smaller file size
+        const imgData = canvas.toDataURL('image/jpeg', 0.7); // 0.7 is a good balance of size and quality
+        
+        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
         pdf.save(`${fileName?.split('.')[0] || 'resume'}-${form.getValues('template')}.pdf`);
     } catch (error) {
+        console.error("PDF Generation Error:", error);
         toast({ variant: 'destructive', title: 'Failed to generate PDF', description: 'There was an error creating the PDF file.' });
     } finally {
         document.body.removeChild(container);
@@ -309,3 +315,4 @@ export default function ResumeCustomizerTool() {
     </div>
   );
 }
+
