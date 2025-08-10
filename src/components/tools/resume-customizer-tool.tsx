@@ -138,7 +138,7 @@ export default function ResumeCustomizerTool() {
 
     try {
         const canvas = await html2canvas(container.firstElementChild as HTMLElement, {
-            scale: 2,
+            scale: 1.5, // Reduced scale from 2 to 1.5
             useCORS: true,
         });
         const pdf = new jsPDF({
@@ -148,7 +148,8 @@ export default function ResumeCustomizerTool() {
         });
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, pdfWidth, pdfHeight);
+        // Use JPEG compression for smaller file size
+        pdf.addImage(canvas.toDataURL('image/jpeg', 0.9), 'JPEG', 0, 0, pdfWidth, pdfHeight);
         pdf.save(`${fileName?.split('.')[0] || 'resume'}-${form.getValues('template')}.pdf`);
     } catch (error) {
         toast({ variant: 'destructive', title: 'Failed to generate PDF', description: 'There was an error creating the PDF file.' });
