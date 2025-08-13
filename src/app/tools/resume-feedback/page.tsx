@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import 'jspdf-autotable';
 import { saveAs } from 'file-saver';
 import { renderToStaticMarkup } from 'react-dom/server';
 import {
@@ -41,6 +41,10 @@ const formSchema = z.object({
 });
 
 type FormData = z.infer<typeof formSchema>;
+
+interface jsPDFWithAutoTable extends jsPDF {
+    autoTable: (options: any) => jsPDF;
+}
 
 export default function ResumeFeedbackTool() {
   const [isLoading, setIsLoading] = useState(false);
@@ -128,30 +132,193 @@ export default function ResumeFeedbackTool() {
 
   const handleDownloadPdf = async () => {
     if (!result?.rewrittenResume) return;
-
     setIsGeneratingPdf(true);
-    const resumeContainer = document.getElementById('resume-container-for-pdf');
-    if (!resumeContainer) {
-      setIsGeneratingPdf(false);
-      return;
-    };
 
     try {
-        const canvas = await html2canvas(resumeContainer, { scale: 3, useCORS: true });
-        const imgData = canvas.toDataURL('image/jpeg', 0.9); 
+        const resumeData = result.rewrittenResume;
+        const doc = new jsPDF('p', 'pt', 'a4') as jsPDFWithAutoTable;
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const margin = 40;
 
-        const pdf = new jsPDF({ orientation: 'p', unit: 'px', format: [canvas.width, canvas.height]});
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
+        // --- STYLES ---
+        const styles = {
+            name: { font: 'helvetica', fontStyle: 'bold', fontSize: 32, textColor: '#2d3748' },
+            contact: { font: 'helvetica', fontSize: 9, textColor: '#718096' },
+            sectionTitle: { font: 'helvetica', fontStyle: 'bold', fontSize: 10, textColor: '#4a5568' },
+            jobTitle: { font: 'helvetica', fontStyle: 'bold', fontSize: 12, textColor: '#2d3748' },
+            company: { font: 'helvetica', fontStyle: 'normal', fontSize: 12, textColor: '#4a5568'},
+            dates: { font: 'helvetica', fontSize: 10, textColor: '#718096' },
+            body: { font: 'helvetica', fontSize: 10, textColor: '#4a5568' },
+            bullet: { font: 'helvetica', fontSize: 10, textColor: '#4a5568'},
+            skillBadge: { font: 'helvetica', fontSize: 8, textColor: '#4a5568', fillColor: '#edf2f7'},
+        };
+        const linkColor = '#2b6cb0';
+        let finalY = 0; // Keep track of the last Y position
+
+        // --- HEADER ---
+        doc.setFont(styles.name.font, styles.name.fontStyle as any).setFontSize(styles.name.fontSize).setTextColor(styles.name.textColor);
+        doc.text(resumeData.name, pageWidth / 2, margin, { align: 'center' });
+        finalY = margin + styles.name.fontSize / 2;
+
+        const contactInfo = [
+            resumeData.contact.location,
+            resumeData.contact.phone,
+            { text: resumeData.contact.email, color: linkColor, url: `mailto:${resumeData.contact.email}` },
+            resumeData.contact.linkedin ? { text: 'LinkedIn', color: linkColor, url: resumeData.contact.linkedin } : null,
+            resumeData.contact.github ? { text: 'GitHub', color: linkColor, url: resumeData.contact.github } : null,
+        ].filter(Boolean);
+
+        let currentX = pageWidth / 2;
+        const contactWidths = contactInfo.map(info => {
+            const text = typeof info === 'string' ? info : info!.text;
+            return doc.getStringUnitWidth(text) * styles.contact.fontSize + (typeof info === 'string' ? 12 : 12); // text + bullet + space
+        });
+        const totalContactWidth = contactWidths.reduce((a, b) => a + b, 0);
+        currentX = (pageWidth - totalContactWidth) / 2;
+
+        doc.setFontSize(styles.contact.fontSize).setTextColor(styles.contact.textColor);
+        contactInfo.forEach((info, index) => {
+            const text = typeof info === 'string' ? info : info!.text;
+            const color = typeof info === 'object' ? info.color : styles.contact.textColor;
+            const url = typeof info === 'object' ? info.url : null;
+            
+            if (index > 0) {
+                doc.text('•', currentX, finalY + 5);
+                currentX += 6;
+            }
+            doc.setTextColor(color).text(text, currentX, finalY + 5, url ? { url } as any : {});
+            currentX += doc.getStringUnitWidth(text) * styles.contact.fontSize + 6;
+        });
+        finalY += 20;
+
+        doc.setDrawColor('#e2e8f0').line(margin, finalY, pageWidth - margin, finalY);
+        finalY += 20;
+
+        // --- TWO COLUMN LAYOUT ---
+        const leftColWidth = (pageWidth - margin * 3) * 0.65;
+        const rightColWidth = (pageWidth - margin * 3) * 0.35;
+        const rightColX = margin + leftColWidth + margin;
+
+        const leftColBody: any[] = [];
+        const rightColBody: any[] = [];
+
+        // Summary
+        leftColBody.push({ content: 'SUMMARY', styles: { fontStyle: 'bold', fontSize: styles.sectionTitle.fontSize, textColor: styles.sectionTitle.textColor } });
+        leftColBody.push({ content: resumeData.summary, styles: { cellPadding: { top: 2, bottom: 15 }, fontSize: styles.body.fontSize, textColor: styles.body.textColor } });
+        doc.setDrawColor('#e2e8f0').line(margin, finalY + 12, margin + leftColWidth, finalY + 12);
         
-        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST'); 
-        pdf.save('resume.pdf');
-      } catch (error) {
+        // Experience
+        leftColBody.push({ content: 'EXPERIENCE', styles: { fontStyle: 'bold', fontSize: styles.sectionTitle.fontSize, textColor: styles.sectionTitle.textColor } });
+        resumeData.experience.forEach(exp => {
+            leftColBody.push({ content: [
+                { content: `${exp.title}, ${exp.company}`, styles: { fontStyle: 'bold', fontSize: styles.jobTitle.fontSize, textColor: styles.jobTitle.textColor, cellPadding: {top: 4, bottom: -2}} },
+                { content: exp.dates, styles: { fontStyle: 'normal', fontSize: styles.dates.fontSize, textColor: styles.dates.textColor, halign: 'right' }}
+            ], styles: { cellPadding: { top: 5, bottom: -2 }}});
+            const bullets = exp.bullets.map(b => `•  ${b}`).join('\n');
+            leftColBody.push({ content: bullets, styles: { cellPadding: { top: 2, bottom: 8, left: 10 }, fontSize: styles.bullet.fontSize, textColor: styles.bullet.textColor }});
+        });
+
+        // Education
+        leftColBody.push({ content: 'EDUCATION', styles: { fontStyle: 'bold', fontSize: styles.sectionTitle.fontSize, textColor: styles.sectionTitle.textColor } });
+        resumeData.education.forEach(edu => {
+             leftColBody.push({ content: [
+                { content: edu.school, styles: { fontStyle: 'bold', fontSize: styles.jobTitle.fontSize, textColor: styles.jobTitle.textColor, cellPadding: {top: 4, bottom: -2}} },
+                { content: edu.dates, styles: { fontStyle: 'normal', fontSize: styles.dates.fontSize, textColor: styles.dates.textColor, halign: 'right' }}
+            ], styles: { cellPadding: { top: 5, bottom: -2 }}});
+            leftColBody.push({ content: edu.degree, styles: { cellPadding: { top: 2, bottom: 8}, fontSize: styles.bullet.fontSize, textColor: styles.bullet.textColor }});
+        });
+
+        // Skills
+        rightColBody.push({ content: 'SKILLS', styles: { fontStyle: 'bold', fontSize: styles.sectionTitle.fontSize, textColor: styles.sectionTitle.textColor } });
+        doc.setDrawColor('#e2e8f0').line(rightColX, finalY + 12, rightColX + rightColWidth, finalY + 12);
+
+        // Projects
+        rightColBody.push({ content: 'PROJECTS', styles: { fontStyle: 'bold', fontSize: styles.sectionTitle.fontSize, textColor: styles.sectionTitle.textColor, cellPadding: {top: 15}} });
+        resumeData.projects.forEach(proj => {
+            rightColBody.push({ content: proj.title, styles: { fontStyle: 'bold', fontSize: styles.jobTitle.fontSize, textColor: styles.jobTitle.textColor, cellPadding: {top: 4, bottom: -2}} });
+            const bullets = proj.bullets.map(b => `•  ${b}`).join('\n');
+            rightColBody.push({ content: bullets, styles: { cellPadding: { top: 2, bottom: 8, left: 10 }, fontSize: styles.bullet.fontSize, textColor: styles.bullet.textColor }});
+        });
+
+        // Achievements
+        rightColBody.push({ content: 'ACHIEVEMENTS', styles: { fontStyle: 'bold', fontSize: styles.sectionTitle.fontSize, textColor: styles.sectionTitle.textColor, cellPadding: {top: 15}} });
+        const achievements = resumeData.achievements.map(a => `•  ${a}`).join('\n');
+        rightColBody.push({ content: achievements, styles: { cellPadding: { top: 2, bottom: 8, left: 10 }, fontSize: styles.bullet.fontSize, textColor: styles.bullet.textColor }});
+
+
+        doc.autoTable({
+            body: [leftColBody],
+            startY: finalY,
+            theme: 'plain',
+            tableWidth: leftColWidth,
+            margin: { left: margin },
+            styles: {
+                font: 'helvetica',
+                fontSize: 10,
+                cellPadding: 0,
+            },
+            columnStyles: {
+                0: { cellWidth: leftColWidth },
+            }
+        });
+        
+        let leftY = (doc as any).lastAutoTable.finalY;
+
+        doc.autoTable({
+            body: [rightColBody],
+            startY: finalY,
+            theme: 'plain',
+            tableWidth: rightColWidth,
+            margin: { left: rightColX },
+            styles: {
+                font: 'helvetica',
+                fontSize: 10,
+                cellPadding: 0,
+            },
+            columnStyles: {
+                0: { cellWidth: rightColWidth },
+            },
+            didDrawCell: (data) => {
+                 if (data.section === 'body' && data.row.index === 0) { // skills section
+                    doc.setFontSize(styles.skillBadge.fontSize);
+                    const skills = resumeData.skills.technical;
+                    let x = data.cell.x + data.cell.padding('left');
+                    let y = data.cell.y + data.cell.padding('top') + 15;
+                    const gutter = 5;
+
+                    skills.forEach(skill => {
+                        const textWidth = doc.getStringUnitWidth(skill) * styles.skillBadge.fontSize + 10;
+                        if (x + textWidth > rightColX + rightColWidth - data.cell.padding('right')) {
+                            x = data.cell.x + data.cell.padding('left');
+                            y += styles.skillBadge.fontSize + gutter;
+                        }
+                        doc.setFillColor(styles.skillBadge.fillColor).roundedRect(x, y-8, textWidth, 12, 6, 6, 'F');
+                        doc.setTextColor(styles.skillBadge.textColor).text(skill, x + 5, y, { baseline: 'middle' });
+                        x += textWidth + gutter;
+                    });
+                 }
+            }
+        });
+
+        let rightY = (doc as any).lastAutoTable.finalY;
+
+        if (Math.max(leftY, rightY) > doc.internal.pageSize.height - margin) {
+             toast({
+                title: 'Note: Resume may have multiple pages.',
+                description: 'The generated content was too long for a single page.'
+            });
+        }
+
+
+        doc.save('resume.pdf');
+    } catch (error) {
+        console.error("PDF Generation Error:", error);
         toast({ variant: 'destructive', title: 'Error Generating PDF', description: error instanceof Error ? error.message : 'An unknown error occurred.' });
-      } finally {
+    } finally {
         setIsGeneratingPdf(false);
-      }
-  };
+    }
+};
+
 
   const handleDownloadHtml = async () => {
     if (!result?.rewrittenResume) return;
