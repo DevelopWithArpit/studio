@@ -67,10 +67,6 @@ import {
     type GeneratePortfolioWebsiteInput,
 } from '@/ai/flows/portfolio-generator-tool';
 import {
-    customizeResume,
-    type CustomizeResumeInput,
-} from '@/ai/flows/resume-customizer-tool';
-import {
     humanizeText,
     type HumanizeTextInput,
 } from '@/ai/flows/text-humanizer-tool';
@@ -152,10 +148,6 @@ export async function handleRemoveWatermarkAction(input: RemoveWatermarkInput) {
 
 export async function handleManipulateImageTextAction(input: ManipulateImageTextInput) {
     return handleAction(input, manipulateImageText);
-}
-
-export async function handleCustomizeResumeAction(input: CustomizeResumeInput) {
-    return handleAction(input, customizeResume);
 }
 
 export async function handleHumanizeTextAction(input: HumanizeTextInput) {
