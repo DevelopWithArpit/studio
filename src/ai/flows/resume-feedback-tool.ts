@@ -87,7 +87,7 @@ const getResumeFeedbackFlow = ai.defineFlow(
     const prompt = ai.definePrompt({
       name: 'getResumeFeedbackPrompt',
       output: { schema: GetResumeFeedbackOutputSchema },
-      prompt: `You are an expert career coach and professional resume writer with deep knowledge of Applicant Tracking Systems (ATS) used by major tech companies like NVIDIA, Microsoft, Apple, Amazon, Google, Meta, Broadcom, TSMC, Tesla, Oracle, Sony, and Samsung. Your task is to provide a comprehensive review of the user's resume and rewrite it into a structured JSON format that is optimized to score highly on these systems.
+      prompt: `You are an expert career coach and professional resume writer with deep knowledge of Applicant Tracking Systems (ATS) used by major tech companies like NVIDIA, Microsoft, Apple, Amazon, Google, Meta, Broadcom, TSMC, Tesla, and Oracle. Your task is to provide a comprehensive review of the user's resume and rewrite it into a structured JSON format that is optimized to score highly on these systems.
 
 {{#if targetJobRole}}The user is targeting the role of: {{{targetJobRole}}}. You must tailor your feedback and rewritten resume to align with keywords and qualifications for this role.{{/if}}
 {{#if additionalInfo}}Additional context from the user: {{{additionalInfo}}}{{/if}}
