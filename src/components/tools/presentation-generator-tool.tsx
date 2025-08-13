@@ -283,7 +283,7 @@ export default function PresentationGeneratorTool() {
                           </FormItem>
                            <FormItem className="flex items-center space-x-3 space-y-0">
                             <FormControl><RadioGroupItem value="custom" /></FormControl>
-                            <FormLabel className="font-normal">Custom Structure</FormLabel>
+                            <FormLabel className="font-normal">Custom Structure & Content</FormLabel>
                           </FormItem>
                         </RadioGroup>
                       </FormControl>
@@ -312,13 +312,13 @@ export default function PresentationGeneratorTool() {
                     name="customStructure"
                     render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Custom Structure</FormLabel>
-                        <FormDescription>Enter one slide title per line.</FormDescription>
+                        <FormLabel>Custom Structure & Content</FormLabel>
+                        <FormDescription>Enter one slide title per line, with notes below each title.</FormDescription>
                         <FormControl>
                             <Textarea
-                                placeholder="e.g.,\nSlide 1: Introduction to the problem\nSlide 2: Our proposed solution\nSlide 3: Market Analysis"
+                                placeholder="e.g.,\n1. About the Company\nBlinkit is an Indian quick-commerce platform...\n\n2. Founders\nAlbinder Dhindsa..."
                                 {...field}
-                                rows={6}
+                                rows={10}
                             />
                         </FormControl>
                         <FormMessage />

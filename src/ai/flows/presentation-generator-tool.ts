@@ -96,7 +96,10 @@ const outlinePrompt = ai.definePrompt({
 {{#if department}}- Department: {{{department}}}{{/if}}
 - Content Type: {{{contentType}}}
 - Number of Slides (for General type): {{{numSlides}}}
-- Custom Structure (if provided): {{{customStructure}}}
+{{#if customStructure}}
+- Custom Structure:
+{{{customStructure}}}
+{{/if}}
 - Image Style: {{{imageStyle}}}
 `,
 });
