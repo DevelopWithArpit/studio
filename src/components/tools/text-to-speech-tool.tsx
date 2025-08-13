@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -25,6 +26,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { handleTextToSpeechAction } from '@/app/actions';
 import type { TextToSpeechOutput } from '@/ai/flows/text-to-speech-tool';
+import { Loader2 } from 'lucide-react';
 
 const formSchema = z.object({
   text: z.string().min(1, 'Please enter some text to convert to speech.'),
@@ -70,8 +72,8 @@ export default function TextToSpeechTool() {
   }, [result]);
 
   return (
-    <div className="space-y-8">
-      <header className="space-y-2">
+    <div className="space-y-6">
+      <header className="space-y-1">
         <h1 className="text-3xl font-bold font-headline">Text-to-Speech Tool</h1>
         <p className="text-muted-foreground">
           Convert written text into natural-sounding speech.
@@ -106,6 +108,7 @@ export default function TextToSpeechTool() {
                 )}
               />
               <Button type="submit" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isLoading ? 'Generating...' : 'Generate Speech'}
               </Button>
             </form>

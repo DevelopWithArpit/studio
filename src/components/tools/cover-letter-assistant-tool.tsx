@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -32,6 +33,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { handleGenerateCoverLetterAction } from '@/app/actions';
 import type { GenerateCoverLetterOutput } from '@/ai/flows/cover-letter-assistant-tool';
+import { Loader2 } from 'lucide-react';
 
 const formSchema = z.object({
   jobDescription: z.string().min(50, 'Please enter a job description of at least 50 characters.'),
@@ -73,7 +75,11 @@ export default function CoverLetterAssistantTool() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
+      <header className="space-y-1">
+        <h1 className="text-3xl font-bold font-headline">Cover Letter Assistant</h1>
+        <p className="text-muted-foreground">Generate a tailored cover letter for any job application.</p>
+      </header>
       <Card>
         <CardHeader>
           <CardTitle>Generate a Cover Letter</CardTitle>
@@ -142,6 +148,7 @@ export default function CoverLetterAssistantTool() {
                 )}
               />
               <Button type="submit" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isLoading ? 'Generating...' : 'Generate Letter'}
               </Button>
             </form>

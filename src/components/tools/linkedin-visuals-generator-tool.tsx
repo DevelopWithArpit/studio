@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -27,7 +28,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { handleGenerateLinkedInVisualsAction } from '@/app/actions';
 import type { GenerateLinkedInVisualsInput, GenerateLinkedInVisualsOutput } from '@/ai/flows/linkedin-visuals-generator-tool';
-import { Download, FileText, UploadCloud } from 'lucide-react';
+import { Download, FileText, Loader2, UploadCloud } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 
@@ -119,8 +120,8 @@ export default function LinkedInVisualsGeneratorTool() {
   }
 
   return (
-    <div className="space-y-8">
-      <header className="space-y-2">
+    <div className="space-y-6">
+      <header className="space-y-1">
         <h1 className="text-3xl font-bold font-headline">LinkedIn Visuals Generator</h1>
         <p className="text-muted-foreground">
           Create a professional profile picture and cover banner for your LinkedIn profile.
@@ -149,7 +150,7 @@ export default function LinkedInVisualsGeneratorTool() {
                                 <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center h-[265px]">
                                 {resumeFileName ? (
                                     <div className='flex flex-col items-center gap-2'>
-                                    <FileText className="w-12 h-12 text-accent" />
+                                    <FileText className="w-12 h-12 text-primary" />
                                     <p className='text-sm font-medium'>{resumeFileName}</p>
                                     <Button variant="link" size="sm" asChild className='p-0 h-auto'>
                                         <label htmlFor="resume-upload" className="cursor-pointer">Change file</label>
@@ -159,7 +160,7 @@ export default function LinkedInVisualsGeneratorTool() {
                                     <>
                                     <UploadCloud className="w-12 h-12 text-muted-foreground" />
                                     <p className="mt-2 text-sm text-muted-foreground">
-                                        <label htmlFor="resume-upload" className="font-semibold text-accent cursor-pointer hover:underline">
+                                        <label htmlFor="resume-upload" className="font-semibold text-primary cursor-pointer hover:underline">
                                         Click to upload
                                         </label>
                                     </p>
@@ -207,7 +208,7 @@ export default function LinkedInVisualsGeneratorTool() {
                       <>
                         <UploadCloud className="w-12 h-12 text-muted-foreground" />
                         <p className="mt-2 text-sm text-muted-foreground">
-                          <label htmlFor="photo-upload" className="font-semibold text-accent cursor-pointer hover:underline">
+                          <label htmlFor="photo-upload" className="font-semibold text-primary cursor-pointer hover:underline">
                              Upload a headshot
                           </label>
                         </p>
@@ -219,6 +220,7 @@ export default function LinkedInVisualsGeneratorTool() {
                 </FormItem>
 
               <Button type="submit" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isLoading ? 'Generating...' : 'Generate Visuals'}
               </Button>
             </form>
@@ -240,7 +242,7 @@ export default function LinkedInVisualsGeneratorTool() {
                         <div className="flex flex-col items-center gap-4">
                             <Image src={result.profilePictureUrl} alt="Generated profile picture" width={192} height={192} className="rounded-full border" />
                             <Button onClick={() => handleDownload(result.profilePictureUrl, 'profile-picture.png')}>
-                                <Download className="mr-2" />
+                                <Download className="mr-2 h-4 w-4" />
                                 Download
                             </Button>
                         </div>
@@ -254,7 +256,7 @@ export default function LinkedInVisualsGeneratorTool() {
                     <div className="flex flex-col items-center gap-4">
                         <Image src={result.coverBannerUrl} alt="Generated cover banner" width={1584} height={396} className="rounded-lg border aspect-[4/1] object-cover" />
                         <Button onClick={() => handleDownload(result.coverBannerUrl, 'cover-banner.png')}>
-                           <Download className="mr-2" />
+                           <Download className="mr-2 h-4 w-4" />
                             Download
                         </Button>
                     </div>

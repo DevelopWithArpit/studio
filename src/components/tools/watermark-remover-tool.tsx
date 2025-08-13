@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -25,8 +26,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { handleRemoveWatermarkAction } from '@/app/actions';
 import type { RemoveWatermarkOutput } from '@/ai/flows/watermark-remover-tool';
-import { UploadCloud } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
+import { Loader2, UploadCloud } from 'lucide-react';
 
 const formSchema = z.object({
   imageDataUri: z.string().min(1, 'Please upload an image.'),
@@ -83,8 +83,8 @@ export default function WatermarkRemoverTool() {
   }
 
   return (
-    <div className="space-y-8">
-      <header className="space-y-2">
+    <div className="space-y-6">
+      <header className="space-y-1">
         <h1 className="text-3xl font-bold font-headline">Watermark Remover</h1>
         <p className="text-muted-foreground">
           Upload an image to attempt to remove the watermark using AI.
@@ -111,7 +111,7 @@ export default function WatermarkRemoverTool() {
                       <>
                         <UploadCloud className="w-12 h-12 text-muted-foreground" />
                         <p className="mt-2 text-sm text-muted-foreground">
-                          <label htmlFor="file-upload" className="font-semibold text-accent cursor-pointer hover:underline">
+                          <label htmlFor="file-upload" className="font-semibold text-primary cursor-pointer hover:underline">
                              Upload an image
                           </label>
                         </p>
@@ -124,6 +124,7 @@ export default function WatermarkRemoverTool() {
                 <FormMessage>{form.formState.errors.imageDataUri?.message}</FormMessage>
               </FormItem>
               <Button type="submit" disabled={isLoading || !originalImage}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isLoading ? 'Processing...' : 'Remove Watermark'}
               </Button>
             </form>

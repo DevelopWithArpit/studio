@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -25,7 +26,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { handleSmartSearchAction } from '@/app/actions';
 import type { SmartSearchOutput } from '@/ai/flows/smart-search-tool';
-import { FileText, UploadCloud } from 'lucide-react';
+import { FileText, Loader2, UploadCloud } from 'lucide-react';
 
 const formSchema = z.object({
   documentDataUri: z
@@ -85,9 +86,9 @@ export default function SmartSearchTool() {
   }
 
   return (
-    <div className="space-y-8">
-      <header className="space-y-2">
-        <h1 className="text-3xl font-bold font-headline">Smart Search Tool</h1>
+    <div className="space-y-6">
+      <header className="space-y-1">
+        <h1 className="text-3xl font-bold font-headline">Smart Search</h1>
         <p className="text-muted-foreground">
           Analyze a document for important information using AI.
         </p>
@@ -109,7 +110,7 @@ export default function SmartSearchTool() {
                   <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center">
                     {fileName ? (
                       <div className='flex flex-col items-center gap-2'>
-                        <FileText className="w-12 h-12 text-accent" />
+                        <FileText className="w-12 h-12 text-primary" />
                         <p className='text-sm font-medium'>{fileName}</p>
                          <Button variant="link" size="sm" asChild className='p-0 h-auto'>
                            <label htmlFor="file-upload" className="cursor-pointer">Change file</label>
@@ -119,7 +120,7 @@ export default function SmartSearchTool() {
                       <>
                         <UploadCloud className="w-12 h-12 text-muted-foreground" />
                         <p className="mt-2 text-sm text-muted-foreground">
-                          <label htmlFor="file-upload" className="font-semibold text-accent cursor-pointer hover:underline">
+                          <label htmlFor="file-upload" className="font-semibold text-primary cursor-pointer hover:underline">
                             Click to upload
                           </label>
                            {' '}or drag and drop
@@ -127,7 +128,7 @@ export default function SmartSearchTool() {
                          <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 200MB</p>
                       </>
                     )}
-                    <Input id="file-upload" type="file" className="sr-only" onChange={handleFileChange} />
+                    <Input id="file-upload" type="file" className="sr-only" onChange={handleFileChange} accept=".pdf,.doc,.docx,.txt" />
                   </div>
                 </FormControl>
                 <FormMessage>{form.formState.errors.documentDataUri?.message}</FormMessage>
@@ -150,6 +151,7 @@ export default function SmartSearchTool() {
                 )}
               />
               <Button type="submit" disabled={isLoading || !form.formState.isValid}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isLoading ? 'Searching...' : 'Search'}
               </Button>
             </form>

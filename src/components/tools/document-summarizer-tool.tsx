@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -32,7 +33,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { handleSummarizeDocumentAction } from '@/app/actions';
 import type { SummarizeDocumentOutput } from '@/ai/flows/document-summarizer-tool';
-import { FileText, UploadCloud } from 'lucide-react';
+import { FileText, Loader2, UploadCloud } from 'lucide-react';
 
 const formSchema = z.object({
   documentDataUri: z.string().min(1, 'Please upload a document.'),
@@ -92,7 +93,11 @@ export default function DocumentSummarizerTool() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
+      <header className="space-y-1">
+        <h1 className="text-3xl font-bold font-headline">Document Summarizer</h1>
+        <p className="text-muted-foreground">Get a quick summary of any uploaded document.</p>
+      </header>
       <Card>
         <CardHeader>
           <CardTitle>Summarize a Document</CardTitle>
@@ -127,7 +132,7 @@ export default function DocumentSummarizerTool() {
                          <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 200MB</p>
                       </>
                     )}
-                    <Input id="file-upload" type="file" className="sr-only" onChange={handleFileChange} />
+                    <Input id="file-upload" type="file" className="sr-only" onChange={handleFileChange} accept=".pdf,.doc,.docx,.txt"/>
                   </div>
                 </FormControl>
                 <FormMessage>{form.formState.errors.documentDataUri?.message}</FormMessage>
@@ -180,6 +185,7 @@ export default function DocumentSummarizerTool() {
               </div>
 
               <Button type="submit" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isLoading ? 'Summarizing...' : 'Summarize'}
               </Button>
             </form>

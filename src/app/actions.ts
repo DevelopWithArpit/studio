@@ -74,6 +74,10 @@ import {
     humanizeText,
     type HumanizeTextInput,
 } from '@/ai/flows/text-humanizer-tool';
+import {
+  generateAcademicDocument,
+  type GenerateAcademicDocumentInput,
+} from '@/ai/flows/thesis-generator-tool';
 
 
 async function handleAction<T_Input, T_Output>(
@@ -157,6 +161,11 @@ export async function handleCustomizeResumeAction(input: CustomizeResumeInput) {
 export async function handleHumanizeTextAction(input: HumanizeTextInput) {
     return handleAction(input, humanizeText);
 }
+
+export async function handleGenerateAcademicDocumentAction(input: GenerateAcademicDocumentInput) {
+    return handleAction(input, generateAcademicDocument);
+}
+
 
 type GeneratePortfolioWebsiteActionInput = 
     | { type: 'resume'; resumeDataUri: string; certificateDataUri?: string | null; }

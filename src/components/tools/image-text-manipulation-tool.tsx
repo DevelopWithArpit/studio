@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -26,7 +27,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { handleManipulateImageTextAction } from '@/app/actions';
 import type { ManipulateImageTextOutput } from '@/ai/flows/image-text-manipulation-tool';
-import { UploadCloud } from 'lucide-react';
+import { Loader2, UploadCloud } from 'lucide-react';
 import { Textarea } from '../ui/textarea';
 
 const formSchema = z.object({
@@ -86,7 +87,11 @@ export default function ImageTextManipulationTool() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
+      <header className="space-y-1">
+        <h1 className="text-3xl font-bold font-headline">Image Text Manipulation</h1>
+        <p className="text-muted-foreground">Edit text directly within an image using AI.</p>
+      </header>
       <Card>
         <CardHeader>
           <CardTitle>Manipulate Image Text</CardTitle>
@@ -139,6 +144,7 @@ export default function ImageTextManipulationTool() {
                     />
                 </div>
               <Button type="submit" disabled={isLoading || !originalImage}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isLoading ? 'Processing...' : 'Manipulate Text'}
               </Button>
             </form>

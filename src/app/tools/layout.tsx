@@ -15,23 +15,19 @@ import {
   SidebarMenuButton,
   SidebarFooter,
   SidebarInset,
-  useSidebar,
 } from '@/components/ui/sidebar';
 import {
   Search,
   MessageCircleQuestion,
   CodeXml,
   ScanEye,
-  ImageIcon,
   ClipboardList,
-  FileText,
   type LucideIcon,
   GitGraph,
   Mic,
   Mail,
   Compass,
   FileSearch,
-  Paintbrush,
   Presentation,
   UserSquare,
   Linkedin,
@@ -43,7 +39,6 @@ import {
   GraduationCap,
   Github,
   LifeBuoy,
-  LogOut,
   Settings,
 } from 'lucide-react';
 import { AppLogo } from '@/components/app-logo';
@@ -60,6 +55,7 @@ type ToolConfig = {
 
 const tools: ToolConfig[] = [
   { id: 'smart-search', name: 'Smart Search', icon: Search, href: '/tools/smart-search', category: 'Analysis' },
+  { id: 'document-summarizer', name: 'Document Summarizer', icon: FileSearch, href: '/tools/document-summarizer', category: 'Analysis' },
   { id: 'ai-explanation', name: 'AI Explanation', icon: MessageCircleQuestion, href: '/tools/ai-explanation', category: 'Learning' },
   { id: 'code-generator', name: 'Code Generator', icon: CodeXml, href: '/tools/code-generator', category: 'Development' },
   { id: 'code-analyzer', name: 'Code Analyzer', icon: ScanEye, href: '/tools/code-analyzer', category: 'Development' },
@@ -71,7 +67,6 @@ const tools: ToolConfig[] = [
   { id: 'cover-letter-assistant', name: 'Cover Letter Assistant', icon: Mail, href: '/tools/cover-letter-assistant', category: 'Career' },
   { id: 'career-path-suggester', name: 'Career Path Suggester', icon: Compass, href: '/tools/career-path-suggester', category: 'Career' },
   { id: 'linkedin-visuals-generator', name: 'LinkedIn Visuals', icon: Linkedin, href: '/tools/linkedin-visuals-generator', category: 'Career' },
-  { id: 'document-summarizer', name: 'Document Summarizer', icon: FileSearch, href: '/tools/document-summarizer', category: 'Productivity' },
   { id: 'presentation-generator', name: 'Presentation Generator', icon: Presentation, href: '/tools/presentation-generator', category: 'Productivity' },
   { id: 'text-to-speech', name: 'Text to Speech', icon: Mic, href: '/tools/text-to-speech', category: 'Productivity' },
   { id: 'text-humanizer', name: 'Text Humanizer', icon: Sparkles, href: '/tools/text-humanizer', category: 'Writing' },
@@ -84,7 +79,6 @@ const categories = [...new Set(tools.map(tool => tool.category))];
 
 const ToolSidebar = () => {
   const pathname = usePathname();
-  const { state } = useSidebar();
   
   return (
     <Sidebar collapsible="icon" className="border-r">

@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -32,8 +33,7 @@ import {
 } from '@/components/ui/select';
 import { handleHumanizeTextAction } from '@/app/actions';
 import type { HumanizeTextOutput } from '@/ai/flows/text-humanizer-tool';
-import { Separator } from '@/components/ui/separator';
-import { ArrowRight } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 const formSchema = z.object({
   text: z.string().min(10, 'Please enter at least 10 characters.'),
@@ -75,8 +75,8 @@ export default function TextHumanizerTool() {
   }
 
   return (
-    <div className="space-y-8">
-      <header className="space-y-2">
+    <div className="space-y-6">
+      <header className="space-y-1">
         <h1 className="text-3xl font-bold font-headline">Text Humanizer</h1>
         <p className="text-muted-foreground">
           Rewrite AI-generated text to sound more natural and engaging.
@@ -135,6 +135,7 @@ export default function TextHumanizerTool() {
                 )}
               />
               <Button type="submit" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isLoading ? 'Humanizing...' : 'Humanize Text'}
               </Button>
             </form>

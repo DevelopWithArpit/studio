@@ -39,10 +39,11 @@ import {
 } from '@/components/ui/accordion';
 import { handleGenerateInterviewQuestionsAction } from '@/app/actions';
 import type { GenerateInterviewQuestionsInput, GenerateInterviewQuestionsOutput } from '@/ai/flows/interview-question-generator-tool';
+import { Loader2 } from 'lucide-react';
 
 const formSchema = z.object({
   topic: z.string().min(1, 'Please enter a job role or topic.'),
-  count: z.number().int().positive().min(1).max(20),
+  count: z.coerce.number().int().positive().min(1, "Must be at least 1").max(20, "Cannot exceed 20"),
   category: z.enum(['Technical', 'Behavioral', 'Situational', 'Brain-Teaser']),
 });
 
@@ -80,8 +81,8 @@ export default function InterviewQuestionGeneratorTool() {
   }
 
   return (
-    <div className="space-y-8">
-      <header className="space-y-2">
+    <div className="space-y-6">
+      <header className="space-y-1">
         <h1 className="text-3xl font-bold font-headline">Interview Question Generator</h1>
         <p className="text-muted-foreground">
           Generate tailored interview questions for any role or topic.
@@ -119,10 +120,7 @@ export default function InterviewQuestionGeneratorTool() {
                     <FormItem>
                       <FormLabel>Number of Questions</FormLabel>
                       <FormControl>
-                        <Input type="number" min="1" max="20" {...field} onChange={e => {
-                            const value = e.target.value;
-                            field.onChange(value === '' ? '' : parseInt(value, 10));
-                        }}/>
+                        <Input type="number" min="1" max="20" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -153,6 +151,7 @@ export default function InterviewQuestionGeneratorTool() {
                 />
               </div>
               <Button type="submit" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isLoading ? 'Generating...' : 'Generate Questions'}
               </Button>
             </form>

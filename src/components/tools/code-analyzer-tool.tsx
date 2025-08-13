@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -26,6 +27,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { handleAnalyzeCodeAction } from '@/app/actions';
 import type { AnalyzeCodeOutput } from '@/ai/flows/code-analyzer-tool';
+import { Loader2 } from 'lucide-react';
 
 const formSchema = z.object({
   code: z.string().min(20, 'Please enter at least 20 characters of code.'),
@@ -67,7 +69,11 @@ export default function CodeAnalyzerTool() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
+       <header className="space-y-1">
+        <h1 className="text-3xl font-bold font-headline">Code Analyzer</h1>
+        <p className="text-muted-foreground">Find errors, performance issues, and security vulnerabilities in your code.</p>
+      </header>
       <Card>
         <CardHeader>
           <CardTitle>Analyze Code</CardTitle>
@@ -125,6 +131,7 @@ export default function CodeAnalyzerTool() {
                 />
               </div>
               <Button type="submit" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isLoading ? 'Analyzing...' : 'Analyze Code'}
               </Button>
             </form>

@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -26,6 +27,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { handleGenerateDiagramAction } from '@/app/actions';
 import type { GenerateDiagramOutput } from '@/ai/flows/diagram-generator-tool';
+import { Loader2 } from 'lucide-react';
 
 const formSchema = z.object({
   description: z.string().min(10, 'Please enter a description of at least 10 characters.'),
@@ -63,7 +65,11 @@ export default function DiagramGeneratorTool() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
+      <header className="space-y-1">
+        <h1 className="text-3xl font-bold font-headline">Diagram Generator</h1>
+        <p className="text-muted-foreground">Create diagrams and flowcharts from a text description.</p>
+      </header>
       <Card>
         <CardHeader>
           <CardTitle>Generate a Diagram</CardTitle>
@@ -92,6 +98,7 @@ export default function DiagramGeneratorTool() {
                 )}
               />
               <Button type="submit" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isLoading ? 'Generating...' : 'Generate Diagram'}
               </Button>
             </form>

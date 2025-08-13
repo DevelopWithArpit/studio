@@ -194,8 +194,8 @@ export default function PortfolioGeneratorTool() {
 
 
   return (
-    <div className="space-y-8">
-      <header className="space-y-2">
+    <div className="space-y-6">
+      <header className="space-y-1">
         <h1 className="text-3xl font-bold font-headline">Portfolio Website Generator</h1>
         <p className="text-muted-foreground">
           Generate a website from your resume, or by filling out the form manually.
@@ -220,7 +220,7 @@ export default function PortfolioGeneratorTool() {
                             <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center h-48">
                                 {resumeFileName ? (
                                     <div className='flex flex-col items-center gap-2'>
-                                        <FileText className="w-12 h-12 text-accent" />
+                                        <FileText className="w-12 h-12 text-primary" />
                                         <p className='text-sm font-medium'>{resumeFileName}</p>
                                         <Button variant="link" size="sm" asChild className='p-0 h-auto'>
                                             <label htmlFor="resume-upload" className="cursor-pointer">Change file</label>
@@ -230,7 +230,7 @@ export default function PortfolioGeneratorTool() {
                                     <>
                                         <UploadCloud className="w-12 h-12 text-muted-foreground" />
                                         <p className="mt-2 text-sm text-muted-foreground">
-                                            <label htmlFor="resume-upload" className="font-semibold text-accent cursor-pointer hover:underline">
+                                            <label htmlFor="resume-upload" className="font-semibold text-primary cursor-pointer hover:underline">
                                                 Upload Resume
                                             </label>
                                         </p>
@@ -246,7 +246,7 @@ export default function PortfolioGeneratorTool() {
                             <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center h-48">
                                 {certificateFileName ? (
                                     <div className='flex flex-col items-center gap-2'>
-                                        <FileText className="w-12 h-12 text-accent" />
+                                        <FileText className="w-12 h-12 text-primary" />
                                         <p className='text-sm font-medium'>{certificateFileName}</p>
                                         <Button variant="link" size="sm" asChild className='p-0 h-auto'>
                                             <label htmlFor="cert-upload" className="cursor-pointer">Change file</label>
@@ -256,7 +256,7 @@ export default function PortfolioGeneratorTool() {
                                     <>
                                         <UploadCloud className="w-12 h-12 text-muted-foreground" />
                                         <p className="mt-2 text-sm text-muted-foreground">
-                                            <label htmlFor="cert-upload" className="font-semibold text-accent cursor-pointer hover:underline">
+                                            <label htmlFor="cert-upload" className="font-semibold text-primary cursor-pointer hover:underline">
                                                 Upload Certificate
                                             </label>
                                         </p>

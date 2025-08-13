@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -26,6 +27,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { handleGenerateCodeAction } from '@/app/actions';
 import type { GenerateCodeOutput } from '@/ai/flows/code-generator-tool';
+import { Loader2 } from 'lucide-react';
 
 const formSchema = z.object({
   instructions: z
@@ -77,7 +79,11 @@ export default function CodeGeneratorTool() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
+       <header className="space-y-1">
+        <h1 className="text-3xl font-bold font-headline">Code Generator</h1>
+        <p className="text-muted-foreground">Generate code snippets in any language from a text description.</p>
+      </header>
       <Card>
         <CardHeader>
           <CardTitle>Generate Code</CardTitle>
@@ -107,7 +113,7 @@ export default function CodeGeneratorTool() {
               />
 
               <div>
-                <h3 className="text-lg font-medium font-headline mb-2">
+                <h3 className="text-lg font-medium mb-2">
                   Constraints (Optional)
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -151,6 +157,7 @@ export default function CodeGeneratorTool() {
               </div>
 
               <Button type="submit" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isLoading ? 'Generating...' : 'Generate Code'}
               </Button>
             </form>

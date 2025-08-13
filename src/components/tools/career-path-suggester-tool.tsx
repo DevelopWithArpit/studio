@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -32,6 +33,7 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from '@/components/ui/accordion';
+import { Loader2 } from 'lucide-react';
 
 const formSchema = z.object({
   interests: z.string().min(10, 'Please describe your interests in at least 10 characters.'),
@@ -71,10 +73,14 @@ export default function CareerPathSuggesterTool() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
+      <header className="space-y-1">
+        <h1 className="text-3xl font-bold font-headline">Career Path Suggester</h1>
+        <p className="text-muted-foreground">Get personalized career suggestions based on your interests and skills.</p>
+      </header>
       <Card>
         <CardHeader>
-          <CardTitle>Find Your Career</CardTitle>
+          <CardTitle>Find Your Career Path</CardTitle>
           <CardDescription>
             Tell us about what you enjoy and what you're good at, and we'll suggest some career paths for you.
           </CardDescription>
@@ -117,6 +123,7 @@ export default function CareerPathSuggesterTool() {
                 )}
               />
               <Button type="submit" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isLoading ? 'Suggesting...' : 'Suggest Careers'}
               </Button>
             </form>

@@ -184,12 +184,14 @@ export default function PresentationGeneratorTool() {
     
     const introSlideContent = result.slides[0]?.content ?? [];
     
-    if (introSlideContent.length > 0) {
-        titleSlide.addText(introSlideContent, {
+    const subtitleTextObjects = introSlideContent.map(point => ({
+        text: point,
+        options: { bullet: true, paraSpaceAfter: 10, breakLine: true, align: 'left'}
+    }));
+
+    if (subtitleTextObjects.length > 0) {
+        titleSlide.addText(subtitleTextObjects, {
             placeholder: 'subtitle',
-            bullet: true,
-            paraSpaceAfter: 10,
-            align: 'left',
         });
     }
 
@@ -232,8 +234,8 @@ export default function PresentationGeneratorTool() {
 
 
   return (
-    <div className="space-y-8">
-      <header className="space-y-2">
+    <div className="space-y-6">
+      <header className="space-y-1">
         <h1 className="text-3xl font-bold font-headline">Presentation Generator</h1>
         <p className="text-muted-foreground">
           Create a full presentation with text and images from a single topic.
@@ -324,10 +326,7 @@ export default function PresentationGeneratorTool() {
                     <FormItem className={cn("transition-opacity", (contentType === 'projectProposal' || contentType === 'custom') && "opacity-50")}>
                       <FormLabel>Number of Slides</FormLabel>
                       <FormControl>
-                        <Input type="number" min="2" max="20" {...field} onChange={e => {
-                            const value = e.target.value;
-                            field.onChange(value === '' ? '' : parseInt(value, 10));
-                        }} disabled={contentType === 'projectProposal' || contentType === 'custom'}/>
+                        <Input type="number" min="2" max="20" {...field} disabled={contentType === 'projectProposal' || contentType === 'custom'}/>
                       </FormControl>
                        {contentType === 'projectProposal' && <p className="text-xs text-muted-foreground">Fixed at 8 slides for project proposals.</p>}
                        {contentType === 'custom' && <p className="text-xs text-muted-foreground">Determined by your custom structure.</p>}

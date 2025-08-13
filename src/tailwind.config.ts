@@ -1,13 +1,16 @@
 
 import type {Config} from 'tailwindcss';
+import { fontFamily } from 'tailwindcss/defaultTheme';
 
-export default {
+const config = {
   darkMode: ['class'],
   content: [
-    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+    './pages/**/*.{ts,tsx}',
+    './components/**/*.{ts,tsx}',
+    './app/**/*.{ts,tsx}',
+    './src/**/*.{ts,tsx}',
   ],
+  prefix: "",
   theme: {
     container: {
       center: true,
@@ -18,9 +21,9 @@ export default {
     },
     extend: {
       fontFamily: {
+        sans: ['var(--font-sans)', ...fontFamily.sans],
         body: ['Inter', 'sans-serif'],
         headline: ['Space Grotesk', 'sans-serif'],
-        code: ['monospace'],
       },
       colors: {
         border: 'hsl(var(--border))',
@@ -101,45 +104,47 @@ export default {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
       },
-       typography: (theme: (arg0: string) => any) => ({
+      typography: (theme: (arg0: string) => any) => ({
         DEFAULT: {
           css: {
-            '--tw-prose-body': theme('colors.foreground'),
-            '--tw-prose-headings': theme('colors.primary'),
-            '--tw-prose-lead': theme('colors.muted.foreground'),
-            '--tw-prose-links': theme('colors.accent.DEFAULT'),
-            '--tw-prose-bold': theme('colors.foreground'),
-            '--tw-prose-counters': theme('colors.muted.foreground'),
-            '--tw-prose-bullets': theme('colors.border'),
-            '--tw-prose-hr': theme('colors.border'),
-            '--tw-prose-quotes': theme('colors.foreground'),
-            '--tw-prose-quote-borders': theme('colors.border'),
-            '--tw-prose-captions': theme('colors.muted.foreground'),
-            '--tw-prose-code': theme('colors.foreground'),
-            '--tw-prose-pre-code': theme('colors.foreground'),
-            '--tw-prose-pre-bg': theme('colors.muted.DEFAULT'),
-            '--tw-prose-th-borders': theme('colors.border'),
-            '--tw-prose-td-borders': theme('colors.border'),
-            '--tw-prose-invert-body': theme('colors.foreground'),
-            '--tw-prose-invert-headings': theme('colors.primary'),
-            '--tw-prose-invert-lead': theme('colors.muted.foreground'),
-            '--tw-prose-invert-links': theme('colors.accent.DEFAULT'),
-            '--tw-prose-invert-bold': theme('colors.foreground'),
-            '--tw-prose-invert-counters': theme('colors.muted.foreground'),
-            '--tw-prose-invert-bullets': theme('colors.border'),
-            '--tw-prose-invert-hr': theme('colors.border'),
-            '--tw-prose-invert-quotes': theme('colors.foreground'),
-            '--tw-prose-invert-quote-borders': theme('colors.border'),
-            '--tw-prose-invert-captions': theme('colors.muted.foreground'),
-            '--tw-prose-invert-code': theme('colors.foreground'),
-            '--tw-prose-invert-pre-code': theme('colors.foreground'),
-            '--tw-prose-invert-pre-bg': theme('colors.muted.DEFAULT'),
-            '--tw-prose-invert-th-borders': theme('colors.border'),
-            '--tw-prose-invert-td-borders': theme('colors.border'),
+            '--tw-prose-body': 'hsl(var(--foreground))',
+            '--tw-prose-headings': 'hsl(var(--primary))',
+            '--tw-prose-lead': 'hsl(var(--muted-foreground))',
+            '--tw-prose-links': 'hsl(var(--primary))',
+            '--tw-prose-bold': 'hsl(var(--foreground))',
+            '--tw-prose-counters': 'hsl(var(--muted-foreground))',
+            '--tw-prose-bullets': 'hsl(var(--border))',
+            '--tw-prose-hr': 'hsl(var(--border))',
+            '--tw-prose-quotes': 'hsl(var(--foreground))',
+            '--tw-prose-quote-borders': 'hsl(var(--border))',
+            '--tw-prose-captions': 'hsl(var(--muted-foreground))',
+            '--tw-prose-code': 'hsl(var(--foreground))',
+            '--tw-prose-pre-code': 'hsl(var(--foreground))',
+            '--tw-prose-pre-bg': 'hsl(var(--muted))',
+            '--tw-prose-th-borders': 'hsl(var(--border))',
+            '--tw-prose-td-borders': 'hsl(var(--border))',
+            '--tw-prose-invert-body': 'hsl(var(--foreground))',
+            '--tw-prose-invert-headings': 'hsl(var(--primary))',
+            '--tw-prose-invert-lead': 'hsl(var(--muted-foreground))',
+            '--tw-prose-invert-links': 'hsl(var(--primary))',
+            '--tw-prose-invert-bold': 'hsl(var(--foreground))',
+            '--tw-prose-invert-counters': 'hsl(var(--muted-foreground))',
+            '--tw-prose-invert-bullets': 'hsl(var(--border))',
+            '--tw-prose-invert-hr': 'hsl(var(--border))',
+            '--tw-prose-invert-quotes': 'hsl(var(--foreground))',
+            '--tw-prose-invert-quote-borders': 'hsl(var(--border))',
+            '--tw-prose-invert-captions': 'hsl(var(--muted-foreground))',
+            '--tw-prose-invert-code': 'hsl(var(--foreground))',
+            '--tw-prose-invert-pre-code': 'hsl(var(--foreground))',
+            '--tw-prose-invert-pre-bg': 'hsl(var(--muted))',
+            '--tw-prose-invert-th-borders': 'hsl(var(--border))',
+            '--tw-prose-invert-td-borders': 'hsl(var(--border))',
           },
         },
       }),
     },
   },
   plugins: [require('tailwindcss-animate'), require('@tailwindcss/typography')],
-} satisfies Config;
+} satisfies Config
+
+export default config;
