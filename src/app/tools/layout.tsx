@@ -1,0 +1,178 @@
+
+'use client';
+
+import React from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import {
+  SidebarProvider,
+  Sidebar,
+  SidebarHeader,
+  SidebarContent,
+  SidebarTrigger,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarFooter,
+  SidebarInset,
+  useSidebar,
+} from '@/components/ui/sidebar';
+import {
+  Search,
+  MessageCircleQuestion,
+  CodeXml,
+  ScanEye,
+  ImageIcon,
+  ClipboardList,
+  FileText,
+  type LucideIcon,
+  GitGraph,
+  Mic,
+  Mail,
+  Compass,
+  FileSearch,
+  Paintbrush,
+  Presentation,
+  UserSquare,
+  Linkedin,
+  Eraser,
+  Type,
+  Briefcase,
+  FileEdit,
+  Sparkles,
+  GraduationCap,
+  Github,
+  LifeBuoy,
+  LogOut,
+  Settings,
+} from 'lucide-react';
+import { AppLogo } from '@/components/app-logo';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+
+type ToolConfig = {
+  id: string;
+  name: string;
+  icon: LucideIcon;
+  href: string;
+  category: string;
+};
+
+const tools: ToolConfig[] = [
+  { id: 'smart-search', name: 'Smart Search', icon: Search, href: '/tools/smart-search', category: 'Analysis' },
+  { id: 'ai-explanation', name: 'AI Explanation', icon: MessageCircleQuestion, href: '/tools/ai-explanation', category: 'Learning' },
+  { id: 'code-generator', name: 'Code Generator', icon: CodeXml, href: '/tools/code-generator', category: 'Development' },
+  { id: 'code-analyzer', name: 'Code Analyzer', icon: ScanEye, href: '/tools/code-analyzer', category: 'Development' },
+  { id: 'diagram-generator', name: 'Diagram Generator', icon: GitGraph, href: '/tools/diagram-generator', category: 'Development' },
+  { id: 'interview-question-generator', name: 'Interview Questions', icon: ClipboardList, href: '/tools/interview-question-generator', category: 'Career' },
+  { id: 'resume-feedback', name: 'Resume Feedback', icon: UserSquare, href: '/tools/resume-feedback', category: 'Career' },
+  { id: 'resume-customizer', name: 'Resume Customizer', icon: FileEdit, href: '/tools/resume-customizer', category: 'Career' },
+  { id: 'portfolio-generator', name: 'Portfolio Generator', icon: Briefcase, href: '/tools/portfolio-generator', category: 'Career' },
+  { id: 'cover-letter-assistant', name: 'Cover Letter Assistant', icon: Mail, href: '/tools/cover-letter-assistant', category: 'Career' },
+  { id: 'career-path-suggester', name: 'Career Path Suggester', icon: Compass, href: '/tools/career-path-suggester', category: 'Career' },
+  { id: 'linkedin-visuals-generator', name: 'LinkedIn Visuals', icon: Linkedin, href: '/tools/linkedin-visuals-generator', category: 'Career' },
+  { id: 'document-summarizer', name: 'Document Summarizer', icon: FileSearch, href: '/tools/document-summarizer', category: 'Productivity' },
+  { id: 'presentation-generator', name: 'Presentation Generator', icon: Presentation, href: '/tools/presentation-generator', category: 'Productivity' },
+  { id: 'text-to-speech', name: 'Text to Speech', icon: Mic, href: '/tools/text-to-speech', category: 'Productivity' },
+  { id: 'text-humanizer', name: 'Text Humanizer', icon: Sparkles, href: '/tools/text-humanizer', category: 'Writing' },
+  { id: 'thesis-generator-tool', name: 'Academic Writer', icon: GraduationCap, href: '/tools/thesis-generator-tool', category: 'Writing' },
+  { id: 'watermark-remover', name: 'Watermark Remover', icon: Eraser, href: '/tools/watermark-remover', category: 'Media' },
+  { id: 'image-text-manipulation', name: 'Image Text Manipulation', icon: Type, href: '/tools/image-text-manipulation', category: 'Media' },
+];
+
+const categories = [...new Set(tools.map(tool => tool.category))];
+
+const ToolSidebar = () => {
+  const pathname = usePathname();
+  const { state } = useSidebar();
+  
+  return (
+    <Sidebar collapsible="icon" className="border-r">
+      <SidebarHeader className="h-14 justify-center">
+        <Link href="/" className="flex items-center gap-2">
+            <AppLogo className="w-8 h-8 text-primary" />
+            <span className="text-xl font-bold font-headline group-data-[collapsible=icon]:hidden">
+            AI Mentor
+            </span>
+        </Link>
+      </SidebarHeader>
+      <Separator />
+      <SidebarContent>
+        {categories.map((category) => (
+          <SidebarMenu key={category}>
+            <SidebarMenuItem>
+              <div className="px-2 py-1 text-xs text-muted-foreground font-semibold group-data-[collapsible=icon]:hidden">
+                {category}
+              </div>
+            </SidebarMenuItem>
+            {tools
+              .filter((tool) => tool.category === category)
+              .map((tool) => (
+                <SidebarMenuItem key={tool.id}>
+                  <Link href={tool.href}>
+                    <SidebarMenuButton
+                      isActive={pathname === tool.href}
+                      tooltip={{
+                        children: tool.name,
+                      }}
+                    >
+                      <tool.icon />
+                      <span>{tool.name}</span>
+                    </SidebarMenuButton>
+                  </Link>
+                </SidebarMenuItem>
+              ))}
+          </SidebarMenu>
+        ))}
+      </SidebarContent>
+       <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton tooltip={{children: 'Support'}}>
+              <LifeBuoy />
+              <span>Support</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton tooltip={{children: 'Settings'}}>
+              <Settings />
+              <span>Settings</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+    </Sidebar>
+  );
+};
+
+export default function ToolsLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <SidebarProvider>
+      <ToolSidebar />
+      <SidebarInset>
+        <header className="flex h-14 items-center justify-between border-b px-4 lg:px-6">
+            <SidebarTrigger className="md:hidden" />
+            <div className="ml-auto flex items-center gap-4">
+              <Button variant="ghost" size="icon">
+                <Github className="h-5 w-5" />
+                <span className="sr-only">GitHub</span>
+              </Button>
+              <Button variant="ghost" size="icon">
+                <Settings className="h-5 w-5" />
+                <span className="sr-only">Settings</span>
+              </Button>
+            </div>
+        </header>
+        <main className="flex-1 overflow-auto p-4 lg:p-6">
+            <div className="mx-auto w-full max-w-4xl">
+                {children}
+            </div>
+        </main>
+      </SidebarInset>
+    </SidebarProvider>
+  );
+}

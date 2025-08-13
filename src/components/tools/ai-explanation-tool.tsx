@@ -26,6 +26,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { handleExplainTopicAction } from '@/app/actions';
 import type { ExplainTopicOutput } from '@/ai/flows/ai-explanation-tool';
+import { Loader2 } from 'lucide-react';
 
 const formSchema = z.object({
   topic: z
@@ -66,6 +67,10 @@ export default function AiExplanationTool() {
 
   return (
     <div className="space-y-6">
+       <header className="space-y-1">
+        <h1 className="text-3xl font-bold font-headline">AI Explanation</h1>
+        <p className="text-muted-foreground">Get clear and concise explanations for complex topics.</p>
+      </header>
       <Card>
         <CardHeader>
           <CardTitle>Explain a Topic</CardTitle>
@@ -94,6 +99,7 @@ export default function AiExplanationTool() {
                 )}
               />
               <Button type="submit" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isLoading ? 'Generating...' : 'Explain'}
               </Button>
             </form>
