@@ -93,13 +93,6 @@ export default function DocumentSummarizerTool() {
 
   return (
     <div className="space-y-8">
-      <header className="space-y-2">
-        <h1 className="text-3xl font-bold font-headline">Document Summarizer</h1>
-        <p className="text-muted-foreground">
-          Get a quick summary of any document.
-        </p>
-      </header>
-
       <Card>
         <CardHeader>
           <CardTitle>Summarize a Document</CardTitle>
@@ -116,7 +109,7 @@ export default function DocumentSummarizerTool() {
                   <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center">
                     {fileName ? (
                       <div className='flex flex-col items-center gap-2'>
-                        <FileText className="w-12 h-12 text-accent" />
+                        <FileText className="w-12 h-12 text-primary" />
                         <p className='text-sm font-medium'>{fileName}</p>
                          <Button variant="link" size="sm" asChild className='p-0 h-auto'>
                            <label htmlFor="file-upload" className="cursor-pointer">Change file</label>
@@ -126,7 +119,7 @@ export default function DocumentSummarizerTool() {
                       <>
                         <UploadCloud className="w-12 h-12 text-muted-foreground" />
                         <p className="mt-2 text-sm text-muted-foreground">
-                          <label htmlFor="file-upload" className="font-semibold text-accent cursor-pointer hover:underline">
+                          <label htmlFor="file-upload" className="font-semibold text-primary cursor-pointer hover:underline">
                             Click to upload
                           </label>
                            {' '}or drag and drop

@@ -87,13 +87,6 @@ export default function ImageTextManipulationTool() {
 
   return (
     <div className="space-y-8">
-      <header className="space-y-2">
-        <h1 className="text-3xl font-bold font-headline">Image Text Manipulation</h1>
-        <p className="text-muted-foreground">
-          Edit text within an image using natural language instructions.
-        </p>
-      </header>
-
       <Card>
         <CardHeader>
           <CardTitle>Manipulate Image Text</CardTitle>
@@ -115,7 +108,7 @@ export default function ImageTextManipulationTool() {
                             <>
                                 <UploadCloud className="w-12 h-12 text-muted-foreground" />
                                 <p className="mt-2 text-sm text-muted-foreground">
-                                <label htmlFor="file-upload" className="font-semibold text-accent cursor-pointer hover:underline">
+                                <label htmlFor="file-upload" className="font-semibold text-primary cursor-pointer hover:underline">
                                     Upload an image
                                 </label>
                                 </p>

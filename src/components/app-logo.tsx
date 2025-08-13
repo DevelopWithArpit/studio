@@ -12,11 +12,12 @@ export function AppLogo(props: SVGProps<SVGSVGElement>) {
       strokeLinejoin="round"
       {...props}
     >
-        <path d="M12 2 L12 12" />
-        <path d="M12 12 L4 20" />
-        <path d="M12 12 L20 20" />
-        <path d="M12 12 L12 22" />
-        <circle cx="12" cy="12" r="2" />
+      <path d="M12 8V4H8" />
+      <rect width="16" height="12" x="4" y="8" rx="2" />
+      <path d="M2 14h2" />
+      <path d="M20 14h2" />
+      <path d="M15 13v2" />
+      <path d="M9 13v2" />
     </svg>
   );
 }

@@ -74,13 +74,6 @@ export default function CoverLetterAssistantTool() {
 
   return (
     <div className="space-y-8">
-      <header className="space-y-2">
-        <h1 className="text-3xl font-bold font-headline">Cover Letter Assistant</h1>
-        <p className="text-muted-foreground">
-          Generate a professional cover letter tailored to a specific job.
-        </p>
-      </header>
-
       <Card>
         <CardHeader>
           <CardTitle>Generate a Cover Letter</CardTitle>

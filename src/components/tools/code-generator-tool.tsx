@@ -78,13 +78,6 @@ export default function CodeGeneratorTool() {
 
   return (
     <div className="space-y-8">
-      <header className="space-y-2">
-        <h1 className="text-3xl font-bold font-headline">Code Generator Tool</h1>
-        <p className="text-muted-foreground">
-          Generate code snippets based on your instructions and specifications.
-        </p>
-      </header>
-
       <Card>
         <CardHeader>
           <CardTitle>Generate Code</CardTitle>
@@ -186,7 +179,7 @@ export default function CodeGeneratorTool() {
           </CardHeader>
           <CardContent>
             <pre className="bg-muted p-4 rounded-md overflow-x-auto text-sm">
-              <code className="text-foreground">{result.code}</code>
+              <code className="text-foreground whitespace-pre-wrap">{result.code}</code>
             </pre>
           </CardContent>
         </Card>

@@ -72,13 +72,6 @@ export default function CareerPathSuggesterTool() {
 
   return (
     <div className="space-y-8">
-      <header className="space-y-2">
-        <h1 className="text-3xl font-bold font-headline">Career Path Suggester</h1>
-        <p className="text-muted-foreground">
-          Discover potential career paths based on your interests and skills.
-        </p>
-      </header>
-
       <Card>
         <CardHeader>
           <CardTitle>Find Your Career</CardTitle>

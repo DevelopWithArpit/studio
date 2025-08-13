@@ -68,13 +68,6 @@ export default function CodeAnalyzerTool() {
 
   return (
     <div className="space-y-8">
-      <header className="space-y-2">
-        <h1 className="text-3xl font-bold font-headline">Code Analyzer Tool</h1>
-        <p className="text-muted-foreground">
-          Identify potential errors, performance issues, and security vulnerabilities in your code.
-        </p>
-      </header>
-
       <Card>
         <CardHeader>
           <CardTitle>Analyze Code</CardTitle>
@@ -160,7 +153,7 @@ export default function CodeAnalyzerTool() {
           </CardHeader>
           <CardContent>
             <pre className="bg-muted p-4 rounded-md overflow-x-auto text-sm text-muted-foreground">
-              <code className="text-foreground">{result.report}</code>
+              <code className="text-foreground whitespace-pre-wrap">{result.report}</code>
             </pre>
           </CardContent>
         </Card>

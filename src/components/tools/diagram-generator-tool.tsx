@@ -64,13 +64,6 @@ export default function DiagramGeneratorTool() {
 
   return (
     <div className="space-y-8">
-      <header className="space-y-2">
-        <h1 className="text-3xl font-bold font-headline">Diagram Generator</h1>
-        <p className="text-muted-foreground">
-          Create diagrams from text descriptions.
-        </p>
-      </header>
-
       <Card>
         <CardHeader>
           <CardTitle>Generate a Diagram</CardTitle>
