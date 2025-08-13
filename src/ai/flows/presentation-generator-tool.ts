@@ -28,8 +28,9 @@ export type GeneratePresentationInput = z.infer<typeof GeneratePresentationInput
 
 const SlideSchema = z.object({
   title: z.string().describe('The title of the slide.'),
-  content: z.array(z.string()).describe('An array of exactly 4 short bullet points for the slide content. Each bullet point must have around 8 words.'),
-  imagePrompt: z.string().describe('A text prompt to generate a relevant image for this slide.'),
+  content: z.array(z.string()).describe('An array of exactly 4 short bullet points for the slide content. Each bullet point must have around 8 words. This can be an empty array for title-only slides.'),
+  imagePrompt: z.string().describe('A text prompt to generate a relevant image for this slide. Can be an empty string if no image is needed.'),
+  slideLayout: z.enum(['title', 'contentWithImage', 'titleOnly']).describe("The best layout for this slide. Use 'title' for the main title slide, 'contentWithImage' for slides with bullet points and a visual, and 'titleOnly' for section headers or simple, impactful statements."),
   imageUrl: z.string().optional().describe('The data URI of the generated image for the slide.'),
 });
 
@@ -61,7 +62,8 @@ const outlinePrompt = ai.definePrompt({
 **Core Principles (Non-negotiable):**
 - **Visuals > Text**: Your primary goal is to create a powerful, memorable visual for each slide. The text is secondary and only supports the visual. For every slide, you must first conceive the visual and then write a short title and content to complement it.
 - **One Idea per Slide**: Each slide must focus on a single, core idea. If a point is complex, it MUST be broken down into multiple slides.
-- **Strict Content Rules**: Each content slide must have exactly 4 bullet points. Each bullet point MUST have around 8 words.
+- **Strict Content Rules**: Each content slide must have exactly 4 bullet points. Each bullet point MUST have around 8 words. For 'titleOnly' slides, the content array should be empty.
+- **Layout Intelligence**: For each slide, you MUST choose the most appropriate layout: 'title' for the main title slide, 'contentWithImage' for standard content slides, and 'titleOnly' for section headers or impactful statements.
 
 **Language Requirement:**
 - You MUST generate all text content (titles and bullet points) in the requested language: **{{#if language}}{{language}}{{else}}English{{/if}}**.
@@ -75,13 +77,14 @@ const outlinePrompt = ai.definePrompt({
 - **Tone and Style**: The content must be professional and authoritative, yet sound natural and human-written. It should be engaging, clear, and concise. Avoid jargon.
 - For each slide, you MUST provide:
   1. A short, impactful title.
-  2. A set of exactly 4 extremely CONCISE bullet points, strictly adhering to the content rules (around 8 words per point).
-  3. A descriptive prompt for an AI image generator. This prompt must describe a **stunning, high-quality, and cinematic visual** that powerfully represents the slide's core idea. **Crucially, the generated image should NOT contain any text or words to avoid spelling errors. All image prompts must be in English.**
+  2. A set of exactly 4 extremely CONCISE bullet points (or an empty array for title-only slides).
+  3. A descriptive prompt for an AI image generator (or an empty string). This prompt must describe a **stunning, high-quality, and cinematic visual** that powerfully represents the slide's core idea. **Crucially, the generated image should NOT contain any text or words to avoid spelling errors. All image prompts must be in English.**
+  4. The appropriate 'slideLayout'.
 
 **Structure Generation Instructions:**
-- **The very first slide must always be an introduction slide.** Its title should be "Introduction" (or its equivalent in the target language) and it should introduce the main topic. It should also include any presenter details provided.
+- **The very first slide must always be the main title slide with the layout 'title'.** It should introduce the main topic and include any presenter details provided.
 - If the user provides a "Custom Structure," you MUST use it as the primary source. The 'numSlides' parameter should be IGNORED.
-  - **Parsing Custom Structure**: The custom structure might contain both titles and notes. A line starting with a number and/or bullet (e.g., "1. About the Company", "- Key Features") should be treated as a slide title. All text following that title, until the next title, should be used as the context/notes for that specific slide.
+  - **Parsing Custom Structure**: A line starting with a number and/or bullet (e.g., "1. About the Company", "- Key Features") should be treated as a slide title. All text following that title, until the next title, should be used as the context/notes for that specific slide.
   - You MUST generate one slide for each title you identify in the custom structure.
 - If the content type is "Project Proposal," generate the subsequent presentation slides using this structure: 1. Introduction, 2. Objectives, 3. Problem Statement / Need Analysis, 4. Target Group / Area, 5. Proposed Activities, 6. Methodology, 7. Expected Outcomes, 8. Conclusion. (Translated to the target language).
 - If the content type is "General," generate a logical presentation of exactly {{{numSlides}}} slides, which must include a conclusion slide at the end. The introduction slide is extra.
@@ -125,23 +128,32 @@ const generatePresentationFlow = ai.defineFlow(
     const imageGenerationPromises = [];
 
     // Background Image Promise
-    imageGenerationPromises.push(
-      ai.generate({
-        model: 'googleai/gemini-2.0-flash-preview-image-generation',
-        prompt: applyStyle(outline.design.backgroundPrompt),
-        config: { responseModalities: ['TEXT', 'IMAGE'] },
-      })
-    );
+    if (outline.design.backgroundPrompt) {
+        imageGenerationPromises.push(
+          ai.generate({
+            model: 'googleai/gemini-2.0-flash-preview-image-generation',
+            prompt: applyStyle(outline.design.backgroundPrompt),
+            config: { responseModalities: ['TEXT', 'IMAGE'] },
+          })
+        );
+    } else {
+        imageGenerationPromises.push(Promise.resolve({ media: { url: '' } }));
+    }
+
 
     // Slide Image Promises
     outline.slides.forEach(slide => {
-        imageGenerationPromises.push(
-            ai.generate({
-                model: 'googleai/gemini-2.0-flash-preview-image-generation',
-                prompt: applyStyle(slide.imagePrompt),
-                config: { responseModalities: ['TEXT', 'IMAGE'] },
-            })
-        );
+        if (slide.imagePrompt) {
+            imageGenerationPromises.push(
+                ai.generate({
+                    model: 'googleai/gemini-2.0-flash-preview-image-generation',
+                    prompt: applyStyle(slide.imagePrompt),
+                    config: { responseModalities: ['TEXT', 'IMAGE'] },
+                })
+            );
+        } else {
+            imageGenerationPromises.push(Promise.resolve({ media: { url: '' } }));
+        }
     });
 
     const results = await Promise.allSettled(imageGenerationPromises);
@@ -156,15 +168,20 @@ const generatePresentationFlow = ai.defineFlow(
     }
     
     // Process slide image results
-    const slideImageResults = results.slice(1);
-    slideImageResults.forEach((result, index) => {
-      if (result.status === 'fulfilled' && result.value.media?.url) {
-        outline.slides[index].imageUrl = result.value.media.url;
-      } else {
-        console.error(`Slide ${index + 1} image generation failed:`, result.status === 'rejected' ? result.reason : 'No URL returned');
-        outline.slides[index].imageUrl = '';
-      }
-    });
+    let imageResultIndex = 1;
+    for (let i = 0; i < outline.slides.length; i++) {
+        if (outline.slides[i].imagePrompt) {
+            const result = results[imageResultIndex++];
+            if (result.status === 'fulfilled' && result.value.media?.url) {
+                outline.slides[i].imageUrl = result.value.media.url;
+            } else {
+                console.error(`Slide ${i + 1} image generation failed:`, result.status === 'rejected' ? result.reason : 'No URL returned');
+                outline.slides[i].imageUrl = '';
+            }
+        } else {
+            outline.slides[i].imageUrl = '';
+        }
+    }
 
     return outline;
   }

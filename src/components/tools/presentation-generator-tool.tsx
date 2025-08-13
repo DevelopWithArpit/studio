@@ -183,73 +183,95 @@ export default function PresentationGeneratorTool() {
         },
       ],
     });
-
-    // Title slide
-    const titleSlide = pptx.addSlide({ masterName: 'TITLE_SLIDE' });
-    titleSlide.transition = { type: "fade", duration: 1 };
     
-    const introSlideData = result.slides[0];
-    
-    titleSlide.addText(result.title, {
-        placeholder: "title",
-        anim: { effect: "wipe", type: "in", duration: 1, delay: 0.2, from: "bottom" }
+    // Master Slide: Title Only
+    pptx.defineSlideMaster({
+      title: "TITLE_ONLY_SLIDE",
+      background: masterBackground,
+      objects: [
+        {
+            placeholder: {
+                options: { name: "title", type: "title", x: 0.5, y: 2.0, w: 9, h: 2, fontFace: 'Arial', fontSize: 44, bold: true, color: cleanColor(design.accentColor), align: 'center', valign: 'middle', fill: { color: '000000', transparency: 60 } },
+                text: "Default Title",
+            }
+        },
+      ],
     });
-    
-    const subtitleTextObjects = [];
-    if (introSlideData && introSlideData.title) {
-        subtitleTextObjects.push({
-            text: introSlideData.title,
-            options: { fontSize: 22, bold: true, breakLine: true }
-        });
-    }
-
-    const presenterDetails = [
-        result.presenterName ? `Presented by: ${result.presenterName}` : null,
-        result.rollNumber ? `Roll No: ${result.rollNumber}` : null,
-        result.department ? `Department: ${result.department}` : null
-    ].filter(Boolean);
-
-    if(presenterDetails.length > 0) {
-      subtitleTextObjects.push(...presenterDetails.map(text => ({ text, options: { breakLine: true } })));
-    }
-    
-    if (subtitleTextObjects.length > 0) {
-        titleSlide.addText(subtitleTextObjects, {
-            placeholder: 'subtitle',
-        });
-    }
 
 
-    // Content slides
-    result.slides.slice(1).forEach((slide) => {
-      const pptxSlide = pptx.addSlide({ masterName: 'CONTENT_SLIDE' });
-      
-      pptxSlide.transition = { type: "fade", duration: 1 };
-      
-       pptxSlide.addText(slide.title, {
-         placeholder: "title",
-         anim: { effect: "fadeIn", duration: 0.5, delay: 0.2 }
-       });
-
-      const bodyTextObjects = slide.content.map(point => ({
-        text: point,
-        options: { bullet: true, paraSpaceAfter: 20, breakLine: true }
-      }));
-
-      if (bodyTextObjects.length > 0) {
-          pptxSlide.addText(bodyTextObjects, {
-              placeholder: 'body',
-              anim: { effect: "fly", type: 'in', by: "paragraph", duration: 0.5, delay: 0.5, stagger: 200 }
-          });
+    // Generate slides
+    result.slides.forEach((slide) => {
+      let masterName = '';
+      switch (slide.slideLayout) {
+        case 'title':
+          masterName = 'TITLE_SLIDE';
+          break;
+        case 'titleOnly':
+          masterName = 'TITLE_ONLY_SLIDE';
+          break;
+        case 'contentWithImage':
+        default:
+          masterName = 'CONTENT_SLIDE';
+          break;
       }
       
-      if (slide.imageUrl && slide.imageUrl.startsWith('data:image')) {
-        pptxSlide.addImage({
-          data: slide.imageUrl,
-          placeholder: "image",
-          sizing: { type: 'cover', w: 3, h: 4.5 },
-          anim: { effect: "zoom", type: 'in', duration: 1, delay: 0.3 }
+      const pptxSlide = pptx.addSlide({ masterName });
+      pptxSlide.transition = { type: "fade", duration: 1 };
+
+      if (masterName === 'TITLE_SLIDE') {
+        pptxSlide.addText(result.title, {
+            placeholder: "title",
+            anim: { effect: "wipe", type: "in", duration: 1, delay: 0.2, from: "bottom" }
         });
+        
+        const subtitleTextObjects = [];
+        if (slide.title) {
+            subtitleTextObjects.push({
+                text: slide.title,
+                options: { fontSize: 22, bold: true, breakLine: true }
+            });
+        }
+        const presenterDetails = [
+            result.presenterName ? `Presented by: ${result.presenterName}` : null,
+            result.rollNumber ? `Roll No: ${result.rollNumber}` : null,
+            result.department ? `Department: ${result.department}` : null
+        ].filter(Boolean);
+    
+        if(presenterDetails.length > 0) {
+          subtitleTextObjects.push(...presenterDetails.map(text => ({ text, options: { breakLine: true } })));
+        }
+        
+        if (subtitleTextObjects.length > 0) {
+            pptxSlide.addText(subtitleTextObjects, { placeholder: 'subtitle' });
+        }
+      } else {
+        pptxSlide.addText(slide.title, {
+          placeholder: "title",
+          anim: { effect: "fadeIn", duration: 0.5, delay: 0.2 }
+        });
+
+        if (masterName === 'CONTENT_SLIDE') {
+          const bodyTextObjects = slide.content.map(point => ({
+            text: point,
+            options: { bullet: true, paraSpaceAfter: 20, breakLine: true }
+          }));
+
+          if (bodyTextObjects.length > 0) {
+              pptxSlide.addText(bodyTextObjects, {
+                  placeholder: 'body',
+                  anim: { effect: "fly", type: 'in', by: "paragraph", duration: 0.5, delay: 0.5, stagger: 200 }
+              });
+          }
+          
+          if (slide.imageUrl && slide.imageUrl.startsWith('data:image')) {
+            pptxSlide.addImage({
+              data: slide.imageUrl,
+              placeholder: "image",
+              sizing: { type: 'cover', w: 3, h: 4.5 },
+              anim: { effect: "zoom", type: 'in', duration: 1, delay: 0.3 }
+            });
+          }
+        }
       }
     });
 
