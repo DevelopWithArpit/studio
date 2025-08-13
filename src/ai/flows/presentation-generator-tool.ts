@@ -56,7 +56,7 @@ const outlinePrompt = ai.definePrompt({
     name: 'generatePresentationOutlinePrompt',
     input: { schema: GeneratePresentationInputSchema },
     output: { schema: PresentationOutlineSchema },
-    prompt: `You are an expert presentation creator and visual designer. Your task is to generate a stunning and detailed presentation outline based on the user's request, following modern presentation best practices. Your output must be exceptionally professional.
+    prompt: `You are an expert presentation creator and visual designer, inspired by tools like PowerPoint Designer. Your task is to generate a stunning and detailed presentation outline based on the user's request, following modern presentation best practices.
 
 **Core Principles (Non-negotiable):**
 - **Visuals > Text**: Your primary goal is to create a powerful, memorable visual for each slide. The text is secondary and only supports the visual. For every slide, you must first conceive the visual and then write a short title and content to complement it.
@@ -80,9 +80,6 @@ const outlinePrompt = ai.definePrompt({
 
 **Structure Generation Instructions:**
 - **The very first slide must always be an introduction slide.** Its title should be "Introduction" (or its equivalent in the target language) and it should introduce the main topic. It should also include any presenter details provided.
-  {{#if presenterName}}Presented by: {{{presenterName}}}{{/if}}
-  {{#if rollNumber}} (Roll No: {{{rollNumber}}}){{/if}}
-  {{#if department}}, {{{department}}}{{/if}}
 - If the user provides a "Custom Structure," you MUST use it as the primary source. The 'numSlides' parameter should be IGNORED.
   - **Parsing Custom Structure**: The custom structure might contain both titles and notes. A line starting with a number and/or bullet (e.g., "1. About the Company", "- Key Features") should be treated as a slide title. All text following that title, until the next title, should be used as the context/notes for that specific slide.
   - You MUST generate one slide for each title you identify in the custom structure.

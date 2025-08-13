@@ -135,7 +135,7 @@ export default function PresentationGeneratorTool() {
     const cleanColor = (color: string) => color.startsWith('#') ? color.substring(1) : color;
     
     const masterBackground = backgroundImageUrl && backgroundImageUrl.startsWith('data:image')
-        ? { data: backgroundImageUrl } 
+        ? { data: backgroundImageUrl, sizing: { type: 'cover', w: '100%', h: '100%' } }
         : { color: cleanColor(design.backgroundColor) };
 
 
@@ -195,17 +195,23 @@ export default function PresentationGeneratorTool() {
         anim: { effect: "wipe", type: "in", duration: 1, delay: 0.2, from: "bottom" }
     });
     
-    const subtitleTextObjects = [
-        {
+    const subtitleTextObjects = [];
+    if (introSlideData && introSlideData.title) {
+        subtitleTextObjects.push({
             text: introSlideData.title,
             options: { fontSize: 22, bold: true, breakLine: true }
-        },
-        ...[
-            result.presenterName ? `Presented by: ${result.presenterName}` : null,
-            result.rollNumber ? `Roll No: ${result.rollNumber}` : null,
-            result.department ? `Department: ${result.department}` : null
-        ].filter(Boolean).map(text => ({ text, options: { breakLine: true } })),
-    ];
+        });
+    }
+
+    const presenterDetails = [
+        result.presenterName ? `Presented by: ${result.presenterName}` : null,
+        result.rollNumber ? `Roll No: ${result.rollNumber}` : null,
+        result.department ? `Department: ${result.department}` : null
+    ].filter(Boolean);
+
+    if(presenterDetails.length > 0) {
+      subtitleTextObjects.push(...presenterDetails.map(text => ({ text, options: { breakLine: true } })));
+    }
     
     if (subtitleTextObjects.length > 0) {
         titleSlide.addText(subtitleTextObjects, {
@@ -326,7 +332,7 @@ export default function PresentationGeneratorTool() {
                         <FormDescription>Enter one slide title per line, with notes below each title.</FormDescription>
                         <FormControl>
                             <Textarea
-                                placeholder="e.g.,\n1. About the Company\nBlinkit is an Indian quick-commerce platform...\n\n2. Founders\nAlbinder Dhindsa..."
+                                placeholder="e.g.,&#10;1. About the Company&#10;Blinkit is an Indian quick-commerce platform...&#10;&#10;2. Founders&#10;Albinder Dhindsa..."
                                 {...field}
                                 rows={10}
                             />
