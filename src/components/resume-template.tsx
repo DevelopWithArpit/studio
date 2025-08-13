@@ -99,10 +99,9 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
                 </header>
 
                 {/* Body */}
-                <main className="flex gap-10 pt-6">
-                    {/* Left Column */}
-                    <div className="w-[65%]">
-                        {summary && (
+                <main className="grid grid-cols-[65%_35%] gap-x-10 pt-6">
+                    <div className="grid grid-flow-row auto-rows-max gap-y-6">
+                         {summary && (
                             <section>
                                 <h2 className="text-xs font-bold uppercase tracking-widest text-gray-600">Summary</h2>
                                 <div className="w-full h-px bg-gray-900 my-1"></div>
@@ -111,7 +110,7 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
                         )}
 
                         {experience && experience.length > 0 && (
-                            <section className="mt-6">
+                            <section>
                                 <h2 className="text-xs font-bold uppercase tracking-widest text-gray-600">Experience</h2>
                                 <div className="w-full h-px bg-gray-900 my-1"></div>
                                 <div className="mt-2 space-y-4">
@@ -129,7 +128,7 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
                             </section>
                         )}
                          {education && education.length > 0 && (
-                            <section className="mt-6">
+                            <section>
                                 <h2 className="text-xs font-bold uppercase tracking-widest text-gray-600">Education</h2>
                                 <div className="w-full h-px bg-gray-900 my-1"></div>
                                 <div className="mt-2 space-y-2">
@@ -148,8 +147,7 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
                         )}
                     </div>
 
-                    {/* Right Column */}
-                    <div className="w-[35%]">
+                   <div className="grid grid-flow-row auto-rows-max gap-y-6">
                         {achievements && achievements.length > 0 && (
                             <section>
                                 <h2 className="text-xs font-bold uppercase tracking-widest text-gray-600">Key Achievements</h2>
@@ -165,7 +163,7 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
                             </section>
                         )}
                         {skills && skills.technical.length > 0 && (
-                            <section className="mt-6">
+                            <section>
                                 <h2 className="text-xs font-bold uppercase tracking-widest text-gray-600">Skills</h2>
                                 <div className="w-full h-px bg-gray-900 my-1"></div>
                                 <div className="mt-2">
@@ -189,7 +187,7 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
                             </section>
                         )}
                          {projects && projects.length > 0 && (
-                            <section className="mt-6">
+                            <section>
                                 <h2 className="text-xs font-bold uppercase tracking-widest text-gray-600">Projects</h2>
                                 <div className="w-full h-px bg-gray-900 my-1"></div>
                                 <div className="mt-2 space-y-3">
