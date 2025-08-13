@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState } from 'react';
@@ -138,14 +137,14 @@ export default function ResumeFeedbackTool() {
     };
 
     try {
-        const canvas = await html2canvas(resumeContainer, { scale: 3, useCORS: true, });
-        const imgData = canvas.toDataURL('image/png');
+        const canvas = await html2canvas(resumeContainer, { scale: 2, useCORS: true });
+        const imgData = canvas.toDataURL('image/jpeg', 0.9); // Use JPEG format with quality 0.9
 
         const pdf = new jsPDF({ orientation: 'p', unit: 'px', format: 'a4'});
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
         
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST'); // Use FAST compression
         pdf.save('resume.pdf');
       } catch (error) {
         toast({ variant: 'destructive', title: 'Error Generating PDF', description: error instanceof Error ? error.message : 'An unknown error occurred.' });
