@@ -82,7 +82,7 @@ const ToolSidebar = () => {
   const pathname = usePathname();
   
   return (
-    <Sidebar collapsible="icon" className="border-r bg-background">
+    <Sidebar collapsible="icon" className="border-r bg-card">
       <SidebarHeader className="h-16 flex items-center justify-center">
         <Link href="/" className="flex items-center gap-2.5">
             <AppLogo className="w-8 h-8 text-primary" />
