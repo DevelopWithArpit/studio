@@ -31,18 +31,18 @@
     --chart-5: 27 87% 67%;
   }
   .dark {
-    --background: 224 71.4% 4.1%;
-    --foreground: 210 20% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --background: 224 71.4% 4.1%; /* #0a101f */
+    --foreground: 210 20% 98%; /* #f9fafb */
+    --card: 222.2 84% 4.9%; /* #08162c */
+    --card-foreground: 210 40% 98%; /* #f8fafc */
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
+    --primary: 217.2 91.2% 59.8%; /* #4f8eff */
+    --primary-foreground: 222.2 47.4% 11.2%; /* #101d33 */
+    --secondary: 217.2 32.6% 17.5%; /* #202d41 */
     --secondary-foreground: 210 40% 98%;
     --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted-foreground: 215 20.2% 65.1%; /* #94a3b8 */
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
