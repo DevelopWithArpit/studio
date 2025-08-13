@@ -178,8 +178,8 @@ export default function PortfolioGeneratorTool() {
   ) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 10 * 1024 * 1024) { // 10MB limit
-        toast({ variant: "destructive", title: "File too large", description: "Please upload a document smaller than 10MB."});
+      if (file.size > 200 * 1024 * 1024) { // 200MB limit
+        toast({ variant: "destructive", title: "File too large", description: "Please upload a document smaller than 200MB."});
         return;
       }
       setFileName(file.name);
@@ -234,7 +234,7 @@ export default function PortfolioGeneratorTool() {
                                                 Upload Resume
                                             </label>
                                         </p>
-                                        <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 10MB</p>
+                                        <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 200MB</p>
                                     </>
                                 )}
                                 <Input id="resume-upload" type="file" className="sr-only" onChange={(e) => handleFileChange(e, setResumeFileName, setResumeDataUri)} accept=".pdf,.docx,.txt" />
@@ -260,7 +260,7 @@ export default function PortfolioGeneratorTool() {
                                                 Upload Certificate
                                             </label>
                                         </p>
-                                        <p className="text-xs text-muted-foreground">Image or PDF up to 10MB</p>
+                                        <p className="text-xs text-muted-foreground">Image or PDF up to 200MB</p>
                                     </>
                                 )}
                                 <Input id="cert-upload" type="file" className="sr-only" onChange={(e) => handleFileChange(e, setCertificateFileName, setCertificateDataUri)} accept="image/*,.pdf" />

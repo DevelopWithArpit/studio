@@ -62,8 +62,8 @@ export default function LinkedInVisualsGeneratorTool() {
   const handleResumeFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 10 * 1024 * 1024) { // 10MB limit
-        toast({ variant: "destructive", title: "File too large", description: "Please upload a resume smaller than 10MB."});
+      if (file.size > 200 * 1024 * 1024) { // 200MB limit
+        toast({ variant: "destructive", title: "File too large", description: "Please upload a resume smaller than 200MB."});
         return;
       }
       const reader = new FileReader();
@@ -80,8 +80,8 @@ export default function LinkedInVisualsGeneratorTool() {
   const handlePhotoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 10 * 1024 * 1024) { // 10MB limit
-        toast({ variant: "destructive", title: "File too large", description: "Please upload an image smaller than 10MB."});
+      if (file.size > 200 * 1024 * 1024) { // 200MB limit
+        toast({ variant: "destructive", title: "File too large", description: "Please upload an image smaller than 200MB."});
         return;
       }
       const reader = new FileReader();
@@ -164,7 +164,7 @@ export default function LinkedInVisualsGeneratorTool() {
                                         Click to upload
                                         </label>
                                     </p>
-                                    <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 10MB</p>
+                                    <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 200MB</p>
                                     </>
                                 )}
                                 <Input id="resume-upload" type="file" className="sr-only" onChange={handleResumeFileChange} accept=".pdf,.doc,.docx,.txt"/>
@@ -213,7 +213,7 @@ export default function LinkedInVisualsGeneratorTool() {
                           </label>
                         </p>
                         <Input id="photo-upload" type="file" accept="image/*" className="sr-only" onChange={handlePhotoFileChange} />
-                         <p className="text-xs text-muted-foreground mt-1">PNG, JPG, GIF up to 10MB</p>
+                         <p className="text-xs text-muted-foreground mt-1">PNG, JPG, GIF up to 200MB</p>
                       </>
                     )}
                   </div>

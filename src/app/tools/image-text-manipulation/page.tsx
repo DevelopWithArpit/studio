@@ -28,7 +28,7 @@ import { Input } from '@/components/ui/input';
 import { handleManipulateImageTextAction } from '@/app/actions';
 import type { ManipulateImageTextOutput } from '@/ai/flows/image-text-manipulation-tool';
 import { Loader2, UploadCloud } from 'lucide-react';
-import { Textarea } from '../ui/textarea';
+import { Textarea } from '@/components/ui/textarea';
 
 const formSchema = z.object({
   imageDataUri: z.string().min(1, 'Please upload an image.'),
@@ -54,8 +54,8 @@ export default function ImageTextManipulationTool() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 10 * 1024 * 1024) { // 10MB limit
-        toast({ variant: "destructive", title: "File too large", description: "Please upload an image smaller than 10MB."});
+      if (file.size > 200 * 1024 * 1024) { // 200MB limit
+        toast({ variant: "destructive", title: "File too large", description: "Please upload an image smaller than 200MB."});
         return;
       }
       const reader = new FileReader();
@@ -118,7 +118,7 @@ export default function ImageTextManipulationTool() {
                                 </label>
                                 </p>
                                 <Input id="file-upload" type="file" accept="image/*" className="sr-only" onChange={handleFileChange} />
-                                <p className="text-xs text-muted-foreground mt-1">PNG, JPG, GIF up to 10MB</p>
+                                <p className="text-xs text-muted-foreground mt-1">PNG, JPG, GIF up to 200MB</p>
                             </>
                             )}
                         </div>
