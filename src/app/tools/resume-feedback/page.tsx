@@ -6,7 +6,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import { saveAs } from 'file-saver';
 import { renderToStaticMarkup } from 'react-dom/server';
 import {
@@ -63,11 +62,11 @@ export default function ResumeFeedbackTool() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 200 * 1024 * 1024) {
+      if (file.size > 10 * 1024 * 1024) { // 10MB limit
         toast({
           variant: 'destructive',
           title: 'File too large',
-          description: 'Please upload a document smaller than 200MB.',
+          description: 'Please upload a document smaller than 10MB.',
         });
         return;
       }
@@ -121,7 +120,7 @@ export default function ResumeFeedbackTool() {
     body { font-family: 'Inter', sans-serif; }
   </style>
 </head>
-<body>
+<body style="width: 816px; margin: 0 auto; background: white;">
   ${staticMarkup}
 </body>
 </html>`;
@@ -129,29 +128,39 @@ export default function ResumeFeedbackTool() {
 
   const handleDownloadPdf = async () => {
     if (!result?.rewrittenResume) return;
-
     setIsGeneratingPdf(true);
     const resumeContainer = document.getElementById('resume-container-for-pdf');
     if (!resumeContainer) {
-      setIsGeneratingPdf(false);
-      return;
-    };
+        setIsGeneratingPdf(false);
+        toast({ variant: 'destructive', title: 'Error', description: 'Could not find resume content to print.'});
+        return;
+    }
 
     try {
-        const canvas = await html2canvas(resumeContainer, { scale: 3, useCORS: true, });
-        const imgData = canvas.toDataURL('image/png');
+        const doc = new jsPDF({
+            orientation: 'p',
+            unit: 'px',
+            format: [816, 1056] // Standard US Letter size in pixels at 96 DPI
+        });
 
-        const pdf = new jsPDF({ orientation: 'p', unit: 'px', format: 'a4'});
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-        
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-        pdf.save('resume.pdf');
-      } catch (error) {
+        await doc.html(resumeContainer, {
+            callback: function(doc) {
+                doc.save('resume.pdf');
+            },
+            x: 0,
+            y: 0,
+            autoPaging: 'text',
+            html2canvas: {
+                scale: 2, // Use a reasonable scale
+                useCORS: true,
+                allowTaint: true,
+            },
+        });
+    } catch (error) {
         toast({ variant: 'destructive', title: 'Error Generating PDF', description: error instanceof Error ? error.message : 'An unknown error occurred.' });
-      } finally {
+    } finally {
         setIsGeneratingPdf(false);
-      }
+    }
   };
 
   const handleDownloadHtml = async () => {
@@ -248,7 +257,7 @@ export default function ResumeFeedbackTool() {
                               or drag and drop
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              PDF, DOCX, TXT up to 200MB
+                              PDF, DOCX, TXT up to 10MB
                             </p>
                           </>
                         )}
@@ -311,7 +320,7 @@ export default function ResumeFeedbackTool() {
 
       {/* Hidden container for PDF generation */}
       {result?.rewrittenResume &&
-        <div id="resume-container-for-pdf" style={{ position: 'absolute', left: '-9999px', top: 0, width: '816px', background: 'white' }}>
+        <div id="resume-container-for-pdf" style={{ position: 'absolute', left: '-9999px', top: 0, width: '816px', background: 'white', padding: '40px' }}>
             <ResumeTemplate resumeData={result.rewrittenResume} />
         </div>
       }
