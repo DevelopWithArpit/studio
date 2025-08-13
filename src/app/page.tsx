@@ -38,8 +38,6 @@ import {
   Briefcase,
   FileEdit,
   Sparkles,
-  Bot,
-  Leaf,
 } from 'lucide-react';
 import { AppLogo } from '@/components/app-logo';
 import { SheetTitle } from '@/components/ui/sheet';
@@ -64,8 +62,6 @@ const ImageTextManipulationTool = dynamic(() => import('@/components/tools/image
 const PortfolioGeneratorTool = dynamic(() => import('@/components/tools/portfolio-generator-tool'), { loading: () => <RobotsBuildingLoader /> });
 const ResumeCustomizerTool = dynamic(() => import('@/components/tools/resume-customizer-tool'), { loading: () => <RobotsBuildingLoader /> });
 const TextHumanizerTool = dynamic(() => import('@/components/tools/text-humanizer-tool'), { loading: () => <RobotsBuildingLoader /> });
-const AutomatedReportBuilderTool = dynamic(() => import('@/components/tools/automated-report-builder-tool'), { loading: () => <RobotsBuildingLoader /> });
-const EvsReportGeneratorTool = dynamic(() => import('@/components/tools/evs-report-generator-tool'), { loading: () => <RobotsBuildingLoader /> });
 
 
 type ToolId =
@@ -87,9 +83,7 @@ type ToolId =
   | 'text-to-speech'
   | 'text-humanizer'
   | 'watermark-remover'
-  | 'image-text-manipulation'
-  | 'automated-report-builder'
-  | 'evs-report-generator';
+  | 'image-text-manipulation';
 
 type ToolConfig = {
   id: ToolId;
@@ -146,18 +140,6 @@ const tools: ToolConfig[] = [
     name: 'Portfolio Generator',
     icon: Briefcase,
     component: PortfolioGeneratorTool,
-  },
-  {
-    id: 'automated-report-builder',
-    name: 'Automated Report Builder',
-    icon: Bot,
-    component: AutomatedReportBuilderTool,
-  },
-  {
-    id: 'evs-report-generator',
-    name: 'EVS Report Generator',
-    icon: Leaf,
-    component: EvsReportGeneratorTool,
   },
   {
     id: 'resume-customizer',
@@ -228,7 +210,7 @@ const tools: ToolConfig[] = [
 ];
 
 export default function Home() {
-  const [activeTool, setActiveTool] = useState<ToolId>('evs-report-generator');
+  const [activeTool, setActiveTool] = useState<ToolId>('smart-search');
 
   const ActiveToolComponent = tools.find((tool) => tool.id === activeTool)?.component;
 

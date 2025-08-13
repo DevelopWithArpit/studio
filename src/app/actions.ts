@@ -74,14 +74,6 @@ import {
     humanizeText,
     type HumanizeTextInput,
 } from '@/ai/flows/text-humanizer-tool';
-import {
-    buildAutomatedReport,
-    type BuildAutomatedReportInput,
-} from '@/ai/flows/automated-report-builder-tool';
-import {
-    generateEvsReport,
-    type GenerateEvsReportInput,
-} from '@/ai/flows/evs-report-generator-tool';
 
 
 async function handleAction<T_Input, T_Output>(
@@ -164,14 +156,6 @@ export async function handleCustomizeResumeAction(input: CustomizeResumeInput) {
 
 export async function handleHumanizeTextAction(input: HumanizeTextInput) {
     return handleAction(input, humanizeText);
-}
-
-export async function handleBuildAutomatedReportAction(input: BuildAutomatedReportInput) {
-    return handleAction(input, buildAutomatedReport);
-}
-
-export async function handleGenerateEvsReportAction(input: GenerateEvsReportInput) {
-    return handleAction(input, generateEvsReport);
 }
 
 type GeneratePortfolioWebsiteActionInput = 
