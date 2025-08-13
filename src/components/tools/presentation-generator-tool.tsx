@@ -183,11 +183,16 @@ export default function PresentationGeneratorTool() {
     });
     
     const introSlideContent = result.slides[0]?.content ?? [];
-    const subtitleText = introSlideContent.join('\\n');
-
-    titleSlide.addText(subtitleText, {
-        placeholder: 'subtitle'
-    });
+    const subtitleTextObjects = introSlideContent.map((point, index) => ({
+        text: point,
+        options: { breakLine: index < introSlideContent.length - 1 }
+    }));
+    
+    if (subtitleTextObjects.length > 0) {
+        titleSlide.addText(subtitleTextObjects, {
+            placeholder: 'subtitle'
+        });
+    }
 
     // Content slides
     result.slides.slice(1).forEach((slide) => {
