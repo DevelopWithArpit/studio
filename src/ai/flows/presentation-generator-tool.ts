@@ -83,7 +83,7 @@ const outlinePrompt = ai.definePrompt({
   {{#if presenterName}}Presented by: {{{presenterName}}}{{/if}}
   {{#if rollNumber}} (Roll No: {{{rollNumber}}}){{/if}}
   {{#if department}}, {{{department}}}{{/if}}
-- If the user provides a "Custom Structure," you MUST use those slide titles in the exact order given for the subsequent slides (after the intro slide).
+- If the user provides a "Custom Structure," you MUST use those slide titles in the exact order given for the subsequent slides (after the intro slide). The 'numSlides' parameter should be IGNORED in this case. You must generate one slide for each title provided in the custom structure.
 - If the content type is "Project Proposal," generate the subsequent presentation slides using this structure: 1. Introduction, 2. Objectives, 3. Problem Statement / Need Analysis, 4. Target Group / Area, 5. Proposed Activities, 6. Methodology, 7. Expected Outcomes, 8. Conclusion. (Translated to the target language).
 - If the content type is "General," generate a logical presentation of exactly {{{numSlides}}} slides, which must include a conclusion slide at the end. The introduction slide is extra.
 
