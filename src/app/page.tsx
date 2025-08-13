@@ -230,7 +230,7 @@ export default function Home() {
 
   return (
     <SidebarProvider>
-      <div className="bg-grid">
+      <div className="">
         <Sidebar>
           <SidebarHeader className="p-4">
             <div className="flex items-center gap-3">
