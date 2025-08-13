@@ -70,7 +70,6 @@ const tools: ToolConfig[] = [
   { id: 'presentation-generator', name: 'Presentation Generator', icon: Presentation, href: '/tools/presentation-generator', category: 'Productivity' },
   { id: 'text-to-speech', name: 'Text to Speech', icon: Mic, href: '/tools/text-to-speech', category: 'Productivity' },
   { id: 'text-humanizer', name: 'Text Humanizer', icon: Sparkles, href: '/tools/text-humanizer', category: 'Writing' },
-  { id: 'thesis-generator-tool', name: 'Academic Writer', icon: GraduationCap, href: '/tools/thesis-generator-tool', category: 'Writing' },
   { id: 'watermark-remover', name: 'Watermark Remover', icon: Eraser, href: '/tools/watermark-remover', category: 'Media' },
   { id: 'image-text-manipulation', name: 'Image Text Manipulation', icon: Type, href: '/tools/image-text-manipulation', category: 'Media' },
 ];
@@ -82,8 +81,8 @@ const ToolSidebar = () => {
   
   return (
     <Sidebar collapsible="icon" className="border-r">
-      <SidebarHeader className="h-14 justify-center">
-        <Link href="/" className="flex items-center gap-2">
+      <SidebarHeader className="h-16 flex items-center justify-center">
+        <Link href="/" className="flex items-center gap-2.5">
             <AppLogo className="w-8 h-8 text-primary" />
             <span className="text-xl font-bold font-headline group-data-[collapsible=icon]:hidden">
             AI Mentor
@@ -95,7 +94,7 @@ const ToolSidebar = () => {
         {categories.map((category) => (
           <SidebarMenu key={category}>
             <SidebarMenuItem>
-              <div className="px-2 py-1 text-xs text-muted-foreground font-semibold group-data-[collapsible=icon]:hidden">
+              <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground group-data-[collapsible=icon]:hidden">
                 {category}
               </div>
             </SidebarMenuItem>
@@ -103,15 +102,18 @@ const ToolSidebar = () => {
               .filter((tool) => tool.category === category)
               .map((tool) => (
                 <SidebarMenuItem key={tool.id}>
-                  <Link href={tool.href}>
+                  <Link href={tool.href} className="block">
                     <SidebarMenuButton
                       isActive={pathname === tool.href}
                       tooltip={{
                         children: tool.name,
+                        side: 'right',
+                        align: 'center'
                       }}
+                      className="justify-start"
                     >
-                      <tool.icon />
-                      <span>{tool.name}</span>
+                      <tool.icon className="w-5 h-5 shrink-0" />
+                      <span className="truncate">{tool.name}</span>
                     </SidebarMenuButton>
                   </Link>
                 </SidebarMenuItem>
@@ -120,17 +122,18 @@ const ToolSidebar = () => {
         ))}
       </SidebarContent>
        <SidebarFooter>
+        <Separator />
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton tooltip={{children: 'Support'}}>
+            <SidebarMenuButton tooltip={{children: 'Support', side: 'right', align: 'center'}}>
               <LifeBuoy />
-              <span>Support</span>
+              <span className="truncate">Support</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton tooltip={{children: 'Settings'}}>
+            <SidebarMenuButton tooltip={{children: 'Settings', side: 'right', align: 'center'}}>
               <Settings />
-              <span>Settings</span>
+              <span className="truncate">Settings</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -148,21 +151,17 @@ export default function ToolsLayout({
     <SidebarProvider>
       <ToolSidebar />
       <SidebarInset>
-        <header className="flex h-14 items-center justify-between border-b px-4 lg:px-6">
+        <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background/80 backdrop-blur-sm px-4 lg:px-6">
             <SidebarTrigger className="md:hidden" />
             <div className="ml-auto flex items-center gap-4">
               <Button variant="ghost" size="icon">
                 <Github className="h-5 w-5" />
                 <span className="sr-only">GitHub</span>
               </Button>
-              <Button variant="ghost" size="icon">
-                <Settings className="h-5 w-5" />
-                <span className="sr-only">Settings</span>
-              </Button>
             </div>
         </header>
-        <main className="flex-1 overflow-auto p-4 lg:p-6">
-            <div className="mx-auto w-full max-w-4xl">
+        <main className="flex-1 overflow-auto p-4 md:p-6 lg:p-8">
+            <div className="mx-auto w-full max-w-5xl">
                 {children}
             </div>
         </main>

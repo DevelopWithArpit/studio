@@ -66,8 +66,8 @@ export default function AiExplanationTool() {
   }
 
   return (
-    <div className="space-y-6">
-      <header className="space-y-1">
+    <div className="space-y-8">
+      <header className="space-y-2">
         <h1 className="text-3xl font-bold font-headline">AI Explanation</h1>
         <p className="text-muted-foreground">Get clear and concise explanations for complex topics.</p>
       </header>
