@@ -20,7 +20,7 @@ const GeneratePresentationInputSchema = z.object({
   department: z.string().optional().describe("The presenter's department."),
   numSlides: z.number().int().min(2).max(20).describe('The number of slides to generate (for general topics).'),
   contentType: z.enum(['general', 'projectProposal', 'custom']).default('general').describe('The type of content to generate.'),
-  customStructure: z.string().optional().describe("A user-defined structure for the presentation, as a string of slide titles."),
+  customStructure: z.string().optional().describe("A user-defined structure for the presentation, as a string of slide titles, potentially with notes for each."),
   imageStyle: z.string().optional().describe("An optional style for the images (e.g., 'photorealistic', 'cartoon')."),
   language: z.string().optional().describe("The language for the presentation content (e.g., 'English', 'Hindi', 'Marathi')."),
 });
@@ -83,7 +83,9 @@ const outlinePrompt = ai.definePrompt({
   {{#if presenterName}}Presented by: {{{presenterName}}}{{/if}}
   {{#if rollNumber}} (Roll No: {{{rollNumber}}}){{/if}}
   {{#if department}}, {{{department}}}{{/if}}
-- If the user provides a "Custom Structure," you MUST use those slide titles in the exact order given for the subsequent slides (after the intro slide). The 'numSlides' parameter should be IGNORED in this case. You must generate one slide for each title provided in the custom structure.
+- If the user provides a "Custom Structure," you MUST use it as the primary source. The 'numSlides' parameter should be IGNORED.
+  - **Parsing Custom Structure**: The custom structure might contain both titles and notes. A line starting with a number and/or bullet (e.g., "1. About the Company", "- Key Features") should be treated as a slide title. All text following that title, until the next title, should be used as the context/notes for that specific slide.
+  - You MUST generate one slide for each title you identify in the custom structure.
 - If the content type is "Project Proposal," generate the subsequent presentation slides using this structure: 1. Introduction, 2. Objectives, 3. Problem Statement / Need Analysis, 4. Target Group / Area, 5. Proposed Activities, 6. Methodology, 7. Expected Outcomes, 8. Conclusion. (Translated to the target language).
 - If the content type is "General," generate a logical presentation of exactly {{{numSlides}}} slides, which must include a conclusion slide at the end. The introduction slide is extra.
 
