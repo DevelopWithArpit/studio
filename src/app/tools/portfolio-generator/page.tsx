@@ -234,7 +234,7 @@ export default function PortfolioGeneratorTool() {
                                                 Upload Resume
                                             </label>
                                         </p>
-                                        <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 200MB</p>
+                                        <p className="text-xs text-muted-foreground">PDF, DOCX, TXT</p>
                                     </>
                                 )}
                                 <Input id="resume-upload" type="file" className="sr-only" onChange={(e) => handleFileChange(e, setResumeFileName, setResumeDataUri)} accept=".pdf,.docx,.txt" />
@@ -260,7 +260,7 @@ export default function PortfolioGeneratorTool() {
                                                 Upload Certificate
                                             </label>
                                         </p>
-                                        <p className="text-xs text-muted-foreground">Image or PDF up to 200MB</p>
+                                        <p className="text-xs text-muted-foreground">Image or PDF</p>
                                     </>
                                 )}
                                 <Input id="cert-upload" type="file" className="sr-only" onChange={(e) => handleFileChange(e, setCertificateFileName, setCertificateDataUri)} accept="image/*,.pdf" />
