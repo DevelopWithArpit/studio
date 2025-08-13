@@ -15,6 +15,9 @@ import { googleAI } from '@genkit-ai/googleai';
 
 const GeneratePresentationInputSchema = z.object({
   topic: z.string().describe('The topic or title of the presentation.'),
+  presenterName: z.string().optional().describe("The name of the presenter."),
+  rollNumber: z.string().optional().describe("The presenter's roll number."),
+  department: z.string().optional().describe("The presenter's department."),
   numSlides: z.number().int().min(2).max(20).describe('The number of slides to generate (for general topics).'),
   contentType: z.enum(['general', 'projectProposal', 'custom']).default('general').describe('The type of content to generate.'),
   customStructure: z.string().optional().describe("A user-defined structure for the presentation, as a string of slide titles."),
@@ -76,13 +79,19 @@ const outlinePrompt = ai.definePrompt({
   3. A descriptive prompt for an AI image generator. This prompt must describe a **stunning, high-quality, and cinematic visual** that powerfully represents the slide's core idea. **Crucially, the generated image should NOT contain any text or words to avoid spelling errors. All image prompts must be in English.**
 
 **Structure Generation Instructions:**
-- **The very first slide must always be an introduction slide.** Its title should be "Introduction" (or its equivalent in the target language) and it should introduce the main topic and include the phrase "Presented by: [Username]".
+- **The very first slide must always be an introduction slide.** Its title should be "Introduction" (or its equivalent in the target language) and it should introduce the main topic. It should also include any presenter details provided.
+  {{#if presenterName}}Presented by: {{{presenterName}}}{{/if}}
+  {{#if rollNumber}} (Roll No: {{{rollNumber}}}){{/if}}
+  {{#if department}}, {{{department}}}{{/if}}
 - If the user provides a "Custom Structure," you MUST use those slide titles in the exact order given for the subsequent slides (after the intro slide).
 - If the content type is "Project Proposal," generate the subsequent presentation slides using this structure: 1. Introduction, 2. Objectives, 3. Problem Statement / Need Analysis, 4. Target Group / Area, 5. Proposed Activities, 6. Methodology, 7. Expected Outcomes, 8. Conclusion. (Translated to the target language).
 - If the content type is "General," generate a logical presentation of exactly {{{numSlides}}} slides, which must include a conclusion slide at the end. The introduction slide is extra.
 
 **User Input Details:**
 - Topic: {{{topic}}}
+{{#if presenterName}}- Presenter: {{{presenterName}}}{{/if}}
+{{#if rollNumber}}- Roll Number: {{{rollNumber}}}{{/if}}
+{{#if department}}- Department: {{{department}}}{{/if}}
 - Content Type: {{{contentType}}}
 - Number of Slides (for General type): {{{numSlides}}}
 - Custom Structure (if provided): {{{customStructure}}}

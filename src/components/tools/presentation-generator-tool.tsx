@@ -47,6 +47,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 
 const formSchema = z.object({
   topic: z.string().min(3, 'Please enter a topic with at least 3 characters.'),
+  presenterName: z.string().optional(),
+  rollNumber: z.string().optional(),
+  department: z.string().optional(),
   numSlides: z.coerce.number().int().min(2, "Must be at least 2 slides.").max(20, "Cannot exceed 20 slides."),
   imageStyle: z.string().optional(),
   language: z.string().optional(),
@@ -73,6 +76,9 @@ export default function PresentationGeneratorTool() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       topic: '',
+      presenterName: '',
+      rollNumber: '',
+      department: '',
       numSlides: 5,
       imageStyle: 'photorealistic',
       language: 'English',
@@ -89,6 +95,9 @@ export default function PresentationGeneratorTool() {
 
     const input: GeneratePresentationInput = {
         topic: data.topic,
+        presenterName: data.presenterName,
+        rollNumber: data.rollNumber,
+        department: data.department,
         contentType: data.contentType,
         numSlides: data.numSlides,
         imageStyle: data.imageStyle,
@@ -317,6 +326,48 @@ export default function PresentationGeneratorTool() {
                     )}
                 />
               )}
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="presenterName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Presenter Name (Optional)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g., Jane Doe" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="rollNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Roll No. (Optional)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g., CS101" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="department"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Department (Optional)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g., Computer Science" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+              </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <FormField
