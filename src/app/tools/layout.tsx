@@ -162,7 +162,7 @@ export default function ToolsLayout({
         <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background/80 backdrop-blur-sm px-4 lg:px-6">
             <SidebarTrigger className="md:hidden" />
             <div className="ml-auto flex items-center gap-4">
-              <Link href="https://github.com/google/firebase-studio" target="_blank" rel="noopener noreferrer">
+              <Link href="https://github.com/your-username/your-repo" target="_blank" rel="noopener noreferrer">
                 <Button variant="ghost" size="icon">
                   <Github className="h-5 w-5" />
                   <span className="sr-only">GitHub</span>
