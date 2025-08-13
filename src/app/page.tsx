@@ -64,10 +64,7 @@ const ImageTextManipulationTool = dynamic(() => import('@/components/tools/image
 const PortfolioGeneratorTool = dynamic(() => import('@/components/tools/portfolio-generator-tool'), { loading: () => <RobotsBuildingLoader /> });
 const ResumeCustomizerTool = dynamic(() => import('@/components/tools/resume-customizer-tool'), { loading: () => <RobotsBuildingLoader /> });
 const TextHumanizerTool = dynamic(() => import('@/components/tools/text-humanizer-tool'), { loading: () => <RobotsBuildingLoader /> });
-const AcademicWriterTool = dynamic(() => import('@/components/tools/academic-writer-tool'), { loading: () => <RobotsBuildingLoader /> });
-const SipReportGeneratorTool = dynamic(() => import('@/components/tools/sip-report-generator-tool'), { loading: () => <RobotsBuildingLoader /> });
 const AutomatedReportBuilderTool = dynamic(() => import('@/components/tools/automated-report-builder-tool'), { loading: () => <RobotsBuildingLoader /> });
-const ReportEditorTool = dynamic(() => import('@/components/tools/report-editor-tool'), { loading: () => <RobotsBuildingLoader /> });
 const EvsReportGeneratorTool = dynamic(() => import('@/components/tools/evs-report-generator-tool'), { loading: () => <RobotsBuildingLoader /> });
 
 
@@ -91,10 +88,7 @@ type ToolId =
   | 'text-humanizer'
   | 'watermark-remover'
   | 'image-text-manipulation'
-  | 'academic-writer'
-  | 'sip-report-generator'
   | 'automated-report-builder'
-  | 'report-editor'
   | 'evs-report-generator';
 
 type ToolConfig = {
@@ -154,22 +148,10 @@ const tools: ToolConfig[] = [
     component: PortfolioGeneratorTool,
   },
   {
-    id: 'sip-report-generator',
-    name: 'SIP Report Generator',
-    icon: Briefcase,
-    component: SipReportGeneratorTool,
-  },
-  {
     id: 'automated-report-builder',
     name: 'Automated Report Builder',
     icon: Bot,
     component: AutomatedReportBuilderTool,
-  },
-  {
-    id: 'report-editor',
-    name: 'SIP Report Editor',
-    icon: FileEdit,
-    component: ReportEditorTool,
   },
   {
     id: 'evs-report-generator',
@@ -200,12 +182,6 @@ const tools: ToolConfig[] = [
     name: 'Document Summarizer',
     icon: FileSearch,
     component: DocumentSummarizerTool,
-  },
-  {
-    id: 'academic-writer',
-    name: 'Academic Writer',
-    icon: FileText,
-    component: AcademicWriterTool,
   },
   {
     id: 'image-generator',

@@ -75,21 +75,9 @@ import {
     type HumanizeTextInput,
 } from '@/ai/flows/text-humanizer-tool';
 import {
-    generateAcademicDocument,
-    type GenerateAcademicDocumentInput,
-} from '@/ai/flows/academic-writer-tool';
-import {
-    generateSipReport,
-    type GenerateSipReportInput,
-} from '@/ai/flows/sip-report-generator-tool';
-import {
     buildAutomatedReport,
     type BuildAutomatedReportInput,
 } from '@/ai/flows/automated-report-builder-tool';
-import {
-    editSipReport,
-    type EditSipReportInput,
-} from '@/ai/flows/report-editor-tool';
 import {
     generateEvsReport,
     type GenerateEvsReportInput,
@@ -178,20 +166,8 @@ export async function handleHumanizeTextAction(input: HumanizeTextInput) {
     return handleAction(input, humanizeText);
 }
 
-export async function handleGenerateAcademicDocumentAction(input: GenerateAcademicDocumentInput) {
-    return handleAction(input, generateAcademicDocument);
-}
-
-export async function handleGenerateSipReportAction(input: GenerateSipReportInput) {
-    return handleAction(input, generateSipReport);
-}
-
 export async function handleBuildAutomatedReportAction(input: BuildAutomatedReportInput) {
     return handleAction(input, buildAutomatedReport);
-}
-
-export async function handleEditSipReportAction(input: EditSipReportInput) {
-    return handleAction(input, editSipReport);
 }
 
 export async function handleGenerateEvsReportAction(input: GenerateEvsReportInput) {
