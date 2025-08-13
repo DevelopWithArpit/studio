@@ -41,9 +41,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { AppLogo } from '@/components/app-logo';
-import { SheetTitle } from '@/components/ui/sheet';
 import { RobotsBuildingLoader } from '@/components/ui/robots-building-loader';
-import { Button } from '@/components/ui/button';
 
 const AiExplanationTool = dynamic(() => import('@/components/tools/ai-explanation-tool'), { loading: () => <RobotsBuildingLoader /> });
 const CodeAnalyzerTool = dynamic(() => import('@/components/tools/code-analyzer-tool'), { loading: () => <RobotsBuildingLoader /> });
@@ -273,7 +271,7 @@ export default function Home() {
                  <>
                     <header className="space-y-1 mb-8">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-md bg-secondary text-secondary-foreground border border-border">
+                            <div className="p-2 rounded-md bg-secondary text-secondary-foreground border">
                                 <activeTool.icon className="w-6 h-6" />
                             </div>
                             <h1 className="text-3xl font-bold font-headline">{activeTool.name}</h1>
