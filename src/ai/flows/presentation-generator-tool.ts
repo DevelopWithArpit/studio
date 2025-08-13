@@ -124,62 +124,64 @@ const generatePresentationFlow = ai.defineFlow(
       return prompt;
     };
     
-    // Generate all images in parallel.
+    // Create a map of slide index to its image prompt.
+    const slideImagePrompts = new Map<number, string>();
+    outline.slides.forEach((slide, index) => {
+        if (slide.imagePrompt) {
+            slideImagePrompts.set(index, slide.imagePrompt);
+        }
+    });
+
     const imageGenerationPromises = [];
 
-    // Background Image Promise
+    // Background Image Promise (always at index 0)
     if (outline.design.backgroundPrompt) {
         imageGenerationPromises.push(
-          ai.generate({
-            model: 'googleai/gemini-2.0-flash-preview-image-generation',
-            prompt: applyStyle(outline.design.backgroundPrompt),
-            config: { responseModalities: ['TEXT', 'IMAGE'] },
-          })
+            ai.generate({
+                model: 'googleai/gemini-2.0-flash-preview-image-generation',
+                prompt: applyStyle(outline.design.backgroundPrompt),
+                config: { responseModalities: ['TEXT', 'IMAGE'] },
+            })
         );
     } else {
         imageGenerationPromises.push(Promise.resolve({ media: { url: '' } }));
     }
 
-
     // Slide Image Promises
-    outline.slides.forEach(slide => {
-        if (slide.imagePrompt) {
-            imageGenerationPromises.push(
-                ai.generate({
-                    model: 'googleai/gemini-2.0-flash-preview-image-generation',
-                    prompt: applyStyle(slide.imagePrompt),
-                    config: { responseModalities: ['TEXT', 'IMAGE'] },
-                })
-            );
-        } else {
-            imageGenerationPromises.push(Promise.resolve({ media: { url: '' } }));
-        }
-    });
+    for (const prompt of slideImagePrompts.values()) {
+        imageGenerationPromises.push(
+            ai.generate({
+                model: 'googleai/gemini-2.0-flash-preview-image-generation',
+                prompt: applyStyle(prompt),
+                config: { responseModalities: ['TEXT', 'IMAGE'] },
+            })
+        );
+    }
 
     const results = await Promise.allSettled(imageGenerationPromises);
 
-    // Process background image result
+    // Process background image result (from index 0)
     const backgroundResult = results[0];
     if (backgroundResult.status === 'fulfilled' && backgroundResult.value.media?.url) {
-      outline.backgroundImageUrl = backgroundResult.value.media.url;
+        outline.backgroundImageUrl = backgroundResult.value.media.url;
     } else {
-      console.error('Background image generation failed:', backgroundResult.status === 'rejected' ? backgroundResult.reason : 'No URL returned');
-      outline.backgroundImageUrl = ''; 
+        console.error('Background image generation failed:', backgroundResult.status === 'rejected' ? backgroundResult.reason : 'No URL returned');
+        outline.backgroundImageUrl = ''; 
     }
     
     // Process slide image results
-    let imageResultIndex = 1;
-    for (let i = 0; i < outline.slides.length; i++) {
-        if (outline.slides[i].imagePrompt) {
-            const result = results[imageResultIndex++];
-            if (result.status === 'fulfilled' && result.value.media?.url) {
-                outline.slides[i].imageUrl = result.value.media.url;
-            } else {
-                console.error(`Slide ${i + 1} image generation failed:`, result.status === 'rejected' ? result.reason : 'No URL returned');
-                outline.slides[i].imageUrl = '';
-            }
+    const slideImageResults = results.slice(1);
+    const slidePromptKeys = Array.from(slideImagePrompts.keys());
+
+    for (let i = 0; i < slideImageResults.length; i++) {
+        const result = slideImageResults[i];
+        const slideIndex = slidePromptKeys[i];
+        
+        if (result.status === 'fulfilled' && result.value.media?.url) {
+            outline.slides[slideIndex].imageUrl = result.value.media.url;
         } else {
-            outline.slides[i].imageUrl = '';
+            console.error(`Slide ${slideIndex + 1} image generation failed:`, result.status === 'rejected' ? result.reason : 'No URL returned');
+            outline.slides[slideIndex].imageUrl = '';
         }
     }
 
