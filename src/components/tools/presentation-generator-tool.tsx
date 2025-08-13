@@ -191,6 +191,7 @@ export default function PresentationGeneratorTool() {
         anim: { effect: "wipe", type: "in", duration: 1, delay: 0.2, from: "bottom" }
     });
     
+    // Correctly get intro slide content
     const introSlideContent = result.slides[0]?.content ?? [];
     
     const subtitleTextObjects = introSlideContent.map(point => ({
@@ -203,6 +204,7 @@ export default function PresentationGeneratorTool() {
             placeholder: 'subtitle',
         });
     }
+
 
     // Content slides
     result.slides.slice(1).forEach((slide) => {
