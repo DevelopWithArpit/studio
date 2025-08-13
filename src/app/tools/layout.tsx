@@ -57,6 +57,8 @@ const tools: ToolConfig[] = [
   { id: 'smart-search', name: 'Smart Search', icon: Search, href: '/tools/smart-search', category: 'Analysis' },
   { id: 'document-summarizer', name: 'Document Summarizer', icon: FileSearch, href: '/tools/document-summarizer', category: 'Analysis' },
   { id: 'ai-explanation', name: 'AI Explanation', icon: MessageCircleQuestion, href: '/tools/ai-explanation', category: 'Learning' },
+  { id: 'thesis-generator', name: 'Thesis Generator', icon: GraduationCap, href: '/tools/thesis-generator', category: 'Writing' },
+  { id: 'text-humanizer', name: 'Text Humanizer', icon: Sparkles, href: '/tools/text-humanizer', category: 'Writing' },
   { id: 'code-generator', name: 'Code Generator', icon: CodeXml, href: '/tools/code-generator', category: 'Development' },
   { id: 'code-analyzer', name: 'Code Analyzer', icon: ScanEye, href: '/tools/code-analyzer', category: 'Development' },
   { id: 'diagram-generator', name: 'Diagram Generator', icon: GitGraph, href: '/tools/diagram-generator', category: 'Development' },
@@ -69,12 +71,14 @@ const tools: ToolConfig[] = [
   { id: 'linkedin-visuals-generator', name: 'LinkedIn Visuals', icon: Linkedin, href: '/tools/linkedin-visuals-generator', category: 'Career' },
   { id: 'presentation-generator', name: 'Presentation Generator', icon: Presentation, href: '/tools/presentation-generator', category: 'Productivity' },
   { id: 'text-to-speech', name: 'Text to Speech', icon: Mic, href: '/tools/text-to-speech', category: 'Productivity' },
-  { id: 'text-humanizer', name: 'Text Humanizer', icon: Sparkles, href: '/tools/text-humanizer', category: 'Writing' },
   { id: 'watermark-remover', name: 'Watermark Remover', icon: Eraser, href: '/tools/watermark-remover', category: 'Media' },
   { id: 'image-text-manipulation', name: 'Image Text Manipulation', icon: Type, href: '/tools/image-text-manipulation', category: 'Media' },
 ];
 
-const categories = [...new Set(tools.map(tool => tool.category))];
+const categories = [...new Set(tools.map(tool => tool.category))].sort((a, b) => {
+    const order = ['Analysis', 'Learning', 'Writing', 'Development', 'Career', 'Productivity', 'Media'];
+    return order.indexOf(a) - order.indexOf(b);
+});
 
 const ToolSidebar = () => {
   const pathname = usePathname();
@@ -125,16 +129,20 @@ const ToolSidebar = () => {
         <Separator />
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton tooltip={{children: 'Support', side: 'right', align: 'center'}}>
-              <LifeBuoy />
-              <span className="truncate">Support</span>
-            </SidebarMenuButton>
+            <Link href="/tools/support" className="block">
+                <SidebarMenuButton isActive={pathname === '/tools/support'} tooltip={{children: 'Support', side: 'right', align: 'center'}}>
+                  <LifeBuoy />
+                  <span className="truncate">Support</span>
+                </SidebarMenuButton>
+            </Link>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton tooltip={{children: 'Settings', side: 'right', align: 'center'}}>
-              <Settings />
-              <span className="truncate">Settings</span>
-            </SidebarMenuButton>
+            <Link href="/tools/settings" className="block">
+                <SidebarMenuButton isActive={pathname === '/tools/settings'} tooltip={{children: 'Settings', side: 'right', align: 'center'}}>
+                  <Settings />
+                  <span className="truncate">Settings</span>
+                </SidebarMenuButton>
+            </Link>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
