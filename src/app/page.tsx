@@ -54,7 +54,6 @@ const TextToSpeechTool = dynamic(() => import('@/components/tools/text-to-speech
 const CoverLetterAssistantTool = dynamic(() => import('@/components/tools/cover-letter-assistant-tool'), { loading: () => <RobotsBuildingLoader /> });
 const CareerPathSuggesterTool = dynamic(() => import('@/components/tools/career-path-suggester-tool'), { loading: () => <RobotsBuildingLoader /> });
 const DocumentSummarizerTool = dynamic(() => import('@/components/tools/document-summarizer-tool'), { loading: () => <RobotsBuildingLoader /> });
-const ImageGeneratorTool = dynamic(() => import('@/components/tools/image-generator-tool'), { loading: () => <RobotsBuildingLoader /> });
 const PresentationGeneratorTool = dynamic(() => import('@/components/tools/presentation-generator-tool'), { loading: () => <RobotsBuildingLoader /> });
 const LinkedInVisualsGeneratorTool = dynamic(() => import('@/components/tools/linkedin-visuals-generator-tool'), { loading: () => <RobotsBuildingLoader /> });
 const WatermarkRemoverTool = dynamic(() => import('@/components/tools/watermark-remover-tool'), { loading: () => <RobotsBuildingLoader /> });
@@ -77,7 +76,6 @@ type ToolId =
   | 'cover-letter-assistant'
   | 'career-path-suggester'
   | 'document-summarizer'
-  | 'image-generator'
   | 'diagram-generator'
   | 'presentation-generator'
   | 'text-to-speech'
@@ -164,12 +162,6 @@ const tools: ToolConfig[] = [
     name: 'Document Summarizer',
     icon: FileSearch,
     component: DocumentSummarizerTool,
-  },
-  {
-    id: 'image-generator',
-    name: 'Image Generator',
-    icon: ImageIcon,
-    component: ImageGeneratorTool,
   },
   {
     id: 'diagram-generator',
