@@ -133,6 +133,7 @@ export default function PresentationGeneratorTool() {
     
     const { design, backgroundImageUrl } = result;
     const cleanColor = (color: string) => color.startsWith('#') ? color.substring(1) : color;
+    
     const masterBackground = backgroundImageUrl && backgroundImageUrl.startsWith('data:image')
         ? { data: backgroundImageUrl } 
         : { color: cleanColor(design.backgroundColor) };
@@ -186,15 +187,22 @@ export default function PresentationGeneratorTool() {
     // Title slide
     const titleSlide = pptx.addSlide({ masterName: 'TITLE_SLIDE' });
     titleSlide.transition = { type: "fade", duration: 1 };
+    
+    const introSlideData = result.slides[0];
+    const presenterInfo = [
+        introSlideData.title,
+        result.presenterName ? `Presented by: ${result.presenterName}` : '',
+        result.rollNumber ? `Roll No: ${result.rollNumber}` : '',
+        result.department ? `Department: ${result.department}` : '',
+    ].filter(Boolean).join('\n');
+
+
     titleSlide.addText(result.title, {
         placeholder: "title",
         anim: { effect: "wipe", type: "in", duration: 1, delay: 0.2, from: "bottom" }
     });
     
-    // Correctly get intro slide content
-    const introSlideContent = result.slides[0]?.content ?? [];
-    
-    const subtitleTextObjects = introSlideContent.map(point => ({
+    const subtitleTextObjects = introSlideData.content.map(point => ({
         text: point,
         options: { bullet: true, paraSpaceAfter: 10, breakLine: true, align: 'left'}
     }));
