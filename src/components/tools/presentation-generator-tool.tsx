@@ -134,9 +134,13 @@ export default function PresentationGeneratorTool() {
     const { design, backgroundImageUrl } = result;
     const cleanColor = (color: string) => color.startsWith('#') ? color.substring(1) : color;
     
-    const masterBackground = backgroundImageUrl && backgroundImageUrl.startsWith('data:image')
-        ? { data: backgroundImageUrl, sizing: { type: 'cover', w: '100%', h: '100%' } }
-        : { color: cleanColor(design.backgroundColor) };
+    const masterBackground = {
+        color: cleanColor(design.backgroundColor)
+    };
+    
+    const backgroundOverlay = backgroundImageUrl && backgroundImageUrl.startsWith('data:image')
+        ? { path: backgroundImageUrl, x: 0, y: 0, w: '100%', h: '100%', transparency: 85 }
+        : undefined;
 
 
     // Master Slide: Title
@@ -144,6 +148,7 @@ export default function PresentationGeneratorTool() {
       title: "TITLE_SLIDE",
       background: masterBackground,
       objects: [
+        ...(backgroundOverlay ? [backgroundOverlay] : []),
         {
             placeholder: {
                 options: { name: "title", type: "title", x: '5%', y: '40%', w: '90%', h: '15%', fontFace: 'Arial', fontSize: 44, bold: true, color: cleanColor(design.accentColor), align: 'center', valign: 'middle' },
@@ -164,6 +169,7 @@ export default function PresentationGeneratorTool() {
       title: "CONTENT_SLIDE",
       background: masterBackground,
       objects: [
+         ...(backgroundOverlay ? [backgroundOverlay] : []),
         { rect: { x: '4%', y: '10.5%', w: '92%', h: 0.1, fill: { color: cleanColor(design.accentColor) } } },
         {
             placeholder: {
@@ -190,6 +196,7 @@ export default function PresentationGeneratorTool() {
       title: "TITLE_ONLY_SLIDE",
       background: masterBackground,
       objects: [
+        ...(backgroundOverlay ? [backgroundOverlay] : []),
         {
             placeholder: {
                 options: { name: "title", type: "title", x: '5%', y: '40%', w: '90%', h: '20%', fontFace: 'Arial', fontSize: 44, bold: true, color: cleanColor(design.accentColor), align: 'center', valign: 'middle' },
@@ -222,14 +229,16 @@ export default function PresentationGeneratorTool() {
       if (masterName === 'TITLE_SLIDE') {
         pptxSlide.addText(result.title, { placeholder: "title" });
         
-        const subtitleTextObjects = [];
+        const subtitleTextObjects: PptxGenJS.TextProps[] = [];
         const firstSlide = result.slides[0];
-        if (firstSlide?.title) {
+        
+        if (firstSlide?.title && firstSlide.title !== result.title) {
             subtitleTextObjects.push({
                 text: firstSlide.title,
-                options: { fontSize: 22, bold: true, breakLine: true }
+                options: { fontSize: 24, bold: true, breakLine: true, color: cleanColor(design.textColor) }
             });
         }
+        
         const presenterDetails = [
             result.presenterName ? `Presented by: ${result.presenterName}` : null,
             result.rollNumber ? `Roll No: ${result.rollNumber}` : null,
@@ -237,7 +246,10 @@ export default function PresentationGeneratorTool() {
         ].filter(Boolean);
     
         if(presenterDetails.length > 0) {
-          subtitleTextObjects.push(...presenterDetails.map(text => ({ text, options: { breakLine: true } })));
+          if(subtitleTextObjects.length > 0) {
+             subtitleTextObjects.push({ text: ' ', options: { breakLine: true } }); // Add a space
+          }
+          subtitleTextObjects.push(...presenterDetails.map(text => ({ text: text!, options: { fontSize: 16, breakLine: true, color: cleanColor(design.textColor) } })));
         }
         
         if (subtitleTextObjects.length > 0) {
