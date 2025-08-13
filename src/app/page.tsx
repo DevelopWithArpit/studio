@@ -256,13 +256,6 @@ export default function Home() {
               ))}
             </SidebarMenu>
           </SidebarContent>
-          <SidebarFooter>
-              <div className="border-t border-border p-4 group-data-[collapsible=icon]:hidden">
-                  <h3 className="font-semibold text-foreground">AI Mentor Pro</h3>
-                  <p className="text-sm text-muted-foreground mt-1 mb-3">Unlock more features and advanced tools.</p>
-                  <Button className="w-full" variant="secondary">Upgrade</Button>
-              </div>
-          </SidebarFooter>
         </Sidebar>
         <SidebarInset>
           <header className="flex items-center justify-between p-4 border-b md:hidden">
