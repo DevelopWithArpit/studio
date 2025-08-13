@@ -136,7 +136,7 @@ export default function PresentationGeneratorTool() {
       objects: [
         {
             placeholder: {
-                options: { name: "title", type: "title", x: 0.5, y: 1.5, w: 9, h: 1.5, fontFace: 'Arial', fontSize: 44, bold: true, color: cleanColor(design.accentColor), align: 'center', valign: 'middle', fill: { color: '000000', transparency: 60 } },
+                options: { name: "title", type: "title", x: 0.5, y: 2.0, w: 9, h: 1.5, fontFace: 'Arial', fontSize: 44, bold: true, color: cleanColor(design.accentColor), align: 'center', valign: 'middle', fill: { color: '000000', transparency: 60 } },
                 text: "Default Title",
             }
         },
@@ -183,14 +183,13 @@ export default function PresentationGeneratorTool() {
     });
     
     const introSlideContent = result.slides[0]?.content ?? [];
-    const subtitleTextObjects = introSlideContent.map((point, index) => ({
-        text: point,
-        options: { breakLine: index < introSlideContent.length - 1 }
-    }));
     
-    if (subtitleTextObjects.length > 0) {
-        titleSlide.addText(subtitleTextObjects, {
-            placeholder: 'subtitle'
+    if (introSlideContent.length > 0) {
+        titleSlide.addText(introSlideContent, {
+            placeholder: 'subtitle',
+            bullet: true,
+            paraSpaceAfter: 10,
+            align: 'left',
         });
     }
 
