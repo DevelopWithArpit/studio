@@ -146,13 +146,13 @@ export default function PresentationGeneratorTool() {
       objects: [
         {
             placeholder: {
-                options: { name: "title", type: "title", x: 0.5, y: 2.0, w: 9, h: 1.5, fontFace: 'Arial', fontSize: 44, bold: true, color: cleanColor(design.accentColor), align: 'center', valign: 'middle', fill: { color: '000000', transparency: 60 } },
+                options: { name: "title", type: "title", x: '5%', y: '40%', w: '90%', h: '15%', fontFace: 'Arial', fontSize: 44, bold: true, color: cleanColor(design.accentColor), align: 'center', valign: 'middle' },
                 text: "Default Title",
             }
         },
         {
             placeholder: {
-                options: { name: "subtitle", type: "body", x: 1.0, y: 3.5, w: 8, h: 2, fontFace: 'Arial', fontSize: 20, color: cleanColor(design.textColor), align: 'center', valign: 'top', fill: { color: '000000', transparency: 60 } },
+                options: { name: "subtitle", type: "body", x: '10%', y: '55%', w: '80%', h: '20%', fontFace: 'Arial', fontSize: 20, color: cleanColor(design.textColor), align: 'center', valign: 'top' },
                 text: "Default Subtitle",
             }
         },
@@ -164,21 +164,22 @@ export default function PresentationGeneratorTool() {
       title: "CONTENT_SLIDE",
       background: masterBackground,
       objects: [
+        { rect: { x: '4%', y: '10.5%', w: '92%', h: 0.1, fill: { color: cleanColor(design.accentColor) } } },
         {
             placeholder: {
-                options: { name: "title", type: "title", x: 0.5, y: 0.2, w: 9, h: 0.8, fontFace: 'Arial', fontSize: 32, bold: true, color: cleanColor(design.accentColor), align: 'left', valign: 'middle', fill: { color: '000000', transparency: 60 } },
+                options: { name: "title", type: "title", x: '4%', y: '2%', w: '92%', h: '15%', fontFace: 'Arial', fontSize: 32, bold: true, color: cleanColor(design.textColor), align: 'left', valign: 'middle' },
                 text: "Default Title",
             },
         },
         {
             placeholder: {
-                options: { name: "body", type: "body", x: 0.5, y: 1.2, w: 5.5, h: 4.5, fontFace: 'Arial', fontSize: 18, color: cleanColor(design.textColor), paraSpaceAfter: 20, isTextBox: true, fill: { color: '000000', transparency: 60 } },
+                options: { name: "body", type: "body", x: '4%', y: '20%', w: '55%', h: '70%', fontFace: 'Arial', fontSize: 18, color: cleanColor(design.textColor), paraSpaceAfter: 15, isTextBox: true, valign: 'top', },
                 text: "Default Body Text",
             },
         },
         {
           placeholder: {
-            options: { name: "image", type: "pic", x: 6.5, y: 1.2, w: 3, h: 4.5 },
+            options: { name: "image", type: "pic", x: '63%', y: '20%', w: '33%', h: '70%' },
           },
         },
       ],
@@ -191,7 +192,7 @@ export default function PresentationGeneratorTool() {
       objects: [
         {
             placeholder: {
-                options: { name: "title", type: "title", x: 0.5, y: 2.0, w: 9, h: 2, fontFace: 'Arial', fontSize: 44, bold: true, color: cleanColor(design.accentColor), align: 'center', valign: 'middle', fill: { color: '000000', transparency: 60 } },
+                options: { name: "title", type: "title", x: '5%', y: '40%', w: '90%', h: '20%', fontFace: 'Arial', fontSize: 44, bold: true, color: cleanColor(design.accentColor), align: 'center', valign: 'middle' },
                 text: "Default Title",
             }
         },
@@ -219,15 +220,13 @@ export default function PresentationGeneratorTool() {
       pptxSlide.transition = { type: "fade", duration: 1 };
 
       if (masterName === 'TITLE_SLIDE') {
-        pptxSlide.addText(result.title, {
-            placeholder: "title",
-            anim: { effect: "wipe", type: "in", duration: 1, delay: 0.2, from: "bottom" }
-        });
+        pptxSlide.addText(result.title, { placeholder: "title" });
         
         const subtitleTextObjects = [];
-        if (slide.title) {
+        const firstSlide = result.slides[0];
+        if (firstSlide?.title) {
             subtitleTextObjects.push({
-                text: slide.title,
+                text: firstSlide.title,
                 options: { fontSize: 22, bold: true, breakLine: true }
             });
         }
@@ -245,30 +244,23 @@ export default function PresentationGeneratorTool() {
             pptxSlide.addText(subtitleTextObjects, { placeholder: 'subtitle' });
         }
       } else {
-        pptxSlide.addText(slide.title, {
-          placeholder: "title",
-          anim: { effect: "fadeIn", duration: 0.5, delay: 0.2 }
-        });
+         pptxSlide.addText(slide.title, { placeholder: "title" });
 
         if (masterName === 'CONTENT_SLIDE') {
           const bodyTextObjects = slide.content.map(point => ({
             text: point,
-            options: { bullet: true, paraSpaceAfter: 20, breakLine: true }
+            options: { bullet: {type: 'dot', indent: 24} }
           }));
 
           if (bodyTextObjects.length > 0) {
-              pptxSlide.addText(bodyTextObjects, {
-                  placeholder: 'body',
-                  anim: { effect: "fly", type: 'in', by: "paragraph", duration: 0.5, delay: 0.5, stagger: 200 }
-              });
+              pptxSlide.addText(bodyTextObjects, { placeholder: 'body' });
           }
           
           if (slide.imageUrl && slide.imageUrl.startsWith('data:image')) {
             pptxSlide.addImage({
               data: slide.imageUrl,
               placeholder: "image",
-              sizing: { type: 'cover', w: 3, h: 4.5 },
-              anim: { effect: "zoom", type: 'in', duration: 1, delay: 0.3 }
+              sizing: { type: 'contain', w: '100%', h: '100%' },
             });
           }
         }
