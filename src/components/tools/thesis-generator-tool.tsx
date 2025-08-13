@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -26,7 +27,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { handleGenerateAcademicDocumentAction } from '@/app/actions';
-import type { GenerateAcademicDocumentOutput } from '@/ai/flows/academic-writer-tool';
+import type { GenerateAcademicDocumentOutput } from '@/ai/flows/thesis-generator-tool';
 import { Download, FileText, Loader2, UploadCloud } from 'lucide-react';
 
 const formSchema = z.object({
@@ -164,7 +165,7 @@ export default function AcademicWriterTool() {
                       <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center h-48">
                         {fileName ? (
                           <div className="flex flex-col items-center gap-2">
-                            <FileText className="w-12 h-12 text-accent" />
+                            <FileText className="w-12 h-12 text-primary" />
                             <p className="text-sm font-medium">{fileName}</p>
                             <Button
                               variant="link"
@@ -186,7 +187,7 @@ export default function AcademicWriterTool() {
                             <p className="mt-2 text-sm text-muted-foreground">
                               <label
                                 htmlFor="file-upload"
-                                className="font-semibold text-accent cursor-pointer hover:underline"
+                                className="font-semibold text-primary cursor-pointer hover:underline"
                               >
                                 Click to upload
                               </label>{' '}

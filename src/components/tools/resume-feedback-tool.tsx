@@ -32,7 +32,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { handleGetResumeFeedbackAction } from '@/app/actions';
 import type { GetResumeFeedbackOutput } from '@/ai/flows/resume-feedback-tool';
-import { FileText, UploadCloud, Download, FileCode } from 'lucide-react';
+import { FileText, UploadCloud, Download, FileCode, Loader2 } from 'lucide-react';
 import { ResumeTemplate } from '@/components/resume-template';
 
 const formSchema = z.object({
@@ -219,7 +219,7 @@ export default function ResumeFeedbackTool() {
                       <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center h-48">
                         {fileName ? (
                           <div className="flex flex-col items-center gap-2">
-                            <FileText className="w-12 h-12 text-accent" />
+                            <FileText className="w-12 h-12 text-primary" />
                             <p className="text-sm font-medium">{fileName}</p>
                             <Button
                               variant="link"
@@ -241,7 +241,7 @@ export default function ResumeFeedbackTool() {
                             <p className="mt-2 text-sm text-muted-foreground">
                               <label
                                 htmlFor="file-upload"
-                                className="font-semibold text-accent cursor-pointer hover:underline"
+                                className="font-semibold text-primary cursor-pointer hover:underline"
                               >
                                 Click to upload
                               </label>{' '}
@@ -302,7 +302,7 @@ export default function ResumeFeedbackTool() {
               </div>
 
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? 'Analyzing...' : 'Get Feedback'}
+                {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Analyzing...</> : 'Get Feedback'}
               </Button>
             </form>
           </Form>
