@@ -189,24 +189,24 @@ export default function PresentationGeneratorTool() {
     titleSlide.transition = { type: "fade", duration: 1 };
     
     const introSlideData = result.slides[0];
-    const presenterInfo = [
-        introSlideData.title,
-        result.presenterName ? `Presented by: ${result.presenterName}` : '',
-        result.rollNumber ? `Roll No: ${result.rollNumber}` : '',
-        result.department ? `Department: ${result.department}` : '',
-    ].filter(Boolean).join('\n');
-
-
+    
     titleSlide.addText(result.title, {
         placeholder: "title",
         anim: { effect: "wipe", type: "in", duration: 1, delay: 0.2, from: "bottom" }
     });
     
-    const subtitleTextObjects = introSlideData.content.map(point => ({
-        text: point,
-        options: { bullet: true, paraSpaceAfter: 10, breakLine: true, align: 'left'}
-    }));
-
+    const subtitleTextObjects = [
+        {
+            text: introSlideData.title,
+            options: { fontSize: 22, bold: true, breakLine: true }
+        },
+        ...[
+            result.presenterName ? `Presented by: ${result.presenterName}` : null,
+            result.rollNumber ? `Roll No: ${result.rollNumber}` : null,
+            result.department ? `Department: ${result.department}` : null
+        ].filter(Boolean).map(text => ({ text, options: { breakLine: true } })),
+    ];
+    
     if (subtitleTextObjects.length > 0) {
         titleSlide.addText(subtitleTextObjects, {
             placeholder: 'subtitle',
@@ -511,3 +511,5 @@ export default function PresentationGeneratorTool() {
     </div>
   );
 }
+
+    
