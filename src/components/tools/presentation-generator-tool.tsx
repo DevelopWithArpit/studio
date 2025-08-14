@@ -188,6 +188,11 @@ export default function PresentationGeneratorTool() {
             options: { name: "image", type: "pic", x: '63%', y: '20%', w: '33%', h: '70%' },
           },
         },
+        {
+          placeholder: {
+            options: { name: "logo", type: "pic", x: '90%', y: '90%', w: '5%', h: '5%' },
+          },
+        },
       ],
     });
     
@@ -273,6 +278,13 @@ export default function PresentationGeneratorTool() {
               data: slide.imageUrl,
               placeholder: "image",
               sizing: { type: 'contain', w: '100%', h: '100%' },
+            });
+          }
+          if (slide.logoUrl) {
+            pptxSlide.addImage({
+                path: slide.logoUrl,
+                placeholder: "logo",
+                 sizing: { type: 'contain', w: '100%', h: '100%' },
             });
           }
         }
@@ -506,7 +518,7 @@ export default function PresentationGeneratorTool() {
                                         {slide.content.map((point, i) => <li key={i}>{point}</li>)}
                                     </ul>
                                 </div>
-                                <div className="bg-muted flex items-center justify-center overflow-hidden">
+                                <div className="bg-muted flex items-center justify-center overflow-hidden relative">
                                     {slide.imageUrl && slide.imageUrl.startsWith('data:image') ? (
                                         <Image
                                             src={slide.imageUrl}
@@ -519,6 +531,17 @@ export default function PresentationGeneratorTool() {
                                         <div className="flex flex-col items-center justify-center text-destructive">
                                             <ImageIconLucide className="w-16 h-16" />
                                             <p className="mt-2 text-sm font-semibold">Image failed to generate</p>
+                                        </div>
+                                    )}
+                                    {slide.logoUrl && (
+                                        <div className="absolute bottom-4 right-4 bg-white/80 p-2 rounded-md">
+                                            <Image
+                                                src={slide.logoUrl}
+                                                alt="Company Logo"
+                                                width={60}
+                                                height={60}
+                                                className="object-contain"
+                                            />
                                         </div>
                                     )}
                                 </div>

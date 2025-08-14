@@ -13,6 +13,22 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { googleAI } from '@genkit-ai/googleai';
 
+const getCompanyLogoTool = ai.defineTool(
+    {
+        name: 'getCompanyLogoTool',
+        description: 'Get the logo for a given company.',
+        inputSchema: z.object({
+            companyName: z.string().describe('The name of the company to get the logo for.'),
+        }),
+        outputSchema: z.string().describe('A URL pointing to the company logo.'),
+    },
+    async (input) => {
+        // In a real application, you would implement a logo fetching service here.
+        // For this example, we'll return a placeholder. The model is taught to handle this.
+        return `https://logo.clearbit.com/${input.companyName.toLowerCase()}.com`;
+    }
+);
+
 const GeneratePresentationInputSchema = z.object({
   topic: z.string().describe('The topic or title of the presentation.'),
   presenterName: z.string().optional().describe("The name of the presenter."),
@@ -30,6 +46,7 @@ const SlideSchema = z.object({
   title: z.string().describe('The title of the slide.'),
   content: z.array(z.string()).describe('An array of exactly 4 short bullet points for the slide content. Each bullet point must have around 8 words. This can be an empty array for title-only slides.'),
   imagePrompt: z.string().describe('A text prompt to generate a relevant image for this slide. Can be an empty string if no image is needed.'),
+  logoUrl: z.string().optional().describe('The URL of a company logo to display on the slide, fetched using the getCompanyLogoTool.'),
   slideLayout: z.enum(['title', 'contentWithImage', 'titleOnly']).describe("The best layout for this slide. Use 'title' for the main title slide, 'contentWithImage' for slides with bullet points and a visual, and 'titleOnly' for section headers or simple, impactful statements."),
   imageUrl: z.string().optional().describe('The data URI of the generated image for the slide.'),
 });
@@ -57,6 +74,7 @@ const outlinePrompt = ai.definePrompt({
     name: 'generatePresentationOutlinePrompt',
     input: { schema: GeneratePresentationInputSchema },
     output: { schema: PresentationOutlineSchema },
+    tools: [getCompanyLogoTool],
     prompt: `You are an expert presentation creator and visual designer, inspired by tools like PowerPoint Designer. Your task is to generate a stunning and detailed presentation outline based on the user's request, following modern presentation best practices.
 
 **Core Principles (Non-negotiable):**
@@ -75,11 +93,13 @@ const outlinePrompt = ai.definePrompt({
 
 **Content Generation:**
 - **Tone and Style**: The content must be professional and authoritative, yet sound natural and human-written. It should be engaging, clear, and concise. Avoid jargon.
+- **Tool Use**: If a slide discusses a specific company (e.g., 'About the Company', 'Founders', 'Competitors'), you MUST use the \`getCompanyLogoTool\` to find and include the company's logo URL in the 'logoUrl' field.
 - For each slide, you MUST provide:
   1. A short, impactful title.
   2. A set of exactly 4 extremely CONCISE bullet points (or an empty array for title-only slides).
-  3. A descriptive prompt for an AI image generator (or an empty string). This prompt must describe a **stunning, high-quality, and cinematic visual** that powerfully represents the slide's core idea. Crucially, the generated image should NOT contain any text, letters, or logos whatsoever to avoid spelling and design errors. All image prompts must be in English.
+  3. A descriptive prompt for an AI image generator (or an empty string). This prompt must describe a stunning, high-quality, and cinematic visual that powerfully represents the slide's core idea. Crucially, the generated image should NOT contain any text or letters whatsoever to avoid spelling and design errors. All image prompts must be in English.
   4. The appropriate 'slideLayout'.
+  5. A 'logoUrl' if a company is mentioned.
 
 **Structure Generation Instructions:**
 - **The very first slide must always be the main title slide with the layout 'title'.** It should introduce the main topic and include any presenter details provided.
@@ -188,5 +208,3 @@ const generatePresentationFlow = ai.defineFlow(
     return outline;
   }
 );
-
-    
