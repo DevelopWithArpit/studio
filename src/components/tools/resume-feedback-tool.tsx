@@ -112,7 +112,7 @@ export default function ResumeFeedbackTool() {
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Resume</title>
+  <title>Resume for ${resumeData.name}</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -122,7 +122,9 @@ export default function ResumeFeedbackTool() {
   </style>
 </head>
 <body>
-  ${staticMarkup}
+  <div style="width: 816px; margin: auto;">
+    ${staticMarkup}
+  </div>
 </body>
 </html>`;
   };
@@ -133,20 +135,31 @@ export default function ResumeFeedbackTool() {
     setIsGeneratingPdf(true);
     const resumeContainer = document.getElementById('resume-container-for-pdf');
     if (!resumeContainer) {
+      toast({ variant: 'destructive', title: 'Error', description: 'Could not find resume content to render.' });
       setIsGeneratingPdf(false);
       return;
     };
 
     try {
-        const canvas = await html2canvas(resumeContainer, { scale: 3, useCORS: true, });
-        const imgData = canvas.toDataURL('image/png');
+        const canvas = await html2canvas(resumeContainer, { 
+            scale: 2, // Higher scale for better resolution
+            useCORS: true, 
+            backgroundColor: '#ffffff',
+            windowWidth: resumeContainer.scrollWidth,
+            windowHeight: resumeContainer.scrollHeight,
+        });
 
-        const pdf = new jsPDF({ orientation: 'p', unit: 'px', format: 'a4'});
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF({
+            orientation: 'p',
+            unit: 'px',
+            format: [canvas.width, canvas.height]
+        });
         
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
         pdf.save('resume.pdf');
+        toast({ title: "PDF Downloaded", description: "Your resume has been saved as a PDF." });
+
       } catch (error) {
         toast({ variant: 'destructive', title: 'Error Generating PDF', description: error instanceof Error ? error.message : 'An unknown error occurred.' });
       } finally {
@@ -354,10 +367,10 @@ export default function ResumeFeedbackTool() {
                 ) : (
                   result?.rewrittenResume && (
                     <div className="space-y-4">
-                       <div className="border rounded-lg bg-gray-100 p-4 max-h-[700px] overflow-y-auto">
-                          <div className="scale-[0.9] origin-top-left">
-                            <ResumeTemplate resumeData={result.rewrittenResume} />
-                          </div>
+                       <div className="border rounded-lg bg-gray-50 p-4 max-h-[700px] overflow-y-auto">
+                           <div id="resume-preview-content">
+                                <ResumeTemplate resumeData={result.rewrittenResume} />
+                           </div>
                       </div>
                       <div className="flex flex-wrap gap-2">
                          <Button
