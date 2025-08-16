@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -5,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import html2canvas from 'html2canvas';
 import { saveAs } from 'file-saver';
 import { renderToStaticMarkup } from 'react-dom/server';
 import {
@@ -66,7 +67,7 @@ export default function ResumeFeedbackTool() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 200 * 1024 * 1024) { // 200MB limit
+      if (file.size > 200 * 1024 * 1024) {
         toast({
           variant: 'destructive',
           title: 'File too large',
@@ -115,7 +116,7 @@ export default function ResumeFeedbackTool() {
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Resume</title>
+  <title>Resume for ${resumeData.name}</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -124,8 +125,10 @@ export default function ResumeFeedbackTool() {
     body { font-family: 'Inter', sans-serif; }
   </style>
 </head>
-<body style="width: 816px; margin: 0 auto; background: white;">
-  ${staticMarkup}
+<body>
+  <div style="width: 816px; margin: auto;">
+    ${staticMarkup}
+  </div>
 </body>
 </html>`;
   };
@@ -236,14 +239,15 @@ export default function ResumeFeedbackTool() {
         rightColBody.push({ content: 'PROJECTS', styles: { fontStyle: 'bold', fontSize: styles.sectionTitle.fontSize, textColor: styles.sectionTitle.textColor, cellPadding: {top: 15}} });
         resumeData.projects.forEach(proj => {
             rightColBody.push({ content: proj.title, styles: { fontStyle: 'bold', fontSize: styles.jobTitle.fontSize, textColor: styles.jobTitle.textColor, cellPadding: {top: 4, bottom: -2}} });
-            const bullets = proj.bullets.map(b => `•  ${b}`).join('\n');
-            rightColBody.push({ content: bullets, styles: { cellPadding: { top: 2, bottom: 8, left: 10 }, fontSize: styles.bullet.fontSize, textColor: styles.bullet.textColor }});
+            rightColBody.push({ content: `•  ${proj.description}`, styles: { cellPadding: { top: 2, bottom: 8, left: 10 }, fontSize: styles.bullet.fontSize, textColor: styles.bullet.textColor }});
         });
 
         // Achievements
-        rightColBody.push({ content: 'ACHIEVEMENTS', styles: { fontStyle: 'bold', fontSize: styles.sectionTitle.fontSize, textColor: styles.sectionTitle.textColor, cellPadding: {top: 15}} });
-        const achievements = resumeData.achievements.map(a => `•  ${a}`).join('\n');
-        rightColBody.push({ content: achievements, styles: { cellPadding: { top: 2, bottom: 8, left: 10 }, fontSize: styles.bullet.fontSize, textColor: styles.bullet.textColor }});
+        rightColBody.push({ content: 'KEY ACHIEVEMENTS', styles: { fontStyle: 'bold', fontSize: styles.sectionTitle.fontSize, textColor: styles.sectionTitle.textColor, cellPadding: {top: 15}} });
+        resumeData.keyAchievements.forEach(ach => {
+            rightColBody.push({ content: ach.title, styles: { fontStyle: 'bold', fontSize: styles.jobTitle.fontSize, textColor: styles.jobTitle.textColor, cellPadding: {top: 4, bottom: -2}} });
+            rightColBody.push({ content: `•  ${ach.description}`, styles: { cellPadding: { top: 2, bottom: 8, left: 10 }, fontSize: styles.bullet.fontSize, textColor: styles.bullet.textColor }});
+        });
 
 
         doc.autoTable({
@@ -281,7 +285,7 @@ export default function ResumeFeedbackTool() {
             didDrawCell: (data) => {
                  if (data.section === 'body' && data.row.index === 0) { // skills section
                     doc.setFontSize(styles.skillBadge.fontSize);
-                    const skills = resumeData.skills.technical;
+                    const skills = resumeData.skills;
                     let x = data.cell.x + data.cell.padding('left');
                     let y = data.cell.y + data.cell.padding('top') + 15;
                     const gutter = 5;
@@ -520,10 +524,10 @@ export default function ResumeFeedbackTool() {
                 ) : (
                   result?.rewrittenResume && (
                     <div className="space-y-4">
-                       <div className="border rounded-lg bg-gray-100 p-4 max-h-[700px] overflow-y-auto">
-                          <div className="scale-[0.9] origin-top-left">
-                            <ResumeTemplate resumeData={result.rewrittenResume} />
-                          </div>
+                       <div className="border rounded-lg bg-gray-50 p-4 max-h-[700px] overflow-y-auto">
+                           <div id="resume-preview-content">
+                                <ResumeTemplate resumeData={result.rewrittenResume} />
+                           </div>
                       </div>
                       <div className="flex flex-wrap gap-2">
                          <Button
@@ -557,3 +561,5 @@ export default function ResumeFeedbackTool() {
     </div>
   );
 }
+
+    
