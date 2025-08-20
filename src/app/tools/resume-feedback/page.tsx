@@ -1,13 +1,13 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import jsPDF from 'jspdf';
 import { saveAs } from 'file-saver';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { PDFDownloadLink } from '@react-pdf/renderer';
 import {
   Card,
   CardContent,
@@ -33,6 +33,7 @@ import { handleGetResumeFeedbackAction } from '@/app/actions';
 import type { GetResumeFeedbackOutput } from '@/ai/flows/resume-feedback-tool';
 import { FileText, UploadCloud, Download, FileCode, Loader2 } from 'lucide-react';
 import { ResumeTemplate } from '@/components/resume-template';
+import { ResumePdfDocument } from '@/components/resume-pdf-document';
 
 const formSchema = z.object({
   resume: z.string().min(1, 'Please upload or paste your resume.'),
@@ -44,11 +45,15 @@ type FormData = z.infer<typeof formSchema>;
 
 export default function ResumeFeedbackTool() {
   const [isLoading, setIsLoading] = useState(false);
-  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [isGeneratingHtml, setIsGeneratingHtml] = useState(false);
+  const [isClient, setIsClient] = useState(false);
   const [result, setResult] = useState<GetResumeFeedbackOutput | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -126,185 +131,6 @@ export default function ResumeFeedbackTool() {
   </div>
 </body>
 </html>`;
-  };
-
-  const handleDownloadPdf = async () => {
-    if (!result?.rewrittenResume) return;
-    setIsGeneratingPdf(true);
-
-    try {
-        const doc = new jsPDF('p', 'pt', 'a4');
-        const resumeData = result.rewrittenResume;
-        const A4_WIDTH = 595.28;
-        const A4_HEIGHT = 841.89;
-        const margin = 30;
-        
-        // --- Column Definitions ---
-        const sidebarWidth = A4_WIDTH * 0.33;
-        const mainContentWidth = A4_WIDTH - sidebarWidth - (margin * 2);
-        const mainContentX = sidebarWidth + margin;
-        
-        let currentY = margin;
-
-        // --- Helper Function ---
-        const addWrappedText = (text: string, x: number, y: number, width: number, options: any = {}) => {
-            const lines = doc.splitTextToSize(text, width);
-            doc.text(lines, x, y, options);
-            return (lines.length * (options.fontSize || 10) * 1.15);
-        };
-
-        // --- Sidebar (Left Column) ---
-        doc.setFillColor('#0e3d4e'); // Sidebar background color
-        doc.rect(0, 0, sidebarWidth, A4_HEIGHT, 'F');
-        doc.setTextColor('#FFFFFF'); // White text
-        currentY = 40;
-
-        // Name
-        doc.setFontSize(24).setFont('helvetica', 'bold');
-        currentY += addWrappedText(resumeData.name, margin / 2, currentY, sidebarWidth - margin);
-        currentY += 20;
-
-        const drawSidebarSection = (title: string, items: any[], itemRenderer: (item: any, y: number) => number) => {
-            if (!items || items.length === 0) return;
-            doc.setFontSize(10).setFont('helvetica', 'bold');
-            doc.text(title.toUpperCase(), margin / 2, currentY, {charSpace: 1});
-            doc.setDrawColor('#FFFFFF').setLineWidth(1.5).line(margin / 2, currentY + 4, sidebarWidth - margin, currentY + 4);
-            currentY += 20;
-            items.forEach(item => {
-                currentY += itemRenderer(item, currentY);
-            });
-            currentY += 20;
-        };
-
-        // Projects
-        drawSidebarSection("Projects", resumeData.projects, (proj, y) => {
-            doc.setFontSize(10).setFont('helvetica', 'bold');
-            let height = addWrappedText(proj.title, margin / 2, y, sidebarWidth - margin);
-            doc.setFontSize(8).setFont('helvetica', 'normal');
-            height += addWrappedText(proj.description, margin / 2, y + height, sidebarWidth - margin);
-            if (proj.link) {
-                doc.setTextColor('#60a5fa');
-                height += addWrappedText(proj.link, margin / 2, y + height, sidebarWidth - margin);
-                doc.setTextColor('#FFFFFF');
-            }
-            return height + 10;
-        });
-
-        // Achievements
-        drawSidebarSection("Key Achievements", resumeData.keyAchievements, (ach, y) => {
-             doc.setFontSize(10).setFont('helvetica', 'bold');
-             let height = addWrappedText(ach.title, margin/2, y, sidebarWidth - margin);
-             doc.setFontSize(8).setFont('helvetica', 'normal');
-             height += addWrappedText(ach.description, margin/2, y + height, sidebarWidth - margin);
-             return height + 10;
-        });
-
-        // Skills
-        drawSidebarSection("Skills", [resumeData.skills.join(', ')], (skillsStr, y) => {
-             doc.setFontSize(8).setFont('helvetica', 'normal');
-             return addWrappedText(skillsStr, margin / 2, y, sidebarWidth - margin);
-        });
-        
-        // Training
-        drawSidebarSection("Training / Courses", resumeData.training, (course, y) => {
-             doc.setFontSize(10).setFont('helvetica', 'bold');
-             let height = addWrappedText(course.title, margin/2, y, sidebarWidth - margin);
-             doc.setFontSize(8).setFont('helvetica', 'normal');
-             height += addWrappedText(course.description, margin/2, y + height, sidebarWidth - margin);
-             return height + 10;
-        });
-
-
-        // --- Main Content (Right Column) ---
-        doc.setTextColor('#2d3748'); // Dark gray text
-        currentY = margin;
-
-        // Title
-        doc.setFontSize(14).setFont('helvetica', 'normal');
-        currentY += addWrappedText(resumeData.title, mainContentX, currentY, mainContentWidth);
-        currentY += 5;
-        
-        // Contact Info
-        const contactInfo = [
-            resumeData.contact.phone,
-            resumeData.contact.email,
-            resumeData.contact.linkedin,
-            resumeData.contact.github,
-            resumeData.contact.location
-        ].filter(Boolean).join(' | ');
-        doc.setFontSize(8);
-        currentY += addWrappedText(contactInfo, mainContentX, currentY, mainContentWidth);
-        currentY += 20;
-
-        const drawMainSection = (title: string, items: any[], itemRenderer: (item: any, y: number) => number) => {
-            if (!items || items.length === 0) return;
-            doc.setFontSize(12).setFont('helvetica', 'bold');
-            doc.text(title.toUpperCase(), mainContentX, currentY, { charSpace: 1 });
-            doc.setDrawColor('#cbd5e0').setLineWidth(1.5).line(mainContentX, currentY + 4, A4_WIDTH - margin, currentY + 4);
-            currentY += 20;
-            items.forEach(item => {
-                currentY += itemRenderer(item, currentY);
-            });
-            currentY += 20;
-        }
-
-        // Summary
-        if(resumeData.summary) {
-            drawMainSection("Summary", [resumeData.summary], (summary, y) => {
-                 doc.setFontSize(9).setFont('helvetica', 'normal');
-                 return addWrappedText(summary, mainContentX, y, mainContentWidth);
-            });
-        }
-        
-        // Experience
-        drawMainSection("Experience", resumeData.experience, (exp, y) => {
-            doc.setFontSize(11).setFont('helvetica', 'bold');
-            let height = addWrappedText(exp.title, mainContentX, y, mainContentWidth);
-            doc.setFontSize(9).setFont('helvetica', 'normal');
-            doc.text(exp.dates, A4_WIDTH - margin, y, { align: 'right' });
-            
-            doc.setFontSize(10).setFont('helvetica', 'bold').setTextColor('#2563eb');
-            height += addWrappedText(exp.company, mainContentX, y + height - 5, mainContentWidth);
-            if(exp.location) {
-                doc.setFontSize(8).setFont('helvetica', 'normal').setTextColor('#64748b');
-                doc.text(exp.location, A4_WIDTH - margin, y + height - 12, {align: 'right'});
-            }
-            doc.setTextColor('#2d3748');
-            height += 5;
-
-            doc.setFontSize(9).setFont('helvetica', 'normal');
-            exp.bullets.forEach(bullet => {
-                 height += addWrappedText(`• ${bullet}`, mainContentX + 10, y + height, mainContentWidth - 10);
-            });
-            return height + 5;
-        });
-
-        // Education
-         drawMainSection("Education", resumeData.education, (edu, y) => {
-            doc.setFontSize(11).setFont('helvetica', 'bold');
-            let height = addWrappedText(edu.degree, mainContentX, y, mainContentWidth);
-            doc.setFontSize(9).setFont('helvetica', 'normal');
-            doc.text(edu.dates, A4_WIDTH - margin, y, { align: 'right' });
-            
-            doc.setFontSize(10).setFont('helvetica', 'bold').setTextColor('#2563eb');
-            height += addWrappedText(edu.school, mainContentX, y + height - 5, mainContentWidth);
-            if(edu.location) {
-                doc.setFontSize(8).setFont('helvetica', 'normal').setTextColor('#64748b');
-                doc.text(edu.location, A4_WIDTH - margin, y + height - 12, {align: 'right'});
-            }
-            doc.setTextColor('#2d3748');
-
-            return height + 5;
-        });
-
-        doc.save('resume.pdf');
-        toast({ title: "PDF Downloaded", description: "Your scannable resume has been saved as a PDF." });
-
-    } catch (error) {
-        toast({ variant: 'destructive', title: 'Error Generating PDF', description: error instanceof Error ? error.message : 'An unknown error occurred.' });
-    } finally {
-        setIsGeneratingPdf(false);
-    }
   };
 
   const handleDownloadHtml = async () => {
@@ -506,18 +332,22 @@ export default function ResumeFeedbackTool() {
                            </div>
                       </div>
                       <div className="flex flex-wrap gap-2">
-                         <Button
-                          onClick={handleDownloadPdf}
-                          disabled={isGeneratingPdf || isGeneratingHtml}
-                        >
-                          {isGeneratingPdf ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-                          {isGeneratingPdf
-                            ? 'Generating PDF...'
-                            : 'Download as PDF'}
-                        </Button>
+                        {isClient && result.rewrittenResume && (
+                          <PDFDownloadLink
+                            document={<ResumePdfDocument resumeData={result.rewrittenResume} />}
+                            fileName="resume.pdf"
+                          >
+                            {({ blob, url, loading, error }) => (
+                              <Button disabled={loading}>
+                                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                                {loading ? 'Generating PDF...' : 'Download as PDF'}
+                              </Button>
+                            )}
+                          </PDFDownloadLink>
+                        )}
                          <Button
                           onClick={handleDownloadHtml}
-                          disabled={isGeneratingPdf || isGeneratingHtml}
+                          disabled={isGeneratingHtml}
                           variant="secondary"
                         >
                           {isGeneratingHtml ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileCode className="mr-2 h-4 w-4" />}
