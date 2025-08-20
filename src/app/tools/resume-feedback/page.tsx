@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 import html2canvas from 'html2canvas';
 import { saveAs } from 'file-saver';
 import { renderToStaticMarkup } from 'react-dom/server';
@@ -561,5 +562,7 @@ export default function ResumeFeedbackTool() {
     </div>
   );
 }
+
+    
 
     
