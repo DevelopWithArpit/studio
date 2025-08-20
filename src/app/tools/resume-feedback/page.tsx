@@ -6,7 +6,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import { saveAs } from 'file-saver';
 import { renderToStaticMarkup } from 'react-dom/server';
 import {
@@ -131,46 +130,182 @@ export default function ResumeFeedbackTool() {
 
   const handleDownloadPdf = async () => {
     if (!result?.rewrittenResume) return;
-
     setIsGeneratingPdf(true);
-    const resumeContainer = document.getElementById('resume-container-for-pdf');
-    if (!resumeContainer) {
-      toast({ variant: 'destructive', title: 'Error', description: 'Could not find resume content to render.' });
-      setIsGeneratingPdf(false);
-      return;
-    };
 
     try {
-        const canvas = await html2canvas(resumeContainer, { 
-            scale: 2, // Higher scale for better resolution
-            useCORS: true, 
-            backgroundColor: '#ffffff',
-            windowWidth: resumeContainer.scrollWidth,
-            windowHeight: resumeContainer.scrollHeight,
+        const doc = new jsPDF('p', 'pt', 'a4');
+        const resumeData = result.rewrittenResume;
+        const A4_WIDTH = 595.28;
+        const A4_HEIGHT = 841.89;
+        const margin = 30;
+        
+        // --- Column Definitions ---
+        const sidebarWidth = A4_WIDTH * 0.33;
+        const mainContentWidth = A4_WIDTH - sidebarWidth - (margin * 2);
+        const mainContentX = sidebarWidth + margin;
+        
+        let currentY = margin;
+
+        // --- Helper Function ---
+        const addWrappedText = (text: string, x: number, y: number, width: number, options: any = {}) => {
+            const lines = doc.splitTextToSize(text, width);
+            doc.text(lines, x, y, options);
+            return (lines.length * (options.fontSize || 10) * 1.15);
+        };
+
+        // --- Sidebar (Left Column) ---
+        doc.setFillColor('#0e3d4e'); // Sidebar background color
+        doc.rect(0, 0, sidebarWidth, A4_HEIGHT, 'F');
+        doc.setTextColor('#FFFFFF'); // White text
+        currentY = 40;
+
+        // Name
+        doc.setFontSize(24).setFont('helvetica', 'bold');
+        currentY += addWrappedText(resumeData.name, margin / 2, currentY, sidebarWidth - margin);
+        currentY += 20;
+
+        const drawSidebarSection = (title: string, items: any[], itemRenderer: (item: any, y: number) => number) => {
+            if (!items || items.length === 0) return;
+            doc.setFontSize(10).setFont('helvetica', 'bold');
+            doc.text(title.toUpperCase(), margin / 2, currentY, {charSpace: 1});
+            doc.setDrawColor('#FFFFFF').setLineWidth(1.5).line(margin / 2, currentY + 4, sidebarWidth - margin, currentY + 4);
+            currentY += 20;
+            items.forEach(item => {
+                currentY += itemRenderer(item, currentY);
+            });
+            currentY += 20;
+        };
+
+        // Projects
+        drawSidebarSection("Projects", resumeData.projects, (proj, y) => {
+            doc.setFontSize(10).setFont('helvetica', 'bold');
+            let height = addWrappedText(proj.title, margin / 2, y, sidebarWidth - margin);
+            doc.setFontSize(8).setFont('helvetica', 'normal');
+            height += addWrappedText(proj.description, margin / 2, y + height, sidebarWidth - margin);
+            if (proj.link) {
+                doc.setTextColor('#60a5fa');
+                height += addWrappedText(proj.link, margin / 2, y + height, sidebarWidth - margin);
+                doc.setTextColor('#FFFFFF');
+            }
+            return height + 10;
         });
 
-        const imgData = canvas.toDataURL('image/png');
-        // A4 page is 595 x 842 points. We'll use the canvas aspect ratio.
-        const pdfWidth = 595;
-        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-        
-        const pdf = new jsPDF({
-            orientation: 'p',
-            unit: 'pt',
-            format: [pdfWidth, pdfHeight]
+        // Achievements
+        drawSidebarSection("Key Achievements", resumeData.keyAchievements, (ach, y) => {
+             doc.setFontSize(10).setFont('helvetica', 'bold');
+             let height = addWrappedText(ach.title, margin/2, y, sidebarWidth - margin);
+             doc.setFontSize(8).setFont('helvetica', 'normal');
+             height += addWrappedText(ach.description, margin/2, y + height, sidebarWidth - margin);
+             return height + 10;
+        });
+
+        // Skills
+        drawSidebarSection("Skills", [resumeData.skills.join(', ')], (skillsStr, y) => {
+             doc.setFontSize(8).setFont('helvetica', 'normal');
+             return addWrappedText(skillsStr, margin / 2, y, sidebarWidth - margin);
         });
         
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-        pdf.save('resume.pdf');
-        toast({ title: "PDF Downloaded", description: "Your resume has been saved as a PDF." });
+        // Training
+        drawSidebarSection("Training / Courses", resumeData.training, (course, y) => {
+             doc.setFontSize(10).setFont('helvetica', 'bold');
+             let height = addWrappedText(course.title, margin/2, y, sidebarWidth - margin);
+             doc.setFontSize(8).setFont('helvetica', 'normal');
+             height += addWrappedText(course.description, margin/2, y + height, sidebarWidth - margin);
+             return height + 10;
+        });
 
-      } catch (error) {
+
+        // --- Main Content (Right Column) ---
+        doc.setTextColor('#2d3748'); // Dark gray text
+        currentY = margin;
+
+        // Title
+        doc.setFontSize(14).setFont('helvetica', 'normal');
+        currentY += addWrappedText(resumeData.title, mainContentX, currentY, mainContentWidth);
+        currentY += 5;
+        
+        // Contact Info
+        const contactInfo = [
+            resumeData.contact.phone,
+            resumeData.contact.email,
+            resumeData.contact.linkedin,
+            resumeData.contact.github,
+            resumeData.contact.location
+        ].filter(Boolean).join(' | ');
+        doc.setFontSize(8);
+        currentY += addWrappedText(contactInfo, mainContentX, currentY, mainContentWidth);
+        currentY += 20;
+
+        const drawMainSection = (title: string, items: any[], itemRenderer: (item: any, y: number) => number) => {
+            if (!items || items.length === 0) return;
+            doc.setFontSize(12).setFont('helvetica', 'bold');
+            doc.text(title.toUpperCase(), mainContentX, currentY, { charSpace: 1 });
+            doc.setDrawColor('#cbd5e0').setLineWidth(1.5).line(mainContentX, currentY + 4, A4_WIDTH - margin, currentY + 4);
+            currentY += 20;
+            items.forEach(item => {
+                currentY += itemRenderer(item, currentY);
+            });
+            currentY += 20;
+        }
+
+        // Summary
+        if(resumeData.summary) {
+            drawMainSection("Summary", [resumeData.summary], (summary, y) => {
+                 doc.setFontSize(9).setFont('helvetica', 'normal');
+                 return addWrappedText(summary, mainContentX, y, mainContentWidth);
+            });
+        }
+        
+        // Experience
+        drawMainSection("Experience", resumeData.experience, (exp, y) => {
+            doc.setFontSize(11).setFont('helvetica', 'bold');
+            let height = addWrappedText(exp.title, mainContentX, y, mainContentWidth);
+            doc.setFontSize(9).setFont('helvetica', 'normal');
+            doc.text(exp.dates, A4_WIDTH - margin, y, { align: 'right' });
+            
+            doc.setFontSize(10).setFont('helvetica', 'bold').setTextColor('#2563eb');
+            height += addWrappedText(exp.company, mainContentX, y + height - 5, mainContentWidth);
+            if(exp.location) {
+                doc.setFontSize(8).setFont('helvetica', 'normal').setTextColor('#64748b');
+                doc.text(exp.location, A4_WIDTH - margin, y + height - 12, {align: 'right'});
+            }
+            doc.setTextColor('#2d3748');
+            height += 5;
+
+            doc.setFontSize(9).setFont('helvetica', 'normal');
+            exp.bullets.forEach(bullet => {
+                 height += addWrappedText(`• ${bullet}`, mainContentX + 10, y + height, mainContentWidth - 10);
+            });
+            return height + 5;
+        });
+
+        // Education
+         drawMainSection("Education", resumeData.education, (edu, y) => {
+            doc.setFontSize(11).setFont('helvetica', 'bold');
+            let height = addWrappedText(edu.degree, mainContentX, y, mainContentWidth);
+            doc.setFontSize(9).setFont('helvetica', 'normal');
+            doc.text(edu.dates, A4_WIDTH - margin, y, { align: 'right' });
+            
+            doc.setFontSize(10).setFont('helvetica', 'bold').setTextColor('#2563eb');
+            height += addWrappedText(edu.school, mainContentX, y + height - 5, mainContentWidth);
+            if(edu.location) {
+                doc.setFontSize(8).setFont('helvetica', 'normal').setTextColor('#64748b');
+                doc.text(edu.location, A4_WIDTH - margin, y + height - 12, {align: 'right'});
+            }
+            doc.setTextColor('#2d3748');
+
+            return height + 5;
+        });
+
+        doc.save('resume.pdf');
+        toast({ title: "PDF Downloaded", description: "Your scannable resume has been saved as a PDF." });
+
+    } catch (error) {
         toast({ variant: 'destructive', title: 'Error Generating PDF', description: error instanceof Error ? error.message : 'An unknown error occurred.' });
-      } finally {
+    } finally {
         setIsGeneratingPdf(false);
-      }
+    }
   };
-
 
   const handleDownloadHtml = async () => {
     if (!result?.rewrittenResume) return;
@@ -326,13 +461,6 @@ export default function ResumeFeedbackTool() {
           </Form>
         </CardContent>
       </Card>
-
-      {/* Hidden container for PDF generation */}
-      {result?.rewrittenResume &&
-        <div id="resume-container-for-pdf" style={{ position: 'absolute', left: '-9999px', top: 0, width: '816px', background: 'white' }}>
-            <ResumeTemplate resumeData={result.rewrittenResume} />
-        </div>
-      }
 
       {(isLoading || result) && (
         <Card>
