@@ -122,10 +122,10 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
                  <header className="mb-8">
                     <h2 className="text-xl font-semibold text-blue-600">{title}</h2>
                     <div className="flex flex-wrap text-xs text-gray-600 mt-2 gap-x-4 gap-y-1">
-                        {contact.phone && <span className="flex items-center gap-1.5"><Phone size={12} /> {contact.phone}</span>}
-                        {contact.email && <a href={`mailto:${contact.email}`} className="flex items-center gap-1.5 text-blue-600 hover:underline"><Mail size={12} /> {contact.email}</a>}
-                        {contact.linkedin && <a href={contact.linkedin} className="flex items-center gap-1.5 text-blue-600 hover:underline"><Linkedin size={12} /> {contact.linkedin}</a>}
-                        {contact.location && <span className="flex items-center gap-1.5"><MapPin size={12} /> {contact.location}</span>}
+                        {contact?.phone && <span className="flex items-center gap-1.5"><Phone size={12} /> {contact.phone}</span>}
+                        {contact?.email && <a href={`mailto:${contact.email}`} className="flex items-center gap-1.5 text-blue-600 hover:underline"><Mail size={12} /> {contact.email}</a>}
+                        {contact?.linkedin && <a href={contact.linkedin} className="flex items-center gap-1.5 text-blue-600 hover:underline"><Linkedin size={12} /> {contact.linkedin}</a>}
+                        {contact?.location && <span className="flex items-center gap-1.5"><MapPin size={12} /> {contact.location}</span>}
                     </div>
                 </header>
                 
