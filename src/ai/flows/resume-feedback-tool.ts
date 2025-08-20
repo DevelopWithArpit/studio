@@ -27,27 +27,27 @@ const RewrittenResumeSchema = z.object({
         email: z.string().optional().describe("The user's email address."),
         linkedin: z.string().optional().describe("The user's LinkedIn profile URL."),
         github: z.string().optional().describe("The user's GitHub profile URL."),
-        location: z.string().optional().describe("The user's city and country."),
+        location: z.string().optional().describe("The user's city and state/country."),
     }).describe("The user's contact information."),
-    summary: z.string().describe("A 2-3 sentence professional summary."),
+    summary: z.string().describe("A 2-4 sentence professional summary."),
     experience: z.array(z.object({
         title: z.string().describe("The job title."),
         company: z.string().describe("The company name."),
-        location: z.string().optional().describe("The location of the company."),
+        location: z.string().optional().describe("The location of the company (e.g., 'Washington, D.C.')."),
         dates: z.string().describe("The dates of employment (e.g., '02/2022 - Present')."),
-        bullets: z.array(z.string()).describe("A list of bullet points describing achievements and responsibilities, starting with strong action verbs and quantifying results where possible.")
+        bullets: z.array(z.string()).describe("A list of 3-5 bullet points describing achievements and responsibilities, starting with strong action verbs and quantifying results where possible.")
     })).describe("A list of professional experiences."),
     education: z.array(z.object({
         degree: z.string().describe("The degree obtained (e.g., 'Master of Business Administration')."),
         school: z.string().describe("The name of the university or school."),
-        location: z.string().optional().describe("The location of the school."),
+        location: z.string().optional().describe("The location of the school (e.g., 'Washington, D.C.')."),
         dates: z.string().describe("The dates of attendance."),
     })).describe("A list of educational qualifications."),
     projects: z.array(z.object({
         title: z.string().describe("The project title."),
         description: z.string().describe("A brief description of the project."),
-        link: z.string().optional().describe("A URL link to the project (e.g., GitHub).")
-    })).describe("A list of relevant projects, typically placed in the sidebar."),
+        link: z.string().optional().describe("A URL link to the project (e.g., GitHub repo).")
+    })).describe("A list of 2-3 key projects, typically placed in the sidebar."),
     skills: z.array(z.string()).describe("A list of key skills relevant to the job, comma-separated."),
     keyAchievements: z.array(z.object({
         title: z.string().describe("The title of the achievement (e.g., 'Boosted Brand Engagement')."),
@@ -109,15 +109,15 @@ Please perform the following two tasks:
 2.  **Rewrite the Resume into JSON:** In the 'rewrittenResume' field, provide a professionally rewritten version of the resume by populating the structured JSON object. Adhere strictly to the following structure, mirroring the visual template:
     - **Header**: Extract the full name, professional title, and all contact details (phone, email, linkedin, location).
     - **Main Column (Right Side)**:
-        - **Summary**: A concise professional summary.
-        - **Experience**: List all work experiences with title, company, location, dates, and detailed, metric-driven bullet points.
+        - **Summary**: A concise professional summary of 2-4 sentences.
+        - **Experience**: List all work experiences with title, company, location, dates, and 3-5 detailed, metric-driven bullet points.
         - **Education**: List all educational qualifications with degree, school, location, and dates.
     - **Sidebar (Left Side)**:
         - **Projects**: Extract 2-3 key projects with a title, a short description, and a URL if available.
         - **Key Achievements**: Identify 3-4 major career achievements. For each, create a short title (e.g., "Increased Conversions") and a description with a quantifiable metric.
         - **Skills**: Compile a list of all relevant skills.
         - **Training/Courses**: List any relevant certifications or courses with a title and a brief description.
-    - **General Rules**: Start every bullet point under 'Experience' with a strong action verb. Quantify achievements with specific metrics wherever possible (e.g., "Increased user engagement by 30%" instead of "Improved user engagement"). Ensure all data is extracted accurately.
+    - **General Rules**: Start every bullet point under 'Experience' with a strong action verb. Quantify achievements with specific metrics wherever possible (e.g., "Increased user engagement by 30%" instead of "Improved user engagement"). Ensure all data is extracted accurately and professionally.
 `,
     });
 
@@ -125,5 +125,3 @@ Please perform the following two tasks:
     return output!;
   }
 );
-
-    

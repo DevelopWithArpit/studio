@@ -12,7 +12,7 @@ Font.register({
   family: 'Inter',
   fonts: [
     { src: 'https://fonts.gstatic.com/s/inter/v13/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7.woff2', fontWeight: 400 },
-    { src: 'https://fonts.gstatic.com/s/inter/v13/UcC-3FwrK3iLTeHuS_fvQtMwCp50KnMa25L7SU-K.woff2', fontWeight: 500 },
+    { src: 'https://fonts.gstatic.com/s/inter/v13/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa25L7SU-K.woff2', fontWeight: 500 },
     { src: 'https://fonts.gstatic.com/s/inter/v13/UcC-3FwrK3iLTeHuS_fvQtMwCp50KnMa25L7SU-K.woff2', fontWeight: 700 },
   ],
 });
@@ -34,17 +34,19 @@ const styles = StyleSheet.create({
   },
   mainContent: {
     width: '67%',
-    padding: 32,
+    padding: 24,
+    paddingLeft: 32,
   },
   name: {
     fontSize: 28,
     fontWeight: 'bold',
     textTransform: 'uppercase',
-    letterSpacing: -1,
+    color: 'white',
+    letterSpacing: 1,
     marginBottom: 32,
   },
   sidebarSection: {
-    marginBottom: 24,
+    marginBottom: 20,
   },
   sidebarSectionTitle: {
     fontSize: 10,
@@ -52,7 +54,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 1,
     borderBottomWidth: 1.5,
-    borderBottomColor: '#cbd5e0',
+    borderBottomColor: '#4a5568',
     paddingBottom: 4,
     marginBottom: 12,
   },
@@ -60,14 +62,15 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: 'bold',
     marginBottom: 2,
+    color: 'white',
   },
   projectDescription: {
-    fontSize: 8,
+    fontSize: 9,
     color: '#d1d5db',
-    marginBottom: 2,
+    marginBottom: 4,
   },
   projectLink: {
-    fontSize: 8,
+    fontSize: 9,
     color: '#93c5fd',
     textDecoration: 'none',
   },
@@ -81,13 +84,14 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: 'bold',
     marginBottom: 2,
+    color: 'white',
   },
   achievementDescription: {
-    fontSize: 8,
+    fontSize: 9,
     color: '#d1d5db',
   },
   skills: {
-    fontSize: 8,
+    fontSize: 9,
     color: '#d1d5db',
   },
   trainingContainer: {
@@ -96,9 +100,10 @@ const styles = StyleSheet.create({
   trainingTitle: {
     fontSize: 10,
     fontWeight: 'bold',
+     color: 'white',
   },
   trainingDescription: {
-    fontSize: 8,
+    fontSize: 9,
     color: '#d1d5db',
   },
   headerTitle: {
@@ -110,21 +115,21 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'row',
     flexWrap: 'wrap',
-    fontSize: 8,
-    color: '#6b7280',
+    fontSize: 9,
+    color: '#4a5568',
     marginTop: 8,
     marginBottom: 24,
     gap: 12,
   },
   contactLink: {
-     color: '#2563eb',
+     color: '#4a5568',
      textDecoration: 'none',
   },
   mainSection: {
-    marginBottom: 24,
+    marginBottom: 20,
   },
   mainSectionTitle: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: 'bold',
     textTransform: 'uppercase',
     color: '#4a5568',
@@ -132,14 +137,14 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1.5,
     borderBottomColor: '#e5e7eb',
     paddingBottom: 4,
-    marginBottom: 16,
+    marginBottom: 12,
   },
   summaryText: {
     fontSize: 9,
     color: '#4a5568',
   },
   experienceItem: {
-    marginBottom: 20,
+    marginBottom: 16,
   },
   expHeader: {
     flexDirection: 'row',
@@ -152,7 +157,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   expDates: {
-    fontSize: 8,
+    fontSize: 9,
     color: '#6b7280',
     fontWeight: 'medium',
   },
@@ -167,23 +172,26 @@ const styles = StyleSheet.create({
     color: '#2563eb',
   },
   location: {
-    fontSize: 8,
+    fontSize: 9,
     color: '#6b7280',
   },
   bulletPoint: {
     flexDirection: 'row',
-    marginTop: 2,
+    marginTop: 4,
+    paddingLeft: 5
   },
   bullet: {
-    width: 10,
+    width: 8,
     fontSize: 9,
+    lineHeight: 1.2
   },
   bulletText: {
     flex: 1,
     fontSize: 9,
+    lineHeight: 1.2
   },
   educationItem: {
-    marginBottom: 16,
+    marginBottom: 12,
   },
   degree: {
     fontSize: 11,
@@ -254,8 +262,7 @@ export const ResumePdfDocument: React.FC<{ resumeData: ResumeData }> = ({ resume
         <View style={styles.contactInfo}>
             {resumeData.contact.phone && <Text>{resumeData.contact.phone}</Text>}
             {resumeData.contact.email && <Link src={`mailto:${resumeData.contact.email}`} style={styles.contactLink}>{resumeData.contact.email}</Link>}
-            {resumeData.contact.linkedin && <Link src={resumeData.contact.linkedin} style={styles.contactLink}>{resumeData.contact.linkedin}</Link>}
-            {resumeData.contact.github && <Link src={resumeData.contact.github} style={styles.contactLink}>{resumeData.contact.github}</Link>}
+            {resumeData.contact.linkedin && <Link src={resumeData.contact.linkedin} style={styles.contactLink}>linkedin.com</Link>}
             {resumeData.contact.location && <Text>{resumeData.contact.location}</Text>}
         </View>
 
@@ -279,7 +286,7 @@ export const ResumePdfDocument: React.FC<{ resumeData: ResumeData }> = ({ resume
                     <Text style={styles.companyName}>{exp.company}</Text>
                     {exp.location && <Text style={styles.location}>{exp.location}</Text>}
                  </View>
-                <View style={{marginTop: 8}}>
+                <View style={{marginTop: 6}}>
                     {exp.bullets.map((bullet, j) => (
                         <View key={j} style={styles.bulletPoint}>
                             <Text style={styles.bullet}>• </Text>

@@ -6,9 +6,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { saveAs } from 'file-saver';
-import { renderToStaticMarkup } from 'react-dom/server';
 import { PDFDownloadLink } from '@react-pdf/renderer';
-import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from 'docx';
 import {
   Card,
   CardContent,
@@ -32,9 +31,11 @@ import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { handleGetResumeFeedbackAction } from '@/app/actions';
 import type { GetResumeFeedbackOutput } from '@/ai/flows/resume-feedback-tool';
-import { FileText, UploadCloud, Download, FileCode, Loader2, FileType } from 'lucide-react';
+import { FileText, UploadCloud, Download, FileType, Loader2, FileCode } from 'lucide-react';
 import { ResumeTemplate } from '@/components/resume-template';
 import { ResumePdfDocument } from '@/components/resume-pdf-document';
+import { renderToStaticMarkup } from 'react-dom/server';
+
 
 const formSchema = z.object({
   resume: z.string().min(1, 'Please upload or paste your resume.'),
@@ -149,101 +150,105 @@ export default function ResumeFeedbackTool() {
     setIsGeneratingDocx(true);
     const resume = result.rewrittenResume;
     
-    const docChildren: Paragraph[] = [
-      new Paragraph({
-        text: resume.name,
-        heading: HeadingLevel.TITLE,
-      }),
-      new Paragraph({
-        text: resume.title,
-        heading: HeadingLevel.HEADING_1,
-      }),
-    ];
-    
-    const contactParts = [
-        resume.contact.phone,
-        resume.contact.email,
-        resume.contact.linkedin,
-        resume.contact.github,
-        resume.contact.location,
-    ].filter(Boolean);
-    docChildren.push(new Paragraph({
-        children: [new TextRun({ text: contactParts.join(' | '), size: '10pt' })],
-        spacing: { after: 200 }
-    }));
-    
-    docChildren.push(new Paragraph({ text: 'Summary', heading: HeadingLevel.HEADING_2 }));
-    docChildren.push(new Paragraph({ children: [new TextRun({ text: resume.summary, size: '10pt' })], spacing: { after: 200 } }));
-
-    if (resume.experience?.length > 0) {
-      docChildren.push(new Paragraph({ text: 'Experience', heading: HeadingLevel.HEADING_2 }));
-      resume.experience.forEach(exp => {
-        docChildren.push(new Paragraph({
-            children: [new TextRun({ text: exp.title, bold: true, size: '11pt' })],
-            spacing: { after: 50 }
-        }));
-        docChildren.push(new Paragraph({
-            children: [
-                new TextRun({ text: `${exp.company} | ${exp.dates}`, italics: true, size: '10pt' }),
-            ],
-            spacing: { after: 100 }
-        }));
-        exp.bullets.forEach(bullet => {
-            docChildren.push(new Paragraph({
-                text: bullet,
-                bullet: { level: 0 },
-                style: 'WellSpaced',
-            }));
-        });
-      });
-    }
-
-    if (resume.education?.length > 0) {
-        docChildren.push(new Paragraph({ text: 'Education', heading: HeadingLevel.HEADING_2 }));
-        resume.education.forEach(edu => {
-            docChildren.push(new Paragraph({
-                children: [new TextRun({ text: edu.degree, bold: true, size: '11pt' })],
-            }));
-            docChildren.push(new Paragraph({
-                children: [new TextRun({ text: `${edu.school} | ${edu.dates}`, size: '10pt' })],
-                spacing: { after: 200 }
-            }));
-        });
-    }
-    
-    // Combine sidebar content into one linear flow for DOCX
-    const sidebarSections: {title: string; content: any[]}[] = [
-        { title: 'Skills', content: resume.skills ? [resume.skills.join(', ')] : [] },
-        { title: 'Projects', content: resume.projects || [] },
-        { title: 'Key Achievements', content: resume.keyAchievements || [] },
-        { title: 'Training / Courses', content: resume.training || [] },
-    ];
-    
-    sidebarSections.forEach(section => {
-        if(section.content.length > 0) {
-            docChildren.push(new Paragraph({ text: section.title, heading: HeadingLevel.HEADING_2 }));
-             section.content.forEach((item: any) => {
-                if (typeof item === 'string') {
-                     docChildren.push(new Paragraph({ text: item, style: 'WellSpaced' }));
-                } else {
-                     docChildren.push(new Paragraph({ children: [new TextRun({ text: item.title, bold: true })]}));
-                     docChildren.push(new Paragraph({ children: [new TextRun({ text: item.description, size: '9pt' })], style: 'WellSpaced' }));
-                }
-             });
-        }
-    });
-
+    // Create a new Document
     const doc = new Document({
-      sections: [{ children: docChildren }],
+      sections: [{
+        properties: {
+          page: {
+            margin: {
+              top: 720,
+              right: 720,
+              bottom: 720,
+              left: 720,
+            },
+          },
+        },
+        children: [
+          new Paragraph({
+            children: [new TextRun({ text: resume.name, bold: true, size: 48, font: "Inter" })],
+            alignment: AlignmentType.LEFT,
+            spacing: { after: 100 }
+          }),
+          new Paragraph({
+            children: [new TextRun({ text: resume.title, size: 24, font: "Inter", color: "555555" })],
+            spacing: { after: 200 }
+          }),
+           new Paragraph({
+            children: [
+                ...(resume.contact.phone ? [new TextRun({ text: `${resume.contact.phone} | `, size: 18, font: "Inter" })] : []),
+                ...(resume.contact.email ? [new TextRun({ text: `${resume.contact.email} | `, size: 18, font: "Inter" })] : []),
+                ...(resume.contact.linkedin ? [new TextRun({ text: `linkedin.com/in/...`, size: 18, font: "Inter", style: "Hyperlink" })] : []),
+            ],
+            spacing: { after: 300 }
+        }),
+          new Paragraph({ text: "Summary", heading: HeadingLevel.HEADING_1, spacing: { after: 150 } }),
+          new Paragraph({ text: resume.summary, style: "normal" }),
+          new Paragraph({ text: "Experience", heading: HeadingLevel.HEADING_1, spacing: { before: 300, after: 150 } }),
+          ...resume.experience.flatMap(exp => [
+            new Paragraph({
+              children: [
+                new TextRun({ text: exp.title, bold: true, size: 22 }),
+                new TextRun({ text: `\t${exp.dates}`, size: 18, color: "888888" }),
+              ]
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({ text: exp.company, color: "4C8FFB", size: 20 }),
+                new TextRun({ text: `\t${exp.location}`, size: 18, color: "888888" }),
+              ],
+               spacing: { after: 100 }
+            }),
+            ...exp.bullets.map(bullet => new Paragraph({ text: bullet, bullet: { level: 0 }, style: "normal" }))
+          ]),
+           new Paragraph({ text: "Education", heading: HeadingLevel.HEADING_1, spacing: { before: 300, after: 150 } }),
+           ...resume.education.flatMap(edu => [
+            new Paragraph({
+              children: [
+                new TextRun({ text: edu.degree, bold: true, size: 22 }),
+                new TextRun({ text: `\t${edu.dates}`, size: 18, color: "888888" }),
+              ]
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({ text: edu.school, color: "4C8FFB", size: 20 }),
+                 new TextRun({ text: `\t${edu.location}`, size: 18, color: "888888" }),
+              ],
+               spacing: { after: 100 }
+            }),
+          ]),
+          new Paragraph({ text: "Projects", heading: HeadingLevel.HEADING_1, spacing: { before: 300, after: 150 } }),
+           ...resume.projects.flatMap(proj => [
+            new Paragraph({ text: proj.title, style: "projectTitle" }),
+            new Paragraph({ text: proj.description, style: "normal" }),
+            ...(proj.link ? [new Paragraph({ children: [new TextRun({text: proj.link, style: "Hyperlink"})], spacing: { after: 100 } })] : [new Paragraph({spacing: {after: 100}})]),
+          ]),
+          new Paragraph({ text: "Skills", heading: HeadingLevel.HEADING_1, spacing: { before: 300, after: 150 } }),
+          new Paragraph({ text: resume.skills.join(', '), style: "normal" }),
+        ],
+      }],
       styles: {
+        default: {
+            heading1: {
+                run: { size: 28, bold: true, color: "000000", font: "Inter" },
+                paragraph: { spacing: { after: 200, before: 400 } },
+            },
+        },
         paragraphStyles: [{
-            id: 'WellSpaced',
-            name: 'Well Spaced',
+            id: 'normal',
+            name: 'Normal',
             basedOn: 'Normal',
-            quickFormat: true,
-            run: { size: '10pt' },
-            paragraph: { spacing: { after: 100 } }
-        }]
+            next: 'Normal',
+            run: { size: 20, font: "Inter" },
+            paragraph: { spacing: { after: 100, line: 360 } },
+        },
+        {
+            id: 'projectTitle',
+            name: 'Project Title',
+            basedOn: 'Normal',
+            next: 'Normal',
+            run: { size: 22, bold: true },
+        }
+        ]
       }
     });
 
@@ -452,7 +457,7 @@ export default function ResumeFeedbackTool() {
                             document={<ResumePdfDocument resumeData={result.rewrittenResume} />}
                             fileName="resume.pdf"
                           >
-                            {({ blob, url, loading, error }) => (
+                            {({ loading }) => (
                               <Button disabled={loading || isGeneratingDocx || isGeneratingHtml}>
                                 {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
                                 {loading ? 'Generating PDF...' : 'Download as PDF'}
