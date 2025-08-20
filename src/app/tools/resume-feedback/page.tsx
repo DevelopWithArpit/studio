@@ -329,7 +329,7 @@ export default function ResumeFeedbackTool() {
 
       {/* Hidden container for PDF generation */}
       {result?.rewrittenResume &&
-        <div id="resume-container-for-pdf" style={{ position: 'absolute', left: '-9999px', top: 0, background: 'white' }}>
+        <div id="resume-container-for-pdf" style={{ position: 'absolute', left: '-9999px', top: 0, width: '816px', background: 'white' }}>
             <ResumeTemplate resumeData={result.rewrittenResume} />
         </div>
       }
