@@ -26,6 +26,7 @@ const RewrittenResumeSchema = z.object({
         phone: z.string().optional().describe("The user's phone number."),
         email: z.string().optional().describe("The user's email address."),
         linkedin: z.string().optional().describe("The user's LinkedIn profile URL."),
+        github: z.string().optional().describe("The user's GitHub profile URL."),
         location: z.string().optional().describe("The user's city and country."),
     }).describe("The user's contact information."),
     summary: z.string().describe("A 2-3 sentence professional summary."),
@@ -124,3 +125,5 @@ Please perform the following two tasks:
     return output!;
   }
 );
+
+    

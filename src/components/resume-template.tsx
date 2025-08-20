@@ -1,7 +1,7 @@
 
 'use client';
 import React from 'react';
-import { Phone, Mail, Linkedin, MapPin, Briefcase, GitFork, Star, TrendingUp, CheckCircle, Award, Target, Users } from 'lucide-react';
+import { Phone, Mail, Linkedin, MapPin, Briefcase, GitFork, Star, TrendingUp, CheckCircle, Award, Target, Users, Github } from 'lucide-react';
 
 interface ResumeData {
   name: string;
@@ -10,6 +10,7 @@ interface ResumeData {
     phone?: string;
     email?: string;
     linkedin?: string;
+    github?: string;
     location?: string;
   };
   summary: string;
@@ -124,7 +125,8 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
                     <div className="flex flex-wrap text-xs text-gray-600 mt-2 gap-x-4 gap-y-1">
                         {contact?.phone && <span className="flex items-center gap-1.5"><Phone size={12} /> {contact.phone}</span>}
                         {contact?.email && <a href={`mailto:${contact.email}`} className="flex items-center gap-1.5 text-blue-600 hover:underline"><Mail size={12} /> {contact.email}</a>}
-                        {contact?.linkedin && <a href={contact.linkedin} className="flex items-center gap-1.5 text-blue-600 hover:underline"><Linkedin size={12} /> {contact.linkedin}</a>}
+                        {contact?.linkedin && <a href={contact.linkedin} className="flex items-center gap-1.5 text-blue-600 hover:underline"><Linkedin size={12} /> LinkedIn</a>}
+                        {contact?.github && <a href={contact.github} className="flex items-center gap-1.5 text-blue-600 hover:underline"><Github size={12} /> GitHub</a>}
                         {contact?.location && <span className="flex items-center gap-1.5"><MapPin size={12} /> {contact.location}</span>}
                     </div>
                 </header>
@@ -183,3 +185,5 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
         </div>
     );
 };
+
+    
