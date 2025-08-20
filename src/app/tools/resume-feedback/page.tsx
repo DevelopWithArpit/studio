@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { saveAs } from 'file-saver';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { PDFDownloadLink } from '@react-pdf/renderer';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
 import {
   Card,
   CardContent,
@@ -31,7 +32,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { handleGetResumeFeedbackAction } from '@/app/actions';
 import type { GetResumeFeedbackOutput } from '@/ai/flows/resume-feedback-tool';
-import { FileText, UploadCloud, Download, FileCode, Loader2 } from 'lucide-react';
+import { FileText, UploadCloud, Download, FileCode, Loader2, FileType } from 'lucide-react';
 import { ResumeTemplate } from '@/components/resume-template';
 import { ResumePdfDocument } from '@/components/resume-pdf-document';
 
@@ -46,6 +47,7 @@ type FormData = z.infer<typeof formSchema>;
 export default function ResumeFeedbackTool() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingHtml, setIsGeneratingHtml] = useState(false);
+  const [isGeneratingDocx, setIsGeneratingDocx] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [result, setResult] = useState<GetResumeFeedbackOutput | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
@@ -140,6 +142,119 @@ export default function ResumeFeedbackTool() {
     const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
     saveAs(blob, 'resume.html');
     setIsGeneratingHtml(false);
+  };
+  
+  const handleDownloadDocx = async () => {
+    if (!result?.rewrittenResume) return;
+    setIsGeneratingDocx(true);
+    const resume = result.rewrittenResume;
+    
+    const docChildren: Paragraph[] = [
+      new Paragraph({
+        text: resume.name,
+        heading: HeadingLevel.TITLE,
+      }),
+      new Paragraph({
+        text: resume.title,
+        heading: HeadingLevel.HEADING_1,
+      }),
+    ];
+    
+    const contactParts = [
+        resume.contact.phone,
+        resume.contact.email,
+        resume.contact.linkedin,
+        resume.contact.github,
+        resume.contact.location,
+    ].filter(Boolean);
+    docChildren.push(new Paragraph({
+        children: [new TextRun({ text: contactParts.join(' | '), size: '10pt' })],
+        spacing: { after: 200 }
+    }));
+    
+    docChildren.push(new Paragraph({ text: 'Summary', heading: HeadingLevel.HEADING_2 }));
+    docChildren.push(new Paragraph({ children: [new TextRun({ text: resume.summary, size: '10pt' })], spacing: { after: 200 } }));
+
+    if (resume.experience?.length > 0) {
+      docChildren.push(new Paragraph({ text: 'Experience', heading: HeadingLevel.HEADING_2 }));
+      resume.experience.forEach(exp => {
+        docChildren.push(new Paragraph({
+            children: [new TextRun({ text: exp.title, bold: true, size: '11pt' })],
+            spacing: { after: 50 }
+        }));
+        docChildren.push(new Paragraph({
+            children: [
+                new TextRun({ text: `${exp.company} | ${exp.dates}`, italics: true, size: '10pt' }),
+            ],
+            spacing: { after: 100 }
+        }));
+        exp.bullets.forEach(bullet => {
+            docChildren.push(new Paragraph({
+                text: bullet,
+                bullet: { level: 0 },
+                style: 'WellSpaced',
+            }));
+        });
+      });
+    }
+
+    if (resume.education?.length > 0) {
+        docChildren.push(new Paragraph({ text: 'Education', heading: HeadingLevel.HEADING_2 }));
+        resume.education.forEach(edu => {
+            docChildren.push(new Paragraph({
+                children: [new TextRun({ text: edu.degree, bold: true, size: '11pt' })],
+            }));
+            docChildren.push(new Paragraph({
+                children: [new TextRun({ text: `${edu.school} | ${edu.dates}`, size: '10pt' })],
+                spacing: { after: 200 }
+            }));
+        });
+    }
+    
+    // Combine sidebar content into one linear flow for DOCX
+    const sidebarSections: {title: string; content: any[]}[] = [
+        { title: 'Skills', content: resume.skills ? [resume.skills.join(', ')] : [] },
+        { title: 'Projects', content: resume.projects || [] },
+        { title: 'Key Achievements', content: resume.keyAchievements || [] },
+        { title: 'Training / Courses', content: resume.training || [] },
+    ];
+    
+    sidebarSections.forEach(section => {
+        if(section.content.length > 0) {
+            docChildren.push(new Paragraph({ text: section.title, heading: HeadingLevel.HEADING_2 }));
+             section.content.forEach((item: any) => {
+                if (typeof item === 'string') {
+                     docChildren.push(new Paragraph({ text: item, style: 'WellSpaced' }));
+                } else {
+                     docChildren.push(new Paragraph({ children: [new TextRun({ text: item.title, bold: true })]}));
+                     docChildren.push(new Paragraph({ children: [new TextRun({ text: item.description, size: '9pt' })], style: 'WellSpaced' }));
+                }
+             });
+        }
+    });
+
+    const doc = new Document({
+      sections: [{ children: docChildren }],
+      styles: {
+        paragraphStyles: [{
+            id: 'WellSpaced',
+            name: 'Well Spaced',
+            basedOn: 'Normal',
+            quickFormat: true,
+            run: { size: '10pt' },
+            paragraph: { spacing: { after: 100 } }
+        }]
+      }
+    });
+
+    Packer.toBlob(doc).then(blob => {
+      saveAs(blob, 'resume.docx');
+      toast({ title: "DOCX Downloaded", description: "Your resume has been saved as a .docx file." });
+    }).catch(err => {
+      toast({ variant: 'destructive', title: 'Error Generating DOCX', description: err.message });
+    }).finally(() => {
+      setIsGeneratingDocx(false);
+    });
   };
 
 
@@ -338,7 +453,7 @@ export default function ResumeFeedbackTool() {
                             fileName="resume.pdf"
                           >
                             {({ blob, url, loading, error }) => (
-                              <Button disabled={loading}>
+                              <Button disabled={loading || isGeneratingDocx || isGeneratingHtml}>
                                 {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
                                 {loading ? 'Generating PDF...' : 'Download as PDF'}
                               </Button>
@@ -347,13 +462,23 @@ export default function ResumeFeedbackTool() {
                         )}
                          <Button
                           onClick={handleDownloadHtml}
-                          disabled={isGeneratingHtml}
+                          disabled={isGeneratingDocx || isGeneratingHtml}
                           variant="secondary"
                         >
                           {isGeneratingHtml ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileCode className="mr-2 h-4 w-4" />}
                           {isGeneratingHtml
                             ? 'Generating HTML...'
                             : 'Download as HTML'}
+                        </Button>
+                         <Button
+                          onClick={handleDownloadDocx}
+                          disabled={isGeneratingDocx || isGeneratingHtml}
+                          variant="secondary"
+                        >
+                          {isGeneratingDocx ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileType className="mr-2 h-4 w-4" />}
+                          {isGeneratingDocx
+                            ? 'Generating DOCX...'
+                            : 'Download as DOCX'}
                         </Button>
                       </div>
                     </div>
