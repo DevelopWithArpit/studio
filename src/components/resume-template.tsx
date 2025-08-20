@@ -185,5 +185,3 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
         </div>
     );
 };
-
-    
