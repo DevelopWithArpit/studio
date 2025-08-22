@@ -45,6 +45,21 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
+const PdfDownloader: React.FC<{ resumeData: GetResumeFeedbackOutput['rewrittenResume'], disabled: boolean }> = ({ resumeData, disabled }) => (
+    <PDFDownloadLink
+        document={<ResumePdfDocument resumeData={resumeData} />}
+        fileName="resume.pdf"
+    >
+        {({ loading }) => (
+        <Button disabled={loading || disabled}>
+            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+            {loading ? 'Generating PDF...' : 'Download as PDF'}
+        </Button>
+        )}
+    </PDFDownloadLink>
+);
+
+
 export default function ResumeFeedbackTool() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingHtml, setIsGeneratingHtml] = useState(false);
@@ -52,7 +67,6 @@ export default function ResumeFeedbackTool() {
   const [isClient, setIsClient] = useState(false);
   const [result, setResult] = useState<GetResumeFeedbackOutput | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
-  const [pdfReady, setPdfReady] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -98,15 +112,12 @@ export default function ResumeFeedbackTool() {
       return;
     }
     setIsLoading(true);
-    setPdfReady(false);
     setResult(null);
     const response = await handleGetResumeFeedbackAction(data);
     setIsLoading(false);
 
     if (response.success) {
       setResult(response.data);
-      // Defer setting pdfReady to ensure the DOM has updated
-      setTimeout(() => setPdfReady(true), 0);
     } else {
       toast({
         variant: 'destructive',
@@ -456,22 +467,15 @@ export default function ResumeFeedbackTool() {
                            </div>
                       </div>
                       <div className="flex flex-wrap gap-2">
-                        {isClient && pdfReady && (
-                          <PDFDownloadLink
-                            document={<ResumePdfDocument resumeData={result.rewrittenResume} />}
-                            fileName="resume.pdf"
-                          >
-                            {({ loading }) => (
-                              <Button disabled={loading || isGeneratingDocx || isGeneratingHtml}>
-                                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-                                {loading ? 'Generating PDF...' : 'Download as PDF'}
-                              </Button>
-                            )}
-                          </PDFDownloadLink>
-                        )}
+                         {isClient && result.rewrittenResume && (
+                            <PdfDownloader
+                                resumeData={result.rewrittenResume}
+                                disabled={isGeneratingDocx || isGeneratingHtml}
+                            />
+                         )}
                          <Button
                           onClick={handleDownloadHtml}
-                          disabled={isGeneratingDocx || isGeneratingHtml || !pdfReady}
+                          disabled={isGeneratingDocx || isGeneratingHtml}
                           variant="secondary"
                         >
                           {isGeneratingHtml ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileCode className="mr-2 h-4 w-4" />}
@@ -481,7 +485,7 @@ export default function ResumeFeedbackTool() {
                         </Button>
                          <Button
                           onClick={handleDownloadDocx}
-                          disabled={isGeneratingDocx || isGeneratingHtml || !pdfReady}
+                          disabled={isGeneratingDocx || isGeneratingHtml}
                           variant="secondary"
                         >
                           {isGeneratingDocx ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileType className="mr-2 h-4 w-4" />}
@@ -500,6 +504,5 @@ export default function ResumeFeedbackTool() {
       )}
     </div>
   );
-}
 
     
