@@ -504,5 +504,4 @@ export default function ResumeFeedbackTool() {
       )}
     </div>
   );
-
-    
+}
