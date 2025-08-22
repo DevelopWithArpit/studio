@@ -52,6 +52,7 @@ export default function ResumeFeedbackTool() {
   const [isClient, setIsClient] = useState(false);
   const [result, setResult] = useState<GetResumeFeedbackOutput | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
+  const [pdfReady, setPdfReady] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -97,12 +98,15 @@ export default function ResumeFeedbackTool() {
       return;
     }
     setIsLoading(true);
+    setPdfReady(false);
     setResult(null);
     const response = await handleGetResumeFeedbackAction(data);
     setIsLoading(false);
 
     if (response.success) {
       setResult(response.data);
+      // Defer setting pdfReady to ensure the DOM has updated
+      setTimeout(() => setPdfReady(true), 0);
     } else {
       toast({
         variant: 'destructive',
@@ -452,7 +456,7 @@ export default function ResumeFeedbackTool() {
                            </div>
                       </div>
                       <div className="flex flex-wrap gap-2">
-                        {isClient && result.rewrittenResume && (
+                        {isClient && pdfReady && (
                           <PDFDownloadLink
                             document={<ResumePdfDocument resumeData={result.rewrittenResume} />}
                             fileName="resume.pdf"
@@ -467,7 +471,7 @@ export default function ResumeFeedbackTool() {
                         )}
                          <Button
                           onClick={handleDownloadHtml}
-                          disabled={isGeneratingDocx || isGeneratingHtml}
+                          disabled={isGeneratingDocx || isGeneratingHtml || !pdfReady}
                           variant="secondary"
                         >
                           {isGeneratingHtml ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileCode className="mr-2 h-4 w-4" />}
@@ -477,7 +481,7 @@ export default function ResumeFeedbackTool() {
                         </Button>
                          <Button
                           onClick={handleDownloadDocx}
-                          disabled={isGeneratingDocx || isGeneratingHtml}
+                          disabled={isGeneratingDocx || isGeneratingHtml || !pdfReady}
                           variant="secondary"
                         >
                           {isGeneratingDocx ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileType className="mr-2 h-4 w-4" />}
@@ -497,3 +501,5 @@ export default function ResumeFeedbackTool() {
     </div>
   );
 }
+
+    
