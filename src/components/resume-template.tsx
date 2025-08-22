@@ -86,13 +86,11 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
     }
 
     const { name, title, contact, summary, experience, education, projects, skills, keyAchievements, training } = resumeData;
-    const AchievementIcon = keyAchievements.length > 0 ? getAchievementIcon(keyAchievements[0].title) : Star;
-
 
     return (
         <div className="bg-white text-gray-800 font-sans leading-normal flex" style={{ width: '816px', minHeight: '1056px' }}>
            {/* Left Sidebar */}
-            <aside className="w-[34%] bg-[#0e3d4e] text-white p-6 flex flex-col">
+            <aside className="w-[33%] bg-[#0e3d4e] text-white p-6 flex flex-col">
                 <h1 className="text-3xl font-bold uppercase tracking-tight mb-10 text-white">{name}</h1>
                 
                 {projects?.length > 0 && (
@@ -154,7 +152,7 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
             </aside>
 
             {/* Main Content */}
-            <main className="w-[66%] bg-white p-8">
+            <main className="w-[67%] bg-white p-8">
                 <header className="mb-6">
                     <h2 className="text-lg font-medium text-gray-600">{title}</h2>
                     <div className="flex flex-wrap text-xs text-gray-500 mt-2 gap-x-3 gap-y-1 items-center">
@@ -215,3 +213,5 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
         </div>
     );
 };
+
+    
