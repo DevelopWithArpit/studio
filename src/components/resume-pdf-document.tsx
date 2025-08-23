@@ -1,7 +1,7 @@
 
 'use client';
 import React from 'react';
-import { Page, Text, View, Document, StyleSheet, Font } from '@react-pdf/renderer';
+import { Page, Text, View, Document, StyleSheet, Font, Link } from '@react-pdf/renderer';
 import type { GetResumeFeedbackOutput } from '@/ai/flows/resume-feedback-tool';
 
 type ResumeData = GetResumeFeedbackOutput['rewrittenResume'];
@@ -94,6 +94,11 @@ const styles = StyleSheet.create({
   contactItem: {
     marginRight: 10,
   },
+  contactLink: {
+    marginRight: 10,
+    color: '#6b7280',
+    textDecoration: 'none',
+  },
   mainSection: {
     marginBottom: 20,
   },
@@ -176,7 +181,7 @@ export const ResumePdfDocument: React.FC<{ resumeData: ResumeData }> = ({ resume
                         <View key={i} style={{ marginBottom: 10 }}>
                             <Text style={styles.sidebarProjectTitle}>{proj.title}</Text>
                             <Text style={styles.sidebarText}>{proj.description}</Text>
-                            {proj.link && <Text style={styles.sidebarLink}>{proj.link}</Text>}
+                            {proj.link && <Link style={styles.sidebarLink} src={proj.link}>{proj.link}</Link>}
                         </View>
                     ))}
                 </View>
@@ -220,8 +225,9 @@ export const ResumePdfDocument: React.FC<{ resumeData: ResumeData }> = ({ resume
                 <Text style={styles.mainTitle}>{title}</Text>
                 <View style={styles.contactLine}>
                     {contact?.phone && <Text style={styles.contactItem}>{contact.phone}</Text>}
-                    {contact?.email && <Text style={styles.contactItem}>{contact.email}</Text>}
-                    {contact?.linkedin && <Text style={styles.contactItem}>{contact.linkedin}</Text>}
+                    {contact?.email && <Link style={styles.contactLink} src={`mailto:${contact.email}`}>{contact.email}</Link>}
+                    {contact?.linkedin && <Link style={styles.contactLink} src={contact.linkedin}>LinkedIn</Link>}
+                    {contact?.github && <Link style={styles.contactLink} src={contact.github}>GitHub</Link>}
                     {contact?.location && <Text style={styles.contactItem}>{contact.location}</Text>}
                 </View>
             </View>
