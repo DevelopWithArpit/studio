@@ -5,8 +5,6 @@ import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { saveAs } from 'file-saver';
-import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from 'docx';
 import {
   Card,
   CardContent,
@@ -30,9 +28,9 @@ import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { handleGetResumeFeedbackAction } from '@/app/actions';
 import type { GetResumeFeedbackOutput } from '@/ai/flows/resume-feedback-tool';
-import { FileText, UploadCloud, Download, FileType, Loader2, FileCode } from 'lucide-react';
+import { FileText, UploadCloud, Loader2 } from 'lucide-react';
 import { ResumeTemplate } from '@/components/resume-template';
-import { renderToStaticMarkup } from 'react-dom/server';
+import { PdfDownloader } from '@/components/pdf-downloader';
 
 
 const formSchema = z.object({
@@ -46,11 +44,14 @@ type FormData = z.infer<typeof formSchema>;
 
 export default function ResumeFeedbackTool() {
   const [isLoading, setIsLoading] = useState(false);
-  const [isGeneratingDocx, setIsGeneratingDocx] = useState(false);
-  const [isGeneratingHtml, setIsGeneratingHtml] = useState(false);
   const [result, setResult] = useState<GetResumeFeedbackOutput | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const { toast } = useToast();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -106,156 +107,6 @@ export default function ResumeFeedbackTool() {
     }
   }
   
-  const getResumeHtml = (resumeData: GetResumeFeedbackOutput['rewrittenResume']): string => {
-    const staticMarkup = renderToStaticMarkup(<ResumeTemplate resumeData={resumeData} />);
-
-    return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Resume for ${resumeData.name}</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-  <style>
-    body { font-family: 'Inter', sans-serif; }
-  </style>
-</head>
-<body>
-  <div style="width: 816px; margin: auto;">
-    ${staticMarkup}
-  </div>
-</body>
-</html>`;
-  };
-
-  const handleDownloadHtml = async () => {
-    if (!result?.rewrittenResume) return;
-    setIsGeneratingHtml(true);
-    const htmlContent = getResumeHtml(result.rewrittenResume);
-    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
-    saveAs(blob, 'resume.html');
-    setIsGeneratingHtml(false);
-  };
-  
-  const handleDownloadDocx = async () => {
-    if (!result?.rewrittenResume) return;
-    setIsGeneratingDocx(true);
-    const resume = result.rewrittenResume;
-    
-    const doc = new Document({
-      sections: [{
-        properties: {
-          page: {
-            margin: {
-              top: 720,
-              right: 720,
-              bottom: 720,
-              left: 720,
-            },
-          },
-        },
-        children: [
-          new Paragraph({
-            children: [new TextRun({ text: resume.name, bold: true, size: 48, font: "Inter" })],
-            alignment: AlignmentType.LEFT,
-            spacing: { after: 100 }
-          }),
-          new Paragraph({
-            children: [new TextRun({ text: resume.title, size: 24, font: "Inter", color: "555555" })],
-            spacing: { after: 200 }
-          }),
-           new Paragraph({
-            children: [
-                ...(resume.contact.phone ? [new TextRun({ text: `${resume.contact.phone} | `, size: 18, font: "Inter" })] : []),
-                ...(resume.contact.email ? [new TextRun({ text: `${resume.contact.email} | `, size: 18, font: "Inter" })] : []),
-                ...(resume.contact.linkedin ? [new TextRun({ text: `linkedin.com/in/...`, size: 18, font: "Inter", style: "Hyperlink" })] : []),
-                 ...(resume.contact.github ? [new TextRun({ text: `github.com/...`, size: 18, font: "Inter", style: "Hyperlink" })] : []),
-            ],
-            spacing: { after: 300 }
-        }),
-          new Paragraph({ text: "Summary", heading: HeadingLevel.HEADING_1, spacing: { after: 150 } }),
-          new Paragraph({ text: resume.summary, style: "normal" }),
-          new Paragraph({ text: "Experience", heading: HeadingLevel.HEADING_1, spacing: { before: 300, after: 150 } }),
-          ...resume.experience.flatMap(exp => [
-            new Paragraph({
-              children: [
-                new TextRun({ text: exp.title, bold: true, size: 22 }),
-                new TextRun({ text: `\t${exp.dates}`, size: 18, color: "888888" }),
-              ]
-            }),
-            new Paragraph({
-              children: [
-                new TextRun({ text: exp.company, color: "4C8FFB", size: 20 }),
-                new TextRun({ text: `\t${exp.location}`, size: 18, color: "888888" }),
-              ],
-               spacing: { after: 100 }
-            }),
-            ...exp.bullets.map(bullet => new Paragraph({ text: bullet, bullet: { level: 0 }, style: "normal" }))
-          ]),
-           new Paragraph({ text: "Education", heading: HeadingLevel.HEADING_1, spacing: { before: 300, after: 150 } }),
-           ...resume.education.flatMap(edu => [
-            new Paragraph({
-              children: [
-                new TextRun({ text: edu.degree, bold: true, size: 22 }),
-                new TextRun({ text: `\t${edu.dates}`, size: 18, color: "888888" }),
-              ]
-            }),
-            new Paragraph({
-              children: [
-                new TextRun({ text: edu.school, color: "4C8FFB", size: 20 }),
-                 new TextRun({ text: `\t${edu.location}`, size: 18, color: "888888" }),
-              ],
-               spacing: { after: 100 }
-            }),
-          ]),
-          new Paragraph({ text: "Projects", heading: HeadingLevel.HEADING_1, spacing: { before: 300, after: 150 } }),
-           ...resume.projects.flatMap(proj => [
-            new Paragraph({ text: proj.title, style: "projectTitle" }),
-            new Paragraph({ text: proj.description, style: "normal" }),
-            ...(proj.link ? [new Paragraph({ children: [new TextRun({text: proj.link, style: "Hyperlink"})], spacing: { after: 100 } })] : [new Paragraph({spacing: {after: 100}})]),
-          ]),
-          new Paragraph({ text: "Skills", heading: HeadingLevel.HEADING_1, spacing: { before: 300, after: 150 } }),
-          new Paragraph({ text: resume.skills.join(', '), style: "normal" }),
-        ],
-      }],
-      styles: {
-        default: {
-            heading1: {
-                run: { size: 28, bold: true, color: "000000", font: "Inter" },
-                paragraph: { spacing: { after: 200, before: 400 } },
-            },
-        },
-        paragraphStyles: [{
-            id: 'normal',
-            name: 'Normal',
-            basedOn: 'Normal',
-            next: 'Normal',
-            run: { size: 20, font: "Inter" },
-            paragraph: { spacing: { after: 100, line: 360 } },
-        },
-        {
-            id: 'projectTitle',
-            name: 'Project Title',
-            basedOn: 'Normal',
-            next: 'Normal',
-            run: { size: 22, bold: true },
-        }
-        ]
-      }
-    });
-
-    Packer.toBlob(doc).then(blob => {
-      saveAs(blob, 'resume.docx');
-      toast({ title: "DOCX Downloaded", description: "Your resume has been saved as a .docx file." });
-    }).catch(err => {
-      toast({ variant: 'destructive', title: 'Error Generating DOCX', description: err.message });
-    }).finally(() => {
-      setIsGeneratingDocx(false);
-    });
-  };
-
   return (
     <div className="space-y-8">
       <header className="space-y-2">
@@ -445,26 +296,9 @@ export default function ResumeFeedbackTool() {
                            </div>
                       </div>
                       <div className="flex flex-wrap gap-2">
-                         <Button
-                          onClick={handleDownloadHtml}
-                          disabled={isGeneratingHtml || isGeneratingDocx}
-                          variant="secondary"
-                        >
-                           {isGeneratingHtml ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileCode className="mr-2 h-4 w-4" />}
-                          {isGeneratingHtml
-                            ? 'Generating HTML...'
-                            : 'Download as HTML'}
-                        </Button>
-                        <Button
-                          onClick={handleDownloadDocx}
-                          disabled={isGeneratingHtml || isGeneratingDocx}
-                          variant="secondary"
-                        >
-                          {isGeneratingDocx ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileType className="mr-2 h-4 w-4" />}
-                          {isGeneratingDocx
-                            ? 'Generating DOCX...'
-                            : 'Download as DOCX'}
-                        </Button>
+                       {isClient && (
+                         <PdfDownloader resumeData={result.rewrittenResume} />
+                       )}
                       </div>
                     </div>
                   )
