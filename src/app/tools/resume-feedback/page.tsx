@@ -1,12 +1,13 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { saveAs } from 'file-saver';
-import { PDFDownloadLink } from '@react-pdf/renderer';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from 'docx';
 import {
   Card,
@@ -33,7 +34,6 @@ import { handleGetResumeFeedbackAction } from '@/app/actions';
 import type { GetResumeFeedbackOutput } from '@/ai/flows/resume-feedback-tool';
 import { FileText, UploadCloud, Download, FileType, Loader2, FileCode } from 'lucide-react';
 import { ResumeTemplate } from '@/components/resume-template';
-import { ResumePdfDocument } from '@/components/resume-pdf-document';
 import { renderToStaticMarkup } from 'react-dom/server';
 
 
@@ -45,33 +45,15 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-const PdfDownloader: React.FC<{ resumeData: GetResumeFeedbackOutput['rewrittenResume'], disabled: boolean }> = ({ resumeData, disabled }) => (
-    <PDFDownloadLink
-        document={<ResumePdfDocument resumeData={resumeData} />}
-        fileName="resume.pdf"
-    >
-        {({ loading }) => (
-        <Button disabled={loading || disabled}>
-            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-            {loading ? 'Generating PDF...' : 'Download as PDF'}
-        </Button>
-        )}
-    </PDFDownloadLink>
-);
-
 
 export default function ResumeFeedbackTool() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingHtml, setIsGeneratingHtml] = useState(false);
   const [isGeneratingDocx, setIsGeneratingDocx] = useState(false);
-  const [isClient, setIsClient] = useState(false);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [result, setResult] = useState<GetResumeFeedbackOutput | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const { toast } = useToast();
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -160,6 +142,44 @@ export default function ResumeFeedbackTool() {
     setIsGeneratingHtml(false);
   };
   
+    const handleDownloadPdf = async () => {
+    if (!result?.rewrittenResume) return;
+
+    setIsGeneratingPdf(true);
+    const resumeContainer = document.getElementById('resume-container-for-pdf');
+    if (!resumeContainer) {
+      toast({ variant: 'destructive', title: 'Error', description: 'Could not find resume content to render.' });
+      setIsGeneratingPdf(false);
+      return;
+    };
+
+    try {
+        const canvas = await html2canvas(resumeContainer, { 
+            scale: 2, // Higher scale for better resolution
+            useCORS: true, 
+            backgroundColor: '#ffffff',
+            windowWidth: resumeContainer.scrollWidth,
+            windowHeight: resumeContainer.scrollHeight,
+        });
+
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF({
+            orientation: 'p',
+            unit: 'px',
+            format: [canvas.width, canvas.height]
+        });
+        
+        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+        pdf.save('resume.pdf');
+        toast({ title: "PDF Downloaded", description: "Your resume has been saved as a PDF." });
+
+      } catch (error) {
+        toast({ variant: 'destructive', title: 'Error Generating PDF', description: error instanceof Error ? error.message : 'An unknown error occurred.' });
+      } finally {
+        setIsGeneratingPdf(false);
+      }
+  };
+
   const handleDownloadDocx = async () => {
     if (!result?.rewrittenResume) return;
     setIsGeneratingDocx(true);
@@ -422,6 +442,13 @@ export default function ResumeFeedbackTool() {
           </Form>
         </CardContent>
       </Card>
+      
+      {/* Hidden container for PDF generation */}
+      {result?.rewrittenResume &&
+        <div id="resume-container-for-pdf" style={{ position: 'absolute', left: '-9999px', top: 0, width: '816px', background: 'white' }}>
+            <ResumeTemplate resumeData={result.rewrittenResume} />
+        </div>
+      }
 
       {(isLoading || result) && (
         <Card>
@@ -467,15 +494,18 @@ export default function ResumeFeedbackTool() {
                            </div>
                       </div>
                       <div className="flex flex-wrap gap-2">
-                         {isClient && result.rewrittenResume && (
-                            <PdfDownloader
-                                resumeData={result.rewrittenResume}
-                                disabled={isGeneratingDocx || isGeneratingHtml}
-                            />
-                         )}
+                         <Button
+                          onClick={handleDownloadPdf}
+                          disabled={isGeneratingPdf || isGeneratingHtml || isGeneratingDocx}
+                        >
+                          {isGeneratingPdf ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                          {isGeneratingPdf
+                            ? 'Generating PDF...'
+                            : 'Download as PDF'}
+                        </Button>
                          <Button
                           onClick={handleDownloadHtml}
-                          disabled={isGeneratingDocx || isGeneratingHtml}
+                          disabled={isGeneratingPdf || isGeneratingHtml || isGeneratingDocx}
                           variant="secondary"
                         >
                           {isGeneratingHtml ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileCode className="mr-2 h-4 w-4" />}
@@ -485,7 +515,7 @@ export default function ResumeFeedbackTool() {
                         </Button>
                          <Button
                           onClick={handleDownloadDocx}
-                          disabled={isGeneratingDocx || isGeneratingHtml}
+                          disabled={isGeneratingPdf || isGeneratingHtml || isGeneratingDocx}
                           variant="secondary"
                         >
                           {isGeneratingDocx ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileType className="mr-2 h-4 w-4" />}
