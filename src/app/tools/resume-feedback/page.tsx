@@ -1,14 +1,13 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { saveAs } from 'file-saver';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from 'docx';
+import dynamic from 'next/dynamic';
 import {
   Card,
   CardContent,
@@ -35,7 +34,8 @@ import type { GetResumeFeedbackOutput } from '@/ai/flows/resume-feedback-tool';
 import { FileText, UploadCloud, Download, FileType, Loader2, FileCode } from 'lucide-react';
 import { ResumeTemplate } from '@/components/resume-template';
 import { renderToStaticMarkup } from 'react-dom/server';
-
+import { ResumePdfDocument } from '@/components/resume-pdf-document';
+import type { PDFDownloadLink } from '@react-pdf/renderer';
 
 const formSchema = z.object({
   resume: z.string().min(1, 'Please upload or paste your resume.'),
@@ -46,11 +46,19 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 
+const DynamicPdfDownloader = dynamic(
+  () => import('@/components/pdf-downloader').then(mod => mod.PdfDownloader),
+  {
+    ssr: false,
+    loading: () => <Button disabled><Loader2 className="mr-2 h-4 w-4 animate-spin" />Generating PDF...</Button>
+  }
+);
+
+
 export default function ResumeFeedbackTool() {
   const [isLoading, setIsLoading] = useState(false);
-  const [isGeneratingHtml, setIsGeneratingHtml] = useState(false);
   const [isGeneratingDocx, setIsGeneratingDocx] = useState(false);
-  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [isGeneratingHtml, setIsGeneratingHtml] = useState(false);
   const [result, setResult] = useState<GetResumeFeedbackOutput | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const { toast } = useToast();
@@ -141,51 +149,12 @@ export default function ResumeFeedbackTool() {
     saveAs(blob, 'resume.html');
     setIsGeneratingHtml(false);
   };
-  
-    const handleDownloadPdf = async () => {
-    if (!result?.rewrittenResume) return;
-
-    setIsGeneratingPdf(true);
-    const resumeContainer = document.getElementById('resume-container-for-pdf');
-    if (!resumeContainer) {
-      toast({ variant: 'destructive', title: 'Error', description: 'Could not find resume content to render.' });
-      setIsGeneratingPdf(false);
-      return;
-    };
-
-    try {
-        const canvas = await html2canvas(resumeContainer, { 
-            scale: 2, // Higher scale for better resolution
-            useCORS: true, 
-            backgroundColor: '#ffffff',
-            windowWidth: resumeContainer.scrollWidth,
-            windowHeight: resumeContainer.scrollHeight,
-        });
-
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF({
-            orientation: 'p',
-            unit: 'px',
-            format: [canvas.width, canvas.height]
-        });
-        
-        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-        pdf.save('resume.pdf');
-        toast({ title: "PDF Downloaded", description: "Your resume has been saved as a PDF." });
-
-      } catch (error) {
-        toast({ variant: 'destructive', title: 'Error Generating PDF', description: error instanceof Error ? error.message : 'An unknown error occurred.' });
-      } finally {
-        setIsGeneratingPdf(false);
-      }
-  };
 
   const handleDownloadDocx = async () => {
     if (!result?.rewrittenResume) return;
     setIsGeneratingDocx(true);
     const resume = result.rewrittenResume;
     
-    // Create a new Document
     const doc = new Document({
       sections: [{
         properties: {
@@ -296,7 +265,6 @@ export default function ResumeFeedbackTool() {
       setIsGeneratingDocx(false);
     });
   };
-
 
   return (
     <div className="space-y-8">
@@ -442,13 +410,6 @@ export default function ResumeFeedbackTool() {
           </Form>
         </CardContent>
       </Card>
-      
-      {/* Hidden container for PDF generation */}
-      {result?.rewrittenResume &&
-        <div id="resume-container-for-pdf" style={{ position: 'absolute', left: '-9999px', top: 0, width: '816px', background: 'white' }}>
-            <ResumeTemplate resumeData={result.rewrittenResume} />
-        </div>
-      }
 
       {(isLoading || result) && (
         <Card>
@@ -489,23 +450,13 @@ export default function ResumeFeedbackTool() {
                   result?.rewrittenResume && (
                     <div className="space-y-4">
                        <div className="border rounded-lg bg-gray-50 p-4 max-h-[700px] overflow-y-auto">
-                           <div id="resume-preview-content">
-                                <ResumeTemplate resumeData={result.rewrittenResume} />
-                           </div>
+                           <ResumeTemplate resumeData={result.rewrittenResume} />
                       </div>
                       <div className="flex flex-wrap gap-2">
-                         <Button
-                          onClick={handleDownloadPdf}
-                          disabled={isGeneratingPdf || isGeneratingHtml || isGeneratingDocx}
-                        >
-                          {isGeneratingPdf ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-                          {isGeneratingPdf
-                            ? 'Generating PDF...'
-                            : 'Download as PDF'}
-                        </Button>
+                         <DynamicPdfDownloader resumeData={result.rewrittenResume} />
                          <Button
                           onClick={handleDownloadHtml}
-                          disabled={isGeneratingPdf || isGeneratingHtml || isGeneratingDocx}
+                          disabled={isGeneratingHtml || isGeneratingDocx}
                           variant="secondary"
                         >
                           {isGeneratingHtml ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileCode className="mr-2 h-4 w-4" />}
@@ -515,7 +466,7 @@ export default function ResumeFeedbackTool() {
                         </Button>
                          <Button
                           onClick={handleDownloadDocx}
-                          disabled={isGeneratingPdf || isGeneratingHtml || isGeneratingDocx}
+                          disabled={isGeneratingHtml || isGeneratingDocx}
                           variant="secondary"
                         >
                           {isGeneratingDocx ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileType className="mr-2 h-4 w-4" />}
