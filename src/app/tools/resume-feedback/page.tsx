@@ -34,8 +34,6 @@ import type { GetResumeFeedbackOutput } from '@/ai/flows/resume-feedback-tool';
 import { FileText, UploadCloud, Download, FileType, Loader2, FileCode } from 'lucide-react';
 import { ResumeTemplate } from '@/components/resume-template';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { ResumePdfDocument } from '@/components/resume-pdf-document';
-import type { PDFDownloadLink } from '@react-pdf/renderer';
 
 const formSchema = z.object({
   resume: z.string().min(1, 'Please upload or paste your resume.'),
@@ -62,11 +60,6 @@ export default function ResumeFeedbackTool() {
   const [result, setResult] = useState<GetResumeFeedbackOutput | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const { toast } = useToast();
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -458,9 +451,7 @@ export default function ResumeFeedbackTool() {
                            <ResumeTemplate resumeData={result.rewrittenResume} />
                       </div>
                       <div className="flex flex-wrap gap-2">
-                        {isClient && (
-                         <DynamicPdfDownloader resumeData={result.rewrittenResume} />
-                        )}
+                        <DynamicPdfDownloader resumeData={result.rewrittenResume} />
                          <Button
                           onClick={handleDownloadHtml}
                           disabled={isGeneratingHtml || isGeneratingDocx}
