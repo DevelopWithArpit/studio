@@ -33,8 +33,7 @@ import type { GetResumeFeedbackOutput } from '@/ai/flows/resume-feedback-tool';
 import { FileText, UploadCloud, Download, FileType, Loader2, FileCode } from 'lucide-react';
 import { ResumeTemplate } from '@/components/resume-template';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { ResumePdfDocument } from '@/components/resume-pdf-document';
-import { PDFDownloadLink } from '@react-pdf/renderer';
+
 
 const formSchema = z.object({
   resume: z.string().min(1, 'Please upload or paste your resume.'),
@@ -44,20 +43,6 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-const PdfDownloader: React.FC<{ resumeData: GetResumeFeedbackOutput['rewrittenResume'] }> = ({ resumeData }) => (
-    <PDFDownloadLink
-      document={<ResumePdfDocument resumeData={resumeData} />}
-      fileName="resume.pdf"
-    >
-      {({ blob, url, loading, error }) => (
-        <Button disabled={loading}>
-          {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-          {loading ? 'Generating PDF...' : 'Download as PDF'}
-        </Button>
-      )}
-    </PDFDownloadLink>
-);
-
 
 export default function ResumeFeedbackTool() {
   const [isLoading, setIsLoading] = useState(false);
@@ -66,11 +51,6 @@ export default function ResumeFeedbackTool() {
   const [result, setResult] = useState<GetResumeFeedbackOutput | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const { toast } = useToast();
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -465,9 +445,6 @@ export default function ResumeFeedbackTool() {
                            </div>
                       </div>
                       <div className="flex flex-wrap gap-2">
-                         {isClient && (
-                            <PdfDownloader resumeData={result.rewrittenResume} />
-                         )}
                          <Button
                           onClick={handleDownloadHtml}
                           disabled={isGeneratingHtml || isGeneratingDocx}
