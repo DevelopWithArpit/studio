@@ -158,7 +158,8 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
                     <div className="flex flex-wrap text-xs text-gray-500 mt-2 gap-x-3 gap-y-1 items-center">
                         {contact?.phone && <span className="flex items-center gap-1.5"><Phone size={12} /> {contact.phone}</span>}
                         {contact?.email && <a href={`mailto:${contact.email}`} className="flex items-center gap-1.5 text-gray-600 hover:text-blue-600"><Mail size={12} /> {contact.email}</a>}
-                        {contact?.linkedin && <a href={contact.linkedin} className="flex items-center gap-1.5 text-gray-600 hover:text-blue-600"><Linkedin size={12} /> linkedin.com</a>}
+                        {contact?.linkedin && <a href={contact.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-gray-600 hover:text-blue-600"><Linkedin size={12} /> LinkedIn</a>}
+                        {contact?.github && <a href={contact.github} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-gray-600 hover:text-blue-600"><Github size={12} /> GitHub</a>}
                         {contact?.location && <span className="flex items-center gap-1.5"><MapPin size={12} /> {contact.location}</span>}
                     </div>
                 </header>
@@ -213,5 +214,3 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
         </div>
     );
 };
-
-    
