@@ -62,6 +62,11 @@ export default function ResumeFeedbackTool() {
   const [result, setResult] = useState<GetResumeFeedbackOutput | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const { toast } = useToast();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -453,7 +458,9 @@ export default function ResumeFeedbackTool() {
                            <ResumeTemplate resumeData={result.rewrittenResume} />
                       </div>
                       <div className="flex flex-wrap gap-2">
+                        {isClient && (
                          <DynamicPdfDownloader resumeData={result.rewrittenResume} />
+                        )}
                          <Button
                           onClick={handleDownloadHtml}
                           disabled={isGeneratingHtml || isGeneratingDocx}
