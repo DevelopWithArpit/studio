@@ -35,10 +35,11 @@ const GeneratePresentationInputSchema = z.object({
   rollNumber: z.string().optional().describe("The presenter's roll number."),
   department: z.string().optional().describe("The presenter's department."),
   numSlides: z.number().int().min(2).max(20).describe('The number of slides to generate (for general topics).'),
-  contentType: z.enum(['general', 'projectProposal', 'custom']).default('general').describe('The type of content to generate.'),
+  contentType: z.enum(['general', 'projectProposal', 'pitchDeck', 'custom']).default('general').describe('The type of content to generate.'),
   customStructure: z.string().optional().describe("A user-defined structure for the presentation, as a string of slide titles, potentially with notes for each."),
   imageStyle: z.string().optional().describe("An optional style for the images (e.g., 'photorealistic', 'cartoon')."),
   language: z.string().optional().describe("The language for the presentation content (e.g., 'English', 'Hindi', 'Marathi')."),
+  style: z.enum(['Default', 'Tech Pitch', 'Creative']).default('Default').describe('The visual design and narrative style of the presentation.'),
 });
 export type GeneratePresentationInput = z.infer<typeof GeneratePresentationInputSchema>;
 
@@ -86,10 +87,13 @@ const outlinePrompt = ai.definePrompt({
 **Language Requirement:**
 - You MUST generate all text content (titles and bullet points) in the requested language: **{{#if language}}{{language}}{{else}}English{{/if}}**.
 
-**Design Generation:**
-- Based on the presentation topic, create a cohesive and professional design theme that is visually representative of the subject.
-- You MUST derive and provide hex color codes for 'backgroundColor', 'textColor', and 'accentColor' that are visually harmonious and reflect the topic's mood.
-- You MUST also provide a 'backgroundPrompt'. This prompt should describe a stunning, high-quality, professional background image (e.g., abstract, subtle, cinematic) that is visually related to the topic but does not distract from the content. The image prompt itself must be in English.
+**Design & Narrative Style: {{style}}**
+- **Design Generation:** Based on the presentation topic and the chosen style, create a cohesive and professional design theme.
+    - **Default:** A clean, professional, and versatile design suitable for most topics.
+    - **Tech Pitch:** A dark, cinematic theme inspired by modern tech companies like Apple. Use bold typography and high-contrast colors (e.g., dark background, white text, electric blue/green accent).
+    - **Creative:** A vibrant, colorful theme inspired by companies like Google. Use a light background, bright accent colors, and clean, friendly fonts.
+- You MUST derive and provide hex color codes for 'backgroundColor', 'textColor', and 'accentColor' that are visually harmonious and reflect the chosen style.
+- You MUST also provide a 'backgroundPrompt' that matches the style. This prompt should describe a stunning, high-quality, professional background image (e.g., abstract, subtle, cinematic) that is visually related to the topic but does not distract from the content. The image prompt itself must be in English.
 
 **Content Generation:**
 - **Tone and Style**: The content must be professional and authoritative, yet sound natural and human-written. It should be engaging, clear, and concise. Avoid jargon.
@@ -107,6 +111,7 @@ const outlinePrompt = ai.definePrompt({
   - **Parsing Custom Structure**: A line starting with a number and/or bullet (e.g., "1. About the Company", "- Key Features") should be treated as a slide title. All text following that title, until the next title, should be used as the context/notes for that specific slide.
   - You MUST generate one slide for each title you identify in the custom structure.
 - If the content type is "Project Proposal," generate the subsequent presentation slides using this structure: 1. Introduction, 2. Objectives, 3. Problem Statement / Need Analysis, 4. Target Group / Area, 5. Proposed Activities, 6. Methodology, 7. Expected Outcomes, 8. Conclusion. (Translated to the target language).
+- If the content type is "Pitch Deck," generate a presentation with this narrative structure: 1. Title, 2. The Problem, 3. The Solution, 4. Market Size, 5. The Product, 6. Team, 7. Financials / Ask, 8. Thank You / Contact.
 - If the content type is "General," generate a logical presentation of exactly {{{numSlides}}} slides, which must include a conclusion slide at the end. The introduction slide is extra.
 
 **User Input Details:**
@@ -115,6 +120,7 @@ const outlinePrompt = ai.definePrompt({
 {{#if rollNumber}}- Roll Number: {{{rollNumber}}}{{/if}}
 {{#if department}}- Department: {{{department}}}{{/if}}
 - Content Type: {{{contentType}}}
+- Presentation Style: {{{style}}}
 - Number of Slides (for General type): {{{numSlides}}}
 {{#if customStructure}}
 - Custom Structure:
@@ -208,3 +214,5 @@ const generatePresentationFlow = ai.defineFlow(
     return outline;
   }
 );
+
+    

@@ -53,8 +53,9 @@ const formSchema = z.object({
   numSlides: z.coerce.number().int().min(2, "Must be at least 2 slides.").max(20, "Cannot exceed 20 slides."),
   imageStyle: z.string().optional(),
   language: z.string().optional(),
-  contentType: z.enum(['general', 'projectProposal', 'custom']).default('general'),
+  contentType: z.enum(['general', 'projectProposal', 'pitchDeck', 'custom']).default('general'),
   customStructure: z.string().optional(),
+  style: z.enum(['Default', 'Tech Pitch', 'Creative']).default('Default'),
 }).refine(data => {
     if (data.contentType === 'custom') {
         return (data.customStructure || '').trim().length > 10;
@@ -84,10 +85,23 @@ export default function PresentationGeneratorTool() {
       language: 'English',
       contentType: 'general',
       customStructure: '',
+      style: 'Default',
     },
   });
 
   const contentType = form.watch('contentType');
+  const style = form.watch('style');
+
+  React.useEffect(() => {
+    if (style === 'Tech Pitch') {
+        form.setValue('contentType', 'pitchDeck');
+    } else if (style === 'Default' || style === 'Creative') {
+       if (form.getValues('contentType') === 'pitchDeck') {
+         form.setValue('contentType', 'general');
+       }
+    }
+  }, [style, form]);
+
 
   async function onSubmit(data: FormData) {
     setIsLoading(true);
@@ -102,6 +116,7 @@ export default function PresentationGeneratorTool() {
         numSlides: data.numSlides,
         imageStyle: data.imageStyle,
         language: data.language,
+        style: data.style,
     };
     if (data.contentType === 'custom' && data.customStructure) {
         input.customStructure = data.customStructure;
@@ -315,6 +330,53 @@ export default function PresentationGeneratorTool() {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="style"
+                  render={({ field }) => (
+                    <FormItem className="space-y-3">
+                      <FormLabel>Presentation Style</FormLabel>
+                       <FormDescription>Choose a visual and narrative style for your presentation.</FormDescription>
+                      <FormControl>
+                        <RadioGroup
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          className="grid grid-cols-1 md:grid-cols-3 gap-4"
+                        >
+                          <FormItem>
+                            <FormControl>
+                               <RadioGroupItem value="Default" id="style-default" className="sr-only peer" />
+                            </FormControl>
+                            <Label htmlFor="style-default" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer">
+                                <span className="font-bold">Default</span>
+                                <span className="text-xs text-muted-foreground mt-1 text-center">A clean, professional look for any topic.</span>
+                             </Label>
+                          </FormItem>
+                           <FormItem>
+                            <FormControl>
+                               <RadioGroupItem value="Tech Pitch" id="style-tech" className="sr-only peer" />
+                            </FormControl>
+                            <Label htmlFor="style-tech" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer">
+                                <span className="font-bold">Tech Pitch</span>
+                                <span className="text-xs text-muted-foreground mt-1 text-center">Cinematic, dark theme. Great for pitch decks.</span>
+                             </Label>
+                          </FormItem>
+                           <FormItem>
+                            <FormControl>
+                               <RadioGroupItem value="Creative" id="style-creative" className="sr-only peer" />
+                            </FormControl>
+                            <Label htmlFor="style-creative" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer">
+                                <span className="font-bold">Creative</span>
+                                <span className="text-xs text-muted-foreground mt-1 text-center">Vibrant, light theme with a friendly feel.</span>
+                             </Label>
+                          </FormItem>
+                        </RadioGroup>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                <FormField
                   control={form.control}
                   name="contentType"
@@ -324,7 +386,7 @@ export default function PresentationGeneratorTool() {
                       <FormControl>
                         <RadioGroup
                           onValueChange={field.onChange}
-                          defaultValue={field.value}
+                          value={field.value}
                           className="flex flex-col space-y-1"
                         >
                           <FormItem className="flex items-center space-x-3 space-y-0">
@@ -334,6 +396,12 @@ export default function PresentationGeneratorTool() {
                           <FormItem className="flex items-center space-x-3 space-y-0">
                             <FormControl><RadioGroupItem value="projectProposal" /></FormControl>
                             <FormLabel className="font-normal">Project Proposal</FormLabel>
+                          </FormItem>
+                           <FormItem className="flex items-center space-x-3 space-y-0">
+                            <FormControl><RadioGroupItem value="pitchDeck" disabled={style === 'Tech Pitch'} /></FormControl>
+                            <FormLabel className={cn("font-normal", style === 'Tech Pitch' && "text-muted-foreground")}>
+                                Pitch Deck {style === 'Tech Pitch' && <span className="text-xs">(Selected by Style)</span>}
+                            </FormLabel>
                           </FormItem>
                            <FormItem className="flex items-center space-x-3 space-y-0">
                             <FormControl><RadioGroupItem value="custom" /></FormControl>
@@ -428,13 +496,14 @@ export default function PresentationGeneratorTool() {
                   control={form.control}
                   name="numSlides"
                   render={({ field }) => (
-                    <FormItem className={cn("transition-opacity", (contentType === 'projectProposal' || contentType === 'custom') && "opacity-50")}>
+                    <FormItem className={cn("transition-opacity", (contentType !== 'general') && "opacity-50")}>
                       <FormLabel>Number of Slides</FormLabel>
                       <FormControl>
-                        <Input type="number" min="2" max="20" {...field} disabled={contentType === 'projectProposal' || contentType === 'custom'}/>
+                        <Input type="number" min="2" max="20" {...field} disabled={contentType !== 'general'}/>
                       </FormControl>
-                       {contentType === 'projectProposal' && <p className="text-xs text-muted-foreground">Fixed at 8 slides for project proposals.</p>}
-                       {contentType === 'custom' && <p className="text-xs text-muted-foreground">Determined by your custom structure.</p>}
+                       {contentType === 'projectProposal' && <p className="text-xs text-muted-foreground">Fixed structure for proposals.</p>}
+                       {contentType === 'pitchDeck' && <p className="text-xs text-muted-foreground">Fixed structure for pitch decks.</p>}
+                       {contentType === 'custom' && <p className="text-xs text-muted-foreground">Determined by your custom input.</p>}
                       <FormMessage />
                     </FormItem>
                   )}
@@ -566,3 +635,5 @@ export default function PresentationGeneratorTool() {
     </div>
   );
 }
+
+    
