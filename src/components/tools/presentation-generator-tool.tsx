@@ -635,5 +635,3 @@ export default function PresentationGeneratorTool() {
     </div>
   );
 }
-
-    
