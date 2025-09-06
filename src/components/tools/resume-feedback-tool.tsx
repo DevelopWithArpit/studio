@@ -34,6 +34,9 @@ import type { GetResumeFeedbackOutput } from '@/ai/flows/resume-feedback-tool';
 import { FileText, UploadCloud, Download, FileCode, Loader2 } from 'lucide-react';
 import { ResumeTemplate } from '@/components/resume-template';
 import { createResumeDocx } from '@/lib/docx-generator';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+
 
 const formSchema = z.object({
   resume: z.string().min(1, 'Please upload or paste your resume.'),
@@ -118,6 +121,33 @@ export default function ResumeFeedbackTool() {
     }
   };
   
+  const handleDownloadPdf = async () => {
+    const resumeElement = document.getElementById('resume-preview-content');
+    if (!resumeElement) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Could not find resume content to download.' });
+        return;
+    }
+
+    try {
+        const canvas = await html2canvas(resumeElement, {
+            scale: 2, // Higher scale for better quality
+            useCORS: true,
+            logging: false,
+        });
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF({
+            orientation: 'p',
+            unit: 'px',
+            format: [canvas.width, canvas.height],
+        });
+        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+        pdf.save('resume.pdf');
+        toast({ title: "PDF Downloaded", description: "Your resume has been saved as a PDF file." });
+    } catch (error) {
+        toast({ variant: 'destructive', title: 'Error Generating PDF', description: error instanceof Error ? error.message : 'An unknown error occurred.' });
+    }
+};
+
   return (
     <div className="space-y-8">
       <header className="space-y-2">
@@ -297,12 +327,12 @@ export default function ResumeFeedbackTool() {
               </TabsContent>
               <TabsContent value="rewritten" className="mt-4">
                 {isLoading ? (
-                  <div className="border rounded-lg"><Skeleton className="h-[700px] w-full" /></div>
+                  <div className="border rounded-lg"><Skeleton className="h-[1056px] w-[816px]" /></div>
                 ) : (
                   result?.rewrittenResume && (
                     <div className="space-y-4">
-                       <div className="border rounded-lg bg-gray-50 p-4 max-h-[700px] overflow-y-auto">
-                           <div id="resume-preview-content">
+                       <div className="bg-gray-200 p-8 flex justify-center overflow-auto">
+                           <div id="resume-preview-content" className="scale-[0.9] origin-top">
                                 <ResumeTemplate resumeData={result.rewrittenResume} />
                            </div>
                       </div>
@@ -311,6 +341,10 @@ export default function ResumeFeedbackTool() {
                           <FileCode className="mr-2 h-4 w-4" />
                           Download as DOCX
                        </Button>
+                        <Button onClick={handleDownloadPdf} variant="secondary">
+                            <Download className="mr-2 h-4 w-4" />
+                            Download as PDF
+                        </Button>
                       </div>
                     </div>
                   )
