@@ -1,13 +1,13 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import dynamic from 'next/dynamic';
-import { Packer } from 'docx';
 import { saveAs } from 'file-saver';
+import { Packer } from 'docx';
+import dynamic from 'next/dynamic';
+
 import {
   Card,
   CardContent,
@@ -31,16 +31,14 @@ import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { handleGetResumeFeedbackAction } from '@/app/actions';
 import type { GetResumeFeedbackOutput } from '@/ai/flows/resume-feedback-tool';
-import { FileText, UploadCloud, Loader2, Download, FileCode } from 'lucide-react';
+import { FileText, UploadCloud, Download, FileCode, Loader2 } from 'lucide-react';
 import { ResumeTemplate } from '@/components/resume-template';
-import { ResumePdfDocument } from '@/components/resume-pdf-document';
 import { createResumeDocx } from '@/lib/docx-generator';
 
-
-const PDFDownloadLink = dynamic(
-  () => import('@react-pdf/renderer').then((mod) => mod.PDFDownloadLink),
-  { ssr: false, loading: () => <Button disabled><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating PDF...</Button> }
-);
+const ResumeDownloader = dynamic(() => import('@/components/resume-downloader').then(mod => mod.ResumeDownloader), {
+    ssr: false,
+    loading: () => <Button disabled><Loader2 className="mr-2 h-4 w-4 animate-spin" />Loading PDF...</Button>
+});
 
 
 const formSchema = z.object({
@@ -320,20 +318,10 @@ export default function ResumeFeedbackTool() {
                            </div>
                       </div>
                       <div className="flex flex-wrap gap-2">
-                       {isClient && (
-                         <PDFDownloadLink
-                            document={<ResumePdfDocument resumeData={result.rewrittenResume} />}
-                            fileName="resume.pdf"
-                          >
-                            {({ loading }) => (
-                               <Button disabled={loading}>
-                                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-                                {loading ? 'Generating PDF...' : 'Download as PDF'}
-                              </Button>
-                            )}
-                          </PDFDownloadLink>
-                       )}
-                       <Button onClick={handleDownloadDocx} variant="secondary">
+                         {isClient && (
+                            <ResumeDownloader resumeData={result.rewrittenResume} />
+                         )}
+                         <Button onClick={handleDownloadDocx} variant="secondary">
                           <FileCode className="mr-2 h-4 w-4" />
                           Download as DOCX
                        </Button>
