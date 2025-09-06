@@ -154,7 +154,7 @@ export default function PresentationGeneratorTool() {
     };
     
     const backgroundOverlay = backgroundImageUrl && backgroundImageUrl.startsWith('data:image')
-        ? { path: backgroundImageUrl, x: 0, y: 0, w: '100%', h: '100%', transparency: 85 }
+        ? { path: backgroundImageUrl, x: 0, y: 0, w: '100%', h: '100%', transparency: 50 }
         : undefined;
 
 
