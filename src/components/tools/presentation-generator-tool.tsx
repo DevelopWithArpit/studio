@@ -244,7 +244,7 @@ export default function PresentationGeneratorTool() {
                     title: "TITLE_ONLY_SLIDE_DEFAULT",
                     background: { color: cleanColor(design.accentColor) },
                     objects: [
-                        ...(backgroundImageUrl ? [{ path: backgroundImageUrl, x: 0, y: 0, w: '100%', h: '100%', transparency: 85 }] : []),
+                        ...(backgroundImageUrl ? [{ image: { path: backgroundImageUrl, x: 0, y: 0, w: '100%', h: '100%', sizing: { type: 'cover', transparency: 80 } }}] : []),
                         { placeholder: { options: { name: "title", type: "title", x: '5%', y: '40%', w: '90%', h: '20%', fontFace: 'Arial', fontSize: 36, bold: true, color: cleanColor(design.backgroundColor), align: 'center', valign: 'middle' } } },
                     ],
                 });
@@ -664,4 +664,3 @@ export default function PresentationGeneratorTool() {
     </div>
   );
 }
-
