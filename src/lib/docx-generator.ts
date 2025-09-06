@@ -12,6 +12,8 @@ import {
   VerticalPosition,
   TextWrappingType,
   TextWrappingSide,
+  TabStopType,
+  TabStopPosition,
 } from 'docx';
 import type { GetResumeFeedbackOutput } from '@/ai/flows/resume-feedback-tool';
 
@@ -47,6 +49,10 @@ export function createResumeDocx(resumeData: ResumeData): Document {
                 run: {
                     size: 20, // 10pt
                     color: '555555'
+                },
+                paragraph: {
+                    alignment: AlignmentType.CENTER,
+                    spacing: {after: 50}
                 }
             },
             {
@@ -56,16 +62,35 @@ export function createResumeDocx(resumeData: ResumeData): Document {
                 next: 'Normal',
                 quickFormat: true,
                 run: {
-                    size: 20, // 10pt
+                    size: 24, // 12pt
                     bold: true,
-                    allCaps: true,
-                    color: '555555'
+                    allCaps: false,
+                    color: '000000'
                 },
                 paragraph: {
-                     border: { bottom: { color: 'auto', space: 1, value: 'single', size: 4 } }, // 0.5pt
+                     border: { bottom: { color: 'auto', space: 1, value: 'single', size: 6 } }, // 0.75pt
                      spacing: { after: 100, before: 200 },
                 }
             },
+             {
+                id: 'JobTitle',
+                name: 'Job Title',
+                basedOn: 'Normal',
+                run: {
+                    bold: true,
+                    size: 22
+                }
+            },
+            {
+                id: 'Company',
+                name: 'Company',
+                basedOn: 'Normal',
+                run: {
+                    bold: true,
+                    color: '4A90E2', // Blue color
+                    size: 22
+                }
+            }
         ]
     },
     sections: [{
@@ -81,7 +106,7 @@ export function createResumeDocx(resumeData: ResumeData): Document {
       },
       children: [
         new Paragraph({
-          text: name.toUpperCase(),
+          text: name,
           style: 'Title',
           alignment: AlignmentType.CENTER,
         }),
@@ -97,7 +122,8 @@ export function createResumeDocx(resumeData: ResumeData): Document {
                 ...(contact.phone ? [new TextRun(`${contact.phone} | `)] : []),
                 ...(contact.email ? [new TextRun(`${contact.email} | `)] : []),
                 ...(contact.location ? [new TextRun(`${contact.location} | `)] : []),
-                ...(contact.linkedin ? [new TextRun({ text: 'linkedin.com', style: "Hyperlink" })] : []),
+                ...(contact.linkedin ? [new TextRun({ text: `linkedin.com/in/profile | `, style: "Hyperlink" })] : []),
+                 ...(contact.github ? [new TextRun({ text: 'github.com/profile', style: "Hyperlink" })] : []),
             ],
             spacing: {after: 200}
         }),
@@ -116,16 +142,16 @@ export function createResumeDocx(resumeData: ResumeData): Document {
         }),
         ...experience.flatMap(exp => [
           new Paragraph({
-            children: [
-              new TextRun({ text: exp.title, bold: true, size: 22 }),
-              new TextRun({ text: `\t${exp.dates}`, size: 20, color: '555555' }),
-            ]
+            style: 'JobTitle',
+            children: [ new TextRun(exp.title) ],
+            tabStops: [{ type: TabStopType.RIGHT, position: TabStopPosition.MAX }]
           }),
           new Paragraph({
              children: [
-              new TextRun({ text: exp.company, bold: true, size: 22, color: '4A90E2' }), // Blue color
-              new TextRun({ text: `\t${exp.location}`, size: 20, color: '555555' }),
-            ]
+              new TextRun({ text: exp.company, style: 'Company' }),
+              new TextRun({ text: `\t${exp.dates} | ${exp.location}`, style: 'Header' }),
+            ],
+            tabStops: [{ type: TabStopType.RIGHT, position: TabStopPosition.MAX }]
           }),
           ...exp.bullets.map(bullet => new Paragraph({ text: bullet, bullet: { level: 0 }, style: 'Normal' })),
            new Paragraph({ text: '', spacing: { after: 100 } }),
@@ -139,15 +165,16 @@ export function createResumeDocx(resumeData: ResumeData): Document {
          ...education.flatMap(edu => [
             new Paragraph({
                 children: [
-                    new TextRun({ text: edu.degree, bold: true, size: 22 }),
-                    new TextRun({ text: `\t${edu.dates}`, size: 20, color: '555555'}),
-                ]
+                    new TextRun({ text: edu.degree, style: 'JobTitle' }),
+                ],
+                tabStops: [{ type: TabStopType.RIGHT, position: TabStopPosition.MAX }]
             }),
             new Paragraph({
                 children: [
-                    new TextRun({ text: edu.school, bold: true, size: 22, color: '4A90E2' }), // Blue color
-                    new TextRun({ text: `\t${edu.location}`, size: 20, color: '555555'}),
-                ]
+                    new TextRun({ text: edu.school, style: 'Company' }),
+                    new TextRun({ text: `\t${edu.dates} | ${edu.location}`, style: 'Header' }),
+                ],
+                 tabStops: [{ type: TabStopType.RIGHT, position: TabStopPosition.MAX }]
             }),
             new Paragraph({ text: '', spacing: { after: 100 } }),
         ]),
@@ -165,9 +192,29 @@ export function createResumeDocx(resumeData: ResumeData): Document {
           style: 'SectionTitle',
         }),
         ...projects.flatMap(proj => [
-            new Paragraph({ text: proj.title, bold: true, size: 22 }),
+            new Paragraph({ text: proj.title, style: 'JobTitle' }),
             new Paragraph({ text: proj.description, style: 'Normal' }),
             ...(proj.link ? [new Paragraph({ children: [new TextRun({ text: proj.link, style: 'Hyperlink' })]})] : []),
+             new Paragraph({ text: '', spacing: { after: 100 } }),
+        ]),
+         // Achievements
+        new Paragraph({
+          text: 'Key Achievements',
+          style: 'SectionTitle',
+        }),
+        ...keyAchievements.flatMap(ach => [
+            new Paragraph({ text: ach.title, style: 'JobTitle' }),
+            new Paragraph({ text: ach.description, style: 'Normal' }),
+             new Paragraph({ text: '', spacing: { after: 100 } }),
+        ]),
+         // Training
+        new Paragraph({
+          text: 'Training',
+          style: 'SectionTitle',
+        }),
+        ...training.flatMap(course => [
+            new Paragraph({ text: course.title, style: 'JobTitle' }),
+            new Paragraph({ text: course.description, style: 'Normal' }),
              new Paragraph({ text: '', spacing: { after: 100 } }),
         ]),
       ],
@@ -176,4 +223,3 @@ export function createResumeDocx(resumeData: ResumeData): Document {
 
   return doc;
 }
-

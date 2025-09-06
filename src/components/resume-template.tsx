@@ -1,7 +1,9 @@
 
 'use client';
 import React from 'react';
-import { Phone, Mail, MapPin, Linkedin, Star, Award, TrendingUp, Users, Target, Percent, Check, Zap } from 'lucide-react';
+import { Phone, Mail, MapPin, Linkedin, Github, Briefcase, Star, Award, TrendingUp, Users, Target, Percent, Check, Zap } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
 
 interface ResumeData {
   name: string;
@@ -10,8 +12,8 @@ interface ResumeData {
     phone?: string;
     email?: string;
     linkedin?: string;
+    github?: string;
     location?: string;
-    extraField?: string;
   };
   summary: string;
   experience: {
@@ -44,27 +46,18 @@ interface ResumeData {
 }
 
 const SidebarSection: React.FC<{ title: string; children: React.ReactNode; className?: string }> = ({ title, children, className }) => (
-    <section className={cn('mb-8', className)}>
-        <h2 className="text-sm font-bold tracking-widest text-white border-b border-gray-400 pb-1 mb-3">{title}</h2>
+    <section className={cn('mb-6', className)}>
+        <h2 className="text-sm font-bold uppercase tracking-widest text-white border-b-2 border-gray-400 pb-1 mb-3">{title}</h2>
         {children}
     </section>
 );
 
 const MainSection: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
     <section className="mb-6">
-        <h2 className="text-xs font-bold uppercase tracking-wider text-gray-500 border-b-2 border-gray-200 pb-1 mb-4">{title}</h2>
+        <h2 className="text-sm font-bold uppercase tracking-wider text-gray-600 border-b-2 border-gray-300 pb-1 mb-3">{title}</h2>
         {children}
     </section>
 );
-
-const getIconForAchievement = (title: string) => {
-    const lowerTitle = title.toLowerCase();
-    if (lowerTitle.includes('engagement') || lowerTitle.includes('brand')) return <Target className="w-4 h-4 text-white mt-1" />;
-    if (lowerTitle.includes('cost') || lowerTitle.includes('reduction')) return <Percent className="w-4 h-4 text-white mt-1" />;
-    if (lowerTitle.includes('conversion') || lowerTitle.includes('increase')) return <Check className="w-4 h-4 text-white mt-1" />;
-    if (lowerTitle.includes('team') || lowerTitle.includes('leadership')) return <Users className="w-4 h-4 text-white mt-1" />;
-    return <Award className="w-4 h-4 text-white mt-1" />;
-}
 
 export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeData }) => {
     if (!resumeData) {
@@ -76,20 +69,28 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
     return (
         <div className="bg-white flex font-sans" style={{ width: '816px', minHeight: '1056px', fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }}>
             {/* Sidebar (Left Column) */}
-            <aside className="w-[33%] bg-[#0d243c] text-white p-8 flex flex-col">
-                <div className="text-left mb-10">
-                    <h1 className="text-4xl font-bold tracking-wider text-white">{name.toUpperCase().split(' ')[0]}</h1>
-                    <h1 className="text-4xl font-bold tracking-wider text-white">{name.toUpperCase().split(' ')[1]}</h1>
+            <aside className="w-[35%] bg-[#0d243c] text-white p-6 flex flex-col">
+                 <div className="text-left mb-8">
+                    <h1 className="text-4xl font-extrabold tracking-tight text-white">{name.split(' ')[0]}</h1>
+                    <h1 className="text-4xl font-extrabold tracking-tight text-white">{name.split(' ').slice(1).join(' ')}</h1>
                 </div>
 
+                {skills?.length > 0 && (
+                     <SidebarSection title="Skills">
+                        <ul className="text-sm text-gray-300 leading-relaxed list-disc pl-4 space-y-1">
+                          {skills.map((skill, i) => <li key={i}>{skill}</li>)}
+                        </ul>
+                    </SidebarSection>
+                )}
+
                 {projects?.length > 0 && (
-                    <SidebarSection title="PROJECTS">
+                    <SidebarSection title="Projects">
                         <div className="space-y-4">
                             {projects.map((proj, i) => (
                                 <div key={i}>
                                     <h3 className="font-bold text-base text-white">{proj.title}</h3>
                                     <p className="text-sm text-gray-300 mt-1">{proj.description}</p>
-                                    {proj.link && <p className="text-sm text-gray-300 break-all">{proj.link}</p>}
+                                    {proj.link && <p className="text-xs text-blue-300 break-all mt-1">{proj.link}</p>}
                                 </div>
                             ))}
                         </div>
@@ -97,78 +98,67 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
                 )}
 
                 {keyAchievements?.length > 0 && (
-                    <SidebarSection title="KEY ACHIEVEMENTS">
+                    <SidebarSection title="Achievements">
                          <div className="space-y-4">
                             {keyAchievements.map((ach, i) => (
-                                <div key={i} className="flex items-start gap-3">
-                                    {getIconForAchievement(ach.title)}
-                                    <div>
-                                        <h3 className="font-bold text-base text-white">{ach.title}</h3>
-                                        <p className="text-sm text-gray-300 mt-1">{ach.description}</p>
-                                    </div>
+                                <div key={i}>
+                                    <h3 className="font-bold text-base text-white">{ach.title}</h3>
+                                    <p className="text-sm text-gray-300 mt-1">{ach.description}</p>
                                 </div>
                             ))}
                         </div>
                     </SidebarSection>
                 )}
                 
-                {skills?.length > 0 && (
-                     <SidebarSection title="SKILLS">
-                        <p className="text-sm text-gray-300 leading-relaxed">{skills.join(', ')}</p>
-                    </SidebarSection>
-                )}
 
                 {training?.length > 0 && (
-                    <SidebarSection title="TRAINING / COURSES" className="mt-auto">
+                    <SidebarSection title="Training">
                         <div className="space-y-3">
                         {training.map((course, i) => (
-                            <div key={i}>
-                                <h3 className="font-bold text-base text-white">{course.title}</h3>
-                                <p className="text-sm text-gray-300">{course.description}</p>
+                            <div key={i} key={i}>
+                                <h3 className="font-semibold text-sm text-white">{course.title}</h3>
+                                <p className="text-xs text-gray-300">{course.description}</p>
                             </div>
                         ))}
                         </div>
                     </SidebarSection>
                 )}
-                 <div className="text-xs text-gray-400 mt-4">Powered by <span className="font-bold">Enhancv</span></div>
             </aside>
 
             {/* Main Content (Right Column) */}
-            <main className="w-[67%] bg-white p-8 text-gray-800">
-                <header className="mb-6">
-                    <h2 className="text-xl font-semibold text-gray-700">{title}</h2>
-                    <div className="text-xs text-gray-500 mt-2 flex items-center flex-wrap gap-x-4 gap-y-1">
+            <main className="w-[65%] bg-white p-8 text-gray-800">
+                <header className="mb-6 text-center">
+                    <h2 className="text-xl font-bold text-gray-700 tracking-wider">{title}</h2>
+                    <hr className="my-2 border-t-2 border-gray-200"/>
+                    <div className="text-xs text-gray-600 flex items-center justify-center flex-wrap gap-x-3 gap-y-1">
                         {contact?.phone && <span className="flex items-center gap-1.5"><Phone className="w-3 h-3"/>{contact.phone}</span>}
                         {contact?.email && <span className="flex items-center gap-1.5"><Mail className="w-3 h-3"/>{contact.email}</span>}
                         {contact?.linkedin && <span className="flex items-center gap-1.5"><Linkedin className="w-3 h-3"/>{contact.linkedin}</span>}
-                    </div>
-                     <div className="text-xs text-gray-500 mt-1 flex items-center flex-wrap gap-x-4 gap-y-1">
+                        {contact?.github && <span className="flex items-center gap-1.5"><Github className="w-3 h-3"/>{contact.github}</span>}
                         {contact?.location && <span className="flex items-center gap-1.5"><MapPin className="w-3 h-3"/>{contact.location}</span>}
-                        {contact?.extraField && <span className="flex items-center gap-1.5"><Star className="w-3 h-3"/>{contact.extraField}</span>}
                     </div>
                 </header>
 
                 {summary && (
-                    <MainSection title="SUMMARY">
+                    <MainSection title="Summary">
                         <p className="text-sm text-gray-700 leading-relaxed">{summary}</p>
                     </MainSection>
                 )}
 
                 {experience?.length > 0 && (
-                    <MainSection title="EXPERIENCE">
-                        <div className="space-y-5">
+                    <MainSection title="Experience">
+                        <div className="space-y-4">
                             {experience.map((exp, i) => (
                                 <div key={i}>
-                                    <div className="flex justify-between items-start mb-1">
+                                    <div className="flex justify-between items-baseline mb-1">
                                         <h3 className="text-base font-bold text-gray-800">{exp.title}</h3>
-                                        <p className="text-xs text-gray-500 font-medium text-right">{exp.dates}</p>
                                     </div>
-                                    <div className="flex justify-between items-start mb-2">
-                                       <p className="text-sm font-semibold text-[#3b82f6]">{exp.company}</p>
-                                       <p className="text-xs text-gray-500 font-medium text-right">{exp.location}</p>
+                                    <div className="flex justify-between items-baseline mb-1">
+                                       <p className="text-sm font-semibold text-blue-600">{exp.company}</p>
+                                       <p className="text-xs text-gray-500 font-medium text-right">{exp.dates} | {exp.location}</p>
                                     </div>
                                     <ul className="space-y-1.5 list-disc pl-5 text-sm text-gray-700 leading-relaxed">
-                                        {exp.bullets.map((bullet, j) => <li key={j} className="pl-1">{bullet}</li>)}
+                                        {exp.bullets.map((bullet, j) => <li key={j}>{bullet}</li>)}
                                     </ul>
                                 </div>
                             ))}
@@ -177,24 +167,22 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
                 )}
                 
                  {education?.length > 0 && (
-                     <MainSection title="EDUCATION">
+                     <MainSection title="Education">
                          <div className="space-y-4">
                             {education.map((edu, i) => (
                                 <div key={i}>
-                                    <div className="flex justify-between items-start mb-1">
+                                    <div className="flex justify-between items-baseline mb-1">
                                         <h3 className="text-base font-bold text-gray-800">{edu.degree}</h3>
-                                        <p className="text-xs text-gray-500 font-medium text-right">{edu.dates}</p>
                                     </div>
-                                    <div className="flex justify-between items-start">
-                                        <p className="text-sm font-semibold text-[#3b82f6]">{edu.school}</p>
-                                        <p className="text-xs text-gray-500 font-medium text-right">{edu.location}</p>
+                                    <div className="flex justify-between items-baseline">
+                                        <p className="text-sm font-semibold text-blue-600">{edu.school}</p>
+                                        <p className="text-xs text-gray-500 font-medium text-right">{edu.dates} | {edu.location}</p>
                                     </div>
                                 </div>
                             ))}
                         </div>
                     </MainSection>
                 )}
-                <div className="text-right text-xs text-gray-400 mt-auto pt-8">www.enhancv.com</div>
             </main>
         </div>
     );
