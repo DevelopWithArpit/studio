@@ -47,14 +47,14 @@ interface ResumeData {
 
 const SidebarSection: React.FC<{ title: string; children: React.ReactNode; className?: string }> = ({ title, children, className }) => (
     <section className={cn('mb-6', className)}>
-        <h2 className="text-xs font-bold uppercase tracking-widest text-white border-b border-gray-400 pb-1 mb-3">{title}</h2>
+        <h2 className="text-sm font-bold uppercase tracking-wider text-white border-b-2 border-gray-400 pb-1 mb-3">{title}</h2>
         {children}
     </section>
 );
 
 const MainSection: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
     <section className="mb-6">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-gray-700 border-b-2 border-gray-200 pb-1 mb-3">{title}</h2>
+        <h2 className="text-sm font-bold uppercase tracking-wider text-gray-700 border-b-2 border-gray-300 pb-1 mb-3">{title}</h2>
         {children}
     </section>
 );
@@ -87,7 +87,7 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
     return (
         <div className="bg-white flex font-sans" style={{ width: '816px', minHeight: '1056px' }}>
             {/* Sidebar (Left Column) */}
-            <aside className="w-[33.33%] bg-[#0d243c] text-white p-8 flex flex-col" style={{fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif'}}>
+            <aside className="w-[35%] bg-[#0d243c] text-white p-6 flex flex-col" style={{fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif'}}>
                  <div className="text-left mb-8">
                     <h1 className="text-4xl font-extrabold tracking-tight text-white uppercase">{name}</h1>
                 </div>
@@ -98,7 +98,7 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
                             {projects.map((proj, i) => (
                                 <div key={i}>
                                     <h3 className="font-bold text-sm text-white">{proj.title}</h3>
-                                    <p className="text-xs text-gray-300 mt-1 leading-relaxed">{proj.description}</p>
+                                    <p className="text-xs text-gray-300 mt-1 leading-snug">{proj.description}</p>
                                     {proj.link && <p className="text-xs text-blue-300 break-all mt-1">{proj.link}</p>}
                                 </div>
                             ))}
@@ -116,7 +116,7 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
                                     <Icon className="w-4 h-4 text-white mt-1 shrink-0" />
                                     <div>
                                         <h3 className="font-bold text-sm text-white leading-tight">{ach.title}</h3>
-                                        <p className="text-xs text-gray-300 mt-1 leading-relaxed">{ach.description}</p>
+                                        <p className="text-xs text-gray-300 mt-1 leading-snug">{ach.description}</p>
                                     </div>
                                 </div>
                             )})}
@@ -147,8 +147,8 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
             </aside>
 
             {/* Main Content (Right Column) */}
-            <main className="w-[66.67%] bg-white p-8 text-gray-800" style={{fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif'}}>
-                <header className="mb-6 text-left">
+            <main className="w-[65%] bg-white p-8 text-gray-800" style={{fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif'}}>
+                <header className="mb-6 text-left border-b-2 border-gray-300 pb-4">
                     <h2 className="text-xl font-bold text-[#0d243c] tracking-wider">{title}</h2>
                     <div className="text-xs text-gray-600 flex items-center flex-wrap gap-x-3 gap-y-1 mt-2">
                         {contact?.phone && <span className="flex items-center gap-1.5"><Phone className="w-3 h-3"/>{contact.phone}</span>}
@@ -170,12 +170,15 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
                         <div className="space-y-5">
                             {experience.map((exp, i) => (
                                 <div key={i}>
-                                    <h3 className="text-sm font-bold text-gray-800">{exp.title}</h3>
                                     <div className="flex justify-between items-baseline mb-1">
-                                       <p className="text-sm font-bold text-blue-600">{exp.company}</p>
-                                       <p className="text-xs text-gray-500 font-medium text-right">{exp.dates} | {exp.location}</p>
+                                       <h3 className="text-sm font-bold text-gray-800">{exp.title}</h3>
+                                       <p className="text-xs text-gray-500 font-medium text-right">{exp.dates}</p>
                                     </div>
-                                    <ul className="space-y-1.5 list-disc pl-4 text-xs text-gray-700 leading-relaxed">
+                                     <div className="flex justify-between items-baseline mb-1">
+                                       <p className="text-sm font-semibold text-blue-600 italic">{exp.company}</p>
+                                       <p className="text-xs text-gray-500 font-medium text-right">{exp.location}</p>
+                                    </div>
+                                    <ul className="space-y-1.5 list-disc pl-4 text-xs text-gray-700 leading-snug">
                                         {exp.bullets.map((bullet, j) => <li key={j}>{bullet}</li>)}
                                     </ul>
                                 </div>
@@ -189,10 +192,13 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
                          <div className="space-y-4">
                             {education.map((edu, i) => (
                                 <div key={i}>
-                                    <h3 className="text-sm font-bold text-gray-800">{edu.degree}</h3>
                                     <div className="flex justify-between items-baseline">
-                                        <p className="text-sm font-bold text-blue-600">{edu.school}</p>
-                                        <p className="text-xs text-gray-500 font-medium text-right">{edu.dates} | {edu.location}</p>
+                                        <h3 className="text-sm font-bold text-gray-800">{edu.degree}</h3>
+                                         <p className="text-xs text-gray-500 font-medium text-right">{edu.dates}</p>
+                                    </div>
+                                    <div className="flex justify-between items-baseline">
+                                        <p className="text-sm font-semibold text-blue-600 italic">{edu.school}</p>
+                                        <p className="text-xs text-gray-500 font-medium text-right">{edu.location}</p>
                                     </div>
                                 </div>
                             ))}
