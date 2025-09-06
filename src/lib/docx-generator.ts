@@ -6,6 +6,12 @@ import {
   HeadingLevel,
   AlignmentType,
   Packer,
+  HorizontalPositionAlign,
+  VerticalPositionAlign,
+  HorizontalPosition,
+  VerticalPosition,
+  TextWrappingType,
+  TextWrappingSide,
 } from 'docx';
 import type { GetResumeFeedbackOutput } from '@/ai/flows/resume-feedback-tool';
 
@@ -28,20 +34,20 @@ export function createResumeDocx(resumeData: ResumeData): Document {
         }),
         new Paragraph({
           text: title,
-          heading: HeadingLevel.HEADING_2,
+          style: 'Subtitle',
           alignment: AlignmentType.CENTER,
         }),
         new Paragraph({
             alignment: AlignmentType.CENTER,
             children: [
-                ...(contact.email ? [new TextRun({ text: `${contact.email} | `, size: 18 })] : []),
-                ...(contact.phone ? [new TextRun({ text: `${contact.phone} | `, size: 18 })] : []),
-                ...(contact.location ? [new TextRun({ text: `${contact.location} | `, size: 18 })] : []),
-                ...(contact.linkedin ? [new TextRun({ text: 'LinkedIn | ', link: contact.linkedin, style: "Hyperlink", size: 18 })] : []),
-                ...(contact.github ? [new TextRun({ text: 'GitHub', link: contact.github, style: "Hyperlink", size: 18 })] : []),
+                ...(contact.email ? [new TextRun({ text: `${contact.email} | `, size: 20 })] : []),
+                ...(contact.phone ? [new TextRun({ text: `${contact.phone} | `, size: 20 })] : []),
+                ...(contact.location ? [new TextRun({ text: `${contact.location} | `, size: 20 })] : []),
+                ...(contact.linkedin ? [new TextRun({ text: 'LinkedIn | ', link: contact.linkedin, style: "Hyperlink", size: 20 })] : []),
+                ...(contact.github ? [new TextRun({ text: 'GitHub', link: contact.github, style: "Hyperlink", size: 20 })] : []),
             ],
         }),
-        new Paragraph({ text: '', spacing: { after: 200 } }), // spacer
+        new Paragraph({ text: '', border: { bottom: { color: 'auto', space: 1, value: 'single', size: 6 } }, spacing: { after: 200 } }), // spacer
 
         // Summary
         new Paragraph({
@@ -62,12 +68,12 @@ export function createResumeDocx(resumeData: ResumeData): Document {
           new Paragraph({
             children: [
               new TextRun({ text: exp.title, bold: true, size: 24 }),
-              new TextRun({ text: `\t${exp.dates}`, size: 20, color: '555555'}),
+              new TextRun({ text: `\t${exp.dates}`, size: 20, color: '555555' }),
             ]
           }),
           new Paragraph({
              children: [
-              new TextRun({ text: `${exp.company}${exp.location ? ', ' + exp.location : ''}`, bold: true, color: '2E64FE', size: 22 }),
+              new TextRun({ text: `${exp.company}${exp.location ? ', ' + exp.location : ''}`, italics: true, size: 22 }),
             ]
           }),
           ...exp.bullets.map(bullet => new Paragraph({ text: bullet, bullet: { level: 0 } })),
@@ -89,13 +95,14 @@ export function createResumeDocx(resumeData: ResumeData): Document {
             }),
             new Paragraph({
                 children: [
-                    new TextRun({ text: `${edu.school}${edu.location ? ', ' + edu.location : ''}`, bold: true, color: '2E64FE', size: 22 }),
+                    new TextRun({ text: `${edu.school}${edu.location ? ', ' + edu.location : ''}`, italics: true, size: 22 }),
                 ]
             }),
             new Paragraph({ text: '', spacing: { after: 100 } }),
         ]),
-
-        // Skills
+        
+        // This is a simplified way to represent columns in DOCX. A true two-column layout is more complex.
+        // It's better for ATS to list these sections linearly.
         new Paragraph({
           text: 'Skills',
           heading: HeadingLevel.HEADING_1,
