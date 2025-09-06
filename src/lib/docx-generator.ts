@@ -64,7 +64,7 @@ export function createResumeDocx(resumeData: ResumeData): Document {
                 run: {
                     size: 24, // 12pt
                     bold: true,
-                    allCaps: false,
+                    allCaps: true,
                     color: '000000'
                 },
                 paragraph: {
@@ -106,7 +106,7 @@ export function createResumeDocx(resumeData: ResumeData): Document {
       },
       children: [
         new Paragraph({
-          text: name,
+          text: name.toUpperCase(),
           style: 'Title',
           alignment: AlignmentType.CENTER,
         }),
@@ -122,9 +122,9 @@ export function createResumeDocx(resumeData: ResumeData): Document {
                 ...(contact.phone ? [new TextRun(`${contact.phone} | `)] : []),
                 ...(contact.email ? [new TextRun(`${contact.email} | `)] : []),
                 ...(contact.location ? [new TextRun(`${contact.location} | `)] : []),
-                ...(contact.linkedin ? [new TextRun({ text: `linkedin.com/in/profile | `, style: "Hyperlink" })] : []),
-                 ...(contact.github ? [new TextRun({ text: 'github.com/profile', style: "Hyperlink" })] : []),
-            ],
+                ...(contact.linkedin ? [new TextRun({ text: `linkedin.com/in/profile`, style: "Hyperlink" }), new TextRun(' | ')] : []),
+                ...(contact.github ? [new TextRun({ text: 'github.com/profile', style: "Hyperlink" })] : []),
+            ].slice(0, -1), // Remove trailing separator
             spacing: {after: 200}
         }),
 
@@ -144,7 +144,6 @@ export function createResumeDocx(resumeData: ResumeData): Document {
           new Paragraph({
             style: 'JobTitle',
             children: [ new TextRun(exp.title) ],
-            tabStops: [{ type: TabStopType.RIGHT, position: TabStopPosition.MAX }]
           }),
           new Paragraph({
              children: [
@@ -167,7 +166,6 @@ export function createResumeDocx(resumeData: ResumeData): Document {
                 children: [
                     new TextRun({ text: edu.degree, style: 'JobTitle' }),
                 ],
-                tabStops: [{ type: TabStopType.RIGHT, position: TabStopPosition.MAX }]
             }),
             new Paragraph({
                 children: [
@@ -209,7 +207,7 @@ export function createResumeDocx(resumeData: ResumeData): Document {
         ]),
          // Training
         new Paragraph({
-          text: 'Training',
+          text: 'Training / Courses',
           style: 'SectionTitle',
         }),
         ...training.flatMap(course => [
