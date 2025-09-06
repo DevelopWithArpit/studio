@@ -123,7 +123,7 @@ export default function ResumeFeedbackTool() {
       <header className="space-y-2">
         <h1 className="text-3xl font-bold font-headline">Resume Feedback Tool</h1>
         <p className="text-muted-foreground">
-          Get AI feedback on your resume, then download it in multiple formats.
+          Get AI feedback on your resume, then download a professionally formatted, editable DOCX file.
         </p>
       </header>
 

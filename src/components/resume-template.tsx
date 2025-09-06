@@ -1,3 +1,4 @@
+
 'use client';
 import React from 'react';
 import { Phone, Mail, Linkedin, MapPin, Github, Briefcase, GitFork, Star, TrendingUp, CheckCircle, Percent, ArrowDown, User, Scale, FileType } from 'lucide-react';
