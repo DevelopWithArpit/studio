@@ -5,10 +5,9 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import { saveAs } from 'file-saver';
-import { renderToStaticMarkup } from 'react-dom/server';
+import { Packer } from 'docx';
+
 import {
   Card,
   CardContent,
@@ -34,6 +33,7 @@ import { handleGetResumeFeedbackAction } from '@/app/actions';
 import type { GetResumeFeedbackOutput } from '@/ai/flows/resume-feedback-tool';
 import { FileText, UploadCloud, Download, FileCode, Loader2 } from 'lucide-react';
 import { ResumeTemplate } from '@/components/resume-template';
+import { createResumeDocx } from '@/lib/docx-generator';
 
 const formSchema = z.object({
   resume: z.string().min(1, 'Please upload or paste your resume.'),
@@ -43,10 +43,9 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
+
 export default function ResumeFeedbackTool() {
   const [isLoading, setIsLoading] = useState(false);
-  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
-  const [isGeneratingHtml, setIsGeneratingHtml] = useState(false);
   const [result, setResult] = useState<GetResumeFeedbackOutput | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const { toast } = useToast();
@@ -104,79 +103,21 @@ export default function ResumeFeedbackTool() {
       });
     }
   }
-  
-  const getResumeHtml = (resumeData: GetResumeFeedbackOutput['rewrittenResume']): string => {
-    const staticMarkup = renderToStaticMarkup(<ResumeTemplate resumeData={resumeData} />);
 
-    return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Resume for ${resumeData.name}</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-  <style>
-    body { font-family: 'Inter', sans-serif; }
-  </style>
-</head>
-<body>
-  <div style="width: 816px; margin: auto;">
-    ${staticMarkup}
-  </div>
-</body>
-</html>`;
-  };
-
-  const handleDownloadPdf = async () => {
+  const handleDownloadDocx = () => {
     if (!result?.rewrittenResume) return;
-
-    setIsGeneratingPdf(true);
-    const resumeContainer = document.getElementById('resume-container-for-pdf');
-    if (!resumeContainer) {
-      toast({ variant: 'destructive', title: 'Error', description: 'Could not find resume content to render.' });
-      setIsGeneratingPdf(false);
-      return;
-    };
 
     try {
-        const canvas = await html2canvas(resumeContainer, { 
-            scale: 2, // Higher scale for better resolution
-            useCORS: true, 
-            backgroundColor: '#ffffff',
-            windowWidth: resumeContainer.scrollWidth,
-            windowHeight: resumeContainer.scrollHeight,
-        });
-
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF({
-            orientation: 'p',
-            unit: 'px',
-            format: [canvas.width, canvas.height]
-        });
-        
-        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-        pdf.save('resume.pdf');
-        toast({ title: "PDF Downloaded", description: "Your resume has been saved as a PDF." });
-
-      } catch (error) {
-        toast({ variant: 'destructive', title: 'Error Generating PDF', description: error instanceof Error ? error.message : 'An unknown error occurred.' });
-      } finally {
-        setIsGeneratingPdf(false);
-      }
+      const doc = createResumeDocx(result.rewrittenResume);
+      Packer.toBlob(doc).then(blob => {
+        saveAs(blob, 'resume.docx');
+        toast({ title: "DOCX Downloaded", description: "Your resume has been saved as a DOCX file." });
+      });
+    } catch (error) {
+       toast({ variant: 'destructive', title: 'Error Generating DOCX', description: error instanceof Error ? error.message : 'An unknown error occurred.' });
+    }
   };
-
-  const handleDownloadHtml = async () => {
-    if (!result?.rewrittenResume) return;
-    setIsGeneratingHtml(true);
-    const htmlContent = getResumeHtml(result.rewrittenResume);
-    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
-    saveAs(blob, 'resume.html');
-    setIsGeneratingHtml(false);
-  };
-
-
+  
   return (
     <div className="space-y-8">
       <header className="space-y-2">
@@ -322,13 +263,6 @@ export default function ResumeFeedbackTool() {
         </CardContent>
       </Card>
 
-      {/* Hidden container for PDF generation */}
-      {result?.rewrittenResume &&
-        <div id="resume-container-for-pdf" style={{ position: 'absolute', left: '-9999px', top: 0, width: '816px', background: 'white' }}>
-            <ResumeTemplate resumeData={result.rewrittenResume} />
-        </div>
-      }
-
       {(isLoading || result) && (
         <Card>
           <CardHeader>
@@ -373,25 +307,10 @@ export default function ResumeFeedbackTool() {
                            </div>
                       </div>
                       <div className="flex flex-wrap gap-2">
-                         <Button
-                          onClick={handleDownloadPdf}
-                          disabled={isGeneratingPdf || isGeneratingHtml}
-                        >
-                          <Download className="mr-2 h-4 w-4" />
-                          {isGeneratingPdf
-                            ? 'Generating PDF...'
-                            : 'Download as PDF'}
-                        </Button>
-                         <Button
-                          onClick={handleDownloadHtml}
-                          disabled={isGeneratingPdf || isGeneratingHtml}
-                          variant="secondary"
-                        >
+                         <Button onClick={handleDownloadDocx} variant="secondary">
                           <FileCode className="mr-2 h-4 w-4" />
-                          {isGeneratingHtml
-                            ? 'Generating HTML...'
-                            : 'Download as HTML'}
-                        </Button>
+                          Download as DOCX
+                       </Button>
                       </div>
                     </div>
                   )
