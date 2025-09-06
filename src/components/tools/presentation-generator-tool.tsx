@@ -153,29 +153,38 @@ export default function PresentationGeneratorTool() {
         color: cleanColor(design.backgroundColor)
     };
     
-    const backgroundOverlay = backgroundImageUrl && backgroundImageUrl.startsWith('data:image')
-        ? { path: backgroundImageUrl, x: 0, y: 0, w: '100%', h: '100%', transparency: 50 }
-        : undefined;
-
+    if (backgroundImageUrl && backgroundImageUrl.startsWith('data:image')) {
+      masterBackground.path = backgroundImageUrl;
+    }
 
     // Master Slide: Title
     pptx.defineSlideMaster({
       title: "TITLE_SLIDE",
       background: masterBackground,
       objects: [
-        ...(backgroundOverlay ? [backgroundOverlay] : []),
         {
-            placeholder: {
-                options: { name: "title", type: "title", x: '5%', y: '40%', w: '90%', h: '15%', fontFace: 'Arial', fontSize: 44, bold: true, color: cleanColor(design.accentColor), align: 'center', valign: 'middle' },
-                text: "Default Title",
-            }
+          placeholder: {
+            options: { name: "title", type: "title", x: '5%', y: '40%', w: '90%', h: '15%', fontFace: 'Arial', fontSize: 44, bold: true, color: cleanColor(design.accentColor), align: 'center', valign: 'middle' },
+            text: "Default Title",
+          }
         },
         {
-            placeholder: {
-                options: { name: "subtitle", type: "body", x: '10%', y: '55%', w: '80%', h: '20%', fontFace: 'Arial', fontSize: 20, color: cleanColor(design.textColor), align: 'center', valign: 'top' },
-                text: "Default Subtitle",
-            }
+          placeholder: {
+            options: { name: "subtitle", type: "body", x: '10%', y: '55%', w: '80%', h: '20%', fontFace: 'Arial', fontSize: 20, color: cleanColor(design.textColor), align: 'center', valign: 'top' },
+            text: "Default Subtitle",
+          }
         },
+        {
+            rect: { x: '40%', y: '52%', w: '20%', h: 0.05, fill: { color: cleanColor(design.accentColor) } }
+        },
+        {
+            text: {
+                text: result.presenterName || '',
+                options: {
+                    x: '0%', y: '95%', w: '100%', align: 'center', fontSize: 10, color: cleanColor(design.textColor)
+                }
+            }
+        }
       ],
     });
 
@@ -184,42 +193,52 @@ export default function PresentationGeneratorTool() {
       title: "CONTENT_SLIDE",
       background: masterBackground,
       objects: [
-         ...(backgroundOverlay ? [backgroundOverlay] : []),
-        { rect: { x: '4%', y: '10.5%', w: '92%', h: 0.1, fill: { color: cleanColor(design.accentColor) } } },
+        { rect: { x: 0, y: 0, w: '100%', h: '15%', fill: { color: cleanColor(design.accentColor) } } },
         {
             placeholder: {
-                options: { name: "title", type: "title", x: '4%', y: '2%', w: '92%', h: '15%', fontFace: 'Arial', fontSize: 32, bold: true, color: cleanColor(design.textColor), align: 'left', valign: 'middle' },
+                options: { name: "title", type: "title", x: '4%', y: '0%', w: '92%', h: '15%', fontFace: 'Arial', fontSize: 28, bold: true, color: cleanColor(design.backgroundColor), align: 'left', valign: 'middle' },
                 text: "Default Title",
             },
         },
+        { rect: { x: '4%', y: '16%', w: '30%', h: 0.1, fill: { color: cleanColor(design.accentColor) } } },
         {
             placeholder: {
-                options: { name: "body", type: "body", x: '4%', y: '20%', w: '55%', h: '70%', fontFace: 'Arial', fontSize: 18, color: cleanColor(design.textColor), paraSpaceAfter: 15, isTextBox: true, valign: 'top', },
+                options: { name: "body", type: "body", x: '4%', y: '22%', w: '55%', h: '68%', fontFace: 'Arial', fontSize: 18, color: cleanColor(design.textColor), paraSpaceAfter: 15, isTextBox: true, valign: 'top', },
                 text: "Default Body Text",
             },
         },
         {
           placeholder: {
-            options: { name: "image", type: "pic", x: '63%', y: '20%', w: '33%', h: '70%' },
+            options: { name: "image", type: "pic", x: '63%', y: '22%', w: '33%', h: '68%' },
           },
         },
         {
           placeholder: {
-            options: { name: "logo", type: "pic", x: '90%', y: '90%', w: '5%', h: '5%' },
+            options: { name: "logo", type: "pic", x: '92%', y: '92%', w: '5%', h: '5%' },
           },
         },
+        {
+            options: {
+              name: "slideNumber",
+              x: '4%', y: '95%', w: '10%', h: '5%',
+              fontFace: 'Arial', fontSize: 10, color: cleanColor(design.textColor)
+            },
+            slideNumber: {
+              align: 'left'
+            }
+        }
       ],
     });
     
-    // Master Slide: Title Only
+    // Master Slide: Title Only (Section Header)
     pptx.defineSlideMaster({
       title: "TITLE_ONLY_SLIDE",
-      background: masterBackground,
+      background: { color: cleanColor(design.accentColor) },
       objects: [
-        ...(backgroundOverlay ? [backgroundOverlay] : []),
+        ...(backgroundImageUrl ? [{ path: backgroundImageUrl, x: 0, y: 0, w: '100%', h: '100%', transparency: 85 }] : []),
         {
             placeholder: {
-                options: { name: "title", type: "title", x: '5%', y: '40%', w: '90%', h: '20%', fontFace: 'Arial', fontSize: 44, bold: true, color: cleanColor(design.accentColor), align: 'center', valign: 'middle' },
+                options: { name: "title", type: "title", x: '5%', y: '40%', w: '90%', h: '20%', fontFace: 'Arial', fontSize: 36, bold: true, color: cleanColor(design.backgroundColor), align: 'center', valign: 'middle' },
                 text: "Default Title",
             }
         },
@@ -228,7 +247,7 @@ export default function PresentationGeneratorTool() {
 
 
     // Generate slides
-    result.slides.forEach((slide) => {
+    result.slides.forEach((slide, index) => {
       let masterName = '';
       switch (slide.slideLayout) {
         case 'title':
@@ -635,3 +654,4 @@ export default function PresentationGeneratorTool() {
     </div>
   );
 }
+
