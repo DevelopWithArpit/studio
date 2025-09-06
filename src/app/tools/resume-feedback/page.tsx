@@ -5,6 +5,9 @@ import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import dynamic from 'next/dynamic';
+import { Packer } from 'docx';
+import { saveAs } from 'file-saver';
 import {
   Card,
   CardContent,
@@ -28,9 +31,16 @@ import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { handleGetResumeFeedbackAction } from '@/app/actions';
 import type { GetResumeFeedbackOutput } from '@/ai/flows/resume-feedback-tool';
-import { FileText, UploadCloud, Loader2 } from 'lucide-react';
+import { FileText, UploadCloud, Loader2, Download, FileCode } from 'lucide-react';
 import { ResumeTemplate } from '@/components/resume-template';
-import { PdfDownloader } from '@/components/pdf-downloader';
+import { ResumePdfDocument } from '@/components/resume-pdf-document';
+import { createResumeDocx } from '@/lib/docx-generator';
+
+
+const PDFDownloadLink = dynamic(
+  () => import('@react-pdf/renderer').then((mod) => mod.PDFDownloadLink),
+  { ssr: false, loading: () => <Button disabled><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating PDF...</Button> }
+);
 
 
 const formSchema = z.object({
@@ -106,6 +116,20 @@ export default function ResumeFeedbackTool() {
       });
     }
   }
+
+  const handleDownloadDocx = () => {
+    if (!result?.rewrittenResume) return;
+
+    try {
+      const doc = createResumeDocx(result.rewrittenResume);
+      Packer.toBlob(doc).then(blob => {
+        saveAs(blob, 'resume.docx');
+        toast({ title: "DOCX Downloaded", description: "Your resume has been saved as a DOCX file." });
+      });
+    } catch (error) {
+       toast({ variant: 'destructive', title: 'Error Generating DOCX', description: error instanceof Error ? error.message : 'An unknown error occurred.' });
+    }
+  };
   
   return (
     <div className="space-y-8">
@@ -297,8 +321,22 @@ export default function ResumeFeedbackTool() {
                       </div>
                       <div className="flex flex-wrap gap-2">
                        {isClient && (
-                         <PdfDownloader resumeData={result.rewrittenResume} />
+                         <PDFDownloadLink
+                            document={<ResumePdfDocument resumeData={result.rewrittenResume} />}
+                            fileName="resume.pdf"
+                          >
+                            {({ loading }) => (
+                               <Button disabled={loading}>
+                                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                                {loading ? 'Generating PDF...' : 'Download as PDF'}
+                              </Button>
+                            )}
+                          </PDFDownloadLink>
                        )}
+                       <Button onClick={handleDownloadDocx} variant="secondary">
+                          <FileCode className="mr-2 h-4 w-4" />
+                          Download as DOCX
+                       </Button>
                       </div>
                     </div>
                   )
