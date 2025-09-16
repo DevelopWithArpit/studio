@@ -61,7 +61,7 @@ const MainSection: React.FC<{ title: string; children: React.ReactNode }> = ({ t
 );
 
 const achievementIcons: { [key: string]: React.FC<any> } = {
-    'engagement': Zap,
+    'engagement': Target,
     'cost': Percent,
     'conversions': Check,
     'leadership': Users,
