@@ -28,7 +28,7 @@ import { Input } from '@/components/ui/input';
 import { handleManipulateImageTextAction } from '@/app/actions';
 import type { ManipulateImageTextOutput } from '@/ai/flows/image-text-manipulation-tool';
 import { Loader2, UploadCloud } from 'lucide-react';
-import { Textarea } from '../ui/textarea';
+import { Textarea } from '@/components/ui/textarea';
 
 const formSchema = z.object({
   imageDataUri: z.string().min(1, 'Please upload an image.'),
