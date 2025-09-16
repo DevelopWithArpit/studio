@@ -133,14 +133,37 @@ export default function ResumeFeedbackTool() {
             scale: 2, // Higher scale for better quality
             useCORS: true,
             logging: false,
+            width: 816, // A4 width in pixels at 96 DPI
+            windowWidth: 816,
         });
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF({
             orientation: 'p',
             unit: 'px',
-            format: [canvas.width, canvas.height],
+            format: 'a4',
         });
-        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const canvasWidth = canvas.width;
+        const canvasHeight = canvas.height;
+        const ratio = canvasWidth / canvasHeight;
+        const pdfRatio = pdfWidth / pdfHeight;
+
+        let finalWidth, finalHeight;
+        if (ratio > pdfRatio) {
+            finalWidth = pdfWidth;
+            finalHeight = pdfWidth / ratio;
+        } else {
+            finalHeight = pdfHeight;
+            finalWidth = pdfHeight * ratio;
+        }
+
+        const x = (pdfWidth - finalWidth) / 2;
+        const y = 0;
+
+
+        pdf.addImage(imgData, 'PNG', x, y, finalWidth, finalHeight);
         pdf.save('resume.pdf');
         toast({ title: "PDF Downloaded", description: "Your resume has been saved as a PDF file." });
     } catch (error) {
@@ -327,12 +350,12 @@ export default function ResumeFeedbackTool() {
               </TabsContent>
               <TabsContent value="rewritten" className="mt-4">
                 {isLoading ? (
-                  <div className="border rounded-lg"><Skeleton className="h-[1056px] w-[816px]" /></div>
+                  <div className="border rounded-lg"><Skeleton className="h-[1056px] w-full max-w-[816px] mx-auto" /></div>
                 ) : (
                   result?.rewrittenResume && (
                     <div className="space-y-4">
                        <div className="bg-gray-200 p-8 flex justify-center overflow-auto">
-                           <div id="resume-preview-content" className="scale-[0.9] origin-top">
+                           <div id="resume-preview-content">
                                 <ResumeTemplate resumeData={result.rewrittenResume} />
                            </div>
                       </div>
