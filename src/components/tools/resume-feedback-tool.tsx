@@ -130,35 +130,31 @@ export default function ResumeFeedbackTool() {
 
     try {
         const canvas = await html2canvas(resumeElement, {
-            scale: 2, // Higher scale for better quality
+            scale: 3, // Higher scale for better quality
             useCORS: true,
             logging: false,
-            width: 816, // A4 width in pixels at 96 DPI
-            windowWidth: 816,
         });
-        const imgData = canvas.toDataURL('image/png');
+        const imgData = canvas.toDataURL('image/png', 1.0);
+        
+        // A4 page dimensions in pixels at 96 DPI are roughly 794x1123
+        const pdfWidth = 794;
+        const pdfHeight = 1123;
+        
         const pdf = new jsPDF({
             orientation: 'p',
             unit: 'px',
-            format: 'a4',
+            format: [pdfWidth, pdfHeight],
         });
 
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
-        const canvasWidth = canvas.width;
-        const canvasHeight = canvas.height;
-        const ratio = canvasWidth / canvasHeight;
-        const pdfRatio = pdfWidth / pdfHeight;
+        const canvasAspectRatio = canvas.width / canvas.height;
+        let finalWidth = pdfWidth;
+        let finalHeight = finalWidth / canvasAspectRatio;
 
-        let finalWidth, finalHeight;
-        if (ratio > pdfRatio) {
-            finalWidth = pdfWidth;
-            finalHeight = pdfWidth / ratio;
-        } else {
+        if (finalHeight > pdfHeight) {
             finalHeight = pdfHeight;
-            finalWidth = pdfHeight * ratio;
+            finalWidth = finalHeight * canvasAspectRatio;
         }
-
+        
         const x = (pdfWidth - finalWidth) / 2;
         const y = 0;
 
@@ -355,7 +351,7 @@ export default function ResumeFeedbackTool() {
                   result?.rewrittenResume && (
                     <div className="space-y-4">
                        <div className="bg-gray-200 p-8 flex justify-center overflow-auto">
-                           <div id="resume-preview-content">
+                           <div id="resume-preview-content" className="origin-top-left">
                                 <ResumeTemplate resumeData={result.rewrittenResume} />
                            </div>
                       </div>
