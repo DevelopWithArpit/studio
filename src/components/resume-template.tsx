@@ -1,7 +1,7 @@
 
 'use client';
 import React from 'react';
-import { Phone, Mail, MapPin, Linkedin, Github, Briefcase, Star, Award, TrendingUp, Users, Target, Percent, Check, Zap, Building, GraduationCap, Mountain } from 'lucide-react';
+import { Phone, Mail, MapPin, Linkedin, Github, Briefcase, Star, Award, TrendingUp, Users, Target, Percent, Check, Zap, Building, GraduationCap, Mountain, Link } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 
@@ -14,6 +14,7 @@ interface ResumeData {
     linkedin?: string;
     github?: string;
     location?: string;
+    extraField?: string;
   };
   summary: string;
   experience: {
@@ -47,14 +48,14 @@ interface ResumeData {
 
 const SidebarSection: React.FC<{ title: string; children: React.ReactNode; className?: string }> = ({ title, children, className }) => (
     <section className={cn('mb-6', className)}>
-        <h2 className="text-sm font-bold uppercase tracking-wider text-white border-b-2 border-gray-400 pb-1 mb-3">{title}</h2>
+        <h2 className="text-sm font-bold uppercase tracking-wider text-gray-400 border-b border-gray-500 pb-1 mb-3">{title}</h2>
         {children}
     </section>
 );
 
 const MainSection: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
     <section className="mb-6">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-gray-700 border-b-2 border-gray-300 pb-1 mb-3">{title}</h2>
+        <h2 className="text-sm font-bold uppercase tracking-wider text-gray-500 border-b border-gray-300 pb-1 mb-3">{title}</h2>
         {children}
     </section>
 );
@@ -79,15 +80,15 @@ const getAchievementIcon = (title: string) => {
 
 export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeData }) => {
     if (!resumeData) {
-        return <div className="p-12 text-center">Loading resume data...</div>;
+        return <div className="p-12 text-center text-black">Loading resume data...</div>;
     }
 
     const { name, title, contact, summary, experience, education, projects, skills, keyAchievements, training } = resumeData;
 
     return (
-        <div className="bg-white flex font-sans" style={{ width: '816px', minHeight: '1056px' }}>
+        <div className="bg-white flex font-sans text-black" style={{ width: '816px', minHeight: '1056px' }}>
             {/* Sidebar (Left Column) */}
-            <aside className="w-[35%] bg-[#0d243c] text-white p-6 flex flex-col" style={{fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif'}}>
+            <aside className="w-[33.33%] bg-[#0d243c] text-white p-6 flex flex-col" style={{fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif'}}>
                  <div className="text-left mb-8">
                     <h1 className="text-4xl font-extrabold tracking-tight text-white uppercase">{name}</h1>
                 </div>
@@ -147,15 +148,15 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
             </aside>
 
             {/* Main Content (Right Column) */}
-            <main className="w-[65%] bg-white p-8 text-gray-800" style={{fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif'}}>
-                <header className="mb-6 text-left border-b-2 border-gray-300 pb-4">
+            <main className="w-[66.67%] bg-white p-8 text-gray-800" style={{fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif'}}>
+                <header className="mb-6 text-left">
                     <h2 className="text-xl font-bold text-[#0d243c] tracking-wider">{title}</h2>
                     <div className="text-xs text-gray-600 flex items-center flex-wrap gap-x-3 gap-y-1 mt-2">
                         {contact?.phone && <span className="flex items-center gap-1.5"><Phone className="w-3 h-3"/>{contact.phone}</span>}
                         {contact?.email && <span className="flex items-center gap-1.5"><Mail className="w-3 h-3"/>{contact.email}</span>}
-                         {contact?.linkedin && <span className="flex items-center gap-1.5"><Linkedin className="w-3 h-3"/>{contact.linkedin}</span>}
+                        {contact?.linkedin && <span className="flex items-center gap-1.5"><Linkedin className="w-3 h-3"/>{contact.linkedin}</span>}
                         {contact?.location && <span className="flex items-center gap-1.5"><MapPin className="w-3 h-3"/>{contact.location}</span>}
-                         {contact?.github && <span className="flex items-center gap-1.5"><Github className="w-3 h-3"/>{contact.github}</span>}
+                        {contact?.extraField && <span className="flex items-center gap-1.5"><Star className="w-3 h-3"/>{contact.extraField}</span>}
                     </div>
                 </header>
 
@@ -175,7 +176,7 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
                                        <p className="text-xs text-gray-500 font-medium text-right">{exp.dates}</p>
                                     </div>
                                      <div className="flex justify-between items-baseline mb-1">
-                                       <p className="text-sm font-semibold text-blue-600 italic">{exp.company}</p>
+                                       <p className="text-sm font-semibold text-blue-600">{exp.company}</p>
                                        <p className="text-xs text-gray-500 font-medium text-right">{exp.location}</p>
                                     </div>
                                     <ul className="space-y-1.5 list-disc pl-4 text-xs text-gray-700 leading-snug">
@@ -197,7 +198,7 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
                                          <p className="text-xs text-gray-500 font-medium text-right">{edu.dates}</p>
                                     </div>
                                     <div className="flex justify-between items-baseline">
-                                        <p className="text-sm font-semibold text-blue-600 italic">{edu.school}</p>
+                                        <p className="text-sm font-semibold text-blue-600">{edu.school}</p>
                                         <p className="text-xs text-gray-500 font-medium text-right">{edu.location}</p>
                                     </div>
                                 </div>

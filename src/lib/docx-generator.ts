@@ -25,13 +25,13 @@ const LIGHT_TEXT_COLOR = '555555';
 const LINK_COLOR = '2563EB';
 
 const createSection = (title: string, isSidebar: boolean = false) => {
-    const titleColor = isSidebar ? ACCENT_TEXT_COLOR : TEXT_COLOR;
-    const borderColor = isSidebar ? '4A5568' : 'D1D5DB';
+    const titleColor = isSidebar ? 'CCCCCC' : '555555';
+    const borderColor = isSidebar ? '555555' : 'D1D5DB';
 
     return new Paragraph({
-        children: [new TextRun({ text: title, bold: true, allCaps: true, color: titleColor, size: 16 })],
-        border: { bottom: { color: borderColor, space: 1, value: 'single', size: 6 } },
-        spacing: { after: 100, before: 200 },
+        children: [new TextRun({ text: title, bold: true, allCaps: true, color: titleColor, size: 16, font: FONT_FAMILY })],
+        border: { bottom: { color: borderColor, space: 1, value: 'single', size: 4 } },
+        spacing: { after: 140, before: 200 },
     });
 }
 
@@ -41,23 +41,23 @@ export function createResumeDocx(resumeData: ResumeData): Document {
 
   const leftColumnContent = [
     new Paragraph({
-      children: [new TextRun({ text: name.toUpperCase(), bold: true, color: ACCENT_TEXT_COLOR, size: 32, font: 'Helvetica-Bold' })],
-      spacing: { after: 250 },
+      children: [new TextRun({ text: name.toUpperCase(), bold: true, color: ACCENT_TEXT_COLOR, size: 36, font: 'Helvetica-Bold' })],
+      spacing: { after: 300 },
     }),
 
     ...(projects.length > 0 ? [
         createSection('Projects', true),
         ...projects.flatMap(proj => [
             new Paragraph({
-                children: [new TextRun({ text: proj.title, bold: true, color: ACCENT_TEXT_COLOR, size: 19 })],
+                children: [new TextRun({ text: proj.title, bold: true, color: ACCENT_TEXT_COLOR, size: 19, font: FONT_FAMILY })],
                 spacing: { after: 40, before: 80 },
             }),
             new Paragraph({
-                children: [new TextRun({ text: proj.description, color: 'DDDDDD', size: 18 })],
+                children: [new TextRun({ text: proj.description, color: 'DDDDDD', size: 18, font: FONT_FAMILY })],
                 spacing: { after: 40 },
             }),
              ...(proj.link ? [new Paragraph({
-                children: [new TextRun({ text: proj.link, color: 'a9c5e8', size: 18, style: 'Hyperlink' })],
+                children: [new TextRun({ text: proj.link, color: 'a9c5e8', size: 18, style: 'Hyperlink', font: FONT_FAMILY })],
                 style: "Hyperlink",
             })] : []),
         ]),
@@ -70,22 +70,23 @@ export function createResumeDocx(resumeData: ResumeData): Document {
              new Paragraph({
                 children: [
                     new TextRun({text: `•\t`, font: 'Symbol', size: 18, color: 'DDDDDD'}),
-                    new TextRun({text: ach.title, bold: true, color: ACCENT_TEXT_COLOR, size: 19})
+                    new TextRun({text: ach.title, bold: true, color: ACCENT_TEXT_COLOR, size: 19, font: FONT_FAMILY})
                 ],
                 spacing: { after: 40, before: 80 }
              }),
              new Paragraph({
-                 children: [new TextRun({text: ach.description, color: 'DDDDDD', size: 18})],
+                 children: [new TextRun({text: ach.description, color: 'DDDDDD', size: 18, font: FONT_FAMILY})],
                  indent: { left: 200 },
                  spacing: { after: 80 }
              })
         ]),
+         new Paragraph({ text: '', spacing: { after: 150 } }),
     ] : []),
 
     ...(skills.length > 0 ? [
         createSection('Skills', true),
         new Paragraph({
-            children: [new TextRun({ text: skills.join(', '), color: 'DDDDDD', size: 18 })],
+            children: [new TextRun({ text: skills.join(', '), color: 'DDDDDD', size: 18, font: FONT_FAMILY })],
             spacing: { before: 80 },
         }),
         new Paragraph({ text: '', spacing: { after: 150 } }),
@@ -95,11 +96,11 @@ export function createResumeDocx(resumeData: ResumeData): Document {
         createSection('Training / Courses', true),
         ...training.flatMap(course => [
             new Paragraph({
-                children: [new TextRun({ text: course.title, bold: true, color: ACCENT_TEXT_COLOR, size: 19 })],
+                children: [new TextRun({ text: course.title, bold: true, color: ACCENT_TEXT_COLOR, size: 19, font: FONT_FAMILY })],
                 spacing: { after: 40, before: 80 },
             }),
             new Paragraph({
-                children: [new TextRun({ text: course.description, color: 'DDDDDD', size: 18 })],
+                children: [new TextRun({ text: course.description, color: 'DDDDDD', size: 18, font: FONT_FAMILY })],
             }),
         ]),
     ] : []),
@@ -107,19 +108,19 @@ export function createResumeDocx(resumeData: ResumeData): Document {
   
   const rightColumnContent = [
      new Paragraph({
-        children: [new TextRun({ text: title, bold: true, color: TEXT_COLOR, size: 22 })],
+        children: [new TextRun({ text: title, bold: true, color: TEXT_COLOR, size: 22, font: FONT_FAMILY })],
         spacing: { after: 40 },
     }),
     new Paragraph({
         children: [
-            new TextRun({ text: [contact.phone, contact.email, contact.linkedin, contact.location].filter(Boolean).join(' | '), color: LIGHT_TEXT_COLOR, size: 18 }),
+            new TextRun({ text: [contact.phone, contact.email, contact.linkedin, contact.location, contact.extraField].filter(Boolean).join(' | '), color: LIGHT_TEXT_COLOR, size: 18, font: FONT_FAMILY }),
         ],
         spacing: { after: 200 },
     }),
 
     ...(summary ? [
         createSection('Summary'),
-        new Paragraph({ children: [new TextRun({text: summary, size: 19, color: TEXT_COLOR})], spacing: { after: 100, before: 80 }}),
+        new Paragraph({ children: [new TextRun({text: summary, size: 18, color: TEXT_COLOR, font: FONT_FAMILY})], spacing: { after: 100, before: 80 }}),
     ] : []),
     
     ...(experience.length > 0 ? [
@@ -127,22 +128,22 @@ export function createResumeDocx(resumeData: ResumeData): Document {
         ...experience.flatMap(exp => [
         new Paragraph({
             children: [
-                new TextRun({ text: exp.title, bold: true, size: 20, color: TEXT_COLOR }),
-                new TextRun({ text: `\t${exp.dates}`, color: LIGHT_TEXT_COLOR, size: 18 }),
+                new TextRun({ text: exp.title, bold: true, size: 20, color: TEXT_COLOR, font: FONT_FAMILY }),
+                new TextRun({ text: `\t${exp.dates}`, color: LIGHT_TEXT_COLOR, size: 18, font: FONT_FAMILY }),
             ],
-            tabStops: [{ type: TabStopType.RIGHT, position: 6500 }],
+            tabStops: [{ type: TabStopType.RIGHT, position: 6800 }],
             spacing: { before: 80 }
         }),
         new Paragraph({
             children: [
-                new TextRun({ text: exp.company, bold: false, color: LINK_COLOR, size: 19 }),
-                new TextRun({ text: `\t${exp.location}`, color: LIGHT_TEXT_COLOR, size: 18 }),
+                new TextRun({ text: exp.company, bold: false, color: LINK_COLOR, size: 19, font: FONT_FAMILY }),
+                new TextRun({ text: `\t${exp.location}`, color: LIGHT_TEXT_COLOR, size: 18, font: FONT_FAMILY }),
             ],
-             tabStops: [{ type: TabStopType.RIGHT, position: 6500 }],
+             tabStops: [{ type: TabStopType.RIGHT, position: 6800 }],
              spacing: { after: 60 },
         }),
         ...exp.bullets.map(bullet => new Paragraph({
-            children: [new TextRun({text: bullet, size: 18, color: TEXT_COLOR})],
+            children: [new TextRun({text: bullet, size: 18, color: TEXT_COLOR, font: FONT_FAMILY})],
             bullet: { level: 0 },
             indent: { left: 280, hanging: 280 },
             spacing: { after: 40 },
@@ -155,18 +156,18 @@ export function createResumeDocx(resumeData: ResumeData): Document {
         ...education.flatMap(edu => [
         new Paragraph({
             children: [
-                 new TextRun({ text: edu.degree, bold: true, size: 20, color: TEXT_COLOR }),
-                 new TextRun({ text: `\t${edu.dates}`, color: LIGHT_TEXT_COLOR, size: 18 }),
+                 new TextRun({ text: edu.degree, bold: true, size: 20, color: TEXT_COLOR, font: FONT_FAMILY }),
+                 new TextRun({ text: `\t${edu.dates}`, color: LIGHT_TEXT_COLOR, size: 18, font: FONT_FAMILY }),
             ],
-            tabStops: [{ type: TabStopType.RIGHT, position: 6500 }],
+            tabStops: [{ type: TabStopType.RIGHT, position: 6800 }],
             spacing: { before: 80 }
         }),
         new Paragraph({
              children: [
-                 new TextRun({ text: edu.school, bold: false, color: LINK_COLOR, size: 19 }),
-                 new TextRun({ text: `\t${edu.location}`, color: LIGHT_TEXT_COLOR, size: 18 }),
+                 new TextRun({ text: edu.school, bold: false, color: LINK_COLOR, size: 19, font: FONT_FAMILY }),
+                 new TextRun({ text: `\t${edu.location}`, color: LIGHT_TEXT_COLOR, size: 18, font: FONT_FAMILY }),
              ],
-              tabStops: [{ type: TabStopType.RIGHT, position: 6500 }],
+              tabStops: [{ type: TabStopType.RIGHT, position: 6800 }],
               spacing: { after: 100 }
         }),
     ])] : []),
@@ -197,13 +198,13 @@ export function createResumeDocx(resumeData: ResumeData): Document {
     sections: [{
       properties: {
         page: {
-            margin: { top: '0.4in', right: '0.4in', bottom: '0.4in', left: '0.4in' },
+            margin: { top: '0.5in', right: '0.5in', bottom: '0.5in', left: '0.5in' },
         },
       },
       children: [
         new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
-            columnWidths: [3200, 6300],
+            columnWidths: [3100, 6400],
             borders: {
                 top: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
                 bottom: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
@@ -236,5 +237,3 @@ export function createResumeDocx(resumeData: ResumeData): Document {
 
   return doc;
 }
-
-    
