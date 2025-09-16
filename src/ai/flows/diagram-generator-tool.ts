@@ -39,11 +39,8 @@ Description: "${description}"
 Ensure the output is a well-structured diagram. For example, for a flowchart, use standard shapes for start/end, process, and decision points. For a system architecture, use clear icons and labels for components.`;
 
     const { media } = await ai.generate({
-      model: 'googleai/gemini-2.0-flash-preview-image-generation',
+      model: 'googleai/imagen-4.0-fast-generate-001',
       prompt: prompt,
-      config: {
-        responseModalities: ['TEXT', 'IMAGE'],
-      },
     });
 
     if (!media?.url) {

@@ -164,9 +164,8 @@ const generatePresentationFlow = ai.defineFlow(
     if (outline.design.backgroundPrompt) {
         imageGenerationPromises.push(
             ai.generate({
-                model: 'googleai/gemini-2.0-flash-preview-image-generation',
+                model: 'googleai/imagen-4.0-fast-generate-001',
                 prompt: applyStyle(outline.design.backgroundPrompt),
-                config: { responseModalities: ['TEXT', 'IMAGE'] },
             })
         );
     } else {
@@ -177,9 +176,8 @@ const generatePresentationFlow = ai.defineFlow(
     for (const prompt of slideImagePrompts.values()) {
         imageGenerationPromises.push(
             ai.generate({
-                model: 'googleai/gemini-2.0-flash-preview-image-generation',
+                model: 'googleai/imagen-4.0-fast-generate-001',
                 prompt: applyStyle(prompt),
-                config: { responseModalities: ['TEXT', 'IMAGE'] },
             })
         );
     }
