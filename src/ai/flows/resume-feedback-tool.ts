@@ -45,7 +45,7 @@ const RewrittenResumeSchema = z.object({
     })).describe("A list of educational qualifications."),
     projects: z.array(z.object({
         title: z.string().describe("The project title."),
-        description: z.string().describe("A brief description of the project, often as bullet points."),
+        description: z.string().describe("A brief description of the project."),
         link: z.string().optional().describe("A URL link to the project (e.g., GitHub repo).")
     })).describe("A list of key projects, typically placed in the sidebar."),
     skills: z.array(z.string()).describe("A list of key skills relevant to the job, comma-separated."),
@@ -112,8 +112,8 @@ Please perform the following two tasks:
         - **Summary**: A concise professional summary of 2-4 sentences.
         - **Experience**: List all work experiences. For each, extract the title, company, location, dates, and 3-5 detailed, metric-driven bullet points.
         - **Education**: List all educational qualifications. For each, extract the degree, school, location, and dates.
-    - **Sidebar (Left Side)**:
-        - **Projects**: Extract key projects with a title, a short description (can be bullet points), and a URL if available.
+    - **Sidebar (Left Column)**:
+        - **Projects**: Extract key projects with a title, a short description, and a URL if available.
         - **Key Achievements**: Identify major career achievements. For each, create a short title (e.g., "Increased Conversions") and a description with a quantifiable metric.
         - **Skills**: Compile a list of all relevant skills.
         - **Training/Courses**: List any relevant certifications or courses with a title and a brief description.

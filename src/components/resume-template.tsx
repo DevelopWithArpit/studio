@@ -14,7 +14,6 @@ interface ResumeData {
     linkedin?: string;
     github?: string;
     location?: string;
-    extraField?: string;
   };
   summary: string;
   experience: {
@@ -47,15 +46,15 @@ interface ResumeData {
 }
 
 const SidebarSection: React.FC<{ title: string; children: React.ReactNode; className?: string }> = ({ title, children, className }) => (
-    <section className={cn('mb-6', className)}>
-        <h2 className="text-[10px] font-bold uppercase tracking-widest text-gray-400 border-b-2 border-gray-500 pb-1 mb-3">{title}</h2>
+    <section className={cn('mb-4', className)}>
+        <h2 className="text-[9px] font-bold uppercase tracking-wider text-gray-400 border-b border-gray-500 pb-1 mb-2">{title}</h2>
         {children}
     </section>
 );
 
 const MainSection: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
-    <section className="mb-6">
-        <h2 className="text-sm font-bold uppercase tracking-widest text-gray-500 border-b border-gray-300 pb-1 mb-3">{title}</h2>
+    <section className="mb-4">
+        <h2 className="text-[9px] font-bold uppercase tracking-wider text-gray-500 border-b border-gray-300 pb-1 mb-2">{title}</h2>
         {children}
     </section>
 );
@@ -88,14 +87,14 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
     return (
         <div className="bg-white flex font-sans text-black" style={{ width: '816px', minHeight: '1056px' }}>
             {/* Sidebar (Left Column) */}
-            <aside className="w-[33.33%] bg-[#0d243c] text-white p-8 flex flex-col" style={{fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif'}}>
-                 <div className="text-left mb-8">
-                    <h1 className="text-4xl font-bold tracking-tight text-white uppercase">{name}</h1>
+            <aside className="w-[35%] bg-[#0d243c] text-white p-6 flex flex-col" style={{fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif'}}>
+                 <div className="text-left mb-6">
+                    <h1 className="text-3xl font-bold tracking-tight text-white uppercase">{name}</h1>
                 </div>
 
                 {projects?.length > 0 && (
                     <SidebarSection title="Projects">
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                             {projects.map((proj, i) => (
                                 <div key={i}>
                                     <h3 className="font-bold text-sm text-white">{proj.title}</h3>
@@ -109,7 +108,7 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
 
                 {keyAchievements?.length > 0 && (
                     <SidebarSection title="Key Achievements">
-                         <div className="space-y-4">
+                         <div className="space-y-3">
                             {keyAchievements.map((ach, i) => {
                                 const Icon = getAchievementIcon(ach.title);
                                 return (
@@ -135,7 +134,7 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
 
                 {training?.length > 0 && (
                     <SidebarSection title="Training / Courses">
-                        <div className="space-y-3">
+                        <div className="space-y-2">
                         {training.map((course, i) => (
                             <div key={i}>
                                 <h3 className="font-semibold text-sm text-white">{course.title}</h3>
@@ -148,15 +147,14 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
             </aside>
 
             {/* Main Content (Right Column) */}
-            <main className="w-[66.67%] bg-white p-8 text-gray-800" style={{fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif'}}>
-                <header className="mb-6 text-left">
-                    <h2 className="text-xl font-bold text-gray-700 tracking-wider">{title}</h2>
-                    <div className="text-xs text-gray-500 flex items-center flex-wrap gap-x-3 gap-y-1 mt-2">
+            <main className="w-[65%] bg-white p-6 text-gray-800" style={{fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif'}}>
+                <header className="mb-4 text-left">
+                    <h2 className="text-lg font-semibold text-gray-700 tracking-wider">{title}</h2>
+                    <div className="text-xs text-gray-500 flex items-center flex-wrap gap-x-3 gap-y-1 mt-1">
                         {contact?.phone && <span className="flex items-center gap-1.5"><Phone className="w-3 h-3"/>{contact.phone}</span>}
                         {contact?.email && <span className="flex items-center gap-1.5"><Mail className="w-3 h-3"/>{contact.email}</span>}
                         {contact?.linkedin && <span className="flex items-center gap-1.5"><Linkedin className="w-3 h-3"/>{contact.linkedin}</span>}
                         {contact?.location && <span className="flex items-center gap-1.5"><MapPin className="w-3 h-3"/>{contact.location}</span>}
-                        {contact?.extraField && <span className="flex items-center gap-1.5"><Star className="w-3 h-3"/>{contact.extraField}</span>}
                     </div>
                 </header>
 
@@ -168,7 +166,7 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
 
                 {experience?.length > 0 && (
                     <MainSection title="Experience">
-                        <div className="space-y-5">
+                        <div className="space-y-4">
                             {experience.map((exp, i) => (
                                 <div key={i}>
                                     <div className="flex justify-between items-baseline mb-1">
@@ -190,7 +188,7 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
                 
                  {education?.length > 0 && (
                      <MainSection title="Education">
-                         <div className="space-y-4">
+                         <div className="space-y-3">
                             {education.map((edu, i) => (
                                 <div key={i}>
                                     <div className="flex justify-between items-baseline">
