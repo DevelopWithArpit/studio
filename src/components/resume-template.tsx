@@ -85,9 +85,9 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
     const { name, title, contact, summary, experience, education, projects, skills, keyAchievements, training } = resumeData;
 
     return (
-        <div className="bg-white flex flex-col md:flex-row font-sans text-black w-full" style={{ minHeight: '1056px' }}>
+        <div className="bg-white flex font-sans text-black" style={{ width: '816px', minHeight: '1056px' }}>
             {/* Sidebar (Left Column) */}
-            <aside className="w-full md:w-[35%] bg-[#0d243c] text-white p-6 flex flex-col" style={{fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif'}}>
+            <aside className="w-[35%] bg-[#0d243c] text-white p-6 flex flex-col" style={{fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif'}}>
                  <div className="text-left mb-6">
                     <h1 className="text-3xl font-bold tracking-tight text-white uppercase">{name}</h1>
                 </div>
@@ -147,7 +147,7 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
             </aside>
 
             {/* Main Content (Right Column) */}
-            <main className="w-full md:w-[65%] bg-white p-6 text-gray-800" style={{fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif'}}>
+            <main className="w-[65%] bg-white p-6 text-gray-800" style={{fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif'}}>
                 <header className="mb-4 text-left">
                     <h2 className="text-lg font-semibold text-gray-700 tracking-wider">{title}</h2>
                     <div className="text-xs text-gray-500 flex items-center flex-wrap gap-x-3 gap-y-1 mt-1">
