@@ -345,16 +345,12 @@ export default function ResumeFeedbackTool() {
               </TabsContent>
               <TabsContent value="rewritten" className="mt-4">
                 {isLoading && !result ? (
-                  <div className="bg-gray-200 p-8 flex justify-center overflow-auto">
-                    <div className="origin-top-left scale-[.6] md:scale-[.8]">
-                      <div className="w-[816px] h-[1056px]"><Skeleton className="w-full h-full" /></div>
-                    </div>
-                  </div>
+                  <div className="border rounded-lg"><Skeleton className="h-[1056px] w-full max-w-[816px] mx-auto" /></div>
                 ) : (
                   result?.rewrittenResume && (
                     <div className="space-y-4">
-                       <div className="bg-gray-200 p-8 flex justify-center overflow-auto">
-                           <div id="resume-preview-content" className="origin-top-left">
+                       <div className="bg-gray-200 p-4 md:p-8 flex justify-center overflow-auto">
+                           <div id="resume-preview-content" className="w-full max-w-4xl">
                                 <ResumeTemplate resumeData={result.rewrittenResume} />
                            </div>
                       </div>
