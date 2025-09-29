@@ -191,13 +191,21 @@ export default function PresentationGeneratorTool() {
             anim: { type: 'fly', options: { direction: 'b', duration: 1, delay: 0.5, effect: 'def' } }
         });
     }
+    
+    const transitions: PptxGenJS.Transition[] = [
+        { type: "fade", duration: 1 },
+        { type: "push", duration: 1, options: { direction: 'l' } },
+        { type: "wipe", duration: 1, options: { direction: 'l' } },
+        { type: "cover", duration: 1, options: { direction: 'l' } },
+    ];
+
 
     // Content Slides
-    result.slides.forEach((slide) => {
+    result.slides.forEach((slide, slideIndex) => {
         if (slide.slideLayout === 'title') return; // Skip the duplicate title slide data
 
         const contentSlide = pptx.addSlide({ masterName: "MASTER_SLIDE" });
-        contentSlide.transition = { type: "fade", duration: 1 };
+        contentSlide.transition = transitions[slideIndex % transitions.length];
         
         contentSlide.addText(slide.title, { 
             x: 0.5, y: 0.5, w: '90%', h: 1, 
@@ -205,19 +213,23 @@ export default function PresentationGeneratorTool() {
             bold: true, 
             color: cleanColor(design.accentColor),
             fontFace: 'Helvetica',
-            anim: { type: 'fly', options: { direction: 'l', duration: 1, effect: 'def' } }
+            anim: { type: 'fly', options: { direction: 'l', duration: 0.5, effect: 'def' } }
         });
         
         if (slide.slideLayout === 'contentWithImage') {
             if (slide.content.length > 0) {
-                 contentSlide.addText(slide.content.join('\n'), {
-                    x: 0.5, y: 1.5, w: '55%', h: 4.5,
-                    fontSize: 18,
-                    color: cleanColor(design.textColor),
-                    bullet: true,
-                    fontFace: 'Arial',
-                    valign: 'top',
-                    anim: { type: 'fly', options: { direction: 'u', duration: 1, delay: 0.5, effect: 'def' } }
+                slide.content.forEach((point, index) => {
+                    contentSlide.addText(point, {
+                        x: 0.5, y: 1.8 + (index * 0.7), w: '55%', h: 0.7,
+                        fontSize: 18,
+                        color: cleanColor(design.textColor),
+                        bullet: true,
+                        fontFace: 'Arial',
+                        anim: {
+                            type: 'fly',
+                            options: { direction: 'u', duration: 0.5, delay: 0.75 + (index * 0.25) }
+                        }
+                    });
                 });
             }
 
@@ -226,6 +238,7 @@ export default function PresentationGeneratorTool() {
                     data: slide.imageUrl,
                     x: '60%', y: 1.5, w: '35%', h: 4.5,
                     sizing: { type: 'contain', w: 3.5, h: 4.5 },
+                    anim: { type: 'zoom', options: { scale: 'in', duration: 1, delay: 0.5 } }
                 });
             }
              if (slide.logoUrl) {
@@ -233,6 +246,7 @@ export default function PresentationGeneratorTool() {
                     path: slide.logoUrl,
                     x: '90%', y: '90%', w: '8%', h: '8%',
                      sizing: { type: 'contain', w: 0.8, h: 0.8 },
+                     anim: { type: 'fade', duration: 1, delay: 1 }
                 });
             }
         }
