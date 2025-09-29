@@ -146,193 +146,96 @@ export default function PresentationGeneratorTool() {
     const pptx = new PptxGenJS();
     pptx.layout = 'LAYOUT_WIDE';
     
-    const { design, backgroundImageUrl, style } = result;
+    const { design, backgroundImageUrl } = result;
     const cleanColor = (color: string) => color.startsWith('#') ? color.substring(1) : color;
     
-    const masterBackground = { color: cleanColor(design.backgroundColor) };
+    const masterBackground: PptxGenJS.BackgroundProps = { color: cleanColor(design.backgroundColor) };
     if (backgroundImageUrl && backgroundImageUrl.startsWith('data:image')) {
         masterBackground.path = backgroundImageUrl;
     }
 
-    const defineMasters = (themeStyle: 'Default' | 'Tech Pitch' | 'Creative') => {
-        switch (themeStyle) {
-            case 'Tech Pitch':
-                pptx.defineSlideMaster({
-                    title: "TITLE_SLIDE_TECH",
-                    background: masterBackground,
-                    objects: [
-                        { text: { text: result.title, options: { x: '5%', y: '40%', w: '90%', h: '20%', fontFace: 'Helvetica', fontSize: 54, bold: true, color: cleanColor(design.accentColor), align: 'left' } } },
-                        { text: { text: result.slides[0]?.title, options: { x: '5%', y: '58%', w: '80%', h: '15%', fontFace: 'Helvetica Neue', fontSize: 24, color: cleanColor(design.textColor), align: 'left' } } },
-                        { rect: { x: '5%', y: '55%', w: '25%', h: 0.05, fill: { color: cleanColor(design.accentColor) } } },
-                    ],
-                });
-                pptx.defineSlideMaster({
-                    title: "CONTENT_SLIDE_TECH",
-                    background: masterBackground,
-                    objects: [
-                        { placeholder: { options: { name: "title", type: "title", x: '4%', y: '4%', w: '92%', h: '15%', fontFace: 'Helvetica', fontSize: 32, bold: true, color: cleanColor(design.accentColor), align: 'left' } } },
-                        { placeholder: { options: { name: "body", type: "body", x: '4%', y: '25%', w: '55%', h: '65%', fontFace: 'Helvetica Neue', fontSize: 18, color: cleanColor(design.textColor), paraSpaceAfter: 15, valign: 'top' } } },
-                        { placeholder: { options: { name: "image", type: "pic", x: '63%', y: '25%', w: '33%', h: '65%' } } },
-                        { rect: { x: '94%', y: '4%', w: '2%', h: '92%', fill: { color: cleanColor(design.accentColor) } } },
-                        { placeholder: { options: { name: "logo", type: "pic", x: '2%', y: '92%', w: '5%', h: '5%' } } },
-                    ],
-                });
-                pptx.defineSlideMaster({
-                    title: "TITLE_ONLY_SLIDE_TECH",
-                    background: { color: cleanColor(design.accentColor) },
-                    objects: [
-                        { text: { text: "Section", options: { x: '5%', y: '40%', w: '90%', h: '20%', fontFace: 'Helvetica', fontSize: 44, bold: true, color: cleanColor(design.backgroundColor), align: 'center' } } },
-                    ],
-                });
-                break;
-            
-            case 'Creative':
-                pptx.defineSlideMaster({
-                    title: "TITLE_SLIDE_CREATIVE",
-                    background: masterBackground,
-                    objects: [
-                        { rect: { x: 0, y: 0, w: '30%', h: '100%', fill: { color: cleanColor(design.accentColor) } } },
-                        { text: { text: result.title, options: { x: '35%', y: '40%', w: '60%', h: '20%', fontFace: 'Garamond', fontSize: 54, bold: true, color: cleanColor(design.accentColor), align: 'left' } } },
-                        { text: { text: result.slides[0]?.title, options: { x: '35%', y: '58%', w: '60%', h: '15%', fontFace: 'Garamond', fontSize: 24, color: cleanColor(design.textColor), align: 'left' } } },
-                    ],
-                });
-                 pptx.defineSlideMaster({
-                    title: "CONTENT_SLIDE_CREATIVE",
-                    background: masterBackground,
-                    objects: [
-                        { placeholder: { options: { name: "title", type: "title", x: '4%', y: '4%', w: '92%', h: '15%', fontFace: 'Garamond', fontSize: 36, bold: true, color: cleanColor(design.accentColor), align: 'left' } } },
-                        { placeholder: { options: { name: "body", type: "body", x: '4%', y: '25%', w: '55%', h: '65%', fontFace: 'Garamond', fontSize: 20, color: cleanColor(design.textColor), paraSpaceAfter: 15, valign: 'top' } } },
-                        { placeholder: { options: { name: "image", type: "pic", x: '63%', y: '25%', w: '33%', h: '65%', shape: pptx.shapes.OVAL, } } },
-                        { rect: { x: 0, y: '95%', w: '100%', h: '5%', fill: { color: cleanColor(design.accentColor) } } },
-                    ],
-                });
-                 pptx.defineSlideMaster({
-                    title: "TITLE_ONLY_SLIDE_CREATIVE",
-                    background: masterBackground,
-                    objects: [
-                        { text: { text: "Section", options: { x: '5%', y: '40%', w: '90%', h: '20%', fontFace: 'Garamond', fontSize: 48, bold: true, color: cleanColor(design.accentColor), align: 'center' } } },
-                         { rect: { x: '30%', y: '58%', w: '40%', h: 0.1, fill: { color: cleanColor(design.accentColor) } } },
-                    ],
-                });
-                break;
-
-            case 'Default':
-            default:
-                pptx.defineSlideMaster({
-                    title: "TITLE_SLIDE_DEFAULT",
-                    background: masterBackground,
-                    objects: [
-                        { placeholder: { options: { name: "title", type: "title", x: '5%', y: '40%', w: '90%', h: '15%', fontFace: 'Arial', fontSize: 44, bold: true, color: cleanColor(design.accentColor), align: 'center', valign: 'middle' } } },
-                        { placeholder: { options: { name: "subtitle", type: "body", x: '10%', y: '55%', w: '80%', h: '20%', fontFace: 'Arial', fontSize: 20, color: cleanColor(design.textColor), align: 'center', valign: 'top' } } },
-                        { rect: { x: '40%', y: '52%', w: '20%', h: 0.05, fill: { color: cleanColor(design.accentColor) } } },
-                    ],
-                });
-                pptx.defineSlideMaster({
-                    title: "CONTENT_SLIDE_DEFAULT",
-                    background: masterBackground,
-                    objects: [
-                        { rect: { x: 0, y: 0, w: '100%', h: '15%', fill: { color: cleanColor(design.accentColor) } } },
-                        { placeholder: { options: { name: "title", type: "title", x: '4%', y: '0%', w: '92%', h: '15%', fontFace: 'Arial', fontSize: 28, bold: true, color: cleanColor(design.backgroundColor), align: 'left', valign: 'middle' } } },
-                        { rect: { x: '4%', y: '16%', w: '30%', h: 0.1, fill: { color: cleanColor(design.accentColor) } } },
-                        { placeholder: { options: { name: "body", type: "body", x: '4%', y: '22%', w: '55%', h: '68%', fontFace: 'Arial', fontSize: 18, color: cleanColor(design.textColor), paraSpaceAfter: 15, valign: 'top', } } },
-                        { placeholder: { options: { name: "image", type: "pic", x: '63%', y: '22%', w: '33%', h: '68%' } } },
-                        { placeholder: { options: { name: "logo", type: "pic", x: '92%', y: '92%', w: '5%', h: '5%' } } },
-                        { options: { name: "slideNumber", x: '4%', y: '95%', w: '10%', h: '5%', fontFace: 'Arial', fontSize: 10, color: cleanColor(design.textColor) }, slideNumber: { align: 'left' } }
-                    ],
-                });
-                pptx.defineSlideMaster({
-                    title: "TITLE_ONLY_SLIDE_DEFAULT",
-                    background: { color: cleanColor(design.accentColor) },
-                    objects: [
-                        ...(backgroundImageUrl ? [{ image: { path: backgroundImageUrl, x: 0, y: 0, w: '100%', h: '100%', sizing: { type: 'cover', transparency: 80 } }}] : []),
-                        { placeholder: { options: { name: "title", type: "title", x: '5%', y: '40%', w: '90%', h: '20%', fontFace: 'Arial', fontSize: 36, bold: true, color: cleanColor(design.backgroundColor), align: 'center', valign: 'middle' } } },
-                    ],
-                });
-                break;
-        }
-    };
+    pptx.defineSlideMaster({
+        title: "MASTER_SLIDE",
+        background: masterBackground,
+        objects: [
+            { 'rect':    { x:0.0, y:6.8, w:'100%', h:0.75, fill:{ color: cleanColor(design.accentColor) } } },
+            { 'text':    { text:'AI Mentor', options:{ x:0.5, y:6.9, w:5, h:0.5, fontFace:'Arial', fontSize:14, color:cleanColor(design.backgroundColor), bold:true } } },
+        ],
+    });
     
-    defineMasters(style);
+    // Title Slide
+    const titleSlide = pptx.addSlide({ masterName: "MASTER_SLIDE" });
+    titleSlide.addText(result.title, { 
+        x: 1, y: 2, w: 8, h: 1.5, 
+        fontSize: 44, 
+        bold: true, 
+        color: cleanColor(design.textColor), 
+        align: 'center',
+        fontFace: 'Helvetica',
+        anim: { type: 'fly', options: { direction: 'b', duration: 1, effect: 'def' } }
+    });
 
+    const presenterDetails = [
+        result.presenterName ? `Presented by: ${result.presenterName}` : null,
+        result.rollNumber ? `Roll No: ${result.rollNumber}` : null,
+        result.department ? `Department: ${result.department}` : null
+    ].filter(Boolean).join('\n');
 
-    // Generate slides
-    result.slides.forEach((slide, index) => {
-      let masterName = '';
-      const styleSuffix = `_${style.toUpperCase()}`;
-      switch (slide.slideLayout) {
-        case 'title':
-          masterName = `TITLE_SLIDE${styleSuffix}`;
-          break;
-        case 'titleOnly':
-          masterName = `TITLE_ONLY_SLIDE${styleSuffix}`;
-          break;
-        case 'contentWithImage':
-        default:
-          masterName = `CONTENT_SLIDE${styleSuffix}`;
-          break;
-      }
-      
-      const pptxSlide = pptx.addSlide({ masterName });
-      pptxSlide.transition = { type: "fade", duration: 1 };
+    if (presenterDetails) {
+        titleSlide.addText(presenterDetails, { 
+            x: 1, y: 4, w: 8, h: 1, 
+            fontSize: 20, 
+            color: cleanColor(design.textColor), 
+            align: 'center',
+            fontFace: 'Arial',
+            anim: { type: 'fly', options: { direction: 'b', duration: 1, delay: 0.5, effect: 'def' } }
+        });
+    }
 
-      if (slide.slideLayout === 'title') {
-        pptxSlide.addText(result.title, { placeholder: "title" });
-        
-        const subtitleTextObjects: PptxGenJS.TextProps[] = [];
-        const firstSlide = result.slides[0];
-        
-        if (firstSlide?.title && firstSlide.title !== result.title) {
-            subtitleTextObjects.push({
-                text: firstSlide.title,
-                options: { fontSize: 24, bold: true, breakLine: true, color: cleanColor(design.textColor) }
-            });
-        }
-        
-        const presenterDetails = [
-            result.presenterName ? `Presented by: ${result.presenterName}` : null,
-            result.rollNumber ? `Roll No: ${result.rollNumber}` : null,
-            result.department ? `Department: ${result.department}` : null
-        ].filter(Boolean);
-    
-        if(presenterDetails.length > 0) {
-          if(subtitleTextObjects.length > 0) {
-             subtitleTextObjects.push({ text: ' ', options: { breakLine: true } }); // Add a space
-          }
-          subtitleTextObjects.push(...presenterDetails.map(text => ({ text: text!, options: { fontSize: 16, breakLine: true, color: cleanColor(design.textColor) } })));
-        }
-        
-        if (subtitleTextObjects.length > 0) {
-            pptxSlide.addText(subtitleTextObjects, { placeholder: 'subtitle' });
-        }
-      } else {
-         pptxSlide.addText(slide.title, { placeholder: "title" });
+    // Content Slides
+    result.slides.forEach((slide) => {
+        if (slide.slideLayout === 'title') return; // Skip the duplicate title slide data
 
+        const contentSlide = pptx.addSlide({ masterName: "MASTER_SLIDE" });
+        contentSlide.transition = { type: "fade", duration: 1 };
+        
+        contentSlide.addText(slide.title, { 
+            x: 0.5, y: 0.5, w: '90%', h: 1, 
+            fontSize: 32, 
+            bold: true, 
+            color: cleanColor(design.accentColor),
+            fontFace: 'Helvetica',
+            anim: { type: 'fly', options: { direction: 'l', duration: 1, effect: 'def' } }
+        });
+        
         if (slide.slideLayout === 'contentWithImage') {
-          const bodyTextObjects = slide.content.map(point => ({
-            text: point,
-            options: { bullet: {type: 'dot', indent: 24} }
-          }));
+            if (slide.content.length > 0) {
+                 contentSlide.addText(slide.content.join('\n'), {
+                    x: 0.5, y: 1.5, w: '55%', h: 4.5,
+                    fontSize: 18,
+                    color: cleanColor(design.textColor),
+                    bullet: true,
+                    fontFace: 'Arial',
+                    valign: 'top',
+                    anim: { type: 'fly', options: { direction: 'u', duration: 1, delay: 0.5, effect: 'def' } }
+                });
+            }
 
-          if (bodyTextObjects.length > 0) {
-              pptxSlide.addText(bodyTextObjects, { placeholder: 'body' });
-          }
-          
-          if (slide.imageUrl && slide.imageUrl.startsWith('data:image')) {
-            pptxSlide.addImage({
-              data: slide.imageUrl,
-              placeholder: "image",
-              sizing: { type: 'contain', w: '100%', h: '100%' },
-            });
-          }
-          if (slide.logoUrl) {
-            pptxSlide.addImage({
-                path: slide.logoUrl,
-                placeholder: "logo",
-                 sizing: { type: 'contain', w: '100%', h: '100%' },
-            });
-          }
+            if (slide.imageUrl && slide.imageUrl.startsWith('data:image')) {
+                contentSlide.addImage({
+                    data: slide.imageUrl,
+                    x: '60%', y: 1.5, w: '35%', h: 4.5,
+                    sizing: { type: 'contain', w: 3.5, h: 4.5 },
+                });
+            }
+             if (slide.logoUrl) {
+                contentSlide.addImage({
+                    path: slide.logoUrl,
+                    x: '90%', y: '90%', w: '8%', h: '8%',
+                     sizing: { type: 'contain', w: 0.8, h: 0.8 },
+                });
+            }
         }
-      }
     });
 
     pptx.writeFile({ fileName: `${result.title}.pptx` });
