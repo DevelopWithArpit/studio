@@ -78,17 +78,17 @@ const getResumeFeedbackFlow = ai.defineFlow(
   },
   async (input) => {
     
-    let documentPrompt = '';
-    let promptInput: Record<string, any> = {
+    let documentPromptPart;
+    const promptInput: Record<string, any> = {
       targetJobRole: input.targetJobRole,
       additionalInfo: input.additionalInfo,
     };
 
     if (input.resume.startsWith('data:')) {
-      documentPrompt = 'Document: {{media url=resume}}';
+      documentPromptPart = 'Document: {{media url=resume}}';
       promptInput.resume = input.resume;
     } else {
-      documentPrompt = 'Document:\n{{{resumeText}}}';
+      documentPromptPart = 'Document:\n{{{resumeText}}}';
       promptInput.resumeText = input.resume;
     }
     
@@ -100,7 +100,7 @@ const getResumeFeedbackFlow = ai.defineFlow(
 {{#if targetJobRole}}The user is targeting the role of: {{{targetJobRole}}}. You must tailor your feedback and rewritten resume to align with keywords and qualifications for this role.{{/if}}
 {{#if additionalInfo}}Additional context from the user: {{{additionalInfo}}}{{/if}}
 
-${documentPrompt}
+${documentPromptPart}
 
 Please perform the following two tasks:
 
@@ -122,6 +122,11 @@ Please perform the following two tasks:
     });
 
     const { output } = await prompt(promptInput);
-    return output!;
+    if (!output) {
+      throw new Error("The AI failed to generate the resume analysis.");
+    }
+    return output;
   }
 );
+
+    
