@@ -110,7 +110,7 @@ const outlinePrompt = ai.definePrompt({
 - If the user provides a "Custom Structure," you MUST use it as the primary source. The 'numSlides' parameter should be IGNORED.
   - **Parsing Custom Structure**: A line starting with a number and/or bullet (e.g., "1. About the Company", "- Key Features") should be treated as a slide title. All text following that title, until the next title, should be used as the context/notes for that specific slide.
   - You MUST generate one slide for each title you identify in the custom structure.
-- If the content type is "Project Proposal," generate the subsequent presentation slides using this structure: 1. Introduction, 2. Objectives, 3. Problem Statement / Need Analysis, 4. Target Group / Area, 5. Proposed Activities, 6. Methodology, 7. Expected Outcomes, 8. Conclusion. (Translated to the target language).
+- If the content type is "Project Proposal," generate the subsequent presentation slides using this structure: 1. Introduction, 2. Objectives, 3. Background / Literature, 4. Methodology / Approach, 5. Project Work / Implementation, 6. Results / Findings, 7. Discussion / Analysis, 8. Conclusion & Suggestions, 9. Acknowledgement. (Translated to the target language).
 - If the content type is "Pitch Deck," generate a presentation with this narrative structure: 1. Title, 2. The Problem, 3. The Solution, 4. Market Size, 5. The Product, 6. Team, 7. Financials / Ask, 8. Thank You / Contact.
 - If the content type is "General," generate a logical presentation of exactly {{{numSlides}}} slides, which must include a conclusion slide at the end. The introduction slide is extra.
 

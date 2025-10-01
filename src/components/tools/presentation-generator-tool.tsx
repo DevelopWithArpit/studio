@@ -126,13 +126,48 @@ export default function PresentationGeneratorTool() {
 
   React.useEffect(() => {
     if (style === 'Tech Pitch') {
-        form.setValue('contentType', 'pitchDeck');
+        if (form.getValues('contentType') !== 'pitchDeck') {
+          form.setValue('contentType', 'pitchDeck');
+        }
     } else if (style === 'Default' || style === 'Creative') {
        if (form.getValues('contentType') === 'pitchDeck') {
          form.setValue('contentType', 'general');
        }
     }
   }, [style, form]);
+
+  React.useEffect(() => {
+    if (contentType === 'projectProposal') {
+      form.setValue('customStructure', `1. Introduction
+What is the project about?
+Why is it important/relevant to field/community?
+2. Objectives
+Main goals of the project
+What you planned to achieve
+3. Background / Literature
+Short background of the topic
+Any references or community issues identified
+4. Methodology / Approach
+Steps taken in field work
+Tools, surveys, techniques used
+5. Project Work / Implementation
+Activities done
+Photographs/figures/observations
+6. Results / Findings
+What you observed/collected
+Data, charts, or key outcomes
+7. Discussion / Analysis
+What the results mean
+Link to community needs/problems
+8. Conclusion & Suggestions
+Summary of work
+Possible improvements, recommendations
+9. Acknowledgement`);
+    } else if (form.getValues('customStructure')?.startsWith('1. Introduction')) {
+      // Clear if it was the default project proposal text
+      form.setValue('customStructure', '');
+    }
+  }, [contentType, form]);
 
 
   async function onSubmit(data: FormData) {
@@ -479,9 +514,7 @@ export default function PresentationGeneratorTool() {
                       <FormControl>
                         <Input type="number" min="2" max="20" {...field} disabled={contentType !== 'general'}/>
                       </FormControl>
-                       {contentType === 'projectProposal' && <p className="text-xs text-muted-foreground">Fixed structure for proposals.</p>}
-                       {contentType === 'pitchDeck' && <p className="text-xs text-muted-foreground">Fixed structure for pitch decks.</p>}
-                       {contentType === 'custom' && <p className="text-xs text-muted-foreground">Determined by your custom input.</p>}
+                       {contentType !== 'general' && <p className="text-xs text-muted-foreground">Determined by content type.</p>}
                       <FormMessage />
                     </FormItem>
                   )}
