@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState } from 'react';
@@ -251,7 +250,7 @@ export default function ResumeFeedbackTool() {
                               or drag and drop
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              PDF, DOCX, TXT up to 200MB
+                              PDF, TXT up to 200MB
                             </p>
                           </>
                         )}
@@ -260,7 +259,7 @@ export default function ResumeFeedbackTool() {
                           type="file"
                           className="sr-only"
                           onChange={handleFileChange}
-                          accept=".pdf,.doc,.docx,.txt"
+                          accept=".pdf,.txt"
                         />
                       </div>
                     </FormControl>
