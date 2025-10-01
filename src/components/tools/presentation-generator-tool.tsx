@@ -76,16 +76,48 @@ export default function PresentationGeneratorTool() {
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      topic: '',
+      topic: 'AI Mentor: A Suite of AI-Powered Tools',
       presenterName: '',
       rollNumber: '',
       department: '',
       numSlides: 5,
       imageStyle: 'photorealistic',
       language: 'English',
-      contentType: 'general',
-      customStructure: '',
-      style: 'Default',
+      contentType: 'custom',
+      customStructure: `1. Introduction to AI Mentor
+- A suite of AI-powered tools to boost productivity and learning.
+
+2. Analysis Tools
+- Smart Search: Analyze documents with natural language queries.
+- Document Summarizer: Get quick summaries of long documents.
+
+3. Learning & Writing
+- AI Explanation: Understand complex topics easily.
+- Thesis Generator: Structure and write academic papers.
+- Text Humanizer: Make AI text sound more natural.
+
+4. Development Tools
+- Code Generator: Create code from text descriptions.
+- Code Analyzer: Find errors and vulnerabilities in code.
+- Diagram Generator: Create flowcharts and diagrams from text.
+
+5. Career Tools
+- Interview Questions: Prepare for job interviews.
+- Resume Feedback: Get AI-powered resume reviews.
+- Portfolio Generator: Create a personal portfolio website.
+- Cover Letter Assistant: Draft tailored cover letters.
+- Career Path Suggester: Discover potential career paths.
+- LinkedIn Visuals: Generate professional profile pictures and banners.
+
+6. Productivity & Media
+- Presentation Generator: Create presentations from a topic.
+- Text to Speech: Convert text into audio.
+- Watermark Remover: Remove watermarks from images.
+- Image Text Manipulation: Edit text within an image.
+
+7. Conclusion
+- Recap of the project's capabilities and future scope.`,
+      style: 'Tech Pitch',
     },
   });
 
