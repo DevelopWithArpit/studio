@@ -62,7 +62,7 @@ entrypoint:
 `,
   "components.json": `
 {
-  "\$schema": "https://ui.shadcn.com/schema.json",
+  "$schema": "https://ui.shadcn.com/schema.json",
   "style": "default",
   "rsc": true,
   "tsx": true,
@@ -516,11 +516,11 @@ const prompt = ai.definePrompt({
   name: 'explainTopicPrompt',
   input: {schema: ExplainTopicInputSchema},
   output: {schema: ExplainTopicOutputSchema},
-  prompt: \`You are an expert in explaining complex topics in a clear and concise manner.
+  prompt: \\\`You are an expert in explaining complex topics in a clear and concise manner.
 
   Please provide a clear and concise explanation of the following topic:
 
-  {{{topic}}}\`,
+  {{{topic}}}\\\`,
 });
 
 const explainTopicFlow = ai.defineFlow(
@@ -574,7 +574,7 @@ const prompt = ai.definePrompt({
   name: 'suggestCareerPathsPrompt',
   input: { schema: SuggestCareerPathsInputSchema },
   output: { schema: SuggestCareerPathsOutputSchema },
-  prompt: \`You are an expert career counselor. Based on the user's interests and skills, suggest three distinct and relevant career paths.
+  prompt: \\\`You are an expert career counselor. Based on the user's interests and skills, suggest three distinct and relevant career paths.
 
 User Interests:
 {{{interests}}}
@@ -582,7 +582,7 @@ User Interests:
 User Skills:
 {{{skills}}}
 
-For each suggested career path, provide a title, a detailed description, and a list of essential skills.\`,
+For each suggested career path, provide a title, a detailed description, and a list of essential skills.\\\`,
 });
 
 const suggestCareerPathsFlow = ai.defineFlow(
@@ -633,7 +633,7 @@ const analyzeCodePrompt = ai.definePrompt({
   name: 'analyzeCodePrompt',
   input: {schema: AnalyzeCodeInputSchema},
   output: {schema: AnalyzeCodeOutputSchema},
-  prompt: \`You are a code analyzer expert. Analyze the following code and provide a report of any errors, possible performance problems, and security issues.
+  prompt: \\\`You are a code analyzer expert. Analyze the following code and provide a report of any errors, possible performance problems, and security issues.
 
 Language: {{{language}}}
 Code:
@@ -642,7 +642,7 @@ Code:
 Constraints: {{constraints}}
 
 Report:
-\`,
+\\\`,
 });
 
 const analyzeCodeFlow = ai.defineFlow(
@@ -700,7 +700,7 @@ const codeGeneratorPrompt = ai.definePrompt({
   name: 'codeGeneratorPrompt',
   input: {schema: GenerateCodeInputSchema},
   output: {schema: GenerateCodeOutputSchema},
-  prompt: \`You are an expert code generator. Generate code according to the instructions and specifications provided. Consider any constraints that apply to the code, and apply them in your answer.
+  prompt: \\\`You are an expert code generator. Generate code according to the instructions and specifications provided. Consider any constraints that apply to the code, and apply them in your answer.
 
 Instructions: {{{instructions}}}
 
@@ -711,7 +711,7 @@ Frameworks: {{{constraints.frameworks}}}
 Libraries: {{{constraints.libraries}}}
 {{/if}}
 
-Generated Code:\`, 
+Generated Code:\\\`, 
 });
 
 const generateCodeFlow = ai.defineFlow(
@@ -760,7 +760,7 @@ const prompt = ai.definePrompt({
   name: 'generateCoverLetterPrompt',
   input: { schema: GenerateCoverLetterInputSchema },
   output: { schema: GenerateCoverLetterOutputSchema },
-  prompt: \`You are an expert career coach specializing in writing compelling cover letters. Your task is to generate a cover letter based on the provided job description and user information.
+  prompt: \\\`You are an expert career coach specializing in writing compelling cover letters. Your task is to generate a cover letter based on the provided job description and user information.
 
 The tone of the cover letter should be: {{{tone}}}.
 
@@ -776,7 +776,7 @@ User Information / Resume:
 {{{userInfo}}}
 ---
 
-Generate the cover letter now.\`,
+Generate the cover letter now.\\\`,
 });
 
 const generateCoverLetterFlow = ai.defineFlow(
@@ -826,11 +826,11 @@ const generateDiagramFlow = ai.defineFlow(
     outputSchema: GenerateDiagramOutputSchema,
   },
   async ({ description }) => {
-    const prompt = \`Generate a clear, high-quality diagram based on the following description. The diagram should be visually clean and easy to understand, suitable for a technical presentation.
+    const prompt = \\\`Generate a clear, high-quality diagram based on the following description. The diagram should be visually clean and easy to understand, suitable for a technical presentation.
 
-Description: "\${description}"
+Description: "\\\${description}"
 
-Ensure the output is a well-structured diagram. For example, for a flowchart, use standard shapes for start/end, process, and decision points. For a system architecture, use clear icons and labels for components.\`;
+Ensure the output is a well-structured diagram. For example, for a flowchart, use standard shapes for start/end, process, and decision points. For a system architecture, use clear icons and labels for components.\\\`;
 
     const { media } = await ai.generate({
       model: 'googleai/imagen-4.0-fast-generate-001',
@@ -879,7 +879,7 @@ const prompt = ai.definePrompt({
   name: 'summarizeDocumentPrompt',
   input: { schema: SummarizeDocumentInputSchema },
   output: { schema: SummarizeDocumentOutputSchema },
-  prompt: \`You are an expert document summarizer. Analyze the following document and generate a summary based on the specified length and style.
+  prompt: \\\`You are an expert document summarizer. Analyze the following document and generate a summary based on the specified length and style.
 
 Document:
 {{media url=documentDataUri}}
@@ -887,7 +887,7 @@ Document:
 Summary Length: {{{length}}}
 Summary Style: {{{style}}}
 
-Generate a concise and accurate summary.\`,
+Generate a concise and accurate summary.\\\`,
 });
 
 const summarizeDocumentFlow = ai.defineFlow(
@@ -940,7 +940,7 @@ const manipulateImageTextFlow = ai.defineFlow(
   async ({ imageDataUri, instructions }) => {
     const prompt = [
         { media: { url: imageDataUri } },
-        { text: \`You are an expert image editor. Your task is to manipulate the text within the provided image based on the following instructions, while seamlessly blending the changes with the original image style, font, and background. Instructions: "\${instructions}"\` },
+        { text: \\\`You are an expert image editor. Your task is to manipulate the text within the provided image based on the following instructions, while seamlessly blending the changes with the original image style, font, and background. Instructions: "\\\${instructions}"\\\` },
     ];
     
     const { media } = await ai.generate({
@@ -998,12 +998,12 @@ const prompt = ai.definePrompt({
   name: 'generateInterviewQuestionsPrompt',
   input: { schema: GenerateInterviewQuestionsInputSchema },
   output: { schema: GenerateInterviewQuestionsOutputSchema },
-  prompt: \`You are an expert interviewer and hiring manager. Your task is to generate a list of insightful interview questions.
+  prompt: \\\`You are an expert interviewer and hiring manager. Your task is to generate a list of insightful interview questions.
 
 Generate {{{count}}} {{{category}}} interview questions for the topic: "{{{topic}}}".
 
 For each question, provide the question itself and a brief summary of what you would expect in a strong answer.
-\`,
+\\\`,
 });
 
 const generateInterviewQuestionsFlow = ai.defineFlow(
@@ -1061,7 +1061,7 @@ const generateLinkedInVisualsFlow = ai.defineFlow(
     if (resumeDataUri) {
         resumeContextPart = { media: { url: resumeDataUri } };
     } else if (resumeText) {
-        resumeContextPart = { text: \`Here is the resume text:\\\\n\\\\n\${resumeText}\` };
+        resumeContextPart = { text: \\\`Here is the resume text:\\\\n\\\\n\\\${resumeText}\\\` };
     } else {
         throw new Error("Either resumeDataUri or resumeText must be provided.");
     }
@@ -1071,16 +1071,16 @@ const generateLinkedInVisualsFlow = ai.defineFlow(
     const profilePicturePrompt = userPhotoUri
       ? [
           { media: { url: userPhotoUri } },
-          { text: \`Based on the user's photo and their resume content, create a professional, high-quality headshot suitable for a LinkedIn profile picture. The background should be simple and professional, not distracting. The person should look friendly and approachable.\` },
+          { text: \\\`Based on the user's photo and their resume content, create a professional, high-quality headshot suitable for a LinkedIn profile picture. The background should be simple and professional, not distracting. The person should look friendly and approachable.\\\` },
           resumeContextPart,
         ]
       : [
-          { text: \`Generate a professional, high-quality headshot suitable for a LinkedIn profile picture for a person in the software engineering industry. The person should look friendly and approachable. The background should be simple and professional. Use the resume content to guide the style.\` },
+          { text: \\\`Generate a professional, high-quality headshot suitable for a LinkedIn profile picture for a person in the software engineering industry. The person should look friendly and approachable. The background should be simple and professional. Use the resume content to guide the style.\\\` },
           resumeContextPart,
         ];
 
     const coverBannerPrompt = [
-        { text: \`Analyze the user's resume content provided. Based on their industry, skills, and experience, generate a professional and abstract background image suitable for a LinkedIn cover banner (1584 x 396 pixels). The design should be modern, clean, and visually represent the user's professional field. For example, for a software engineer, it might incorporate subtle code-like patterns or abstract representations of data. For a graphic designer, it could be more artistic. The banner should not contain any text and should be visually appealing but not distracting.\` },
+        { text: \\\`Analyze the user's resume content provided. Based on their industry, skills, and experience, generate a professional and abstract background image suitable for a LinkedIn cover banner (1584 x 396 pixels). The design should be modern, clean, and visually represent the user's professional field. For example, for a software engineer, it might incorporate subtle code-like patterns or abstract representations of data. For a graphic designer, it could be more artistic. The banner should not contain any text and should be visually appealing but not distracting.\\\` },
         resumeContextPart,
     ];
 
@@ -1177,7 +1177,7 @@ const extractPortfolioDataPrompt = ai.definePrompt({
     name: 'extractPortfolioDataPrompt',
     input: { schema: z.object({ text: z.string() }) },
     output: { schema: PortfolioDataSchema },
-    prompt: \`You are an expert at parsing unstructured text and extracting structured information. Analyze the following document, which could be a resume, a LinkedIn profile, or an article about building a portfolio. Your task is to extract all relevant information and structure it according to the provided JSON schema.
+    prompt: \\\`You are an expert at parsing unstructured text and extracting structured information. Analyze the following document, which could be a resume, a LinkedIn profile, or an article about building a portfolio. Your task is to extract all relevant information and structure it according to the provided JSON schema.
 
 - Based on the content, determine the person's profession (e.g., 'Software Engineer', 'Graphic Designer') and populate the 'profession' field.
 - If the document is a guide or article, create a realistic and compelling portfolio for a fictional person (e.g., Alex Doe, a Full-Stack Developer) based on the principles and examples in the text.
@@ -1190,7 +1190,7 @@ Document to analyze:
 {{{text}}}
 ---
 
-Extract the data now.\`,
+Extract the data now.\\\`,
 });
 
 export async function extractPortfolioDataFromText(text: string): Promise<GeneratePortfolioWebsiteInput> {
@@ -1206,7 +1206,7 @@ const prompt = ai.definePrompt({
     name: 'generatePortfolioWebsitePrompt',
     input: { schema: PortfolioDataSchema },
     output: { schema: GeneratePortfolioWebsiteOutputSchema },
-    prompt: \`You are an expert web developer and designer, specializing in creating modern, animated portfolio websites. Your task is to generate the complete HTML, CSS, and JavaScript for a portfolio, visually tailored to the user's profession.
+    prompt: \\\`You are an expert web developer and designer, specializing in creating modern, animated portfolio websites. Your task is to generate the complete HTML, CSS, and JavaScript for a portfolio, visually tailored to the user's profession.
 
 **User's Profession:** {{{profession}}}
 
@@ -1726,7 +1726,7 @@ document.addEventListener('DOMContentLoaded', () => {
     animate();
 });
 \\\`\\\`\\\`
-\`,
+\\\`,
 });
 
 
@@ -1769,7 +1769,7 @@ const getCompanyLogoTool = ai.defineTool(
     async (input) => {
         // In a real application, you would implement a logo fetching service here.
         // For this example, we'll return a placeholder. The model is taught to handle this.
-        return \`https://logo.clearbit.com/\${input.companyName.toLowerCase()}.com\`;
+        return \\\`https://logo.clearbit.com/\\\${input.companyName.toLowerCase()}.com\\\`;
     }
 );
 
@@ -1820,7 +1820,7 @@ const outlinePrompt = ai.definePrompt({
     input: { schema: GeneratePresentationInputSchema },
     output: { schema: PresentationOutlineSchema },
     tools: [getCompanyLogoTool],
-    prompt: \`You are an expert presentation creator and visual designer, inspired by tools like PowerPoint Designer. Your task is to generate a stunning and detailed presentation outline based on the user's request, following modern presentation best practices.
+    prompt: \\\`You are an expert presentation creator and visual designer, inspired by tools like PowerPoint Designer. Your task is to generate a stunning and detailed presentation outline based on the user's request, following modern presentation best practices.
 
 **Core Principles (Non-negotiable):**
 - **Visuals > Text**: Your primary goal is to create a powerful, memorable visual for each slide. The text is secondary and only supports the visual. For every slide, you must first conceive the visual and then write a short title and content to complement it.
@@ -1871,7 +1871,7 @@ const outlinePrompt = ai.definePrompt({
 {{{customStructure}}}
 {{/if}}
 - Image Style: {{{imageStyle}}}
-\`,
+\\\`,
 });
 
 
@@ -1889,7 +1889,7 @@ const generatePresentationFlow = ai.defineFlow(
 
     const applyStyle = (prompt: string) => {
       if (input.imageStyle && input.imageStyle.toLowerCase() !== 'photorealistic') {
-        return \`\${prompt}, in a \${input.imageStyle} style\`;
+        return \\\`\\\${prompt}, in a \\\${input.imageStyle} style\\\`;
       }
       return prompt;
     };
@@ -1948,7 +1948,7 @@ const generatePresentationFlow = ai.defineFlow(
         if (result.status === 'fulfilled' && result.value.media?.url) {
             outline.slides[slideIndex].imageUrl = result.value.media.url;
         } else {
-            console.error(\`Slide \${slideIndex + 1} image generation failed:\`, result.status === 'rejected' ? result.reason : 'No URL returned');
+            console.error(\\\`Slide \\\${slideIndex + 1} image generation failed:\\\`, result.status === 'rejected' ? result.reason : 'No URL returned');
             outline.slides[slideIndex].imageUrl = '';
         }
     }
@@ -2047,19 +2047,19 @@ const getResumeFeedbackFlow = ai.defineFlow(
       documentPromptPart = 'Document: {{media url=resume}}';
       promptInput.resume = input.resume;
     } else {
-      documentPromptPart = 'Document:\\n{{{resumeText}}}';
+      documentPromptPart = 'Document:\\\\n{{{resumeText}}}';
       promptInput.resumeText = input.resume;
     }
     
     const prompt = ai.definePrompt({
       name: 'getResumeFeedbackPrompt',
       output: { schema: GetResumeFeedbackOutputSchema },
-      prompt: \`You are an expert career coach and professional resume writer with deep knowledge of Applicant Tracking Systems (ATS). Your task is to provide a comprehensive review of the user's resume and rewrite it into a structured JSON format that perfectly matches the provided schema and the visual template provided in the user's prompt.
+      prompt: \\\`You are an expert career coach and professional resume writer with deep knowledge of Applicant Tracking Systems (ATS). Your task is to provide a comprehensive review of the user's resume and rewrite it into a structured JSON format that perfectly matches the provided schema and the visual template provided in the user's prompt.
 
 {{#if targetJobRole}}The user is targeting the role of: {{{targetJobRole}}}. You must tailor your feedback and rewritten resume to align with keywords and qualifications for this role.{{/if}}
 {{#if additionalInfo}}Additional context from the user: {{{additionalInfo}}}{{/if}}
 
-\${documentPromptPart}
+\\\${documentPromptPart}
 
 Please perform the following two tasks:
 
@@ -2077,7 +2077,7 @@ Please perform the following two tasks:
         - **Skills**: Compile a list of all relevant skills.
         - **Training/Courses**: List any relevant certifications or courses with a title and a brief description.
     - **General Rules**: Start every bullet point under 'Experience' with a strong action verb. Quantify achievements with specific metrics wherever possible (e.g., "Increased user engagement by 30%" instead of "Improved user engagement"). Ensure all data is extracted accurately and professionally.
-\`,
+\\\`,
     });
 
     const { output } = await prompt(promptInput);
@@ -2130,7 +2130,7 @@ const getWeatherTool = ai.defineTool(
     async (input) => {
       // In a real application, you would call a weather API here.
       // For this example, we'll return mock data.
-      return \`The weather in \${input.location} is 72°F and sunny.\`;
+      return \\\`The weather in \\\${input.location} is 72°F and sunny.\\\`;
     }
 );
 
@@ -2144,7 +2144,7 @@ const prompt = ai.definePrompt({
   input: {schema: SmartSearchInputSchema},
   output: {schema: SmartSearchOutputSchema},
   tools: [getWeatherTool],
-  prompt: \`You are an expert document analyzer. Your task is to extract key information from the document provided, based on the user's query.
+  prompt: \\\`You are an expert document analyzer. Your task is to extract key information from the document provided, based on the user's query.
 
 If the user asks about the weather, use the getWeatherTool to provide a weather forecast. Otherwise, analyze the provided document.
 
@@ -2152,7 +2152,7 @@ Document: {{media url=documentDataUri}}
 
 User Query: {{{query}}}
 
-Provide a concise summary of the key information that answers the user's query.\`,
+Provide a concise summary of the key information that answers the user's query.\\\`,
 });
 
 const smartSearchFlow = ai.defineFlow(
@@ -2200,7 +2200,7 @@ const prompt = ai.definePrompt({
   name: 'humanizeTextPrompt',
   input: { schema: HumanizeTextInputSchema },
   output: { schema: HumanizeTextOutputSchema },
-  prompt: \`You are an expert at rewriting text to make it sound more natural and human. Your task is to take the user's input text and rewrite it in a {{{tone}}} tone.
+  prompt: \\\`You are an expert at rewriting text to make it sound more natural and human. Your task is to take the user's input text and rewrite it in a {{{tone}}} tone.
 
 The goal is to eliminate robotic or overly formal language, improve the flow, and make the text more engaging and relatable, as if a real person wrote it. Do not just replace words; restructure sentences and adjust the style as needed to fit the requested tone.
 
@@ -2209,7 +2209,7 @@ Original Text:
 {{{text}}}
 ---
 
-Rewrite the text now.\`,
+Rewrite the text now.\\\`,
 });
 
 const humanizeTextFlow = ai.defineFlow(
@@ -2358,7 +2358,7 @@ const prompt = ai.definePrompt({
   name: 'generateAcademicDocumentPrompt',
   input: { schema: GenerateAcademicDocumentInputSchema },
   output: { schema: GenerateAcademicDocumentOutputSchema },
-  prompt: \`You are an expert academic writer. Your task is to generate a well-structured academic document (like a thesis, research paper, or SIP report) based on the user's uploaded document, which contains the topic, an outline, and research notes.
+  prompt: \\\`You are an expert academic writer. Your task is to generate a well-structured academic document (like a thesis, research paper, or SIP report) based on the user's uploaded document, which contains the topic, an outline, and research notes.
 
 **Uploaded Document:**
 {{media url=documentDataUri}}
@@ -2371,7 +2371,7 @@ const prompt = ai.definePrompt({
 5.  **Conclusion:** Write a strong conclusion that summarizes the key findings, restates the thesis, and suggests areas for future research.
 6.  **Formatting:** All content for the introduction, chapters, and conclusion must be written in Markdown format, using headings, lists, and bold text as appropriate for academic writing.
 
-Generate the complete document structure now.\`,
+Generate the complete document structure now.\\\`,
 });
 
 const generateAcademicDocumentFlow = ai.defineFlow(
@@ -3167,7 +3167,7 @@ export default function ImageTextManipulationTool() {
                             <FormLabel>Instructions</FormLabel>
                             <FormControl>
                             <Textarea
-                                placeholder="e.g., 'Change the title to \`Hello World\` and make the subtitle blue.'"
+                                placeholder="e.g., 'Change the title to \\\`Hello World\\\` and make the subtitle blue.'"
                                 {...field}
                                 rows={10}
                             />
@@ -3532,7 +3532,7 @@ export default function LinkedInVisualsGeneratorTool() {
     saveAs(url, filename);
     toast({
       title: 'Download Started',
-      description: \`\${filename} is downloading.\`,
+      description: \\\`\\\${filename} is downloading.\\\`,
     });
   };
 
@@ -3857,8 +3857,8 @@ export default function PortfolioGeneratorTool() {
   const copyToClipboard = (text: string, type: string) => {
     navigator.clipboard.writeText(text);
     toast({
-      title: \`\${type} Copied!\`,
-      description: \`The \${type.toLowerCase()} code has been copied to your clipboard.\`,
+      title: \\\`\\\${type} Copied!\\\`,
+      description: \\\`The \\\${type.toLowerCase()} code has been copied to your clipboard.\\\`,
     });
   };
   
@@ -3879,7 +3879,7 @@ export default function PortfolioGeneratorTool() {
     });
      toast({
       title: 'Download Started!',
-      description: \`Your portfolio website is being downloaded as a zip file.\`,
+      description: \\\`Your portfolio website is being downloaded as a zip file.\\\`,
     });
   };
 
@@ -4012,8 +4012,8 @@ export default function PortfolioGeneratorTool() {
                             <CardContent className="space-y-4">
                                 {socialFields.map((field, index) => (
                                     <div key={field.id} className="flex gap-4 items-end">
-                                        <FormField control={form.control} name={\`contact.socials.\${index}.network\`} render={({ field }) => ( <FormItem className="flex-1"> <FormLabel>Network</FormLabel> <FormControl><Input {...field} placeholder="e.g., LinkedIn" /></FormControl> <FormMessage /> </FormItem> )}/>
-                                        <FormField control={form.control} name={\`contact.socials.\${index}.url\`} render={({ field }) => ( <FormItem className="flex-1"> <FormLabel>URL</FormLabel> <FormControl><Input {...field} placeholder="https://linkedin.com/in/..." /></FormControl> <FormMessage /> </FormItem> )}/>
+                                        <FormField control={form.control} name={\\\`contact.socials.\\\${index}.network\\\`} render={({ field }) => ( <FormItem className="flex-1"> <FormLabel>Network</FormLabel> <FormControl><Input {...field} placeholder="e.g., LinkedIn" /></FormControl> <FormMessage /> </FormItem> )}/>
+                                        <FormField control={form.control} name={\\\`contact.socials.\\\${index}.url\\\`} render={({ field }) => ( <FormItem className="flex-1"> <FormLabel>URL</FormLabel> <FormControl><Input {...field} placeholder="https://linkedin.com/in/..." /></FormControl> <FormMessage /> </FormItem> )}/>
                                         <Button type="button" variant="ghost" size="icon" className="h-9 w-9" onClick={() => removeSocial(index)}><Trash2 className="h-4 w-4" /></Button>
                                     </div>
                                 ))}
@@ -4031,11 +4031,11 @@ export default function PortfolioGeneratorTool() {
                                     <div key={field.id} className="space-y-4 border p-4 rounded-md relative">
                                         <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={() => removeExp(index)}><Trash2 className="h-4 w-4" /></Button>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <FormField control={form.control} name={\`experience.\${index}.title\`} render={({ field }) => ( <FormItem> <FormLabel>Job Title</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-                                            <FormField control={form.control} name={\`experience.\${index}.company\`} render={({ field }) => ( <FormItem> <FormLabel>Company</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                            <FormField control={form.control} name={\\\`experience.\\\${index}.title\\\`} render={({ field }) => ( <FormItem> <FormLabel>Job Title</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                            <FormField control={form.control} name={\\\`experience.\\\${index}.company\\\`} render={({ field }) => ( <FormItem> <FormLabel>Company</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                                         </div>
-                                        <FormField control={form.control} name={\`experience.\${index}.dates\`} render={({ field }) => ( <FormItem> <FormLabel>Dates</FormLabel> <FormControl><Input {...field} placeholder="e.g., June 2023 - Present" /></FormControl> <FormMessage /> </FormItem> )}/>
-                                        <FormField control={form.control} name={\`experience.\${index}.description\`} render={({ field }) => ( <FormItem> <FormLabel>Description</FormLabel> <FormControl><Textarea {...field} rows={4} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                        <FormField control={form.control} name={\\\`experience.\\\${index}.dates\\\`} render={({ field }) => ( <FormItem> <FormLabel>Dates</FormLabel> <FormControl><Input {...field} placeholder="e.g., June 2023 - Present" /></FormControl> <FormMessage /> </FormItem> )}/>
+                                        <FormField control={form.control} name={\\\`experience.\\\${index}.description\\\`} render={({ field }) => ( <FormItem> <FormLabel>Description</FormLabel> <FormControl><Textarea {...field} rows={4} /></FormControl> <FormMessage /> </FormItem> )}/>
                                     </div>
                                 ))}
                             </CardContent>
@@ -4052,10 +4052,10 @@ export default function PortfolioGeneratorTool() {
                                     <div key={field.id} className="space-y-4 border p-4 rounded-md relative">
                                         <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={() => removeEdu(index)}><Trash2 className="h-4 w-4" /></Button>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <FormField control={form.control} name={\`education.\${index}.degree\`} render={({ field }) => ( <FormItem> <FormLabel>Degree</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-                                            <FormField control={form.control} name={\`education.\${index}.school\`} render={({ field }) => ( <FormItem> <FormLabel>School/University</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                            <FormField control={form.control} name={\\\`education.\\\${index}.degree\\\`} render={({ field }) => ( <FormItem> <FormLabel>Degree</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                            <FormField control={form.control} name={\\\`education.\\\${index}.school\\\`} render={({ field }) => ( <FormItem> <FormLabel>School/University</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                                         </div>
-                                        <FormField control={form.control} name={\`education.\${index}.dates\`} render={({ field }) => ( <FormItem> <FormLabel>Dates</FormLabel> <FormControl><Input {...field} placeholder="e.g., 2022 - 2026" /></FormControl> <FormMessage /> </FormItem> )}/>
+                                        <FormField control={form.control} name={\\\`education.\\\${index}.dates\\\`} render={({ field }) => ( <FormItem> <FormLabel>Dates</FormLabel> <FormControl><Input {...field} placeholder="e.g., 2022 - 2026" /></FormControl> <FormMessage /> </FormItem> )}/>
                                     </div>
                                 ))}
                             </CardContent>
@@ -4071,11 +4071,11 @@ export default function PortfolioGeneratorTool() {
                                 {projFields.map((field, index) => (
                                     <div key={field.id} className="space-y-4 border p-4 rounded-md relative">
                                         <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={() => removeProj(index)}><Trash2 className="h-4 w-4" /></Button>
-                                        <FormField control={form.control} name={\`projects.\${index}.title\`} render={({ field }) => ( <FormItem> <FormLabel>Project Title</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-                                        <FormField control={form.control} name={\`projects.\${index}.description\`} render={({ field }) => ( <FormItem> <FormLabel>Description</FormLabel> <FormControl><Textarea {...field} rows={3} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                        <FormField control={form.control} name={\\\`projects.\\\${index}.title\\\`} render={({ field }) => ( <FormItem> <FormLabel>Project Title</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                        <FormField control={form.control} name={\\\`projects.\\\${index}.description\\\`} render={({ field }) => ( <FormItem> <FormLabel>Description</FormLabel> <FormControl><Textarea {...field} rows={3} /></FormControl> <FormMessage /> </FormItem> )}/>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <FormField control={form.control} name={\`projects.\${index}.link\`} render={({ field }) => ( <FormItem> <FormLabel>Project Link (Optional)</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-                                            <FormField control={form.control} name={\`projects.\${index}.imageUrl\`} render={({ field }) => ( <FormItem> <FormLabel>Image URL (Optional)</FormLabel> <FormControl><Input {...field} placeholder="https://placehold.co/600x400" /></FormControl> <FormMessage /> </FormItem> )}/>
+                                            <FormField control={form.control} name={\\\`projects.\\\${index}.link\\\`} render={({ field }) => ( <FormItem> <FormLabel>Project Link (Optional)</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                            <FormField control={form.control} name={\\\`projects.\\\${index}.imageUrl\\\`} render={({ field }) => ( <FormItem> <FormLabel>Image URL (Optional)</FormLabel> <FormControl><Input {...field} placeholder="https://placehold.co/600x400" /></FormControl> <FormMessage /> </FormItem> )}/>
                                         </div>
                                     </div>
                                 ))}
@@ -4172,7 +4172,7 @@ export default function PortfolioGeneratorTool() {
                     </TabsList>
                     <TabsContent value="preview" className="mt-4">
                         <iframe 
-                            srcDoc={\`<html><head><style>\${result.css}</style></head><body>\${result.html}<script>\${result.javascript}</script></body></html>\`}
+                            srcDoc={\\\`<html><head><style>\\\${result.css}</style></head><body>\\\${result.html}<script>\\\${result.javascript}</script></body></html>\\\`}
                             className="w-full h-[600px] border rounded-md"
                             title="Portfolio Preview"
                         />
@@ -4590,7 +4590,7 @@ export default function ResumeFeedbackTool() {
                     <div
                       className="prose prose-invert max-w-none"
                       dangerouslySetInnerHTML={{
-                        __html: result.feedback.replace(/\\n/g, '<br />'),
+                        __html: result.feedback.replace(/\\\\n/g, '<br />'),
                       }}
                     />
                   )
@@ -4602,8 +4602,8 @@ export default function ResumeFeedbackTool() {
                 ) : (
                   result?.rewrittenResume && (
                     <div className="space-y-4">
-                       <div className="bg-gray-200 p-4 md:p-8 flex justify-center overflow-auto">
-                           <div id="resume-preview-content" className="w-full max-w-4xl">
+                       <div className="bg-gray-200 p-8 flex justify-center overflow-auto">
+                           <div id="resume-preview-content" className="origin-top-left">
                                 <ResumeTemplate resumeData={result.rewrittenResume} />
                            </div>
                       </div>
@@ -5143,7 +5143,7 @@ export default function ThesisGeneratorPage() {
     doc.setFontSize(12).setFont('helvetica', 'normal');
     addText(result.conclusion.replace(/###|##|#/g, ''), {});
 
-    doc.save(\`\${result.title.replace(/\\s+/g, '_')}.pdf\`);
+    doc.save(\\\`\\\${result.title.replace(/\\s+/g, '_')}.pdf\\\`);
   };
 
   return (
@@ -5975,7 +5975,7 @@ export default function CareerPathSuggesterTool() {
           <CardContent>
             <Accordion type="single" collapsible className="w-full">
               {result.careerPaths.map((path, index) => (
-                <AccordionItem value={\`item-\${index}\`} key={index}>
+                <AccordionItem value={\\\`item-\\\${index}\\\`} key={index}>
                   <AccordionTrigger>{path.title}</AccordionTrigger>
                   <AccordionContent>
                     <div className="space-y-4">
@@ -6824,7 +6824,7 @@ export default function ImageTextManipulationTool() {
                             <FormLabel>Instructions</FormLabel>
                             <FormControl>
                             <Textarea
-                                placeholder="e.g., 'Change the title to \`Hello World\` and make the subtitle blue.'"
+                                placeholder="e.g., 'Change the title to \\\`Hello World\\\` and make the subtitle blue.'"
                                 {...field}
                                 rows={10}
                             />
@@ -7060,7 +7060,7 @@ export default function InterviewQuestionGeneratorTool() {
           <CardContent>
             <Accordion type="single" collapsible className="w-full">
               {result.questions.map((q, index) => (
-                <AccordionItem value={\`item-\${index}\`} key={index}>
+                <AccordionItem value={\\\`item-\\\${index}\\\`} key={index}>
                   <AccordionTrigger>{index + 1}. {q.question}</AccordionTrigger>
                   <AccordionContent>
                     <div className="prose prose-invert max-w-none">
@@ -7178,7 +7178,7 @@ export default function LinkedInVisualsGeneratorTool() {
     saveAs(url, filename);
     toast({
       title: 'Download Started',
-      description: \`\${filename} is downloading.\`,
+      description: \\\`\\\${filename} is downloading.\\\`,
     });
   };
 
@@ -7496,8 +7496,8 @@ export default function PortfolioGeneratorTool() {
   const copyToClipboard = (text: string, type: string) => {
     navigator.clipboard.writeText(text);
     toast({
-      title: \`\${type} Copied!\`,
-      description: \`The \${type.toLowerCase()} code has been copied to your clipboard.\`,
+      title: \\\`\\\${type} Copied!\\\`,
+      description: \\\`The \\\${type.toLowerCase()} code has been copied to your clipboard.\\\`,
     });
   };
   
@@ -7518,7 +7518,7 @@ export default function PortfolioGeneratorTool() {
     });
      toast({
       title: 'Download Started!',
-      description: \`Your portfolio website is being downloaded as a zip file.\`,
+      description: \\\`Your portfolio website is being downloaded as a zip file.\\\`,
     });
   };
 
@@ -7651,8 +7651,8 @@ export default function PortfolioGeneratorTool() {
                             <CardContent className="space-y-4">
                                 {socialFields.map((field, index) => (
                                     <div key={field.id} className="flex gap-4 items-end">
-                                        <FormField control={form.control} name={\`contact.socials.\${index}.network\`} render={({ field }) => ( <FormItem className="flex-1"> <FormLabel>Network</FormLabel> <FormControl><Input {...field} placeholder="e.g., LinkedIn" /></FormControl> <FormMessage /> </FormItem> )}/>
-                                        <FormField control={form.control} name={\`contact.socials.\${index}.url\`} render={({ field }) => ( <FormItem className="flex-1"> <FormLabel>URL</FormLabel> <FormControl><Input {...field} placeholder="https://linkedin.com/in/..." /></FormControl> <FormMessage /> </FormItem> )}/>
+                                        <FormField control={form.control} name={\\\`contact.socials.\\\${index}.network\\\`} render={({ field }) => ( <FormItem className="flex-1"> <FormLabel>Network</FormLabel> <FormControl><Input {...field} placeholder="e.g., LinkedIn" /></FormControl> <FormMessage /> </FormItem> )}/>
+                                        <FormField control={form.control} name={\\\`contact.socials.\\\${index}.url\\\`} render={({ field }) => ( <FormItem className="flex-1"> <FormLabel>URL</FormLabel> <FormControl><Input {...field} placeholder="https://linkedin.com/in/..." /></FormControl> <FormMessage /> </FormItem> )}/>
                                         <Button type="button" variant="ghost" size="icon" className="h-9 w-9" onClick={() => removeSocial(index)}><Trash2 className="h-4 w-4" /></Button>
                                     </div>
                                 ))}
@@ -7670,11 +7670,11 @@ export default function PortfolioGeneratorTool() {
                                     <div key={field.id} className="space-y-4 border p-4 rounded-md relative">
                                         <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={() => removeExp(index)}><Trash2 className="h-4 w-4" /></Button>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <FormField control={form.control} name={\`experience.\${index}.title\`} render={({ field }) => ( <FormItem> <FormLabel>Job Title</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-                                            <FormField control={form.control} name={\`experience.\${index}.company\`} render={({ field }) => ( <FormItem> <FormLabel>Company</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                            <FormField control={form.control} name={\\\`experience.\\\${index}.title\\\`} render={({ field }) => ( <FormItem> <FormLabel>Job Title</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                            <FormField control={form.control} name={\\\`experience.\\\${index}.company\\\`} render={({ field }) => ( <FormItem> <FormLabel>Company</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                                         </div>
-                                        <FormField control={form.control} name={\`experience.\${index}.dates\`} render={({ field }) => ( <FormItem> <FormLabel>Dates</FormLabel> <FormControl><Input {...field} placeholder="e.g., June 2023 - Present" /></FormControl> <FormMessage /> </FormItem> )}/>
-                                        <FormField control={form.control} name={\`experience.\${index}.description\`} render={({ field }) => ( <FormItem> <FormLabel>Description</FormLabel> <FormControl><Textarea {...field} rows={4} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                        <FormField control={form.control} name={\\\`experience.\\\${index}.dates\\\`} render={({ field }) => ( <FormItem> <FormLabel>Dates</FormLabel> <FormControl><Input {...field} placeholder="e.g., June 2023 - Present" /></FormControl> <FormMessage /> </FormItem> )}/>
+                                        <FormField control={form.control} name={\\\`experience.\\\${index}.description\\\`} render={({ field }) => ( <FormItem> <FormLabel>Description</FormLabel> <FormControl><Textarea {...field} rows={4} /></FormControl> <FormMessage /> </FormItem> )}/>
                                     </div>
                                 ))}
                             </CardContent>
@@ -7691,10 +7691,10 @@ export default function PortfolioGeneratorTool() {
                                     <div key={field.id} className="space-y-4 border p-4 rounded-md relative">
                                         <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={() => removeEdu(index)}><Trash2 className="h-4 w-4" /></Button>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <FormField control={form.control} name={\`education.\${index}.degree\`} render={({ field }) => ( <FormItem> <FormLabel>Degree</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-                                            <FormField control={form.control} name={\`education.\${index}.school\`} render={({ field }) => ( <FormItem> <FormLabel>School/University</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                            <FormField control={form.control} name={\\\`education.\\\${index}.degree\\\`} render={({ field }) => ( <FormItem> <FormLabel>Degree</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                            <FormField control={form.control} name={\\\`education.\\\${index}.school\\\`} render={({ field }) => ( <FormItem> <FormLabel>School/University</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                                         </div>
-                                        <FormField control={form.control} name={\`education.\${index}.dates\`} render={({ field }) => ( <FormItem> <FormLabel>Dates</FormLabel> <FormControl><Input {...field} placeholder="e.g., 2022 - 2026" /></FormControl> <FormMessage /> </FormItem> )}/>
+                                        <FormField control={form.control} name={\\\`education.\\\${index}.dates\\\`} render={({ field }) => ( <FormItem> <FormLabel>Dates</FormLabel> <FormControl><Input {...field} placeholder="e.g., 2022 - 2026" /></FormControl> <FormMessage /> </FormItem> )}/>
                                     </div>
                                 ))}
                             </CardContent>
@@ -7710,11 +7710,11 @@ export default function PortfolioGeneratorTool() {
                                 {projFields.map((field, index) => (
                                     <div key={field.id} className="space-y-4 border p-4 rounded-md relative">
                                         <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={() => removeProj(index)}><Trash2 className="h-4 w-4" /></Button>
-                                        <FormField control={form.control} name={\`projects.\${index}.title\`} render={({ field }) => ( <FormItem> <FormLabel>Project Title</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-                                        <FormField control={form.control} name={\`projects.\${index}.description\`} render={({ field }) => ( <FormItem> <FormLabel>Description</FormLabel> <FormControl><Textarea {...field} rows={3} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                        <FormField control={form.control} name={\\\`projects.\\\${index}.title\\\`} render={({ field }) => ( <FormItem> <FormLabel>Project Title</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                        <FormField control={form.control} name={\\\`projects.\\\${index}.description\\\`} render={({ field }) => ( <FormItem> <FormLabel>Description</FormLabel> <FormControl><Textarea {...field} rows={3} /></FormControl> <FormMessage /> </FormItem> )}/>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <FormField control={form.control} name={\`projects.\${index}.link\`} render={({ field }) => ( <FormItem> <FormLabel>Project Link (Optional)</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
-                                            <FormField control={form.control} name={\`projects.\${index}.imageUrl\`} render={({ field }) => ( <FormItem> <FormLabel>Image URL (Optional)</FormLabel> <FormControl><Input {...field} placeholder="https://placehold.co/600x400" /></FormControl> <FormMessage /> </FormItem> )}/>
+                                            <FormField control={form.control} name={\\\`projects.\\\${index}.link\\\`} render={({ field }) => ( <FormItem> <FormLabel>Project Link (Optional)</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                            <FormField control={form.control} name={\\\`projects.\\\${index}.imageUrl\\\`} render={({ field }) => ( <FormItem> <FormLabel>Image URL (Optional)</FormLabel> <FormControl><Input {...field} placeholder="https://placehold.co/600x400" /></FormControl> <FormMessage /> </FormItem> )}/>
                                         </div>
                                     </div>
                                 ))}
@@ -7811,7 +7811,7 @@ export default function PortfolioGeneratorTool() {
                     </TabsList>
                     <TabsContent value="preview" className="mt-4">
                         <iframe 
-                            srcDoc={\`<html><head><style>\${result.css}</style></head><body>\${result.html}<script>\${result.javascript}</script></body></html>\`}
+                            srcDoc={\\\`<html><head><style>\\\${result.css}</style></head><body>\\\${result.html}<script>\\\${result.javascript}</script></body></html>\\\`}
                             className="w-full h-[600px] border rounded-md"
                             title="Portfolio Preview"
                         />
@@ -7968,7 +7968,7 @@ export default function PresentationGeneratorTool() {
       imageStyle: 'photorealistic',
       language: 'English',
       contentType: 'custom',
-      customStructure: \`1. Introduction to AI Mentor
+      customStructure: \\\`1. Introduction to AI Mentor
 - A suite of AI-powered tools to boost productivity and learning.
 
 2. Analysis Tools
@@ -8000,7 +8000,7 @@ export default function PresentationGeneratorTool() {
 - Image Text Manipulation: Edit text within an image.
 
 7. Conclusion
-- Recap of the project's capabilities and future scope.\`,
+- Recap of the project's capabilities and future scope.\\\`,
       style: 'Tech Pitch',
     },
   });
@@ -8022,7 +8022,7 @@ export default function PresentationGeneratorTool() {
 
   React.useEffect(() => {
     if (contentType === 'projectProposal') {
-      form.setValue('customStructure', \`1. Introduction
+      form.setValue('customStructure', \\\`1. Introduction
 What is the project about?
 Why is it important/relevant to field/community?
 2. Objectives
@@ -8046,7 +8046,7 @@ Link to community needs/problems
 8. Conclusion & Suggestions
 Summary of work
 Possible improvements, recommendations
-9. Acknowledgement\`);
+9. Acknowledgement\\\`);
     } else if (form.getValues('customStructure')?.startsWith('1. Introduction')) {
       // Clear if it was the default project proposal text
       form.setValue('customStructure', '');
@@ -8127,10 +8127,10 @@ Possible improvements, recommendations
     });
 
     const presenterDetails = [
-        result.presenterName ? \`Presented by: \${result.presenterName}\` : null,
-        result.rollNumber ? \`Roll No: \${result.rollNumber}\` : null,
-        result.department ? \`Department: \${result.department}\` : null
-    ].filter(Boolean).join('\\n');
+        result.presenterName ? \\\`Presented by: \\\${result.presenterName}\\\` : null,
+        result.rollNumber ? \\\`Roll No: \\\${result.rollNumber}\\\` : null,
+        result.department ? \\\`Department: \\\${result.department}\\\` : null
+    ].filter(Boolean).join('\\\\n');
 
     if (presenterDetails) {
         titleSlide.addText(presenterDetails, { 
@@ -8203,8 +8203,8 @@ Possible improvements, recommendations
         }
     });
 
-    pptx.writeFile({ fileName: \`\${result.title}.pptx\` });
-    toast({ title: 'Download Started', description: \`Your presentation "\${result.title}.pptx" is downloading.\` });
+    pptx.writeFile({ fileName: \\\`\\\${result.title}.pptx\\\` });
+    toast({ title: 'Download Started', description: \\\`Your presentation "\\\${result.title}.pptx" is downloading.\\\` });
   };
 
 
@@ -8883,8 +8883,8 @@ export default function ResumeFeedbackTool() {
                 ) : (
                   result?.rewrittenResume && (
                     <div className="space-y-4">
-                       <div className="bg-gray-200 p-4 md:p-8 flex justify-center overflow-auto">
-                           <div id="resume-preview-content" className="w-full max-w-4xl">
+                       <div className="bg-gray-200 p-8 flex justify-center overflow-auto">
+                           <div id="resume-preview-content" className="origin-top-left">
                                 <ResumeTemplate resumeData={result.rewrittenResume} />
                            </div>
                       </div>
@@ -9569,7 +9569,7 @@ export default function AcademicWriterTool() {
     doc.setFontSize(12).setFont('helvetica', 'normal');
     addText(result.conclusion.replace(/###|##|#/g, ''), {});
 
-    doc.save(\`\${result.title.replace(/\\s+/g, '_')}.pdf\`);
+    doc.save(\\\`\\\${result.title.replace(/\\s+/g, '_')}.pdf\\\`);
   };
 
   return (
@@ -10783,7 +10783,7 @@ const ChartContainer = React.forwardRef<
   }
 >(({ id, className, children, config, ...props }, ref) => {
   const uniqueId = React.useId()
-  const chartId = \`chart-\${id || uniqueId.replace(/:/g, "")}\`
+  const chartId = \\\`chart-\\\${id || uniqueId.replace(/:/g, "")}\\\`
 
   return (
     <ChartContext.Provider value={{ config }}>
@@ -10820,20 +10820,20 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
       dangerouslySetInnerHTML={{
         __html: Object.entries(THEMES)
           .map(
-            ([theme, prefix]) => \`
-\${prefix} [data-chart=\${id}] {
-\${colorConfig
+            ([theme, prefix]) => \\\`
+\\\${prefix} [data-chart=\\\${id}] {
+\\\${colorConfig
   .map(([key, itemConfig]) => {
     const color =
       itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
       itemConfig.color
-    return color ? \`  --color-\${key}: \${color};\` : null
+    return color ? \\\`  --color-\\\${key}: \\\${color};\\\` : null
   })
-  .join("\\n")}
+  .join("\\\\n")}
 }
-\`
+\\\`
           )
-          .join("\\n"),
+          .join("\\\\n"),
       }}
     />
   )
@@ -10878,7 +10878,7 @@ const ChartTooltipContent = React.forwardRef<
       }
 
       const [item] = payload
-      const key = \`\${labelKey || item.dataKey || item.name || "value"}\`
+      const key = \\\`\\\${labelKey || item.dataKey || item.name || "value"}\\\`
       const itemConfig = getPayloadConfigFromPayload(config, item, key)
       const value =
         !labelKey && typeof label === "string"
@@ -10925,7 +10925,7 @@ const ChartTooltipContent = React.forwardRef<
         {!nestLabel ? tooltipLabel : null}
         <div className="grid gap-1.5">
           {payload.map((item, index) => {
-            const key = \`\${nameKey || item.name || item.dataKey || "value"}\`
+            const key = \\\`\\\${nameKey || item.name || item.dataKey || "value"}\\\`
             const itemConfig = getPayloadConfigFromPayload(config, item, key)
             const indicatorColor = color || item.payload.fill || item.color
 
@@ -11025,7 +11025,7 @@ const ChartLegendContent = React.forwardRef<
         )}
       >
         {payload.map((item) => {
-          const key = \`\${nameKey || item.dataKey || "value"}\`
+          const key = \\\`\\\${nameKey || item.dataKey || "value"}\\\`
           const itemConfig = getPayloadConfigFromPayload(config, item, key)
 
           return (
@@ -11534,9 +11534,9 @@ const useFormField = () => {
   return {
     id,
     name: fieldContext.name,
-    formItemId: \`\${id}-form-item\`,
-    formDescriptionId: \`\${id}-form-item-description\`,
-    formMessageId: \`\${id}-form-item-message\`,
+    formItemId: \\\`\\\${id}-form-item\\\`,
+    formDescriptionId: \\\`\\\${id}-form-item-description\\\`,
+    formMessageId: \\\`\\\${id}-form-item-message\\\`,
     ...fieldState,
   }
 }
@@ -11592,8 +11592,8 @@ const FormControl = React.forwardRef<
       id={formItemId}
       aria-describedby={
         !error
-          ? \`\${formDescriptionId}\`
-          : \`\${formDescriptionId} \${formMessageId}\`
+          ? \\\`\\\${formDescriptionId}\\\`
+          : \\\`\\\${formDescriptionId} \\\${formMessageId}\\\`
       }
       aria-invalid={!!error}
       {...props}
@@ -12022,7 +12022,7 @@ const Progress = React.forwardRef<
   >
     <ProgressPrimitive.Indicator
       className="h-full w-full flex-1 bg-primary transition-all"
-      style={{ transform: \`translateX(-\${100 - (value || 0)}%)\` }}
+      style={{ transform: \\\`translateX(-\\\${100 - (value || 0)}%)\\\` }}
     />
   </ProgressPrimitive.Root>
 ))
@@ -12081,7 +12081,7 @@ export const RobotsBuildingLoader = () => {
     return (
       <div className="flex flex-col items-center justify-center h-full w-full bg-background p-8">
         <style>
-          {\`
+          {\\\`
             @keyframes robot-move-1 {
               0% { motion-offset: 0%; }
               100% { motion-offset: 100%; }
@@ -12108,7 +12108,7 @@ export const RobotsBuildingLoader = () => {
             .fade-in-text {
               animation: fade-in 2s ease-in-out forwards;
             }
-          \`}
+          \\\`}
         </style>
         <svg viewBox="0 0 400 300" className="w-full max-w-md h-auto">
           {/* Robots */}
@@ -12612,7 +12612,7 @@ const SidebarProvider = React.forwardRef<
         }
 
         // This sets the cookie to keep the sidebar state.
-        document.cookie = \`\${SIDEBAR_COOKIE_NAME}=\${openState}; path=/; max-age=\${SIDEBAR_COOKIE_MAX_AGE}\`
+        document.cookie = \\\`\\\${SIDEBAR_COOKIE_NAME}=\\\${openState}; path=/; max-age=\\\${SIDEBAR_COOKIE_MAX_AGE}\\\`
       },
       [setOpenProp, open]
     )
@@ -13485,7 +13485,7 @@ export function useIsMobile() {
   const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined)
 
   React.useEffect(() => {
-    const mql = window.matchMedia(\`(max-width: \${MOBILE_BREAKPOINT - 1}px)\`)
+    const mql = window.matchMedia(\\\`(max-width: \\\${MOBILE_BREAKPOINT - 1}px)\\\`)
     const onChange = () => {
       setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
     }
@@ -13774,7 +13774,7 @@ export function createResumeDocx(resumeData: ResumeData): Document {
       ...keyAchievements.flatMap(ach => [
         new Paragraph({
             children: [
-                new TextRun({ text: \`\${getAchievementIcon(ach.title)} \`, size: 16, font: { name: 'Segoe UI Emoji' } }),
+                new TextRun({ text: \\\`\\\${getAchievementIcon(ach.title)} \\\`, size: 16, font: { name: 'Segoe UI Emoji' } }),
                 new TextRun({ text: ach.title, bold: true, color: ACCENT_TEXT_COLOR, size: 17, font: { name: FONT_FAMILY } })
             ],
             spacing: { before: 80, after: 20 }
@@ -13819,10 +13819,10 @@ export function createResumeDocx(resumeData: ResumeData): Document {
     new Paragraph({
       children: [
         new TextRun({ text: [
-            contact.phone ? \`📞 \${contact.phone}\` : null,
-            contact.email ? \`✉️ \${contact.email}\` : null,
-            contact.linkedin ? \`💼 \${contact.linkedin}\`: null,
-            contact.location ? \`📍 \${contact.location}\`: null
+            contact.phone ? \\\`📞 \\\${contact.phone}\\\` : null,
+            contact.email ? \\\`✉️ \\\${contact.email}\\\` : null,
+            contact.linkedin ? \\\`💼 \\\${contact.linkedin}\\\`: null,
+            contact.location ? \\\`📍 \\\${contact.location}\\\`: null
         ].filter(Boolean).join(' | '), color: LIGHT_TEXT_COLOR, size: 16, font: { name: FONT_FAMILY } }),
       ],
       spacing: { after: 150 },
@@ -13839,7 +13839,7 @@ export function createResumeDocx(resumeData: ResumeData): Document {
         new Paragraph({
           children: [
             new TextRun({ text: exp.title, bold: true, size: 18, color: TEXT_COLOR, font: { name: FONT_FAMILY } }),
-            new TextRun({ text: \`\\t\${exp.dates}\`, color: LIGHT_TEXT_COLOR, size: 16, font: { name: FONT_FAMILY } }),
+            new TextRun({ text: \\\`\\\\t\\\${exp.dates}\\\`, color: LIGHT_TEXT_COLOR, size: 16, font: { name: FONT_FAMILY } }),
           ],
           tabStops: [{ type: TabStopType.RIGHT, position: TabStopPosition.MAX }],
           spacing: { before: 60 }
@@ -13847,7 +13847,7 @@ export function createResumeDocx(resumeData: ResumeData): Document {
         new Paragraph({
           children: [
             new TextRun({ text: exp.company, bold: false, color: LINK_COLOR, size: 17, font: { name: FONT_FAMILY } }),
-            new TextRun({ text: \`\\t\${exp.location}\`, color: LIGHT_TEXT_COLOR, size: 16, font: { name: FONT_FAMILY } }),
+            new TextRun({ text: \\\`\\\\t\\\${exp.location}\\\`, color: LIGHT_TEXT_COLOR, size: 16, font: { name: FONT_FAMILY } }),
           ],
           tabStops: [{ type: TabStopType.RIGHT, position: TabStopPosition.MAX }],
           spacing: { after: 40 },
@@ -13867,7 +13867,7 @@ export function createResumeDocx(resumeData: ResumeData): Document {
         new Paragraph({
           children: [
             new TextRun({ text: edu.degree, bold: true, size: 18, color: TEXT_COLOR, font: { name: FONT_FAMILY } }),
-            new TextRun({ text: \`\\t\${edu.dates}\`, color: LIGHT_TEXT_COLOR, size: 16, font: { name: FONT_FAMILY } }),
+            new TextRun({ text: \\\`\\\\t\\\${edu.dates}\\\`, color: LIGHT_TEXT_COLOR, size: 16, font: { name: FONT_FAMILY } }),
           ],
           tabStops: [{ type: TabStopType.RIGHT, position: TabStopPosition.MAX }],
           spacing: { before: 60 }
@@ -13875,7 +13875,7 @@ export function createResumeDocx(resumeData: ResumeData): Document {
         new Paragraph({
           children: [
             new TextRun({ text: edu.school, bold: false, color: LINK_COLOR, size: 17, font: { name: FONT_FAMILY } }),
-            new TextRun({ text: \`\\t\${edu.location}\`, color: LIGHT_TEXT_COLOR, size: 16, font: { name: FONT_FAMILY } }),
+            new TextRun({ text: \\\`\\\\t\\\${edu.location}\\\`, color: LIGHT_TEXT_COLOR, size: 16, font: { name: FONT_FAMILY } }),
           ],
           tabStops: [{ type: TabStopType.RIGHT, position: TabStopPosition.MAX }],
           spacing: { after: 80 }
@@ -13886,7 +13886,7 @@ export function createResumeDocx(resumeData: ResumeData): Document {
 
   const doc = new Document({
     creator: "AI Mentor",
-    title: \`Resume for \${name}\`,
+    title: \\\`Resume for \\\${name}\\\`,
     styles: {
       default: {
         document: {
