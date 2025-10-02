@@ -294,7 +294,7 @@ export default config;
     "tailwind.config.ts": `
 import type {Config} from 'tailwindcss';
 
-export default {
+const config: Config = {
   darkMode: ['class'],
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
@@ -390,45 +390,46 @@ export default {
        typography: (theme: (arg0: string) => any) => ({
         DEFAULT: {
           css: {
-            '--tw-prose-body': theme('colors.foreground'),
-            '--tw-prose-headings': theme('colors.primary'),
-            '--tw-prose-lead': theme('colors.muted.foreground'),
-            '--tw-prose-links': theme('colors.accent.DEFAULT'),
-            '--tw-prose-bold': theme('colors.foreground'),
-            '--tw-prose-counters': theme('colors.muted.foreground'),
-            '--tw-prose-bullets': theme('colors.border'),
-            '--tw-prose-hr': theme('colors.border'),
-            '--tw-prose-quotes': theme('colors.foreground'),
-            '--tw-prose-quote-borders': theme('colors.border'),
-            '--tw-prose-captions': theme('colors.muted.foreground'),
-            '--tw-prose-code': theme('colors.foreground'),
-            '--tw-prose-pre-code': theme('colors.foreground'),
-            '--tw-prose-pre-bg': theme('colors.muted.DEFAULT'),
-            '--tw-prose-th-borders': theme('colors.border'),
-            '--tw-prose-td-borders': theme('colors.border'),
-            '--tw-prose-invert-body': theme('colors.foreground'),
-            '--tw-prose-invert-headings': theme('colors.primary'),
-            '--tw-prose-invert-lead': theme('colors.muted.foreground'),
-            '--tw-prose-invert-links': theme('colors.accent.DEFAULT'),
-            '--tw-prose-invert-bold': theme('colors.foreground'),
-            '--tw-prose-invert-counters': theme('colors.muted.foreground'),
-            '--tw-prose-invert-bullets': theme('colors.border'),
-            '--tw-prose-invert-hr': theme('colors.border'),
-            '--tw-prose-invert-quotes': theme('colors.foreground'),
-            '--tw-prose-invert-quote-borders': theme('colors.border'),
-            '--tw-prose-invert-captions': theme('colors.muted.foreground'),
-            '--tw-prose-invert-code': theme('colors.foreground'),
-            '--tw-prose-invert-pre-code': theme('colors.foreground'),
-            '--tw-prose-invert-pre-bg': theme('colors.muted.DEFAULT'),
-            '--tw-prose-invert-th-borders': theme('colors.border'),
-            '--tw-prose-invert-td-borders': theme('colors.border'),
+            '--tw-prose-body': 'hsl(var(--foreground))',
+            '--tw-prose-headings': 'hsl(var(--primary))',
+            '--tw-prose-lead': 'hsl(var(--muted-foreground))',
+            '--tw-prose-links': 'hsl(var(--primary))',
+            '--tw-prose-bold': 'hsl(var(--foreground))',
+            '--tw-prose-counters': 'hsl(var(--muted-foreground))',
+            '--tw-prose-bullets': 'hsl(var(--border))',
+            '--tw-prose-hr': 'hsl(var(--border))',
+            '--tw-prose-quotes': 'hsl(var(--foreground))',
+            '--tw-prose-quote-borders': 'hsl(var(--border))',
+            '--tw-prose-captions': 'hsl(var(--muted-foreground))',
+            '--tw-prose-code': 'hsl(var(--foreground))',
+            '--tw-prose-pre-code': 'hsl(var(--foreground))',
+            '--tw-prose-pre-bg': 'hsl(var(--muted))',
+            '--tw-prose-th-borders': 'hsl(var(--border))',
+            '--tw-prose-td-borders': 'hsl(var(--border))',
+            '--tw-prose-invert-body': 'hsl(var(--foreground))',
+            '--tw-prose-invert-headings': 'hsl(var(--primary))',
+            '--tw-prose-invert-lead': 'hsl(var(--muted-foreground))',
+            '--tw-prose-invert-links': 'hsl(var(--primary))',
+            '--tw-prose-invert-bold': 'hsl(var(--foreground))',
+            '--tw-prose-invert-counters': 'hsl(var(--muted-foreground))',
+            '--tw-prose-invert-bullets': 'hsl(var(--border))',
+            '--tw-prose-invert-hr': 'hsl(var(--border))',
+            '--tw-prose-invert-quotes': 'hsl(var(--foreground))',
+            '--tw-prose-invert-quote-borders': 'hsl(var(--border))',
+            '--tw-prose-invert-captions': 'hsl(var(--muted-foreground))',
+            '--tw-prose-invert-code': 'hsl(var(--foreground))',
+            '--tw-prose-invert-pre-code': 'hsl(var(--foreground))',
+            '--tw-prose-invert-pre-bg': 'hsl(var(--muted))',
+            '--tw-prose-invert-th-borders': 'hsl(var(--border))',
+            '--tw-prose-invert-td-borders': 'hsl(var(--border))',
           },
         },
       }),
     },
   },
   plugins: [require('tailwindcss-animate'), require('@tailwindcss/typography')],
-} satisfies Config;
+};
+export default config;
 `,
   "tsconfig.json": `
 {
@@ -549,14 +550,14 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 
 const SuggestCareerPathsInputSchema = z.object({
-  interests: z.string().describe('A description of the user\\'s interests and passions.'),
-  skills: z.string().describe('A description of the user\\'s existing skills and experience.'),
+  interests: z.string().describe('A description of the user\\\\'s interests and passions.'),
+  skills: z.string().describe('A description of the user\\\\'s existing skills and experience.'),
 });
 export type SuggestCareerPathsInput = z.infer<typeof SuggestCareerPathsInputSchema>;
 
 const CareerPathSchema = z.object({
   title: z.string().describe('The title of the suggested career path.'),
-  description: z.string().describe('A detailed description of the career path, including day-to-day responsibilities and why it fits the user\\'s profile.'),
+  description: z.string().describe('A detailed description of the career path, including day-to-day responsibilities and why it fits the user\\\\'s profile.'),
   requiredSkills: z.array(z.string()).describe('A list of key skills required for this career.'),
 });
 
@@ -917,7 +918,7 @@ import { z } from 'zod';
 
 const ManipulateImageTextInputSchema = z.object({
   imageDataUri: z.string().describe("An image containing text, as a data URI. Format: 'data:<mimetype>;base64,<encoded_data>'."),
-  instructions: z.string().describe('Detailed instructions on how to manipulate the text in the image (e.g., "Change the headline to \\'New Title\\'").'),
+  instructions: z.string().describe('Detailed instructions on how to manipulate the text in the image (e.g., "Change the headline to \\\\'New Title\\\\'").'),
 });
 export type ManipulateImageTextInput = z.infer<typeof ManipulateImageTextInputSchema>;
 
@@ -1060,7 +1061,7 @@ const generateLinkedInVisualsFlow = ai.defineFlow(
     if (resumeDataUri) {
         resumeContextPart = { media: { url: resumeDataUri } };
     } else if (resumeText) {
-        resumeContextPart = { text: \`Here is the resume text:\\n\\n\${resumeText}\` };
+        resumeContextPart = { text: \`Here is the resume text:\\\\n\\\\n\${resumeText}\` };
     } else {
         throw new Error("Either resumeDataUri or resumeText must be provided.");
     }
@@ -2046,7 +2047,7 @@ const getResumeFeedbackFlow = ai.defineFlow(
       documentPromptPart = 'Document: {{media url=resume}}';
       promptInput.resume = input.resume;
     } else {
-      documentPromptPart = 'Document:\\n{{{resumeText}}}';
+      documentPromptPart = 'Document:\\\\n{{{resumeText}}}';
       promptInput.resumeText = input.resume;
     }
     
@@ -3032,10 +3033,192 @@ export default function DocumentSummarizerTool() {
 }
 `,
   "src/app/tools/image-text-manipulation/page.tsx": `
-import ImageTextManipulationTool from '@/components/tools/image-text-manipulation-tool';
+'use client';
 
-export default function ImageTextManipulationPage() {
-  return <ImageTextManipulationTool />;
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import Image from 'next/image';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
+import { Input } from '@/components/ui/input';
+import { handleManipulateImageTextAction } from '@/app/actions';
+import type { ManipulateImageTextOutput } from '@/ai/flows/image-text-manipulation-tool';
+import { Loader2, UploadCloud } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+
+const formSchema = z.object({
+  imageDataUri: z.string().min(1, 'Please upload an image.'),
+  instructions: z.string().min(1, 'Please provide instructions.'),
+});
+
+type FormData = z.infer<typeof formSchema>;
+
+export default function ImageTextManipulationTool() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [originalImage, setOriginalImage] = useState<string | null>(null);
+  const [result, setResult] = useState<ManipulateImageTextOutput | null>(null);
+  const { toast } = useToast();
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      imageDataUri: '',
+      instructions: '',
+    },
+  });
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 200 * 1024 * 1024) { // 200MB limit
+        toast({ variant: "destructive", title: "File too large", description: "Please upload an image smaller than 200MB."});
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (loadEvent) => {
+        const dataUri = loadEvent.target?.result as string;
+        form.setValue('imageDataUri', dataUri);
+        setOriginalImage(dataUri);
+        setResult(null); // Clear previous result
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  async function onSubmit(data: FormData) {
+    setIsLoading(true);
+    setResult(null);
+    const response = await handleManipulateImageTextAction(data);
+    setIsLoading(false);
+
+    if (response.success) {
+      setResult(response.data);
+    } else {
+      toast({
+        variant: 'destructive',
+        title: 'Error manipulating image text',
+        description: response.error,
+      });
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      <header className="space-y-1">
+        <h1 className="text-3xl font-bold font-headline">Image Text Manipulation</h1>
+        <p className="text-muted-foreground">Edit text directly within an image using AI.</p>
+      </header>
+      <Card>
+        <CardHeader>
+          <CardTitle>Manipulate Image Text</CardTitle>
+          <CardDescription>
+            Upload an image containing text and tell the AI what changes to make.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                    <FormItem>
+                        <FormLabel>Image File</FormLabel>
+                        <FormControl>
+                            <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center h-[265px]">
+                            {originalImage ? (
+                            <Image src={originalImage} alt="Image preview" layout="fill" objectFit="contain" className="rounded-md" />
+                            ) : (
+                            <>
+                                <UploadCloud className="w-12 h-12 text-muted-foreground" />
+                                <p className="mt-2 text-sm text-muted-foreground">
+                                <label htmlFor="file-upload" className="font-semibold text-primary cursor-pointer hover:underline">
+                                    Upload an image
+                                </label>
+                                </p>
+                                <Input id="file-upload" type="file" accept="image/*" className="sr-only" onChange={handleFileChange} />
+                                <p className="text-xs text-muted-foreground mt-1">PNG, JPG, GIF up to 200MB</p>
+                            </>
+                            )}
+                        </div>
+                        </FormControl>
+                        <FormMessage>{form.formState.errors.imageDataUri?.message}</FormMessage>
+                    </FormItem>
+                    <FormField
+                        control={form.control}
+                        name="instructions"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Instructions</FormLabel>
+                            <FormControl>
+                            <Textarea
+                                placeholder="e.g., 'Change the title to \`Hello World\` and make the subtitle blue.'"
+                                {...field}
+                                rows={10}
+                            />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                </div>
+              <Button type="submit" disabled={isLoading || !originalImage}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isLoading ? 'Processing...' : 'Manipulate Text'}
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+
+      {(isLoading || result) && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Result</CardTitle>
+          </CardHeader>
+           <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+              <div className="space-y-2">
+                <h3 className="text-center font-semibold">Original</h3>
+                {originalImage && (
+                    <div className="aspect-square w-full relative">
+                        <Image src={originalImage} alt="Original image" layout="fill" objectFit="contain" className="rounded-lg border" />
+                    </div>
+                )}
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-center font-semibold">Processed</h3>
+                {isLoading ? (
+                  <Skeleton className="aspect-square w-full rounded-lg" />
+                ) : (
+                  result && (
+                     <div className="aspect-square w-full relative">
+                        <Image src={result.processedImageUrl} alt="Processed image" layout="fill" objectFit="contain" className="rounded-lg border" />
+                    </div>
+                  )
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
 }
 `,
   "src/app/tools/interview-question-generator/page.tsx": `
@@ -3250,10 +3433,274 @@ export default function ToolsLayout({
 }
 `,
   "src/app/tools/linkedin-visuals-generator/page.tsx": `
-import LinkedInVisualsGeneratorTool from '@/components/tools/linkedin-visuals-generator-tool';
+'use client';
 
-export default function LinkedInVisualsGeneratorPage() {
-  return <LinkedInVisualsGeneratorTool />;
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import Image from 'next/image';
+import { saveAs } from 'file-saver';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
+import { Input } from '@/components/ui/input';
+import { handleGenerateLinkedInVisualsAction } from '@/app/actions';
+import type { GenerateLinkedInVisualsInput, GenerateLinkedInVisualsOutput } from '@/ai/flows/linkedin-visuals-generator-tool';
+import { Download, FileText, Loader2, UploadCloud } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
+
+const formSchema = z.object({
+  resumeDataUri: z.string().optional(),
+  resumeText: z.string().optional(),
+  userPhotoUri: z.string().optional(),
+}).refine(data => !!data.resumeDataUri || !!data.resumeText, {
+    message: 'Please either upload a resume or enter text manually.',
+    path: ['resumeDataUri'],
+});
+
+type FormData = z.infer<typeof formSchema>;
+
+export default function LinkedInVisualsGeneratorTool() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [result, setResult] = useState<GenerateLinkedInVisualsOutput | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [resumeFileName, setResumeFileName] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      resumeDataUri: '',
+      resumeText: '',
+      userPhotoUri: '',
+    },
+  });
+
+  const handleResumeFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 200 * 1024 * 1024) { // 200MB limit
+        toast({ variant: "destructive", title: "File too large", description: "Please upload a resume smaller than 200MB."});
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (loadEvent) => {
+        const dataUri = loadEvent.target?.result as string;
+        form.setValue('resumeDataUri', dataUri);
+        form.setValue('resumeText', ''); // Clear text input if file is uploaded
+        setResumeFileName(file.name);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handlePhotoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 200 * 1024 * 1024) { // 200MB limit
+        toast({ variant: "destructive", title: "File too large", description: "Please upload an image smaller than 200MB."});
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (loadEvent) => {
+        const dataUri = loadEvent.target?.result as string;
+        form.setValue('userPhotoUri', dataUri);
+        setPhotoPreview(dataUri);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+  
+  const handleDownload = (url: string, filename: string) => {
+    saveAs(url, filename);
+    toast({
+      title: 'Download Started',
+      description: \`\${filename} is downloading.\`,
+    });
+  };
+
+  async function onSubmit(data: GenerateLinkedInVisualsInput) {
+    setIsLoading(true);
+    setResult(null);
+    const response = await handleGenerateLinkedInVisualsAction(data);
+    setIsLoading(false);
+
+    if (response.success) {
+      setResult(response.data);
+    } else {
+      toast({
+        variant: 'destructive',
+        title: 'Error generating visuals',
+        description: response.error,
+      });
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      <header className="space-y-1">
+        <h1 className="text-3xl font-bold font-headline">LinkedIn Visuals Generator</h1>
+        <p className="text-muted-foreground">
+          Create a professional profile picture and cover banner for your LinkedIn profile.
+        </p>
+      </header>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Generate Visuals</CardTitle>
+          <CardDescription>
+            Provide your resume for context and optionally upload a photo to use as a base.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <Tabs defaultValue="upload" className="w-full">
+                    <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="upload">Upload Resume</TabsTrigger>
+                        <TabsTrigger value="manual">Manual Entry</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="upload" className="mt-4">
+                        <FormItem>
+                            <FormLabel>Your Resume</FormLabel>
+                            <FormControl>
+                                <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center h-[265px]">
+                                {resumeFileName ? (
+                                    <div className='flex flex-col items-center gap-2'>
+                                    <FileText className="w-12 h-12 text-primary" />
+                                    <p className='text-sm font-medium'>{resumeFileName}</p>
+                                    <Button variant="link" size="sm" asChild className='p-0 h-auto'>
+                                        <label htmlFor="resume-upload" className="cursor-pointer">Change file</label>
+                                    </Button>
+                                    </div>
+                                ) : (
+                                    <>
+                                    <UploadCloud className="w-12 h-12 text-muted-foreground" />
+                                    <p className="mt-2 text-sm text-muted-foreground">
+                                        <label htmlFor="resume-upload" className="font-semibold text-primary cursor-pointer hover:underline">
+                                        Click to upload
+                                        </label>
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 200MB</p>
+                                    </>
+                                )}
+                                <Input id="resume-upload" type="file" className="sr-only" onChange={handleResumeFileChange} accept=".pdf,.doc,.docx,.txt"/>
+                                </div>
+                            </FormControl>
+                             <FormMessage>{form.formState.errors.resumeDataUri?.message}</FormMessage>
+                        </FormItem>
+                    </TabsContent>
+                    <TabsContent value="manual" className="mt-4">
+                        <FormField
+                            control={form.control}
+                            name="resumeText"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Paste Resume Content</FormLabel>
+                                    <FormControl>
+                                        <Textarea
+                                            placeholder="Paste your resume content here..."
+                                            {...field}
+                                            rows={12}
+                                            onChange={(e) => {
+                                                field.onChange(e);
+                                                form.setValue('resumeDataUri', '');
+                                                setResumeFileName(null);
+                                            }}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </TabsContent>
+                </Tabs>
+                
+                <FormItem>
+                  <FormLabel>Your Photo (Optional)</FormLabel>
+                   <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center h-[265px]">
+                    {photoPreview ? (
+                      <Image src={photoPreview} alt="Image preview" layout="fill" objectFit="contain" className="rounded-md" />
+                    ) : (
+                      <>
+                        <UploadCloud className="w-12 h-12 text-muted-foreground" />
+                        <p className="mt-2 text-sm text-muted-foreground">
+                          <label htmlFor="photo-upload" className="font-semibold text-primary cursor-pointer hover:underline">
+                             Upload a headshot
+                          </label>
+                        </p>
+                        <Input id="photo-upload" type="file" accept="image/*" className="sr-only" onChange={handlePhotoFileChange} />
+                         <p className="text-xs text-muted-foreground mt-1">PNG, JPG, GIF up to 200MB</p>
+                      </>
+                    )}
+                  </div>
+                </FormItem>
+
+              <Button type="submit" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isLoading ? 'Generating...' : 'Generate Visuals'}
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+
+      {(isLoading || result) && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Generated Visuals</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8">
+             <div className="space-y-4">
+                <h3 className="font-semibold text-center font-headline">Profile Picture</h3>
+                <div className="flex justify-center">
+                    {isLoading && !result ? <Skeleton className="w-48 h-48 rounded-full" /> : null}
+                    {result?.profilePictureUrl && (
+                        <div className="flex flex-col items-center gap-4">
+                            <Image src={result.profilePictureUrl} alt="Generated profile picture" width={192} height={192} className="rounded-full border" />
+                            <Button onClick={() => handleDownload(result.profilePictureUrl, 'profile-picture.png')}>
+                                <Download className="mr-2 h-4 w-4" />
+                                Download
+                            </Button>
+                        </div>
+                    )}
+                </div>
+             </div>
+             <div className="space-y-4">
+                <h3 className="font-semibold text-center font-headline">Cover Banner</h3>
+                 {isLoading && !result ? <Skeleton className="w-full aspect-[4/1] rounded-lg" /> : null}
+                 {result?.coverBannerUrl && (
+                    <div className="flex flex-col items-center gap-4">
+                        <Image src={result.coverBannerUrl} alt="Generated cover banner" width={1584} height={396} className="rounded-lg border aspect-[4/1] object-cover" />
+                        <Button onClick={() => handleDownload(result.coverBannerUrl, 'cover-banner.png')}>
+                           <Download className="mr-2 h-4 w-4" />
+                            Download
+                        </Button>
+                    </div>
+                 )}
+             </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
 }
 `,
   "src/app/tools/loading.tsx": `
@@ -3264,11 +3711,537 @@ export default function Loading() {
 }
 `,
   "src/app/tools/portfolio-generator/page.tsx": `
-import PortfolioGeneratorTool from '@/components/tools/portfolio-generator-tool';
+'use client';
 
-export default function PortfolioGeneratorPage() {
-  return <PortfolioGeneratorTool />;
+import React, { useState } from 'react';
+import { useForm, useFieldArray } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { saveAs } from 'file-saver';
+import JSZip from 'jszip';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter
+} from '@/components/ui/card';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
+import { handleGeneratePortfolioWebsiteAction } from '@/app/actions';
+import type { GeneratePortfolioWebsiteOutput, GeneratePortfolioWebsiteInput } from '@/ai/flows/portfolio-generator-tool';
+import { Copy, Download, FileArchive, FileText, Loader2, Plus, Trash2, UploadCloud } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+
+const portfolioSchema = z.object({
+    name: z.string().min(1, "Name is required."),
+    headline: z.string().min(1, "Headline is required."),
+    profession: z.string().min(1, "Profession is required."),
+    contact: z.object({
+        email: z.string().email("Invalid email address."),
+        phone: z.string().optional(),
+        linkedin: z.string().optional(),
+        github: z.string().optional(),
+        socials: z.array(z.object({
+            network: z.string(),
+            url: z.string().url().or(z.literal('')),
+        })).optional(),
+    }),
+    about: z.string().min(20, "About section should be at least 20 characters."),
+    experience: z.array(z.object({
+        title: z.string().min(1, "Title is required."),
+        company: z.string().min(1, "Company is required."),
+        dates: z.string().min(1, "Dates are required."),
+        description: z.string().min(1, "Description is required."),
+    })),
+    education: z.array(z.object({
+        degree: z.string().min(1, "Degree is required."),
+        school: z.string().min(1, "School is required."),
+        dates: z.string().min(1, "Dates are required."),
+    })),
+    projects: z.array(z.object({
+        title: z.string().min(1, "Title is required."),
+        description: z.string().min(1, "Description is required."),
+        link: z.string().url("Invalid URL.").optional().or(z.literal('')),
+        imageUrl: z.string().url("Invalid URL.").optional().or(z.literal('')),
+    })),
+    skills: z.array(z.string().min(1)).min(1, "At least one skill is required."),
+    achievements: z.array(z.string()).optional(),
+});
+
+type FormData = z.infer<typeof portfolioSchema>;
+
+export default function PortfolioGeneratorTool() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [result, setResult] = useState<GeneratePortfolioWebsiteOutput | null>(null);
+  const { toast } = useToast();
+  const [resumeDataUri, setResumeDataUri] = useState<string | null>(null);
+  const [resumeFileName, setResumeFileName] = useState<string | null>(null);
+  const [certificateDataUri, setCertificateDataUri] = useState<string | null>(null);
+  const [certificateFileName, setCertificateFileName] = useState<string | null>(null);
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(portfolioSchema),
+    defaultValues: {
+        name: '',
+        headline: '',
+        profession: '',
+        contact: { email: '', socials: [{ network: 'LinkedIn', url: '' }, { network: 'GitHub', url: '' }] },
+        about: '',
+        experience: [{ title: '', company: '', dates: '', description: '' }],
+        education: [{ degree: '', school: '', dates: '' }],
+        projects: [{ title: '', description: '', link: '', imageUrl: '' }],
+        skills: [],
+        achievements: [],
+    },
+  });
+
+  const { fields: expFields, append: appendExp, remove: removeExp } = useFieldArray({ control: form.control, name: "experience" });
+  const { fields: eduFields, append: appendEdu, remove: removeEdu } = useFieldArray({ control: form.control, name: "education" });
+  const { fields: projFields, append: appendProj, remove: removeProj } = useFieldArray({ control: form.control, name: "projects" });
+  const { fields: socialFields, append: appendSocial, remove: removeSocial } = useFieldArray({ control: form.control, name: "contact.socials" });
+
+  async function onManualSubmit(data: FormData) {
+    setIsLoading(true);
+    setResult(null);
+    const response = await handleGeneratePortfolioWebsiteAction({ type: 'manual', data });
+    setIsLoading(false);
+
+    if (response.success && response.data) {
+      setResult(response.data);
+      toast({ title: 'Website Generated!', description: 'Your portfolio has been successfully generated.' });
+    } else {
+      toast({
+        variant: 'destructive',
+        title: 'Error Generating Website',
+        description: response.error,
+      });
+    }
+  }
+
+  const onResumeSubmit = async () => {
+    if (!resumeDataUri) {
+        toast({ variant: 'destructive', title: 'No Resume Provided', description: 'Please upload a resume.' });
+        return;
+    }
+    setIsLoading(true);
+    setResult(null);
+    const response = await handleGeneratePortfolioWebsiteAction({ type: 'resume', resumeDataUri, certificateDataUri });
+    setIsLoading(false);
+
+    if (response.success && response.data) {
+      setResult(response.data);
+      toast({ title: 'Website Generated!', description: 'Your portfolio has been successfully generated from the provided resume.' });
+    } else {
+      toast({
+        variant: 'destructive',
+        title: 'Error Generating Website',
+        description: response.error,
+      });
+    }
+  };
+  
+  const copyToClipboard = (text: string, type: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: \`\${type} Copied!\`,
+      description: \`The \${type.toLowerCase()} code has been copied to your clipboard.\`,
+    });
+  };
+  
+  const downloadFile = (content: string, filename: string, type: string) => {
+    const blob = new Blob([content], { type });
+    saveAs(blob, filename);
+  };
+
+  const handleDownloadZip = () => {
+    if (!result) return;
+    const zip = new JSZip();
+    zip.file("index.html", result.html);
+    zip.file("style.css", result.css);
+    zip.file("script.js", result.javascript);
+    zip.generateAsync({type:"blob"})
+    .then(function(content) {
+        saveAs(content, "portfolio-website.zip");
+    });
+     toast({
+      title: 'Download Started!',
+      description: \`Your portfolio website is being downloaded as a zip file.\`,
+    });
+  };
+
+  const handleFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    setFileName: React.Dispatch<React.SetStateAction<string | null>>,
+    setDataUri: React.Dispatch<React.SetStateAction<string | null>>
+  ) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 200 * 1024 * 1024) { // 200MB limit
+        toast({ variant: "destructive", title: "File too large", description: "Please upload a document smaller than 200MB."});
+        return;
+      }
+      setFileName(file.name);
+      const reader = new FileReader();
+      reader.onload = async (loadEvent) => {
+        const dataUri = loadEvent.target?.result as string;
+        setDataUri(dataUri);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+
+  return (
+    <div className="space-y-6">
+      <header className="space-y-1">
+        <h1 className="text-3xl font-bold font-headline">Portfolio Website Generator</h1>
+        <p className="text-muted-foreground">
+          Generate a website from your resume, or by filling out the form manually.
+        </p>
+      </header>
+      
+      <Card>
+        <CardHeader>
+            <CardTitle>Create Your Portfolio</CardTitle>
+            <CardDescription>Choose your preferred method to get started.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <Tabs defaultValue="auto-generate">
+                <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="auto-generate">From Resume</TabsTrigger>
+                    <TabsTrigger value="manual">Manual Entry</TabsTrigger>
+                </TabsList>
+                <TabsContent value="auto-generate" className="mt-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <Label>1. Upload Resume</Label>
+                            <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center h-48">
+                                {resumeFileName ? (
+                                    <div className='flex flex-col items-center gap-2'>
+                                        <FileText className="w-12 h-12 text-primary" />
+                                        <p className='text-sm font-medium'>{resumeFileName}</p>
+                                        <Button variant="link" size="sm" asChild className='p-0 h-auto'>
+                                            <label htmlFor="resume-upload" className="cursor-pointer">Change file</label>
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <UploadCloud className="w-12 h-12 text-muted-foreground" />
+                                        <p className="mt-2 text-sm text-muted-foreground">
+                                            <label htmlFor="resume-upload" className="font-semibold text-primary cursor-pointer hover:underline">
+                                                Upload Resume
+                                            </label>
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">PDF, DOCX, TXT</p>
+                                    </>
+                                )}
+                                <Input id="resume-upload" type="file" className="sr-only" onChange={(e) => handleFileChange(e, setResumeFileName, setResumeDataUri)} accept=".pdf,.docx,.txt" />
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label>2. Upload Certificate (Optional)</Label>
+                            <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center h-48">
+                                {certificateFileName ? (
+                                    <div className='flex flex-col items-center gap-2'>
+                                        <FileText className="w-12 h-12 text-primary" />
+                                        <p className='text-sm font-medium'>{certificateFileName}</p>
+                                        <Button variant="link" size="sm" asChild className='p-0 h-auto'>
+                                            <label htmlFor="cert-upload" className="cursor-pointer">Change file</label>
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <UploadCloud className="w-12 h-12 text-muted-foreground" />
+                                        <p className="mt-2 text-sm text-muted-foreground">
+                                            <label htmlFor="cert-upload" className="font-semibold text-primary cursor-pointer hover:underline">
+                                                Upload Certificate
+                                            </label>
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">Image or PDF</p>
+                                    </>
+                                )}
+                                <Input id="cert-upload" type="file" className="sr-only" onChange={(e) => handleFileChange(e, setCertificateFileName, setCertificateDataUri)} accept="image/*,.pdf" />
+                            </div>
+                        </div>
+                    </div>
+                     <div className="mt-6">
+                        <Button onClick={onResumeSubmit} disabled={isLoading || !resumeDataUri}>
+                            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                            Generate Website
+                        </Button>
+                    </div>
+                </TabsContent>
+                <TabsContent value="manual" className="mt-6">
+                    <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onManualSubmit)} className="space-y-8">
+                        {/* Personal Details */}
+                        <Card>
+                            <CardHeader><CardTitle>Personal Details</CardTitle></CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <FormField control={form.control} name="name" render={({ field }) => ( <FormItem> <FormLabel>Full Name</FormLabel> <FormControl><Input placeholder="John Doe" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                    <FormField control={form.control} name="headline" render={({ field }) => ( <FormItem> <FormLabel>Headline</FormLabel> <FormControl><Input placeholder="Software Engineer | AI Enthusiast" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                </div>
+                                <FormField control={form.control} name="profession" render={({ field }) => ( <FormItem> <FormLabel>Profession</FormLabel> <FormControl><Input placeholder="e.g., Software Engineer" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                 <FormField control={form.control} name="contact.email" render={({ field }) => ( <FormItem> <FormLabel>Email</FormLabel> <FormControl><Input placeholder="your.email@example.com" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                <FormField control={form.control} name="about" render={({ field }) => ( <FormItem> <FormLabel>About Me</FormLabel> <FormControl><Textarea placeholder="A short bio about yourself..." {...field} rows={5} /></FormControl> <FormMessage /> </FormItem> )}/>
+                            </CardContent>
+                        </Card>
+
+                        {/* Social Links */}
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between">
+                                <CardTitle>Social Links</CardTitle>
+                                <Button type="button" variant="outline" size="sm" onClick={() => appendSocial({ network: '', url: '' })}><Plus className="mr-2 h-4 w-4" /> Add Link</Button>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                {socialFields.map((field, index) => (
+                                    <div key={field.id} className="flex gap-4 items-end">
+                                        <FormField control={form.control} name={\`contact.socials.\${index}.network\`} render={({ field }) => ( <FormItem className="flex-1"> <FormLabel>Network</FormLabel> <FormControl><Input {...field} placeholder="e.g., LinkedIn" /></FormControl> <FormMessage /> </FormItem> )}/>
+                                        <FormField control={form.control} name={\`contact.socials.\${index}.url\`} render={({ field }) => ( <FormItem className="flex-1"> <FormLabel>URL</FormLabel> <FormControl><Input {...field} placeholder="https://linkedin.com/in/..." /></FormControl> <FormMessage /> </FormItem> )}/>
+                                        <Button type="button" variant="ghost" size="icon" className="h-9 w-9" onClick={() => removeSocial(index)}><Trash2 className="h-4 w-4" /></Button>
+                                    </div>
+                                ))}
+                            </CardContent>
+                        </Card>
+
+                        {/* Experience */}
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between">
+                                <CardTitle>Work Experience</CardTitle>
+                                <Button type="button" variant="outline" size="sm" onClick={() => appendExp({ title: '', company: '', dates: '', description: '' })}><Plus className="mr-2 h-4 w-4" /> Add Experience</Button>
+                            </CardHeader>
+                            <CardContent className="space-y-6">
+                                {expFields.map((field, index) => (
+                                    <div key={field.id} className="space-y-4 border p-4 rounded-md relative">
+                                        <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={() => removeExp(index)}><Trash2 className="h-4 w-4" /></Button>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <FormField control={form.control} name={\`experience.\${index}.title\`} render={({ field }) => ( <FormItem> <FormLabel>Job Title</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                            <FormField control={form.control} name={\`experience.\${index}.company\`} render={({ field }) => ( <FormItem> <FormLabel>Company</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                        </div>
+                                        <FormField control={form.control} name={\`experience.\${index}.dates\`} render={({ field }) => ( <FormItem> <FormLabel>Dates</FormLabel> <FormControl><Input {...field} placeholder="e.g., June 2023 - Present" /></FormControl> <FormMessage /> </FormItem> )}/>
+                                        <FormField control={form.control} name={\`experience.\${index}.description\`} render={({ field }) => ( <FormItem> <FormLabel>Description</FormLabel> <FormControl><Textarea {...field} rows={4} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                    </div>
+                                ))}
+                            </CardContent>
+                        </Card>
+
+                        {/* Education */}
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between">
+                                <CardTitle>Education</CardTitle>
+                                <Button type="button" variant="outline" size="sm" onClick={() => appendEdu({ degree: '', school: '', dates: '' })}><Plus className="mr-2 h-4 w-4" /> Add Education</Button>
+                            </CardHeader>
+                            <CardContent className="space-y-6">
+                                {eduFields.map((field, index) => (
+                                    <div key={field.id} className="space-y-4 border p-4 rounded-md relative">
+                                        <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={() => removeEdu(index)}><Trash2 className="h-4 w-4" /></Button>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <FormField control={form.control} name={\`education.\${index}.degree\`} render={({ field }) => ( <FormItem> <FormLabel>Degree</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                            <FormField control={form.control} name={\`education.\${index}.school\`} render={({ field }) => ( <FormItem> <FormLabel>School/University</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                        </div>
+                                        <FormField control={form.control} name={\`education.\${index}.dates\`} render={({ field }) => ( <FormItem> <FormLabel>Dates</FormLabel> <FormControl><Input {...field} placeholder="e.g., 2022 - 2026" /></FormControl> <FormMessage /> </FormItem> )}/>
+                                    </div>
+                                ))}
+                            </CardContent>
+                        </Card>
+
+                        {/* Projects */}
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between">
+                                <CardTitle>Projects</CardTitle>
+                                <Button type="button" variant="outline" size="sm" onClick={() => appendProj({ title: '', description: '', link: '', imageUrl: '' })}><Plus className="mr-2 h-4 w-4" /> Add Project</Button>
+                            </CardHeader>
+                            <CardContent className="space-y-6">
+                                {projFields.map((field, index) => (
+                                    <div key={field.id} className="space-y-4 border p-4 rounded-md relative">
+                                        <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={() => removeProj(index)}><Trash2 className="h-4 w-4" /></Button>
+                                        <FormField control={form.control} name={\`projects.\${index}.title\`} render={({ field }) => ( <FormItem> <FormLabel>Project Title</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                        <FormField control={form.control} name={\`projects.\${index}.description\`} render={({ field }) => ( <FormItem> <FormLabel>Description</FormLabel> <FormControl><Textarea {...field} rows={3} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <FormField control={form.control} name={\`projects.\${index}.link\`} render={({ field }) => ( <FormItem> <FormLabel>Project Link (Optional)</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                                            <FormField control={form.control} name={\`projects.\${index}.imageUrl\`} render={({ field }) => ( <FormItem> <FormLabel>Image URL (Optional)</FormLabel> <FormControl><Input {...field} placeholder="https://placehold.co/600x400" /></FormControl> <FormMessage /> </FormItem> )}/>
+                                        </div>
+                                    </div>
+                                ))}
+                            </CardContent>
+                        </Card>
+
+                        {/* Skills */}
+                        <Card>
+                            <CardHeader><CardTitle>Skills</CardTitle></CardHeader>
+                            <CardContent>
+                                <FormField
+                                    control={form.control}
+                                    name="skills"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Enter your skills, separated by commas</FormLabel>
+                                            <FormControl>
+                                                <Textarea
+                                                    placeholder="e.g., Python, JavaScript, React, AI, Machine Learning"
+                                                    onChange={(e) => {
+                                                        const skillsArray = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
+                                                        field.onChange(skillsArray);
+                                                    }}
+                                                    value={Array.isArray(field.value) ? field.value.join(', ') : ''}
+                                                    rows={3}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </CardContent>
+                        </Card>
+                        
+                        {/* Achievements */}
+                        <Card>
+                            <CardHeader><CardTitle>Achievements</CardTitle></CardHeader>
+                            <CardContent>
+                                <FormField
+                                    control={form.control}
+                                    name="achievements"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Enter your achievements, separated by commas</FormLabel>
+                                            <FormControl>
+                                                <Textarea
+                                                    placeholder="e.g., Won 1st place in hackathon, Published a paper"
+                                                    onChange={(e) => {
+                                                        const achievementsArray = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
+                                                        field.onChange(achievementsArray);
+                                                    }}
+                                                    value={Array.isArray(field.value) ? field.value.join(', ') : ''}
+                                                    rows={3}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </CardContent>
+                        </Card>
+
+                        <Button type="submit" disabled={isLoading}>
+                             {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                            Generate Website from Form
+                        </Button>
+                    </form>
+                </Form>
+                </TabsContent>
+            </Tabs>
+        </CardContent>
+      </Card>
+
+      {(isLoading || result) && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Generated Website Code</CardTitle>
+            <CardDescription>Your portfolio code is ready. You can preview it or download the files.</CardDescription>
+          </CardHeader>
+          <CardContent>
+             {isLoading ? (
+                <div className="space-y-4">
+                    <Skeleton className="h-10 w-1/3" />
+                    <Skeleton className="h-64 w-full" />
+                </div>
+             ) : (
+                result &&
+                <Tabs defaultValue="preview">
+                    <TabsList>
+                        <TabsTrigger value="preview">Preview</TabsTrigger>
+                        <TabsTrigger value="html">HTML</TabsTrigger>
+                        <TabsTrigger value="css">CSS</TabsTrigger>
+                        <TabsTrigger value="js">JavaScript</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="preview" className="mt-4">
+                        <iframe 
+                            srcDoc={\`<html><head><style>\${result.css}</style></head><body>\${result.html}<script>\${result.javascript}</script></body></html>\`}
+                            className="w-full h-[600px] border rounded-md"
+                            title="Portfolio Preview"
+                        />
+                    </TabsContent>
+                    <TabsContent value="html">
+                        <CodeBlock 
+                          code={result.html} 
+                          onCopy={() => copyToClipboard(result.html, 'HTML')} 
+                          onDownload={() => downloadFile(result.html, 'index.html', 'text/html')}
+                        />
+                    </TabsContent>
+                     <TabsContent value="css">
+                        <CodeBlock 
+                          code={result.css} 
+                          onCopy={() => copyToClipboard(result.css, 'CSS')}
+                          onDownload={() => downloadFile(result.css, 'style.css', 'text/css')}
+                        />
+                    </TabsContent>
+                     <TabsContent value="js">
+                        <CodeBlock 
+                          code={result.javascript} 
+                          onCopy={() => copyToClipboard(result.javascript, 'JavaScript')}
+                          onDownload={() => downloadFile(result.javascript, 'script.js', 'text/javascript')}
+                        />
+                    </TabsContent>
+                </Tabs>
+             )}
+          </CardContent>
+          {result && (
+            <CardFooter>
+                 <Button onClick={handleDownloadZip}>
+                    <FileArchive className="mr-2 h-4 w-4" />
+                    Download Site (.zip)
+                </Button>
+            </CardFooter>
+          )}
+        </Card>
+      )}
+    </div>
+  );
 }
+
+const CodeBlock = ({ code, onCopy, onDownload }: { code: string; onCopy: () => void; onDownload: () => void; }) => {
+  return (
+    <div className="relative">
+      <div className="absolute top-2 right-2 flex gap-2">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-7 w-7"
+          onClick={onCopy}
+        >
+          <Copy className="h-4 w-4" />
+        </Button>
+         <Button
+          variant="ghost"
+          size="icon"
+          className="h-7 w-7"
+          onClick={onDownload}
+        >
+          <Download className="h-4 w-4" />
+        </Button>
+      </div>
+      <pre className="bg-muted p-4 rounded-md overflow-x-auto text-sm h-96">
+        <code className="text-foreground">{code}</code>
+      </pre>
+    </div>
+  );
+};
 `,
   "src/app/tools/presentation-generator/page.tsx": `
 import PresentationGeneratorTool from '@/components/tools/presentation-generator-tool';
@@ -3278,10 +4251,382 @@ export default function PresentationGeneratorPage() {
 }
 `,
   "src/app/tools/resume-feedback/page.tsx": `
-import ResumeFeedbackTool from '@/components/tools/resume-feedback-tool';
+'use client';
 
-export default function ResumeFeedbackPage() {
-  return <ResumeFeedbackTool />;
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { saveAs } from 'file-saver';
+import { Packer } from 'docx';
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { handleGetResumeFeedbackAction } from '@/app/actions';
+import type { GetResumeFeedbackOutput } from '@/ai/flows/resume-feedback-tool';
+import { FileText, UploadCloud, Download, FileCode, Loader2 } from 'lucide-react';
+import { ResumeTemplate } from '@/components/resume-template';
+import { createResumeDocx } from '@/lib/docx-generator';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+
+
+const formSchema = z.object({
+  resume: z.string().min(1, 'Please upload or paste your resume.'),
+  targetJobRole: z.string().optional(),
+  additionalInfo: z.string().optional(),
+});
+
+type FormData = z.infer<typeof formSchema>;
+
+
+export default function ResumeFeedbackTool() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [result, setResult] = useState<GetResumeFeedbackOutput | null>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      resume: '',
+      targetJobRole: '',
+      additionalInfo: '',
+    },
+  });
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 200 * 1024 * 1024) {
+        toast({
+          variant: 'destructive',
+          title: 'File too large',
+          description: 'Please upload a document smaller than 200MB.',
+        });
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (loadEvent) => {
+        const dataUri = loadEvent.target?.result as string;
+        form.setValue('resume', dataUri);
+        setFileName(file.name);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  async function onSubmit(data: FormData) {
+    if (!data.resume) {
+      form.setError('resume', {
+        type: 'manual',
+        message: 'Please upload or paste your resume.',
+      });
+      return;
+    }
+    setIsLoading(true);
+    setResult(null);
+    const response = await handleGetResumeFeedbackAction(data);
+    setIsLoading(false);
+
+    if (response.success) {
+      setResult(response.data);
+    } else {
+      toast({
+        variant: 'destructive',
+        title: 'Error Analyzing Resume',
+        description: response.error,
+      });
+    }
+  }
+
+  const handleDownloadDocx = () => {
+    if (!result?.rewrittenResume) return;
+
+    try {
+      const doc = createResumeDocx(result.rewrittenResume);
+      Packer.toBlob(doc).then(blob => {
+        saveAs(blob, 'resume.docx');
+        toast({ title: "DOCX Downloaded", description: "Your resume has been saved as a DOCX file." });
+      });
+    } catch (error) {
+       toast({ variant: 'destructive', title: 'Error Generating DOCX', description: error instanceof Error ? error.message : 'An unknown error occurred.' });
+    }
+  };
+  
+  const handleDownloadPdf = async () => {
+    const resumeElement = document.getElementById('resume-preview-content');
+    if (!resumeElement) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Could not find resume content to download.' });
+        return;
+    }
+
+    try {
+        const canvas = await html2canvas(resumeElement, {
+            scale: 3, // Higher scale for better quality
+            useCORS: true,
+            logging: false,
+        });
+        const imgData = canvas.toDataURL('image/png', 1.0);
+        
+        // A4 page dimensions in pixels at 96 DPI are roughly 794x1123
+        const pdfWidth = 794;
+        const pdfHeight = 1123;
+        
+        const pdf = new jsPDF({
+            orientation: 'p',
+            unit: 'px',
+            format: [pdfWidth, pdfHeight],
+        });
+
+        const canvasAspectRatio = canvas.width / canvas.height;
+        let finalWidth = pdfWidth;
+        let finalHeight = finalWidth / canvasAspectRatio;
+
+        if (finalHeight > pdfHeight) {
+            finalHeight = pdfHeight;
+            finalWidth = finalHeight * canvasAspectRatio;
+        }
+        
+        const x = (pdfWidth - finalWidth) / 2;
+        const y = 0;
+
+
+        pdf.addImage(imgData, 'PNG', x, y, finalWidth, finalHeight);
+        pdf.save('resume.pdf');
+        toast({ title: "PDF Downloaded", description: "Your resume has been saved as a PDF file." });
+    } catch (error) {
+        toast({ variant: 'destructive', title: 'Error Generating PDF', description: error instanceof Error ? error.message : 'An unknown error occurred.' });
+    }
+};
+
+  return (
+    <div className="space-y-8">
+      <header className="space-y-2">
+        <h1 className="text-3xl font-bold font-headline">Resume Feedback Tool</h1>
+        <p className="text-muted-foreground">
+          Get AI feedback on your resume, then download a professionally formatted, editable DOCX file.
+        </p>
+      </header>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Analyze Your Resume</CardTitle>
+          <CardDescription>
+            Upload or paste your resume, then provide some optional context about
+            your job search.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <Tabs defaultValue="paste">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="paste">Paste Text</TabsTrigger>
+                  <TabsTrigger value="upload">Upload File</TabsTrigger>
+                </TabsList>
+                <TabsContent value="paste" className="mt-4">
+                  <FormField
+                    control={form.control}
+                    name="resume"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Paste your resume content here</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Paste your resume here..."
+                            rows={15}
+                            {...field}
+                            onChange={(e) => {
+                              field.onChange(e);
+                              setFileName(null);
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </TabsContent>
+                <TabsContent value="upload" className="mt-4">
+                  <FormItem>
+                    <FormLabel>Upload Document</FormLabel>
+                    <FormControl>
+                      <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center h-48">
+                        {fileName ? (
+                          <div className="flex flex-col items-center gap-2">
+                            <FileText className="w-12 h-12 text-primary" />
+                            <p className="text-sm font-medium">{fileName}</p>
+                            <Button
+                              variant="link"
+                              size="sm"
+                              asChild
+                              className="p-0 h-auto"
+                            >
+                              <label
+                                htmlFor="file-upload"
+                                className="cursor-pointer"
+                              >
+                                Change file
+                              </label>
+                            </Button>
+                          </div>
+                        ) : (
+                          <>
+                            <UploadCloud className="w-12 h-12 text-muted-foreground" />
+                            <p className="mt-2 text-sm text-muted-foreground">
+                              <label
+                                htmlFor="file-upload"
+                                className="font-semibold text-primary cursor-pointer hover:underline"
+                              >
+                                Click to upload
+                              </label>{' '}
+                              or drag and drop
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              PDF, TXT up to 200MB
+                            </p>
+                          </>
+                        )}
+                        <Input
+                          id="file-upload"
+                          type="file"
+                          className="sr-only"
+                          onChange={handleFileChange}
+                          accept=".pdf,.txt"
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage>
+                      {form.formState.errors.resume?.message}
+                    </FormMessage>
+                  </FormItem>
+                </TabsContent>
+              </Tabs>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="targetJobRole"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Target Job Role (Optional)</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g., Software Engineer"
+                          {...field}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="additionalInfo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Additional Info (Optional)</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g., transitioning from another industry"
+                          {...field}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Analyzing...</> : 'Get Feedback'}
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+
+      {(isLoading || result) && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Your Resume Analysis</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="feedback">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="feedback">Feedback</TabsTrigger>
+                <TabsTrigger value="rewritten">Rewritten Resume</TabsTrigger>
+              </TabsList>
+              <TabsContent value="feedback" className="mt-4">
+                {isLoading ? (
+                  <div className="space-y-4 pt-4">
+                    <Skeleton className="h-4 w-1/4" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-4 w-1/4 mt-4" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-5/6" />
+                  </div>
+                ) : (
+                  result && (
+                    <div
+                      className="prose prose-invert max-w-none"
+                      dangerouslySetInnerHTML={{
+                        __html: result.feedback.replace(/\\\\n/g, '<br />'),
+                      }}
+                    />
+                  )
+                )}
+              </TabsContent>
+              <TabsContent value="rewritten" className="mt-4">
+                {isLoading && !result ? (
+                  <div className="border rounded-lg"><Skeleton className="h-[1056px] w-full max-w-[816px] mx-auto" /></div>
+                ) : (
+                  result?.rewrittenResume && (
+                    <div className="space-y-4">
+                       <div className="bg-gray-200 p-4 md:p-8 flex justify-center overflow-auto">
+                           <div id="resume-preview-content" className="w-full max-w-4xl">
+                                <ResumeTemplate resumeData={result.rewrittenResume} />
+                           </div>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                         <Button onClick={handleDownloadDocx} variant="secondary">
+                          <FileCode className="mr-2 h-4 w-4" />
+                          Download as DOCX
+                       </Button>
+                        <Button onClick={handleDownloadPdf} variant="secondary">
+                            <Download className="mr-2 h-4 w-4" />
+                            Download as PDF
+                        </Button>
+                      </div>
+                    </div>
+                  )
+                )}
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
 }
 `,
   "src/app/tools/settings/page.tsx": `
@@ -3365,10 +4710,192 @@ export default function SettingsPage() {
 }
 `,
   "src/app/tools/smart-search/page.tsx": `
-import SmartSearchTool from '@/components/tools/smart-search-tool';
+'use client';
 
-export default function SmartSearchPage() {
-  return <SmartSearchTool />;
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
+import { handleSmartSearchAction } from '@/app/actions';
+import type { SmartSearchOutput } from '@/ai/flows/smart-search-tool';
+import { FileText, Loader2, UploadCloud } from 'lucide-react';
+
+const formSchema = z.object({
+  documentDataUri: z
+    .string()
+    .min(1, 'Please upload a document.'),
+  query: z.string().min(1, 'Please enter a query.'),
+});
+
+type FormData = z.infer<typeof formSchema>;
+
+export default function SmartSearchTool() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [result, setResult] = useState<SmartSearchOutput | null>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      documentDataUri: '',
+      query: '',
+    },
+  });
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 200 * 1024 * 1024) { // 200MB limit
+        toast({ variant: "destructive", title: "File too large", description: "Please upload a document smaller than 200MB."});
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (loadEvent) => {
+        const dataUri = loadEvent.target?.result as string;
+        form.setValue('documentDataUri', dataUri);
+        setFileName(file.name);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  async function onSubmit(data: FormData) {
+    setIsLoading(true);
+    setResult(null);
+    const response = await handleSmartSearchAction(data);
+    setIsLoading(false);
+
+    if (response.success) {
+      setResult(response.data);
+    } else {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: response.error,
+      });
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      <header className="space-y-1">
+        <h1 className="text-3xl font-bold font-headline">Smart Search</h1>
+        <p className="text-muted-foreground">
+          Analyze a document for important information using AI.
+        </p>
+      </header>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Analyze Document</CardTitle>
+          <CardDescription>
+            Upload a document and ask a question about its contents.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormItem>
+                <FormLabel>Document</FormLabel>
+                <FormControl>
+                  <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center">
+                    {fileName ? (
+                      <div className='flex flex-col items-center gap-2'>
+                        <FileText className="w-12 h-12 text-primary" />
+                        <p className='text-sm font-medium'>{fileName}</p>
+                         <Button variant="link" size="sm" asChild className='p-0 h-auto'>
+                           <label htmlFor="file-upload" className="cursor-pointer">Change file</label>
+                         </Button>
+                      </div>
+                    ) : (
+                      <>
+                        <UploadCloud className="w-12 h-12 text-muted-foreground" />
+                        <p className="mt-2 text-sm text-muted-foreground">
+                          <label htmlFor="file-upload" className="font-semibold text-primary cursor-pointer hover:underline">
+                            Click to upload
+                          </label>
+                           {' '}or drag and drop
+                        </p>
+                         <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 200MB</p>
+                      </>
+                    )}
+                    <Input id="file-upload" type="file" className="sr-only" onChange={handleFileChange} accept=".pdf,.doc,.docx,.txt" />
+                  </div>
+                </FormControl>
+                <FormMessage>{form.formState.errors.documentDataUri?.message}</FormMessage>
+              </FormItem>
+
+              <FormField
+                control={form.control}
+                name="query"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Query</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="e.g., What are the key takeaways from this document?"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" disabled={isLoading || !form.formState.isValid}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isLoading ? 'Searching...' : 'Search'}
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+
+      {isLoading && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Summary</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-1/2" />
+          </CardContent>
+        </Card>
+      )}
+
+      {result && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Summary</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground whitespace-pre-wrap">{result.summary}</p>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
 }
 `,
   "src/app/tools/support/page.tsx": `
@@ -3482,17 +5009,448 @@ export default function TextToSpeechPage() {
 }
 `,
   "src/app/tools/thesis-generator/page.tsx": `
-import AcademicWriterTool from '@/components/tools/thesis-generator-tool';
+'use client';
+
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import jsPDF from 'jspdf';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
+import { handleGenerateAcademicDocumentAction } from '@/app/actions';
+import type { GenerateAcademicDocumentOutput } from '@/ai/flows/thesis-generator-tool';
+import { Download, FileText, Loader2, UploadCloud } from 'lucide-react';
+
+const formSchema = z.object({
+  documentDataUri: z.string().min(1, 'Please upload a document.'),
+});
+
+type FormData = z.infer<typeof formSchema>;
 
 export default function ThesisGeneratorPage() {
-  return <AcademicWriterTool />;
+  const [isLoading, setIsLoading] = useState(false);
+  const [result, setResult] = useState<GenerateAcademicDocumentOutput | null>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      documentDataUri: '',
+    },
+  });
+  
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 200 * 1024 * 1024) { // 200MB limit
+        toast({ variant: "destructive", title: "File too large", description: "Please upload a document smaller than 200MB."});
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (loadEvent) => {
+        const dataUri = loadEvent.target?.result as string;
+        form.setValue('documentDataUri', dataUri);
+        setFileName(file.name);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+
+  async function onSubmit(data: FormData) {
+    setIsLoading(true);
+    setResult(null);
+    const response = await handleGenerateAcademicDocumentAction(data);
+    setIsLoading(false);
+
+    if (response.success) {
+      setResult(response.data);
+      toast({ title: 'Document Generated', description: 'Your academic document has been created successfully.' });
+    } else {
+      toast({
+        variant: 'destructive',
+        title: 'Error generating document',
+        description: response.error,
+      });
+    }
+  }
+
+  const handleDownloadPdf = () => {
+    if (!result) return;
+    
+    const doc = new jsPDF();
+    const margin = 15;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const usableWidth = pageWidth - 2 * margin;
+    let y = margin;
+
+    const addText = (text: string, options: any) => {
+        const lines = doc.splitTextToSize(text, usableWidth);
+        const textHeight = doc.getTextDimensions(lines).h;
+        if (y + textHeight > pageHeight - margin) {
+            doc.addPage();
+            y = margin;
+        }
+        doc.text(lines, margin, y, options);
+        y += textHeight + 5;
+    }
+
+    // Title
+    doc.setFontSize(22).setFont('helvetica', 'bold');
+    addText(result.title, { align: 'center' });
+    y += 10;
+    
+    // Introduction
+    doc.setFontSize(16).setFont('helvetica', 'bold');
+    addText('Introduction', {});
+    doc.setFontSize(12).setFont('helvetica', 'normal');
+    addText(result.introduction.replace(/###|##|#/g, ''), {}); // Simple markdown removal
+    y += 5;
+
+    // Chapters
+    result.chapters.forEach(chapter => {
+        doc.setFontSize(16).setFont('helvetica', 'bold');
+        addText(chapter.title, {});
+        doc.setFontSize(12).setFont('helvetica', 'normal');
+        addText(chapter.content.replace(/###|##|#/g, ''), {});
+        y += 5;
+    });
+
+    // Conclusion
+    doc.setFontSize(16).setFont('helvetica', 'bold');
+    addText('Conclusion', {});
+    doc.setFontSize(12).setFont('helvetica', 'normal');
+    addText(result.conclusion.replace(/###|##|#/g, ''), {});
+
+    doc.save(\`\${result.title.replace(/\\s+/g, '_')}.pdf\`);
+  };
+
+  return (
+    <div className="space-y-8">
+      <header className="space-y-2">
+        <h1 className="text-3xl font-bold font-headline">Thesis Generator</h1>
+        <p className="text-muted-foreground">
+          Generate a structured academic document from your outline and research notes.
+        </p>
+      </header>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Generate Document</CardTitle>
+          <CardDescription>
+            Upload a document containing your structure, topic, and research notes.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+               <FormField
+                control={form.control}
+                name="documentDataUri"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Document Outline & Notes</FormLabel>
+                     <FormControl>
+                      <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center h-48">
+                        {fileName ? (
+                          <div className="flex flex-col items-center gap-2">
+                            <FileText className="w-12 h-12 text-primary" />
+                            <p className="text-sm font-medium">{fileName}</p>
+                            <Button
+                              variant="link"
+                              size="sm"
+                              asChild
+                              className="p-0 h-auto"
+                            >
+                              <label
+                                htmlFor="file-upload"
+                                className="cursor-pointer"
+                              >
+                                Change file
+                              </label>
+                            </Button>
+                          </div>
+                        ) : (
+                          <>
+                            <UploadCloud className="w-12 h-12 text-muted-foreground" />
+                            <p className="mt-2 text-sm text-muted-foreground">
+                              <label
+                                htmlFor="file-upload"
+                                className="font-semibold text-primary cursor-pointer hover:underline"
+                              >
+                                Click to upload
+                              </label>{' '}
+                              or drag and drop
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              PDF, DOCX, TXT up to 200MB
+                            </p>
+                          </>
+                        )}
+                        <Input
+                          id="file-upload"
+                          type="file"
+                          className="sr-only"
+                          onChange={handleFileChange}
+                          accept=".pdf,.doc,.docx,.txt"
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating...</> : 'Generate Document'}
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+
+      {isLoading && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Generating Document Content...</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <Skeleton className="h-8 w-3/4" />
+            <div className="space-y-2">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-5/6" />
+            </div>
+            <Skeleton className="h-6 w-1/2" />
+             <div className="space-y-2">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-5/6" />
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {result && (
+        <Card>
+          <CardHeader>
+            <CardTitle>{result.title}</CardTitle>
+            <CardDescription>Your generated document is ready. Review the content below.</CardDescription>
+          </CardHeader>
+          <CardContent className="prose prose-invert max-w-none space-y-6">
+            <div>
+                <h2 className='text-xl font-bold'>Introduction</h2>
+                <div dangerouslySetInnerHTML={{ __html: result.introduction.replace(/\\n/g, '<br />') }} />
+            </div>
+            {result.chapters.map((chapter, index) => (
+                <div key={index}>
+                    <h2 className='text-xl font-bold'>{chapter.title}</h2>
+                    <div dangerouslySetInnerHTML={{ __html: chapter.content.replace(/\\n/g, '<br />') }} />
+                </div>
+            ))}
+             <div>
+                <h2 className='text-xl font-bold'>Conclusion</h2>
+                <div dangerouslySetInnerHTML={{ __html: result.conclusion.replace(/\\n/g, '<br />') }} />
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button onClick={handleDownloadPdf}>
+              <Download className="mr-2 h-4 w-4" />
+              Download as PDF
+            </Button>
+          </CardFooter>
+        </Card>
+      )}
+    </div>
+  );
 }
 `,
   "src/app/tools/watermark-remover/page.tsx": `
-import WatermarkRemoverTool from '@/components/tools/watermark-remover-tool';
+'use client';
 
-export default function WatermarkRemoverPage() {
-  return <WatermarkRemoverTool />;
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import Image from 'next/image';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
+  Form,
+  FormControl,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
+import { Input } from '@/components/ui/input';
+import { handleRemoveWatermarkAction } from '@/app/actions';
+import type { RemoveWatermarkOutput } from '@/ai/flows/watermark-remover-tool';
+import { Loader2, UploadCloud } from 'lucide-react';
+
+const formSchema = z.object({
+  imageDataUri: z.string().min(1, 'Please upload an image.'),
+});
+
+type FormData = z.infer<typeof formSchema>;
+
+export default function WatermarkRemoverTool() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [originalImage, setOriginalImage] = useState<string | null>(null);
+  const [result, setResult] = useState<RemoveWatermarkOutput | null>(null);
+  const { toast } = useToast();
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      imageDataUri: '',
+    },
+  });
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 200 * 1024 * 1024) { // 200MB limit
+        toast({ variant: "destructive", title: "File too large", description: "Please upload an image smaller than 200MB."});
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (loadEvent) => {
+        const dataUri = loadEvent.target?.result as string;
+        form.setValue('imageDataUri', dataUri);
+        setOriginalImage(dataUri);
+        setResult(null); // Clear previous result
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  async function onSubmit(data: FormData) {
+    setIsLoading(true);
+    setResult(null);
+    const response = await handleRemoveWatermarkAction(data);
+    setIsLoading(false);
+
+    if (response.success) {
+      setResult(response.data);
+    } else {
+      toast({
+        variant: 'destructive',
+        title: 'Error removing watermark',
+        description: response.error,
+      });
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      <header className="space-y-1">
+        <h1 className="text-3xl font-bold font-headline">Watermark Remover</h1>
+        <p className="text-muted-foreground">
+          Upload an image to attempt to remove the watermark using AI.
+        </p>
+      </header>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Upload Image</CardTitle>
+          <CardDescription>
+            Choose an image file with a watermark to process.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormItem>
+                <FormLabel>Image File</FormLabel>
+                <FormControl>
+                    <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center h-64">
+                    {originalImage ? (
+                      <Image src={originalImage} alt="Image preview" layout="fill" objectFit="contain" className="rounded-md" />
+                    ) : (
+                      <>
+                        <UploadCloud className="w-12 h-12 text-muted-foreground" />
+                        <p className="mt-2 text-sm text-muted-foreground">
+                          <label htmlFor="file-upload" className="font-semibold text-primary cursor-pointer hover:underline">
+                             Upload an image
+                          </label>
+                        </p>
+                        <Input id="file-upload" type="file" accept="image/*" className="sr-only" onChange={handleFileChange} />
+                         <p className="text-xs text-muted-foreground mt-1">PNG, JPG, GIF up to 200MB</p>
+                      </>
+                    )}
+                  </div>
+                </FormControl>
+                <FormMessage>{form.formState.errors.imageDataUri?.message}</FormMessage>
+              </FormItem>
+              <Button type="submit" disabled={isLoading || !originalImage}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isLoading ? 'Processing...' : 'Remove Watermark'}
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+
+      {(isLoading || result) && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Result</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+              <div className="space-y-2">
+                <h3 className="text-center font-semibold">Original</h3>
+                {originalImage && (
+                    <div className="aspect-square w-full relative">
+                        <Image src={originalImage} alt="Original image" layout="fill" objectFit="contain" className="rounded-lg border" />
+                    </div>
+                )}
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-center font-semibold">Processed</h3>
+                {isLoading ? (
+                  <Skeleton className="aspect-square w-full rounded-lg" />
+                ) : (
+                  result && (
+                     <div className="aspect-square w-full relative">
+                        <Image src={result.processedImageUrl} alt="Processed image" layout="fill" objectFit="contain" className="rounded-lg border" />
+                    </div>
+                  )
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
 }
 `,
   "src/components/app-logo.tsx": `
@@ -3600,7 +5558,7 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
     const { name, title, contact, summary, experience, education, projects, skills, keyAchievements, training } = resumeData;
 
     return (
-        <div className="bg-white md:flex font-sans text-black w-full md:w-[816px] md:min-h-[1056px]">
+        <div className="bg-white flex font-sans text-black w-full md:w-[816px] min-h-[1056px] flex-col md:flex-row">
             {/* Sidebar (Left Column) */}
             <aside className="w-full md:w-[35%] bg-[#0d243c] text-white p-6 flex flex-col" style={{fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif'}}>
                  <div className="text-left mb-6">
@@ -5924,6 +7882,655 @@ const CodeBlock = ({ code, onCopy, onDownload }: { code: string; onCopy: () => v
   );
 };
 `,
+  "src/components/tools/presentation-generator-tool.tsx": `
+'use client';
+
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import Image from 'next/image';
+import PptxGenJS from 'pptxgenjs';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
+import { handleGeneratePresentationAction } from '@/app/actions';
+import type { GeneratePresentationOutput, GeneratePresentationInput } from '@/ai/flows/presentation-generator-tool';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from '@/components/ui/carousel';
+import { Badge } from '@/components/ui/badge';
+import { Download, Loader2, Image as ImageIconLucide } from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
+import { cn } from '@/lib/utils';
+import { Textarea } from '../ui/textarea';
+import { RobotsBuildingLoader } from '../ui/robots-building-loader';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+
+const formSchema = z.object({
+  topic: z.string().min(3, 'Please enter a topic with at least 3 characters.'),
+  presenterName: z.string().optional(),
+  rollNumber: z.string().optional(),
+  department: z.string().optional(),
+  numSlides: z.coerce.number().int().min(2, "Must be at least 2 slides.").max(20, "Cannot exceed 20 slides."),
+  imageStyle: z.string().optional(),
+  language: z.string().optional(),
+  contentType: z.enum(['general', 'projectProposal', 'pitchDeck', 'custom']).default('general'),
+  customStructure: z.string().optional(),
+  style: z.enum(['Default', 'Tech Pitch', 'Creative']).default('Default'),
+}).refine(data => {
+    if (data.contentType === 'custom') {
+        return (data.customStructure || '').trim().length > 10;
+    }
+    return true;
+}, {
+    message: "Please provide a custom structure with at least 10 characters.",
+    path: ['customStructure'],
+});
+
+type FormData = z.infer<typeof formSchema>;
+
+export default function PresentationGeneratorTool() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [result, setResult] = useState<GeneratePresentationOutput | null>(null);
+  const { toast } = useToast();
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      topic: 'AI Mentor: A Suite of AI-Powered Tools',
+      presenterName: '',
+      rollNumber: '',
+      department: '',
+      numSlides: 5,
+      imageStyle: 'photorealistic',
+      language: 'English',
+      contentType: 'custom',
+      customStructure: \`1. Introduction to AI Mentor
+- A suite of AI-powered tools to boost productivity and learning.
+
+2. Analysis Tools
+- Smart Search: Analyze documents with natural language queries.
+- Document Summarizer: Get quick summaries of long documents.
+
+3. Learning & Writing
+- AI Explanation: Understand complex topics easily.
+- Thesis Generator: Structure and write academic papers.
+- Text Humanizer: Make AI text sound more natural.
+
+4. Development Tools
+- Code Generator: Create code from text descriptions.
+- Code Analyzer: Find errors and vulnerabilities in code.
+- Diagram Generator: Create flowcharts and diagrams from text.
+
+5. Career Tools
+- Interview Questions: Prepare for job interviews.
+- Resume Feedback: Get AI-powered resume reviews.
+- Portfolio Generator: Create a personal portfolio website.
+- Cover Letter Assistant: Draft tailored cover letters.
+- Career Path Suggester: Discover potential career paths.
+- LinkedIn Visuals: Generate professional profile pictures and banners.
+
+6. Productivity & Media
+- Presentation Generator: Create presentations from a topic.
+- Text to Speech: Convert text into audio.
+- Watermark Remover: Remove watermarks from images.
+- Image Text Manipulation: Edit text within an image.
+
+7. Conclusion
+- Recap of the project's capabilities and future scope.\`,
+      style: 'Tech Pitch',
+    },
+  });
+
+  const contentType = form.watch('contentType');
+  const style = form.watch('style');
+
+  React.useEffect(() => {
+    if (style === 'Tech Pitch') {
+        if (form.getValues('contentType') !== 'pitchDeck') {
+          form.setValue('contentType', 'pitchDeck');
+        }
+    } else if (style === 'Default' || style === 'Creative') {
+       if (form.getValues('contentType') === 'pitchDeck') {
+         form.setValue('contentType', 'general');
+       }
+    }
+  }, [style, form]);
+
+  React.useEffect(() => {
+    if (contentType === 'projectProposal') {
+      form.setValue('customStructure', \`1. Introduction
+What is the project about?
+Why is it important/relevant to field/community?
+2. Objectives
+Main goals of the project
+What you planned to achieve
+3. Background / Literature
+Short background of the topic
+Any references or community issues identified
+4. Methodology / Approach
+Steps taken in field work
+Tools, surveys, techniques used
+5. Project Work / Implementation
+Activities done
+Photographs/figures/observations
+6. Results / Findings
+What you observed/collected
+Data, charts, or key outcomes
+7. Discussion / Analysis
+What the results mean
+Link to community needs/problems
+8. Conclusion & Suggestions
+Summary of work
+Possible improvements, recommendations
+9. Acknowledgement\`);
+    } else if (form.getValues('customStructure')?.startsWith('1. Introduction')) {
+      // Clear if it was the default project proposal text
+      form.setValue('customStructure', '');
+    }
+  }, [contentType, form]);
+
+
+  async function onSubmit(data: FormData) {
+    setIsLoading(true);
+    setResult(null);
+
+    const input: GeneratePresentationInput = {
+        topic: data.topic,
+        presenterName: data.presenterName,
+        rollNumber: data.rollNumber,
+        department: data.department,
+        contentType: data.contentType,
+        numSlides: data.numSlides,
+        imageStyle: data.imageStyle,
+        language: data.language,
+        style: data.style,
+    };
+    if (data.contentType === 'custom' && data.customStructure) {
+        input.customStructure = data.customStructure;
+    }
+
+    const response = await handleGeneratePresentationAction(input);
+    
+    setIsLoading(false);
+    if (response.success && response.data) {
+        setResult(response.data);
+        toast({
+            title: "Presentation Generated!",
+            description: "Your presentation with text and images is ready.",
+        });
+    } else {
+        toast({
+            variant: 'destructive',
+            title: 'Error Generating Presentation',
+            description: response.error,
+        });
+    }
+  }
+
+ const handleDownload = () => {
+    if (!result) return;
+
+    const pptx = new PptxGenJS();
+    pptx.layout = 'LAYOUT_WIDE';
+    
+    const { design, backgroundImageUrl } = result;
+    const cleanColor = (color: string) => color.startsWith('#') ? color.substring(1) : color;
+    
+    const masterBackground: PptxGenJS.BackgroundProps = { color: cleanColor(design.backgroundColor) };
+    if (backgroundImageUrl && backgroundImageUrl.startsWith('data:image')) {
+        masterBackground.path = backgroundImageUrl;
+    }
+
+    pptx.defineSlideMaster({
+        title: "MASTER_SLIDE",
+        background: masterBackground,
+        objects: [
+            { 'rect':    { x:0.0, y:6.8, w:'100%', h:0.75, fill:{ color: cleanColor(design.accentColor) } } },
+            { 'text':    { text:'AI Mentor', options:{ x:0.5, y:6.9, w:5, h:0.5, fontFace:'Arial', fontSize:14, color:cleanColor(design.backgroundColor), bold:true } } },
+        ],
+    });
+    
+    // Title Slide
+    const titleSlide = pptx.addSlide({ masterName: "MASTER_SLIDE" });
+    titleSlide.addText(result.title, { 
+        x: 1, y: 2, w: 8, h: 1.5, 
+        fontSize: 44, 
+        bold: true, 
+        color: cleanColor(design.textColor), 
+        align: 'center',
+        fontFace: 'Helvetica',
+        anim: { type: 'fly', options: { direction: 'b', duration: 1, effect: 'def' } }
+    });
+
+    const presenterDetails = [
+        result.presenterName ? \`Presented by: \${result.presenterName}\` : null,
+        result.rollNumber ? \`Roll No: \${result.rollNumber}\` : null,
+        result.department ? \`Department: \${result.department}\` : null
+    ].filter(Boolean).join('\\\\n');
+
+    if (presenterDetails) {
+        titleSlide.addText(presenterDetails, { 
+            x: 1, y: 4, w: 8, h: 1, 
+            fontSize: 20, 
+            color: cleanColor(design.textColor), 
+            align: 'center',
+            fontFace: 'Arial',
+            anim: { type: 'fly', options: { direction: 'b', duration: 1, delay: 0.5, effect: 'def' } }
+        });
+    }
+    
+    const transitions: PptxGenJS.Transition[] = [
+        { type: "fade", duration: 1 },
+        { type: "push", duration: 1, options: { direction: 'l' } },
+        { type: "wipe", duration: 1, options: { direction: 'l' } },
+        { type: "cover", duration: 1, options: { direction: 'l' } },
+    ];
+
+
+    // Content Slides
+    result.slides.forEach((slide, slideIndex) => {
+        if (slide.slideLayout === 'title') return; // Skip the duplicate title slide data
+
+        const contentSlide = pptx.addSlide({ masterName: "MASTER_SLIDE" });
+        contentSlide.transition = transitions[slideIndex % transitions.length];
+        
+        contentSlide.addText(slide.title, { 
+            x: 0.5, y: 0.5, w: '90%', h: 1, 
+            fontSize: 32, 
+            bold: true, 
+            color: cleanColor(design.accentColor),
+            fontFace: 'Helvetica',
+            anim: { type: 'fly', options: { direction: 'l', duration: 0.5, effect: 'def' } }
+        });
+        
+        if (slide.slideLayout === 'contentWithImage') {
+            if (slide.content.length > 0) {
+                slide.content.forEach((point, index) => {
+                    contentSlide.addText(point, {
+                        x: 0.5, y: 1.8 + (index * 0.7), w: '55%', h: 0.7,
+                        fontSize: 18,
+                        color: cleanColor(design.textColor),
+                        bullet: true,
+                        fontFace: 'Arial',
+                        anim: {
+                            type: 'fly',
+                            options: { direction: 'u', duration: 0.5, delay: 0.75 + (index * 0.25) }
+                        }
+                    });
+                });
+            }
+
+            if (slide.imageUrl && slide.imageUrl.startsWith('data:image')) {
+                contentSlide.addImage({
+                    data: slide.imageUrl,
+                    x: '60%', y: 1.5, w: '35%', h: 4.5,
+                    sizing: { type: 'contain', w: 3.5, h: 4.5 },
+                    anim: { type: 'zoom', options: { scale: 'in', duration: 1, delay: 0.5 } }
+                });
+            }
+             if (slide.logoUrl) {
+                contentSlide.addImage({
+                    path: slide.logoUrl,
+                    x: '90%', y: '90%', w: '8%', h: '8%',
+                     sizing: { type: 'contain', w: 0.8, h: 0.8 },
+                     anim: { type: 'fade', duration: 1, delay: 1 }
+                });
+            }
+        }
+    });
+
+    pptx.writeFile({ fileName: \`\${result.title}.pptx\` });
+    toast({ title: 'Download Started', description: \`Your presentation "\${result.title}.pptx" is downloading.\` });
+  };
+
+
+  return (
+    <div className="space-y-6">
+      <header className="space-y-1">
+        <h1 className="text-3xl font-bold font-headline">Presentation Generator</h1>
+        <p className="text-muted-foreground">
+          Create a full presentation with text and images from a single topic.
+        </p>
+      </header>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Generate a Presentation</CardTitle>
+          <CardDescription>
+            Provide a topic and our AI will generate an entire slide deck for you.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="style"
+                  render={({ field }) => (
+                    <FormItem className="space-y-3">
+                      <FormLabel>Presentation Style</FormLabel>
+                       <FormDescription>Choose a visual and narrative style for your presentation.</FormDescription>
+                      <FormControl>
+                        <RadioGroup
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          className="grid grid-cols-1 md:grid-cols-3 gap-4"
+                        >
+                          <FormItem>
+                            <FormControl>
+                               <RadioGroupItem value="Default" id="style-default" className="sr-only peer" />
+                            </FormControl>
+                            <Label htmlFor="style-default" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer">
+                                <span className="font-bold">Default</span>
+                                <span className="text-xs text-muted-foreground mt-1 text-center">A clean, professional look for any topic.</span>
+                             </Label>
+                          </FormItem>
+                           <FormItem>
+                            <FormControl>
+                               <RadioGroupItem value="Tech Pitch" id="style-tech" className="sr-only peer" />
+                            </FormControl>
+                            <Label htmlFor="style-tech" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer">
+                                <span className="font-bold">Tech Pitch</span>
+                                <span className="text-xs text-muted-foreground mt-1 text-center">Cinematic, dark theme. Great for pitch decks.</span>
+                             </Label>
+                          </FormItem>
+                           <FormItem>
+                            <FormControl>
+                               <RadioGroupItem value="Creative" id="style-creative" className="sr-only peer" />
+                            </FormControl>
+                            <Label htmlFor="style-creative" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer">
+                                <span className="font-bold">Creative</span>
+                                <span className="text-xs text-muted-foreground mt-1 text-center">Vibrant, light theme with a friendly feel.</span>
+                             </Label>
+                          </FormItem>
+                        </RadioGroup>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+               <FormField
+                  control={form.control}
+                  name="contentType"
+                  render={({ field }) => (
+                    <FormItem className="space-y-3">
+                      <FormLabel>Content Type</FormLabel>
+                      <FormControl>
+                        <RadioGroup
+                          onValueChange={field.onChange}
+                          value={field.value}
+                          className="flex flex-col space-y-1"
+                        >
+                          <FormItem className="flex items-center space-x-3 space-y-0">
+                            <FormControl><RadioGroupItem value="general" /></FormControl>
+                            <FormLabel className="font-normal">General Topic</FormLabel>
+                          </FormItem>
+                          <FormItem className="flex items-center space-x-3 space-y-0">
+                            <FormControl><RadioGroupItem value="projectProposal" /></FormControl>
+                            <FormLabel className="font-normal">Project Proposal</FormLabel>
+                          </FormItem>
+                           <FormItem className="flex items-center space-x-3 space-y-0">
+                            <FormControl><RadioGroupItem value="pitchDeck" disabled={style === 'Tech Pitch'} /></FormControl>
+                            <FormLabel className={cn("font-normal", style === 'Tech Pitch' && "text-muted-foreground")}>
+                                Pitch Deck {style === 'Tech Pitch' && <span className="text-xs">(Selected by Style)</span>}
+                            </FormLabel>
+                          </FormItem>
+                           <FormItem className="flex items-center space-x-3 space-y-0">
+                            <FormControl><RadioGroupItem value="custom" /></FormControl>
+                            <FormLabel className="font-normal">Custom Structure & Content</FormLabel>
+                          </FormItem>
+                        </RadioGroup>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+              <FormField
+                control={form.control}
+                name="topic"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Presentation Topic or Project Title</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., The Future of Renewable Energy" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {contentType === 'custom' && (
+                <FormField
+                    control={form.control}
+                    name="customStructure"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Custom Structure & Content</FormLabel>
+                        <FormDescription>Enter one slide title per line, with notes below each title.</FormDescription>
+                        <FormControl>
+                            <Textarea
+                                placeholder="e.g.,&#10;1. About the Company&#10;Blinkit is an Indian quick-commerce platform...&#10;&#10;2. Founders&#10;Albinder Dhindsa..."
+                                {...field}
+                                rows={10}
+                            />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="presenterName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Presenter Name (Optional)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g., Jane Doe" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="rollNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Roll No. (Optional)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g., CS101" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="department"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Department (Optional)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g., Computer Science" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <FormField
+                  control={form.control}
+                  name="numSlides"
+                  render={({ field }) => (
+                    <FormItem className={cn("transition-opacity", (contentType !== 'general') && "opacity-50")}>
+                      <FormLabel>Number of Slides</FormLabel>
+                      <FormControl>
+                        <Input type="number" min="2" max="20" {...field} disabled={contentType !== 'general'}/>
+                      </FormControl>
+                       {contentType !== 'general' && <p className="text-xs text-muted-foreground">Determined by content type.</p>}
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                 <FormField
+                  control={form.control}
+                  name="imageStyle"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Image Style (Optional)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., minimalist, cartoon, abstract" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="language"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Language</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a language" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="English">English</SelectItem>
+                          <SelectItem value="Hindi">Hindi</SelectItem>
+                          <SelectItem value="Marathi">Marathi</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating Presentation...</> : 'Generate Presentation'}
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+
+      {isLoading && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Generating Presentation</CardTitle>
+            <CardDescription>The AI is building your presentation. This may take a few moments...</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <RobotsBuildingLoader />
+          </CardContent>
+        </Card>
+      )}
+
+      {result && (
+        <Card>
+          <CardHeader>
+            <CardTitle>{result?.title}</CardTitle>
+            <CardDescription>
+                Your generated presentation is ready.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Carousel className="w-full">
+                <CarouselContent>
+                    {result?.slides.map((slide, index) => (
+                    <CarouselItem key={index}>
+                        <div className="p-1">
+                        <Card className="overflow-hidden">
+                            <div className="grid grid-cols-1 md:grid-cols-2 h-[500px]">
+                                <div className="p-6 flex flex-col">
+                                    <Badge variant="outline" className="w-fit mb-4">Slide {index + 1}</Badge>
+                                    <h3 className="text-2xl font-bold font-headline mb-4">{slide.title}</h3>
+                                    <ul className="space-y-3 list-disc pl-5 text-muted-foreground flex-1">
+                                        {slide.content.map((point, i) => <li key={i}>{point}</li>)}
+                                    </ul>
+                                </div>
+                                <div className="bg-muted flex items-center justify-center overflow-hidden relative">
+                                    {slide.imageUrl && slide.imageUrl.startsWith('data:image') ? (
+                                        <Image
+                                            src={slide.imageUrl}
+                                            alt={slide.title}
+                                            width={500}
+                                            height={500}
+                                            className="object-cover w-full h-full"
+                                        />
+                                    ) : (
+                                        <div className="flex flex-col items-center justify-center text-destructive">
+                                            <ImageIconLucide className="w-16 h-16" />
+                                            <p className="mt-2 text-sm font-semibold">Image failed to generate</p>
+                                        </div>
+                                    )}
+                                    {slide.logoUrl && (
+                                        <div className="absolute bottom-4 right-4 bg-white/80 p-2 rounded-md">
+                                            <Image
+                                                src={slide.logoUrl}
+                                                alt="Company Logo"
+                                                width={60}
+                                                height={60}
+                                                className="object-contain"
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </Card>
+                        </div>
+                    </CarouselItem>
+                    ))}
+                </CarouselContent>
+                <CarouselPrevious className="ml-12" />
+                <CarouselNext className="mr-12" />
+            </Carousel>
+          </CardContent>
+          <CardFooter>
+            <Button onClick={handleDownload} disabled={isLoading}>
+                <Download className="mr-2 h-4 w-4"/>
+                Download Presentation
+            </Button>
+          </CardFooter>
+        </Card>
+      )}
+    </div>
+  );
+}
+`,
   "src/components/tools/resume-feedback-tool.tsx": `
 'use client';
 
@@ -6264,7 +8871,7 @@ export default function ResumeFeedbackTool() {
                     <div
                       className="prose prose-invert max-w-none"
                       dangerouslySetInnerHTML={{
-                        __html: result.feedback.replace(/\\n/g, '<br />'),
+                        __html: result.feedback.replace(/\\\\n/g, '<br />'),
                       }}
                     />
                   )
@@ -6276,8 +8883,8 @@ export default function ResumeFeedbackTool() {
                 ) : (
                   result?.rewrittenResume && (
                     <div className="space-y-4">
-                       <div className="bg-gray-200 p-4 md:p-8 flex justify-center overflow-auto">
-                           <div id="resume-preview-content" className="w-full">
+                       <div className="bg-gray-200 p-8 flex justify-center overflow-auto">
+                           <div id="resume-preview-content" className="origin-top-left">
                                 <ResumeTemplate resumeData={result.rewrittenResume} />
                            </div>
                       </div>
@@ -8222,11 +10829,11 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
       itemConfig.color
     return color ? \`  --color-\${key}: \${color};\` : null
   })
-  .join("\\n")}
+  .join("\\\\n")}
 }
 \`
           )
-          .join("\\n"),
+          .join("\\\\n"),
       }}
     />
   )
@@ -11232,7 +13839,7 @@ export function createResumeDocx(resumeData: ResumeData): Document {
         new Paragraph({
           children: [
             new TextRun({ text: exp.title, bold: true, size: 18, color: TEXT_COLOR, font: { name: FONT_FAMILY } }),
-            new TextRun({ text: \`\\\t\${exp.dates}\`, color: LIGHT_TEXT_COLOR, size: 16, font: { name: FONT_FAMILY } }),
+            new TextRun({ text: \`\\t\${exp.dates}\`, color: LIGHT_TEXT_COLOR, size: 16, font: { name: FONT_FAMILY } }),
           ],
           tabStops: [{ type: TabStopType.RIGHT, position: TabStopPosition.MAX }],
           spacing: { before: 60 }
@@ -11240,7 +13847,7 @@ export function createResumeDocx(resumeData: ResumeData): Document {
         new Paragraph({
           children: [
             new TextRun({ text: exp.company, bold: false, color: LINK_COLOR, size: 17, font: { name: FONT_FAMILY } }),
-            new TextRun({ text: \`\\\t\${exp.location}\`, color: LIGHT_TEXT_COLOR, size: 16, font: { name: FONT_FAMILY } }),
+            new TextRun({ text: \`\\t\${exp.location}\`, color: LIGHT_TEXT_COLOR, size: 16, font: { name: FONT_FAMILY } }),
           ],
           tabStops: [{ type: TabStopType.RIGHT, position: TabStopPosition.MAX }],
           spacing: { after: 40 },
@@ -11260,7 +13867,7 @@ export function createResumeDocx(resumeData: ResumeData): Document {
         new Paragraph({
           children: [
             new TextRun({ text: edu.degree, bold: true, size: 18, color: TEXT_COLOR, font: { name: FONT_FAMILY } }),
-            new TextRun({ text: \`\\\t\${edu.dates}\`, color: LIGHT_TEXT_COLOR, size: 16, font: { name: FONT_FAMILY } }),
+            new TextRun({ text: \`\\t\${edu.dates}\`, color: LIGHT_TEXT_COLOR, size: 16, font: { name: FONT_FAMILY } }),
           ],
           tabStops: [{ type: TabStopType.RIGHT, position: TabStopPosition.MAX }],
           spacing: { before: 60 }
@@ -11268,7 +13875,7 @@ export function createResumeDocx(resumeData: ResumeData): Document {
         new Paragraph({
           children: [
             new TextRun({ text: edu.school, bold: false, color: LINK_COLOR, size: 17, font: { name: FONT_FAMILY } }),
-            new TextRun({ text: \`\\\t\${edu.location}\`, color: LIGHT_TEXT_COLOR, size: 16, font: { name: FONT_FAMILY } }),
+            new TextRun({ text: \`\\t\${edu.location}\`, color: LIGHT_TEXT_COLOR, size: 16, font: { name: FONT_FAMILY } }),
           ],
           tabStops: [{ type: TabStopType.RIGHT, position: TabStopPosition.MAX }],
           spacing: { after: 80 }
