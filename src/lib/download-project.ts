@@ -201,6 +201,86 @@ export default nextConfig;
   }
 }
 `,
+  "package-lock.json": `
+{
+  "name": "nextn",
+  "version": "0.1.0",
+  "lockfileVersion": 3,
+  "requires": true,
+  "packages": {
+    "": {
+      "name": "nextn",
+      "version": "0.1.0",
+      "private": true,
+      "dependencies": {
+        "@genkit-ai/firebase": "^1.15.5",
+        "@genkit-ai/googleai": "^1.15.5",
+        "@genkit-ai/next": "^1.15.5",
+        "@hookform/resolvers": "^4.1.3",
+        "@radix-ui/react-accordion": "^1.2.3",
+        "@radix-ui/react-alert-dialog": "^1.1.6",
+        "@radix-ui/react-avatar": "^1.1.3",
+        "@radix-ui/react-checkbox": "^1.1.4",
+        "@radix-ui/react-collapsible": "^1.1.11",
+        "@radix-ui/react-dialog": "^1.1.6",
+        "@radix-ui/react-dropdown-menu": "^2.1.6",
+        "@radix-ui/react-label": "^2.1.2",
+        "@radix-ui/react-menubar": "^1.1.6",
+        "@radix-ui/react-popover": "^1.1.6",
+        "@radix-ui/react-progress": "^1.1.2",
+        "@radix-ui/react-radio-group": "^1.2.3",
+        "@radix-ui/react-scroll-area": "^1.2.3",
+        "@radix-ui/react-select": "^2.1.6",
+        "@radix-ui/react-separator": "^1.1.2",
+        "@radix-ui/react-slider": "^1.2.3",
+        "@radix-ui/react-slot": "^1.2.3",
+        "@radix-ui/react-switch": "^1.1.3",
+        "@radix-ui/react-tabs": "^1.1.3",
+        "@radix-ui/react-toast": "^1.2.6",
+        "@radix-ui/react-tooltip": "^1.1.8",
+        "@tailwindcss/typography": "^0.5.13",
+        "class-variance-authority": "^0.7.1",
+        "clsx": "^2.1.1",
+        "date-fns": "^3.6.0",
+        "docx": "^8.5.0",
+        "dotenv": "^16.5.0",
+        "embla-carousel-react": "^8.6.0",
+        "file-saver": "^2.0.5",
+        "firebase": "^11.9.1",
+        "genkit": "^1.15.5",
+        "html2canvas": "^1.4.1",
+        "jspdf": "^2.5.1",
+        "jszip": "^3.10.1",
+        "lucide-react": "^0.475.0",
+        "next": "15.3.3",
+        "patch-package": "^8.0.0",
+        "pptxgenjs": "^3.12.0",
+        "react": "^18.3.1",
+        "react-day-picker": "^8.10.1",
+        "react-dom": "^18.3.1",
+        "react-hook-form": "^7.54.2",
+        "recharts": "^2.15.1",
+        "tailwind-merge": "^3.0.1",
+        "tailwindcss-animate": "^1.0.7",
+        "wav": "^1.0.2",
+        "zod": "^3.24.2"
+      },
+      "devDependencies": {
+        "@types/file-saver": "^2.0.7",
+        "@types/jszip": "^3.4.1",
+        "@types/node": "^20",
+        "@types/react": "^18",
+        "@types/react-dom": "^18",
+        "@types/wav": "^1.0.3",
+        "genkit-cli": "^1.15.5",
+        "postcss": "^8",
+        "tailwindcss": "^3.4.1",
+        "typescript": "^5"
+      }
+    }
+  }
+}
+`,
     "postcss.config.mjs": `/** @type {import('postcss-load-config').Config} */
 const config = {
   plugins: {
@@ -1773,7 +1853,7 @@ const outlinePrompt = ai.definePrompt({
 - If the user provides a "Custom Structure," you MUST use it as the primary source. The 'numSlides' parameter should be IGNORED.
   - **Parsing Custom Structure**: A line starting with a number and/or bullet (e.g., "1. About the Company", "- Key Features") should be treated as a slide title. All text following that title, until the next title, should be used as the context/notes for that specific slide.
   - You MUST generate one slide for each title you identify in the custom structure.
-- If the content type is "Project Proposal," generate the subsequent presentation slides using this structure: 1. Introduction, 2. Objectives, 3. Problem Statement / Need Analysis, 4. Target Group / Area, 5. Proposed Activities, 6. Methodology, 7. Expected Outcomes, 8. Conclusion. (Translated to the target language).
+- If the content type is "Project Proposal," generate the subsequent presentation slides using this structure: 1. Introduction, 2. Objectives, 3. Background / Literature, 4. Methodology / Approach, 5. Project Work / Implementation, 6. Results / Findings, 7. Discussion / Analysis, 8. Conclusion & Suggestions, 9. Acknowledgement. (Translated to the target language).
 - If the content type is "Pitch Deck," generate a presentation with this narrative structure: 1. Title, 2. The Problem, 3. The Solution, 4. Market Size, 5. The Product, 6. Team, 7. Financials / Ask, 8. Thank You / Contact.
 - If the content type is "General," generate a logical presentation of exactly {{{numSlides}}} slides, which must include a conclusion slide at the end. The introduction slide is extra.
 
@@ -1956,17 +2036,17 @@ const getResumeFeedbackFlow = ai.defineFlow(
   },
   async (input) => {
     
-    let documentPrompt = '';
-    let promptInput: Record<string, any> = {
+    let documentPromptPart;
+    const promptInput: Record<string, any> = {
       targetJobRole: input.targetJobRole,
       additionalInfo: input.additionalInfo,
     };
 
     if (input.resume.startsWith('data:')) {
-      documentPrompt = 'Document: {{media url=resume}}';
+      documentPromptPart = 'Document: {{media url=resume}}';
       promptInput.resume = input.resume;
     } else {
-      documentPrompt = 'Document:\\n{{{resumeText}}}';
+      documentPromptPart = 'Document:\\n{{{resumeText}}}';
       promptInput.resumeText = input.resume;
     }
     
@@ -1978,7 +2058,7 @@ const getResumeFeedbackFlow = ai.defineFlow(
 {{#if targetJobRole}}The user is targeting the role of: {{{targetJobRole}}}. You must tailor your feedback and rewritten resume to align with keywords and qualifications for this role.{{/if}}
 {{#if additionalInfo}}Additional context from the user: {{{additionalInfo}}}{{/if}}
 
-\${documentPrompt}
+\${documentPromptPart}
 
 Please perform the following two tasks:
 
@@ -2000,7 +2080,10 @@ Please perform the following two tasks:
     });
 
     const { output } = await prompt(promptInput);
-    return output!;
+    if (!output) {
+      throw new Error("The AI failed to generate the resume analysis.");
+    }
+    return output;
   }
 );
 `,
@@ -3517,9 +3600,9 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
     const { name, title, contact, summary, experience, education, projects, skills, keyAchievements, training } = resumeData;
 
     return (
-        <div className="bg-white flex font-sans text-black" style={{ width: '816px', minHeight: '1056px' }}>
+        <div className="bg-white md:flex font-sans text-black w-full md:w-[816px] md:min-h-[1056px]">
             {/* Sidebar (Left Column) */}
-            <aside className="w-[35%] bg-[#0d243c] text-white p-6 flex flex-col" style={{fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif'}}>
+            <aside className="w-full md:w-[35%] bg-[#0d243c] text-white p-6 flex flex-col" style={{fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif'}}>
                  <div className="text-left mb-6">
                     <h1 className="text-3xl font-bold tracking-tight text-white uppercase">{name}</h1>
                 </div>
@@ -3579,7 +3662,7 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
             </aside>
 
             {/* Main Content (Right Column) */}
-            <main className="w-[65%] bg-white p-6 text-gray-800" style={{fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif'}}>
+            <main className="w-full md:w-[65%] bg-white p-6 text-gray-800" style={{fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif'}}>
                 <header className="mb-4 text-left">
                     <h2 className="text-lg font-semibold text-gray-700 tracking-wider">{title}</h2>
                     <div className="text-xs text-gray-500 flex items-center flex-wrap gap-x-3 gap-y-1 mt-1">
@@ -3642,10 +3725,142 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
 };
 `,
   "src/components/tools/ai-explanation-tool.tsx": `
-import AiExplanationTool from '@/components/tools/ai-explanation-tool';
+'use client';
 
-export default function AiExplanationPage() {
-  return <AiExplanationTool />;
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
+import { handleExplainTopicAction } from '@/app/actions';
+import type { ExplainTopicOutput } from '@/ai/flows/ai-explanation-tool';
+import { Loader2 } from 'lucide-react';
+
+const formSchema = z.object({
+  topic: z
+    .string()
+    .min(10, 'Please enter a topic with at least 10 characters.'),
+});
+
+type FormData = z.infer<typeof formSchema>;
+
+export default function AiExplanationTool() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [result, setResult] = useState<ExplainTopicOutput | null>(null);
+  const { toast } = useToast();
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      topic: '',
+    },
+  });
+
+  async function onSubmit(data: FormData) {
+    setIsLoading(true);
+    setResult(null);
+    const response = await handleExplainTopicAction(data);
+    setIsLoading(false);
+
+    if (response.success) {
+      setResult(response.data);
+    } else {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: response.error,
+      });
+    }
+  }
+
+  return (
+    <div className="space-y-8">
+      <header className="space-y-2">
+        <h1 className="text-3xl font-bold font-headline">AI Explanation</h1>
+        <p className="text-muted-foreground">Get clear and concise explanations for complex topics.</p>
+      </header>
+      <Card>
+        <CardHeader>
+          <CardTitle>Explain a Topic</CardTitle>
+          <CardDescription>
+            Enter a topic below and let our AI provide a detailed explanation.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="topic"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Topic</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="e.g., Explain the theory of relativity"
+                        {...field}
+                        rows={4}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isLoading ? 'Generating...' : 'Explain'}
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+
+      {isLoading && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Explanation</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-1/2" />
+          </CardContent>
+        </Card>
+      )}
+
+      {result && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Explanation</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="prose prose-invert max-w-none whitespace-pre-wrap">
+              {result.explanation}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
 }
 `,
   "src/components/tools/career-path-suggester-tool.tsx": `
@@ -5962,7 +6177,7 @@ export default function ResumeFeedbackTool() {
                               or drag and drop
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              PDF, DOCX, TXT up to 200MB
+                              PDF, TXT up to 200MB
                             </p>
                           </>
                         )}
@@ -5971,7 +6186,7 @@ export default function ResumeFeedbackTool() {
                           type="file"
                           className="sr-only"
                           onChange={handleFileChange}
-                          accept=".pdf,.doc,.docx,.txt"
+                          accept=".pdf,.txt"
                         />
                       </div>
                     </FormControl>
@@ -6056,17 +6271,13 @@ export default function ResumeFeedbackTool() {
                 )}
               </TabsContent>
               <TabsContent value="rewritten" className="mt-4">
-                 {isLoading ? (
-                  <div className="bg-gray-200 p-8 flex justify-center overflow-auto">
-                    <div className="origin-top-left scale-[.6] md:scale-[.8]">
-                      <div className="w-[816px] h-[1056px]"><Skeleton className="w-full h-full" /></div>
-                    </div>
-                  </div>
+                {isLoading && !result ? (
+                  <div className="border rounded-lg"><Skeleton className="h-[1056px] w-full max-w-[816px] mx-auto" /></div>
                 ) : (
                   result?.rewrittenResume && (
                     <div className="space-y-4">
-                       <div className="bg-gray-200 p-8 flex justify-center overflow-auto">
-                           <div id="resume-preview-content" className="origin-top-left">
+                       <div className="bg-gray-200 p-4 md:p-8 flex justify-center overflow-auto">
+                           <div id="resume-preview-content" className="w-full">
                                 <ResumeTemplate resumeData={result.rewrittenResume} />
                            </div>
                       </div>
