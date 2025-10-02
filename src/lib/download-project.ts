@@ -62,7 +62,7 @@ entrypoint:
 `,
   "components.json": `
 {
-  "$schema": "https://ui.shadcn.com/schema.json",
+  "\$schema": "https://ui.shadcn.com/schema.json",
   "style": "default",
   "rsc": true,
   "tsx": true,
@@ -550,14 +550,14 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 
 const SuggestCareerPathsInputSchema = z.object({
-  interests: z.string().describe('A description of the user\\\\'s interests and passions.'),
-  skills: z.string().describe('A description of the user\\\\'s existing skills and experience.'),
+  interests: z.string().describe('A description of the user\\'s interests and passions.'),
+  skills: z.string().describe('A description of the user\\'s existing skills and experience.'),
 });
 export type SuggestCareerPathsInput = z.infer<typeof SuggestCareerPathsInputSchema>;
 
 const CareerPathSchema = z.object({
   title: z.string().describe('The title of the suggested career path.'),
-  description: z.string().describe('A detailed description of the career path, including day-to-day responsibilities and why it fits the user\\\\'s profile.'),
+  description: z.string().describe('A detailed description of the career path, including day-to-day responsibilities and why it fits the user\\'s profile.'),
   requiredSkills: z.array(z.string()).describe('A list of key skills required for this career.'),
 });
 
@@ -918,7 +918,7 @@ import { z } from 'zod';
 
 const ManipulateImageTextInputSchema = z.object({
   imageDataUri: z.string().describe("An image containing text, as a data URI. Format: 'data:<mimetype>;base64,<encoded_data>'."),
-  instructions: z.string().describe('Detailed instructions on how to manipulate the text in the image (e.g., "Change the headline to \\\\'New Title\\\\'").'),
+  instructions: z.string().describe('Detailed instructions on how to manipulate the text in the image (e.g., "Change the headline to \\'New Title\\'").'),
 });
 export type ManipulateImageTextInput = z.infer<typeof ManipulateImageTextInputSchema>;
 
@@ -2047,7 +2047,7 @@ const getResumeFeedbackFlow = ai.defineFlow(
       documentPromptPart = 'Document: {{media url=resume}}';
       promptInput.resume = input.resume;
     } else {
-      documentPromptPart = 'Document:\\\\n{{{resumeText}}}';
+      documentPromptPart = 'Document:\\n{{{resumeText}}}';
       promptInput.resumeText = input.resume;
     }
     
@@ -4590,7 +4590,7 @@ export default function ResumeFeedbackTool() {
                     <div
                       className="prose prose-invert max-w-none"
                       dangerouslySetInnerHTML={{
-                        __html: result.feedback.replace(/\\\\n/g, '<br />'),
+                        __html: result.feedback.replace(/\\n/g, '<br />'),
                       }}
                     />
                   )
@@ -5558,9 +5558,9 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
     const { name, title, contact, summary, experience, education, projects, skills, keyAchievements, training } = resumeData;
 
     return (
-        <div className="bg-white flex font-sans text-black w-full md:w-[816px] min-h-[1056px] flex-col md:flex-row">
+        <div className="bg-white flex font-sans text-black" style={{ width: '816px', minHeight: '1056px' }}>
             {/* Sidebar (Left Column) */}
-            <aside className="w-full md:w-[35%] bg-[#0d243c] text-white p-6 flex flex-col" style={{fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif'}}>
+            <aside className="w-[35%] bg-[#0d243c] text-white p-6 flex flex-col" style={{fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif'}}>
                  <div className="text-left mb-6">
                     <h1 className="text-3xl font-bold tracking-tight text-white uppercase">{name}</h1>
                 </div>
@@ -5620,7 +5620,7 @@ export const ResumeTemplate: React.FC<{ resumeData: ResumeData }> = ({ resumeDat
             </aside>
 
             {/* Main Content (Right Column) */}
-            <main className="w-full md:w-[65%] bg-white p-6 text-gray-800" style={{fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif'}}>
+            <main className="w-[65%] bg-white p-6 text-gray-800" style={{fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif'}}>
                 <header className="mb-4 text-left">
                     <h2 className="text-lg font-semibold text-gray-700 tracking-wider">{title}</h2>
                     <div className="text-xs text-gray-500 flex items-center flex-wrap gap-x-3 gap-y-1 mt-1">
@@ -8130,7 +8130,7 @@ Possible improvements, recommendations
         result.presenterName ? \`Presented by: \${result.presenterName}\` : null,
         result.rollNumber ? \`Roll No: \${result.rollNumber}\` : null,
         result.department ? \`Department: \${result.department}\` : null
-    ].filter(Boolean).join('\\\\n');
+    ].filter(Boolean).join('\\n');
 
     if (presenterDetails) {
         titleSlide.addText(presenterDetails, { 
@@ -8883,8 +8883,8 @@ export default function ResumeFeedbackTool() {
                 ) : (
                   result?.rewrittenResume && (
                     <div className="space-y-4">
-                       <div className="bg-gray-200 p-8 flex justify-center overflow-auto">
-                           <div id="resume-preview-content" className="origin-top-left">
+                       <div className="bg-gray-200 p-4 md:p-8 flex justify-center overflow-auto">
+                           <div id="resume-preview-content" className="w-full max-w-4xl">
                                 <ResumeTemplate resumeData={result.rewrittenResume} />
                            </div>
                       </div>
@@ -10829,11 +10829,11 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
       itemConfig.color
     return color ? \`  --color-\${key}: \${color};\` : null
   })
-  .join("\\\\n")}
+  .join("\\n")}
 }
 \`
           )
-          .join("\\\\n"),
+          .join("\\n"),
       }}
     />
   )
@@ -13971,7 +13971,158 @@ import { twMerge } from "tailwind-merge"
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
-`
+`,
+  "src/tailwind.config.ts": `
+import type {Config} from 'tailwindcss';
+import { fontFamily } from 'tailwindcss/defaultTheme';
+
+const config = {
+  darkMode: ['class'],
+  content: [
+    './pages/**/*.{ts,tsx}',
+    './components/**/*.{ts,tsx}',
+    './app/**/*.{ts,tsx}',
+    './src/**/*.{ts,tsx}',
+  ],
+  prefix: "",
+  theme: {
+    container: {
+      center: true,
+      padding: '2rem',
+      screens: {
+        '2xl': '1400px',
+      },
+    },
+    extend: {
+      fontFamily: {
+        sans: ['var(--font-sans)', ...fontFamily.sans],
+        body: ['Inter', 'sans-serif'],
+        headline: ['Space Grotesk', 'sans-serif'],
+      },
+      colors: {
+        border: 'hsl(var(--border))',
+        input: 'hsl(var(--input))',
+        ring: 'hsl(var(--ring))',
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
+        primary: {
+          DEFAULT: 'hsl(var(--primary))',
+          foreground: 'hsl(var(--primary-foreground))',
+        },
+        secondary: {
+          DEFAULT: 'hsl(var(--secondary))',
+          foreground: 'hsl(var(--secondary-foreground))',
+        },
+        destructive: {
+          DEFAULT: 'hsl(var(--destructive))',
+          foreground: 'hsl(var(--destructive-foreground))',
+        },
+        muted: {
+          DEFAULT: 'hsl(var(--muted))',
+          foreground: 'hsl(var(--muted-foreground))',
+        },
+        accent: {
+          DEFAULT: 'hsl(var(--accent))',
+          foreground: 'hsl(var(--accent-foreground))',
+        },
+        popover: {
+          DEFAULT: 'hsl(var(--popover))',
+          foreground: 'hsl(var(--popover-foreground))',
+        },
+        card: {
+          DEFAULT: 'hsl(var(--card))',
+          foreground: 'hsl(var(--card-foreground))',
+        },
+        sidebar: {
+          DEFAULT: 'hsl(var(--sidebar-background))',
+          foreground: 'hsl(var(--sidebar-foreground))',
+          primary: 'hsl(var(--sidebar-primary))',
+          'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
+          accent: 'hsl(var(--sidebar-accent))',
+          'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
+          border: 'hsl(var(--sidebar-border))',
+          ring: 'hsl(var(--sidebar-ring))',
+        },
+        chart: {
+          '1': 'hsl(var(--chart-1))',
+          '2': 'hsl(var(--chart-2))',
+          '3': 'hsl(var(--chart-3))',
+          '4': 'hsl(var(--chart-4))',
+          '5': 'hsl(var(--chart-5))',
+        },
+      },
+      borderRadius: {
+        lg: 'var(--radius)',
+        md: 'calc(var(--radius) - 2px)',
+        sm: 'calc(var(--radius) - 4px)',
+      },
+      keyframes: {
+        'accordion-down': {
+          from: {
+            height: '0',
+          },
+          to: {
+            height: 'var(--radix-accordion-content-height)',
+          },
+        },
+        'accordion-up': {
+          from: {
+            height: 'var(--radix-accordion-content-height)',
+          },
+          to: {
+            height: '0',
+          },
+        },
+      },
+      animation: {
+        'accordion-down': 'accordion-down 0.2s ease-out',
+        'accordion-up': 'accordion-up 0.2s ease-out',
+      },
+      typography: (theme: (arg0: string) => any) => ({
+        DEFAULT: {
+          css: {
+            '--tw-prose-body': 'hsl(var(--foreground))',
+            '--tw-prose-headings': 'hsl(var(--primary))',
+            '--tw-prose-lead': 'hsl(var(--muted-foreground))',
+            '--tw-prose-links': 'hsl(var(--primary))',
+            '--tw-prose-bold': 'hsl(var(--foreground))',
+            '--tw-prose-counters': 'hsl(var(--muted-foreground))',
+            '--tw-prose-bullets': 'hsl(var(--border))',
+            '--tw-prose-hr': 'hsl(var(--border))',
+            '--tw-prose-quotes': 'hsl(var(--foreground))',
+            '--tw-prose-quote-borders': 'hsl(var(--border))',
+            '--tw-prose-captions': 'hsl(var(--muted-foreground))',
+            '--tw-prose-code': 'hsl(var(--foreground))',
+            '--tw-prose-pre-code': 'hsl(var(--foreground))',
+            '--tw-prose-pre-bg': 'hsl(var(--muted))',
+            '--tw-prose-th-borders': 'hsl(var(--border))',
+            '--tw-prose-td-borders': 'hsl(var(--border))',
+            '--tw-prose-invert-body': 'hsl(var(--foreground))',
+            '--tw-prose-invert-headings': 'hsl(var(--primary))',
+            '--tw-prose-invert-lead': 'hsl(var(--muted-foreground))',
+            '--tw-prose-invert-links': 'hsl(var(--primary))',
+            '--tw-prose-invert-bold': 'hsl(var(--foreground))',
+            '--tw-prose-invert-counters': 'hsl(var(--muted-foreground))',
+            '--tw-prose-invert-bullets': 'hsl(var(--border))',
+            '--tw-prose-invert-hr': 'hsl(var(--border))',
+            '--tw-prose-invert-quotes': 'hsl(var(--foreground))',
+            '--tw-prose-invert-quote-borders': 'hsl(var(--border))',
+            '--tw-prose-invert-captions': 'hsl(var(--muted-foreground))',
+            '--tw-prose-invert-code': 'hsl(var(--foreground))',
+            '--tw-prose-invert-pre-code': 'hsl(var(--foreground))',
+            '--tw-prose-invert-pre-bg': 'hsl(var(--muted))',
+            '--tw-prose-invert-th-borders': 'hsl(var(--border))',
+            '--tw-prose-invert-td-borders': 'hsl(var(--border))',
+          },
+        },
+      }),
+    },
+  },
+  plugins: [require('tailwindcss-animate'), require('@tailwindcss/typography')],
+} satisfies Config
+
+export default config;
+`,
 };
 
 export const downloadProject = () => {
