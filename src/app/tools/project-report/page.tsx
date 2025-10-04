@@ -4,9 +4,7 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
 import {
   Card,
   CardContent,
@@ -27,34 +25,21 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { handleGenerateAcademicDocumentAction } from '@/app/actions';
-import type { GenerateAcademicDocumentOutput, GenerateAcademicDocumentInput } from '@/ai/flows/thesis-generator-tool';
+import { handleGenerateProjectReportAction } from '@/app/actions';
+import { GenerateProjectReportInputSchema, type GenerateProjectReportOutput, type GenerateProjectReportInput } from '@/ai/flows/project-report-generator-tool';
 import { Download, FileText, Loader2, UploadCloud } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 
-const formSchema = z.object({
-  topic: z.string().min(5, "Topic must be at least 5 characters."),
-  collegeName: z.string().min(3, "College name is required."),
-  departmentName: z.string().min(3, "Department name is required."),
-  semester: z.string().min(1, "Semester is required."),
-  year: z.string().min(4, "Year is required."),
-  subject: z.string().min(3, "Subject is required."),
-  studentName: z.string().min(3, "Student name is required."),
-  rollNumber: z.string().min(1, "Roll number is required."),
-  guideName: z.string().min(3, "Guide's name is required."),
-  documentDataUri: z.string().min(1, 'Please upload your notes and outline document.'),
-});
+type FormData = z.infer<typeof GenerateProjectReportInputSchema>;
 
-type FormData = z.infer<typeof formSchema>;
-
-export default function ThesisGeneratorPage() {
+export default function ProjectReportGeneratorPage() {
   const [isLoading, setIsLoading] = useState(false);
-  const [result, setResult] = useState<GenerateAcademicDocumentOutput | null>(null);
+  const [result, setResult] = useState<GenerateProjectReportOutput | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const { toast } = useToast();
 
   const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(GenerateProjectReportInputSchema),
     defaultValues: {
       topic: '',
       collegeName: '',
@@ -87,10 +72,10 @@ export default function ThesisGeneratorPage() {
   };
 
 
-  async function onSubmit(data: GenerateAcademicDocumentInput) {
+  async function onSubmit(data: GenerateProjectReportInput) {
     setIsLoading(true);
     setResult(null);
-    const response = await handleGenerateAcademicDocumentAction(data);
+    const response = await handleGenerateProjectReportAction(data);
     setIsLoading(false);
 
     if (response.success && response.data) {
@@ -214,7 +199,7 @@ export default function ThesisGeneratorPage() {
   return (
     <div className="space-y-8">
       <header className="space-y-2">
-        <h1 className="text-3xl font-bold font-headline">Thesis Generator</h1>
+        <h1 className="text-3xl font-bold font-headline">Project Report Generator</h1>
         <p className="text-muted-foreground">
           Generate a structured academic document from your outline and research notes.
         </p>
@@ -222,7 +207,7 @@ export default function ThesisGeneratorPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Generate Document</CardTitle>
+          <CardTitle>Generate Project Report</CardTitle>
           <CardDescription>
             Fill in your project details and upload a document with your outline and research notes.
           </CardDescription>

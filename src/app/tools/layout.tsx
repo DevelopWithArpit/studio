@@ -40,6 +40,8 @@ import {
   LifeBuoy,
   Settings,
   Download,
+  Video,
+  BookMarked,
 } from 'lucide-react';
 import { AppLogo } from '@/components/app-logo';
 import { Button } from '@/components/ui/button';
@@ -62,6 +64,7 @@ const tools: ToolConfig[] = [
   { id: 'ai-explanation', name: 'AI Explanation', icon: MessageCircleQuestion, href: '/tools/ai-explanation', category: 'Learning' },
   { id: 'thesis-generator', name: 'Thesis Generator', icon: GraduationCap, href: '/tools/thesis-generator', category: 'Writing' },
   { id: 'text-humanizer', name: 'Text Humanizer', icon: Sparkles, href: '/tools/text-humanizer', category: 'Writing' },
+  { id: 'project-report', name: 'Project Report', icon: BookMarked, href: '/tools/project-report', category: 'Writing' },
   { id: 'code-generator', name: 'Code Generator', icon: CodeXml, href: '/tools/code-generator', category: 'Development' },
   { id: 'code-analyzer', name: 'Code Analyzer', icon: ScanEye, href: '/tools/code-analyzer', category: 'Development' },
   { id: 'diagram-generator', name: 'Diagram Generator', icon: GitGraph, href: '/tools/diagram-generator', category: 'Development' },
@@ -73,6 +76,7 @@ const tools: ToolConfig[] = [
   { id: 'linkedin-visuals-generator', name: 'LinkedIn Visuals', icon: Linkedin, href: '/tools/linkedin-visuals-generator', category: 'Career' },
   { id: 'presentation-generator', name: 'Presentation Generator', icon: Presentation, href: '/tools/presentation-generator', category: 'Productivity' },
   { id: 'text-to-speech', name: 'Text to Speech', icon: Mic, href: '/tools/text-to-speech', category: 'Productivity' },
+  { id: 'video-generator', name: 'Video Generator', icon: Video, href: '/tools/video-generator', category: 'Media' },
   { id: 'watermark-remover', name: 'Watermark Remover', icon: Eraser, href: '/tools/watermark-remover', category: 'Media' },
   { id: 'image-text-manipulation', name: 'Image Text Manipulation', icon: Type, href: '/tools/image-text-manipulation', category: 'Media' },
 ];

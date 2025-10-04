@@ -21,3 +21,4 @@ import '@/ai/flows/image-text-manipulation-tool.ts';
 import '@/ai/flows/portfolio-generator-tool.ts';
 import '@/ai/flows/text-humanizer-tool.ts';
 import '@/ai/flows/thesis-generator-tool.ts';
+import '@/ai/flows/project-report-generator-tool.ts';

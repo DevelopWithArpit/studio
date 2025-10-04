@@ -74,6 +74,10 @@ import {
   generateAcademicDocument,
   type GenerateAcademicDocumentInput,
 } from '@/ai/flows/thesis-generator-tool';
+import {
+  generateProjectReport,
+  type GenerateProjectReportInput,
+} from '@/ai/flows/project-report-generator-tool';
 
 
 async function handleAction<T_Input, T_Output>(
@@ -156,6 +160,10 @@ export async function handleHumanizeTextAction(input: HumanizeTextInput) {
 
 export async function handleGenerateAcademicDocumentAction(input: GenerateAcademicDocumentInput) {
     return handleAction(input, generateAcademicDocument);
+}
+
+export async function handleGenerateProjectReportAction(input: GenerateProjectReportInput) {
+    return handleAction(input, generateProjectReport);
 }
 
 
