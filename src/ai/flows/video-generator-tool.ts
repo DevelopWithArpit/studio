@@ -16,13 +16,13 @@ import * as fs from 'fs';
 import { Readable } from 'stream';
 import { MediaPart } from 'genkit';
 
-export const GenerateVideoInputSchema = z.object({
+const GenerateVideoInputSchema = z.object({
   prompt: z.string().describe('The text prompt to generate the video from.'),
   durationSeconds: z.number().int().min(1).max(10).default(5).describe('The duration of the video in seconds.'),
 });
 export type GenerateVideoInput = z.infer<typeof GenerateVideoInputSchema>;
 
-export const GenerateVideoOutputSchema = z.object({
+const GenerateVideoOutputSchema = z.object({
   videoUrl: z.string().describe('The data URI of the generated video.'),
 });
 export type GenerateVideoOutput = z.infer<typeof GenerateVideoOutputSchema>;
@@ -31,7 +31,7 @@ export async function generateVideo(input: GenerateVideoInput): Promise<Generate
   return generateVideoFlow(input);
 }
 
-async function downloadVideo(video: MediaPart, path: string) {
+async function downloadVideo(video: MediaPart): Promise<Buffer> {
     const fetch = (await import('node-fetch')).default;
     // Add API key before fetching the video.
     const videoDownloadResponse = await fetch(
@@ -45,7 +45,11 @@ async function downloadVideo(video: MediaPart, path: string) {
       throw new Error('Failed to fetch video');
     }
   
-    Readable.from(videoDownloadResponse.body).pipe(fs.createWriteStream(path));
+    const chunks: Buffer[] = [];
+    for await (const chunk of videoDownloadResponse.body) {
+        chunks.push(chunk as Buffer);
+    }
+    return Buffer.concat(chunks);
 }
 
 const generateVideoFlow = ai.defineFlow(
@@ -84,13 +88,8 @@ const generateVideoFlow = ai.defineFlow(
         throw new Error('Failed to find the generated video');
       }
 
-      const tempPath = `/tmp/output-${Date.now()}.mp4`;
-      await downloadVideo(video, tempPath);
-      
-      const videoData = fs.readFileSync(tempPath);
+      const videoData = await downloadVideo(video);
       const videoDataUri = `data:video/mp4;base64,${videoData.toString('base64')}`;
-
-      fs.unlinkSync(tempPath);
 
       return { videoUrl: videoDataUri };
   }
