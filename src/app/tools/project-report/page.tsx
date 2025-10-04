@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import jsPDF from 'jspdf';
 import Image from 'next/image';
-import { Packer, Document, Paragraph, TextRun, HeadingLevel, AlignmentType } from 'docx';
+import { Packer, Document, Paragraph, TextRun, HeadingLevel, AlignmentType, PageOrientation } from 'docx';
 import { saveAs } from 'file-saver';
 import {
   Card,
@@ -79,7 +79,7 @@ export default function ProjectReportGeneratorPage() {
   const handleDownloadPdf = () => {
     if (!result) return;
     
-    const doc = new jsPDF();
+    const doc = new jsPDF({ orientation: 'landscape' });
     const margin = 15;
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
@@ -90,32 +90,32 @@ export default function ProjectReportGeneratorPage() {
     } = form.getValues();
 
     // --- Title Page ---
-    doc.setFontSize(24).setFont('helvetica', 'bold');
-    doc.text(collegeName, pageWidth / 2, 40, { align: 'center' });
-    doc.setFontSize(16);
-    doc.text(`Department of ${departmentName}`, pageWidth / 2, 50, { align: 'center' });
-    doc.text(`(${year})`, pageWidth / 2, 58, { align: 'center' });
+    doc.setFontSize(36).setFont('helvetica', 'bold');
+    doc.text(collegeName, pageWidth / 2, 60, { align: 'center' });
+    doc.setFontSize(22);
+    doc.text(`Department of ${departmentName}`, pageWidth / 2, 75, { align: 'center' });
+    doc.text(`(${year})`, pageWidth / 2, 85, { align: 'center' });
 
-    doc.setFontSize(22).setFont('helvetica', 'bold');
-    const titleLines = doc.splitTextToSize(topic, usableWidth - 20);
-    doc.text(titleLines, pageWidth / 2, 100, { align: 'center' });
+    doc.setFontSize(28).setFont('helvetica', 'bold');
+    const titleLines = doc.splitTextToSize(topic, usableWidth - 40);
+    doc.text(titleLines, pageWidth / 2, 120, { align: 'center' });
 
-    doc.setFontSize(14).setFont('helvetica', 'normal');
-    doc.text(`A Project Report submitted for the subject`, pageWidth / 2, 125, { align: 'center' });
-    doc.setFontSize(16).setFont('helvetica', 'bold');
-    doc.text(subject, pageWidth / 2, 133, { align: 'center' });
+    doc.setFontSize(16).setFont('helvetica', 'normal');
+    doc.text(`A Project Report submitted for the subject`, pageWidth / 2, 145, { align: 'center' });
+    doc.setFontSize(18).setFont('helvetica', 'bold');
+    doc.text(subject, pageWidth / 2, 155, { align: 'center' });
     
     doc.setFontSize(14).setFont('helvetica', 'normal');
-    doc.text('Submitted by:', margin, 180);
+    doc.text('Submitted by:', margin, 190);
     doc.setFontSize(16).setFont('helvetica', 'bold');
-    doc.text(studentName, margin, 188);
+    doc.text(studentName, margin, 198);
     doc.setFontSize(14).setFont('helvetica', 'normal');
-    doc.text(`Roll No: ${rollNumber}`, margin, 196);
+    doc.text(`Roll No: ${rollNumber}`, margin, 206);
 
     doc.setFontSize(14).setFont('helvetica', 'normal');
-    doc.text('Guided by:', pageWidth - margin, 180, { align: 'right' });
+    doc.text('Guided by:', pageWidth - margin, 190, { align: 'right' });
     doc.setFontSize(16).setFont('helvetica', 'bold');
-    doc.text(guideName, pageWidth - margin, 188, { align: 'right' });
+    doc.text(guideName, pageWidth - margin, 198, { align: 'right' });
 
 
     // --- Content Pages ---
@@ -125,7 +125,7 @@ export default function ProjectReportGeneratorPage() {
     const addContent = async (title: string, content: string, imageUrl?: string) => {
         if (y > margin) y += 10; // Add space before new section
 
-        doc.setFontSize(16).setFont('helvetica', 'bold');
+        doc.setFontSize(18).setFont('helvetica', 'bold');
         let titleHeight = doc.getTextDimensions(title).h;
         if (y + titleHeight > pageHeight - margin) {
             doc.addPage(); y = margin;
@@ -133,7 +133,15 @@ export default function ProjectReportGeneratorPage() {
         doc.text(title, pageWidth / 2, y, { align: 'center' });
         y += titleHeight + 8;
 
+        const contentLines = doc.splitTextToSize(content.replace(/###|##|#/g, ''), usableWidth * 0.5 - margin);
+        const contentHeight = doc.getTextDimensions(contentLines).h;
+
+        let imageSpaceNeeded = 100;
         if (imageUrl) {
+            if (y + Math.max(contentHeight, imageSpaceNeeded) > pageHeight - margin) {
+                doc.addPage(); y = margin;
+            }
+            
             try {
                 const img = new Image();
                 img.src = imageUrl;
@@ -142,13 +150,10 @@ export default function ProjectReportGeneratorPage() {
                     img.onerror = () => resolve(null);
                 });
                 if (img.complete && img.naturalHeight !== 0) {
-                    const imgWidth = 100;
-                    const imgHeight = (img.height * imgWidth) / img.width;
-                    if (y + imgHeight > pageHeight - margin) {
-                        doc.addPage(); y = margin;
-                    }
-                    doc.addImage(imageUrl, 'PNG', (pageWidth - imgWidth) / 2, y, imgWidth, imgHeight);
-                    y += imgHeight + 10;
+                    const aspectRatio = img.width / img.height;
+                    const imgWidth = usableWidth * 0.45;
+                    const imgHeight = imgWidth / aspectRatio;
+                    doc.addImage(imageUrl, 'PNG', pageWidth / 2 + margin / 2, y, imgWidth, imgHeight);
                 }
             } catch (e) {
                 console.error("Failed to load image for PDF", e);
@@ -156,18 +161,8 @@ export default function ProjectReportGeneratorPage() {
         }
         
         doc.setFontSize(12).setFont('helvetica', 'normal');
-        const lines = doc.splitTextToSize(content.replace(/###|##|#/g, ''), usableWidth);
-
-        lines.forEach((line: string) => {
-            const lineHeight = doc.getTextDimensions(line).h;
-            if (y + lineHeight > pageHeight - margin) {
-                doc.addPage();
-                y = margin;
-            }
-            doc.text(line, margin, y);
-            y += lineHeight;
-        });
-        y += 5;
+        doc.text(contentLines, margin, y);
+        y += Math.max(contentHeight, imageUrl ? imageSpaceNeeded : 0) + 10;
     };
     
     (async () => {
@@ -231,8 +226,8 @@ export default function ProjectReportGeneratorPage() {
         creator: "AI Mentor",
         title: `Project Report: ${topic}`,
         sections: [
-            { properties: { page: { margin: { top: 720, right: 720, bottom: 720, left: 720 } } }, children: titlePage },
-            { properties: { page: { margin: { top: 720, right: 720, bottom: 720, left: 720 } } }, children: contentPages },
+            { properties: { page: { margin: { top: 720, right: 720, bottom: 720, left: 720 }, orientation: PageOrientation.LANDSCAPE } }, children: titlePage },
+            { properties: { page: { margin: { top: 720, right: 720, bottom: 720, left: 720 }, orientation: PageOrientation.LANDSCAPE } }, children: contentPages },
         ],
     });
 
