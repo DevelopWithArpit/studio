@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import jsPDF from 'jspdf';
+import Image from 'next/image';
 import {
   Card,
   CardContent,
@@ -27,8 +28,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { handleGenerateProjectReportAction } from '@/app/actions';
 import { GenerateProjectReportInputSchema, type GenerateProjectReportOutput, type GenerateProjectReportInput } from '@/ai/flows/project-report-generator-tool';
-import { Download, Loader2 } from 'lucide-react';
+import { Download, Loader2, Image as ImageIconLucide } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import { Badge } from '@/components/ui/badge';
 
 type FormData = z.infer<typeof GenerateProjectReportInputSchema>;
 
@@ -253,26 +256,52 @@ export default function ProjectReportGeneratorPage() {
             <CardTitle>{result.title}</CardTitle>
             <CardDescription>Your generated document is ready. Review the content below.</CardDescription>
           </CardHeader>
-          <CardContent className="prose prose-invert max-w-none space-y-6">
-            <div>
-                <h2 className='text-xl font-bold'>Introduction</h2>
-                <div dangerouslySetInnerHTML={{ __html: result.introduction.replace(/\n/g, '<br />') }} />
-            </div>
-            {result.chapters.map((chapter, index) => (
-                <div key={index}>
-                    <h2 className='text-xl font-bold'>{chapter.title}</h2>
-                    {chapter.imageUrl && (
-                        <div className="my-4">
-                            <img src={chapter.imageUrl} alt={`Illustration for ${chapter.title}`} className="max-w-sm mx-auto rounded-md shadow-lg" />
+          <CardContent>
+            <Carousel className="w-full">
+              <CarouselContent>
+                {[
+                  { title: 'Introduction', content: result.introduction, imageUrl: null },
+                  ...result.chapters,
+                  { title: 'Conclusion', content: result.conclusion, imageUrl: null },
+                ].map((item, index) => (
+                  <CarouselItem key={index}>
+                    <div className="p-1">
+                      <Card className="overflow-hidden">
+                        <div className="grid grid-cols-1 md:grid-cols-2 h-[500px]">
+                          <div className="p-6 flex flex-col overflow-y-auto">
+                            <Badge variant="outline" className="w-fit mb-4">
+                              Page {index + 1}
+                            </Badge>
+                            <h3 className="text-2xl font-bold font-headline mb-4">{item.title}</h3>
+                            <div className="prose prose-sm prose-invert max-w-none flex-1">
+                              <p className="whitespace-pre-wrap">{item.content}</p>
+                            </div>
+                          </div>
+                          <div className="bg-muted flex items-center justify-center overflow-hidden relative">
+                            {item.imageUrl ? (
+                              <Image
+                                src={item.imageUrl}
+                                alt={`Illustration for ${item.title}`}
+                                width={500}
+                                height={500}
+                                className="object-cover w-full h-full"
+                              />
+                            ) : (
+                              <div className="flex flex-col items-center justify-center text-muted-foreground">
+                                <ImageIconLucide className="w-16 h-16" />
+                                <p className="mt-2 text-sm font-semibold">No Image</p>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                    )}
-                    <div dangerouslySetInnerHTML={{ __html: chapter.content.replace(/\n/g, '<br />') }} />
-                </div>
-            ))}
-             <div>
-                <h2 className='text-xl font-bold'>Conclusion</h2>
-                <div dangerouslySetInnerHTML={{ __html: result.conclusion.replace(/\n/g, '<br />') }} />
-            </div>
+                      </Card>
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="ml-12" />
+              <CarouselNext className="mr-12" />
+            </Carousel>
           </CardContent>
           <CardFooter>
             <Button onClick={handleDownloadPdf}>
