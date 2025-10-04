@@ -30,11 +30,11 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { handleGenerateProjectReportAction } from '@/app/actions';
-import { type GenerateProjectReportOutput, type GenerateProjectReportInput } from '@/ai/flows/project-report-generator-tool';
 import { Download, FileCode, Loader2, Image as ImageIconLucide } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Badge } from '@/components/ui/badge';
+import type { GenerateProjectReportInput, GenerateProjectReportOutput } from '@/ai/flows/project-report-generator-tool';
 
 const formSchema = z.object({
   topic: z.string().min(1, "Project topic is required."),

@@ -13,7 +13,7 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { googleAI } from '@genkit-ai/googleai';
 
-export const GenerateProjectReportInputSchema = z.object({
+const GenerateProjectReportInputSchema = z.object({
   topic: z.string().describe("The main topic or title of the project."),
   collegeName: z.string().describe("The name of the student's college."),
   departmentName: z.string().describe("The name of the department."),
