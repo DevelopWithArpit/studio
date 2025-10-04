@@ -12,7 +12,7 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 
-const GenerateProjectReportInputSchema = z.object({
+export const GenerateProjectReportInputSchema = z.object({
   topic: z.string().describe("The main topic or title of the project."),
   collegeName: z.string().describe("The name of the student's college."),
   departmentName: z.string().describe("The name of the department."),
@@ -34,7 +34,7 @@ const ChapterSchema = z.object({
   imageUrl: z.string().optional().describe('The data URI of the generated image for this chapter.'),
 });
 
-const GenerateProjectReportOutputSchema = z.object({
+export const GenerateProjectReportOutputSchema = z.object({
   title: z.string().describe('The main title of the generated document.'),
   introduction: ChapterSchema.describe('The introduction chapter object, containing title, content, and imagePrompt.'),
   chapters: z.array(ChapterSchema).describe('An array of generated chapters or sections for the document body.'),
@@ -92,6 +92,7 @@ const generateProjectReportFlow = ai.defineFlow(
     outputSchema: GenerateProjectReportOutputSchema,
   },
   async (input) => {
+    // 1. Generate the text outline and image prompts first.
     const { output: outline } = await prompt({
       topic: input.topic,
       numPages: input.numPages,
@@ -100,32 +101,38 @@ const generateProjectReportFlow = ai.defineFlow(
       throw new Error('Failed to generate document outline.');
     }
 
-    const allSections = [outline.introduction, ...outline.chapters, outline.conclusion];
+    // 2. Create a list of all sections that need an image.
+    const sectionsWithPrompts = [
+        outline.introduction, 
+        ...outline.chapters, 
+        outline.conclusion
+    ].filter(section => section.imagePrompt);
 
-    const imageGenerationPromises = allSections.map(section => {
-        if (section.imagePrompt) {
-            return ai.generate({
-                model: 'googleai/imagen-4.0-fast-generate-001',
-                prompt: `${section.imagePrompt}. CRITICAL: If you include any text or words in the image, you MUST ensure they are spelled correctly.`,
-                config: {
-                  aspectRatio: '16:9',
-                },
-            });
-        }
-        return Promise.resolve({ media: null });
+    // 3. Generate images for all sections in parallel.
+    const imageGenerationPromises = sectionsWithPrompts.map(section => {
+        return ai.generate({
+            model: 'googleai/imagen-4.0-fast-generate-001',
+            prompt: `${section.imagePrompt}. CRITICAL: If you include any text or words in the image, you MUST ensure they are spelled correctly.`,
+            config: {
+              aspectRatio: '16:9',
+            },
+        });
     });
 
-    const results = await Promise.allSettled(imageGenerationPromises);
-    
-    results.forEach((result, index) => {
+    const imageResults = await Promise.allSettled(imageGenerationPromises);
+
+    // 4. Attach the generated image URLs back to their corresponding sections.
+    imageResults.forEach((result, index) => {
+        const section = sectionsWithPrompts[index];
         if (result.status === 'fulfilled' && result.value.media?.url) {
-            allSections[index].imageUrl = result.value.media.url;
+            section.imageUrl = result.value.media.url;
         } else {
-            console.error(`Section ${index + 1} image generation failed.`);
-            allSections[index].imageUrl = '';
+            console.error(`Section "${section.title}" image generation failed.`);
+            section.imageUrl = ''; // Set to empty string on failure
         }
     });
 
+    // 5. Return the fully populated outline.
     return outline;
   }
 );
