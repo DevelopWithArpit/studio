@@ -23,6 +23,7 @@ export const GenerateProjectReportInputSchema = z.object({
   studentName: z.string().describe("The student's full name."),
   rollNumber: z.string().describe("The student's class roll number."),
   guideName: z.string().describe("The name of the project guide."),
+  numPages: z.number().int().min(2).max(15).describe("The desired number of pages for the report."),
 });
 export type GenerateProjectReportInput = z.infer<typeof GenerateProjectReportInputSchema>;
 
@@ -65,17 +66,17 @@ export async function generateProjectReport(input: GenerateProjectReportInput): 
 
 const prompt = ai.definePrompt({
   name: 'generateProjectReportPrompt',
-  input: { schema: z.object({ topic: z.string() }) },
+  input: { schema: z.object({ topic: z.string(), numPages: z.number() }) },
   output: { schema: GenerateProjectReportOutputSchema },
   tools: [researchTopicTool],
-  prompt: `You are an expert academic writer. Your task is to generate a well-structured academic document (like a thesis, research paper, or SIP report) on a given topic. The generated content should be detailed enough to fill approximately 6-8 printed pages.
+  prompt: `You are an expert academic writer. Your task is to generate a well-structured academic document (like a thesis, research paper, or SIP report) on a given topic. The generated content should be detailed enough to fill approximately {{{numPages}}} printed pages.
 
 **Topic:** {{{topic}}}
 
 **Instructions:**
 1.  **Research First:** You MUST use the \`researchTopicTool\` to gather in-depth information about the specified topic.
-2.  **Analyze and Expand:** Based on the research findings from the tool, create a comprehensive academic paper. Flesh out each section with detailed, well-organized content. The total length should be substantial, aiming for 6-8 pages when printed.
-3.  **Structure:** Generate the content for the Introduction, all body Chapters, and the Conclusion.
+2.  **Analyze and Expand:** Based on the research findings from the tool, create a comprehensive academic paper. Flesh out each section with detailed, well-organized content. The total length should be substantial, aiming for {{{numPages}}} pages when printed.
+3.  **Structure:** Generate the content for the Introduction, all body Chapters, and the Conclusion. The number of chapters should be appropriate for the requested page count.
 4.  **Image Prompts:** For each chapter (including Introduction and Conclusion), you MUST create a descriptive prompt for an AI image generator. The prompt should describe a relevant, professional, and visually appealing image that illustrates the chapter's core theme. The image should NOT contain any text.
 5.  **Formatting:** All content must be written in clear, academic Markdown.
 
@@ -91,6 +92,7 @@ const generateProjectReportFlow = ai.defineFlow(
   async (input) => {
     const { output: outline } = await prompt({
       topic: input.topic,
+      numPages: input.numPages,
     });
     if (!outline) {
       throw new Error('Failed to generate document outline.');

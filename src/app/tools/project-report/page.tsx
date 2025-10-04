@@ -27,7 +27,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { handleGenerateProjectReportAction } from '@/app/actions';
 import { GenerateProjectReportInputSchema, type GenerateProjectReportOutput, type GenerateProjectReportInput } from '@/ai/flows/project-report-generator-tool';
-import { Download, FileText, Loader2, UploadCloud } from 'lucide-react';
+import { Download, Loader2 } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 
 type FormData = z.infer<typeof GenerateProjectReportInputSchema>;
@@ -49,6 +49,7 @@ export default function ProjectReportGeneratorPage() {
       studentName: '',
       rollNumber: '',
       guideName: '',
+      numPages: 8,
     },
   });
   
@@ -200,10 +201,25 @@ export default function ProjectReportGeneratorPage() {
                     <FormField control={form.control} name="collegeName" render={({ field }) => ( <FormItem> <FormLabel>College Name</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                     <FormField control={form.control} name="departmentName" render={({ field }) => ( <FormItem> <FormLabel>Department Name</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField control={form.control} name="semester" render={({ field }) => ( <FormItem> <FormLabel>Semester</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                     <FormField control={form.control} name="year" render={({ field }) => ( <FormItem> <FormLabel>Year</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField control={form.control} name="subject" render={({ field }) => ( <FormItem> <FormLabel>Subject</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
+                    <FormField
+                      control={form.control}
+                      name="numPages"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Number of Pages</FormLabel>
+                          <FormControl>
+                            <Input type="number" min="2" max="15" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                 </div>
                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <FormField control={form.control} name="studentName" render={({ field }) => ( <FormItem> <FormLabel>Student Name</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
