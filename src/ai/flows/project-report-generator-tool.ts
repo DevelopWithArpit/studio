@@ -108,6 +108,9 @@ const generateProjectReportFlow = ai.defineFlow(
             return ai.generate({
                 model: 'googleai/imagen-4.0-fast-generate-001',
                 prompt: `${chapter.imagePrompt}, professional, high quality, relevant for an academic paper`,
+                config: {
+                  aspectRatio: '16:9',
+                },
             });
         }
         return Promise.resolve({ media: null });
