@@ -29,8 +29,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { handleGenerateAcademicDocumentAction } from '@/app/actions';
 import type { GenerateAcademicDocumentOutput, GenerateAcademicDocumentInput } from '@/ai/flows/thesis-generator-tool';
-import { Download, FileText, Loader2, UploadCloud } from 'lucide-react';
+import { Download, FileText, Loader2, UploadCloud, Image as ImageIcon } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
+import Image from 'next/image';
 
 const formSchema = z.object({
   topic: z.string().min(5, "Topic must be at least 5 characters."),
@@ -115,7 +116,7 @@ export default function ThesisGeneratorPage() {
     const usableWidth = pageWidth - 2 * margin;
     let y = margin;
     const {
-      topic, collegeName, departmentName, semester, year, subject, studentName, rollNumber, guideName
+      topic, collegeName, departmentName, year, subject, studentName, rollNumber, guideName
     } = form.getValues();
 
     // --- Title Page ---
@@ -164,7 +165,7 @@ export default function ThesisGeneratorPage() {
 
         if (imageUrl) {
             try {
-                const img = new Image();
+                const img = new window.Image();
                 img.src = imageUrl;
                 await new Promise(resolve => {
                     img.onload = resolve;
@@ -200,11 +201,11 @@ export default function ThesisGeneratorPage() {
     };
     
     (async () => {
-        await addContent('Introduction', result.introduction);
+        await addContent(result.introduction.title, result.introduction.content, result.introduction.imageUrl);
         for (const chapter of result.chapters) {
             await addContent(chapter.title, chapter.content, chapter.imageUrl);
         }
-        await addContent('Conclusion', result.conclusion);
+        await addContent(result.conclusion.title, result.conclusion.content, result.conclusion.imageUrl);
 
         doc.save(`${result.title.replace(/\s+/g, '_')}.pdf`);
         toast({ title: "PDF Downloaded", description: "Your project report has been downloaded." });
@@ -304,25 +305,22 @@ export default function ThesisGeneratorPage() {
             <CardDescription>Your generated document is ready. Review the content below.</CardDescription>
           </CardHeader>
           <CardContent className="prose prose-invert max-w-none space-y-6">
-            <div>
-                <h2 className='text-xl font-bold'>Introduction</h2>
-                <div dangerouslySetInnerHTML={{ __html: result.introduction.replace(/\n/g, '<br />') }} />
-            </div>
-            {result.chapters.map((chapter, index) => (
+            {[result.introduction, ...result.chapters, result.conclusion].map((chapter, index) => (
                 <div key={index}>
                     <h2 className='text-xl font-bold'>{chapter.title}</h2>
-                    {chapter.imageUrl && (
+                    {chapter.imageUrl ? (
                         <div className="my-4">
-                            <img src={chapter.imageUrl} alt={`Illustration for ${chapter.title}`} className="max-w-sm mx-auto rounded-md shadow-lg" />
+                            <Image src={chapter.imageUrl} alt={`Illustration for ${chapter.title}`} width={500} height={281} className="max-w-sm mx-auto rounded-md shadow-lg" />
                         </div>
+                    ): (
+                       <div className="my-4 flex flex-col items-center justify-center text-muted-foreground bg-muted h-48 max-w-sm mx-auto rounded-md">
+                          <ImageIcon className="w-12 h-12" />
+                          <p className="mt-2 text-sm font-semibold">No Image Generated</p>
+                       </div>
                     )}
                     <div dangerouslySetInnerHTML={{ __html: chapter.content.replace(/\n/g, '<br />') }} />
                 </div>
             ))}
-             <div>
-                <h2 className='text-xl font-bold'>Conclusion</h2>
-                <div dangerouslySetInnerHTML={{ __html: result.conclusion.replace(/\n/g, '<br />') }} />
-            </div>
           </CardContent>
           <CardFooter>
             <Button onClick={handleDownloadPdf}>

@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -10,7 +11,6 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { googleAI } from '@genkit-ai/googleai';
 
 const GenerateAcademicDocumentInputSchema = z.object({
   topic: z.string().describe("The main topic or title of the project."),
@@ -29,15 +29,15 @@ export type GenerateAcademicDocumentInput = z.infer<typeof GenerateAcademicDocum
 const ChapterSchema = z.object({
   title: z.string().describe('The title of the chapter or section.'),
   content: z.string().describe('The full content of the chapter/section, written in well-structured Markdown format.'),
-  imagePrompt: z.string().describe("A descriptive text prompt for an AI image generator to create a relevant, professional-looking picture for this chapter's content. The image should be illustrative and not contain text."),
+  imagePrompt: z.string().describe("A descriptive text prompt for an AI image generator to create a relevant, professional-looking picture for this chapter's content. CRITICAL: Any text or words in the image MUST be spelled correctly."),
   imageUrl: z.string().optional().describe('The data URI of the generated image for this chapter.'),
 });
 
 const GenerateAcademicDocumentOutputSchema = z.object({
   title: z.string().describe('The main title of the generated document.'),
-  introduction: z.string().describe('The content of the introduction chapter in Markdown format.'),
-  chapters: z.array(ChapterSchema).describe('An array of generated chapters or sections for the document body.'),
-  conclusion: z.string().describe('The content of the conclusion chapter in Markdown format.'),
+  introduction: ChapterSchema.describe('An object for the introduction chapter, containing a title, content, and imagePrompt.'),
+  chapters: z.array(ChapterSchema).describe('An array of generated chapters or sections for the document body, each with a title, content, and imagePrompt.'),
+  conclusion: ChapterSchema.describe('An object for the conclusion chapter, containing a title, content, and imagePrompt.'),
 });
 export type GenerateAcademicDocumentOutput = z.infer<typeof GenerateAcademicDocumentOutputSchema>;
 
@@ -56,11 +56,13 @@ const prompt = ai.definePrompt({
 **Uploaded Document (Outline & Notes):**
 {{media url=documentDataUri}}
 
-**Instructions:**
-1.  **Analyze and Expand:** Carefully analyze the provided outline and research notes. Flesh out each section with detailed, well-organized content to create a comprehensive academic paper. The total length should be substantial, aiming for 6-8 pages when printed.
-2.  **Structure:** Generate the content for the Introduction, all body Chapters, and the Conclusion.
-3.  **Image Prompts:** For each chapter (including Introduction and Conclusion), you MUST create a descriptive prompt for an AI image generator. The prompt should describe a relevant, professional, and visually appealing image that illustrates the chapter's core theme. The image should NOT contain any text.
-4.  **Formatting:** All content must be written in clear, academic Markdown.
+**CRITICAL INSTRUCTIONS:**
+1.  **Analyze and Expand:** Carefully analyze the provided outline and research notes. Flesh out each section with detailed, well-organized content to create a comprehensive academic paper.
+2.  **Structure:** Your entire output must be a single JSON object that perfectly matches the output schema. You must generate content for 'title', 'introduction', 'chapters', and 'conclusion'.
+3.  **Introduction and Conclusion Objects:** The 'introduction' and 'conclusion' fields must be objects, each containing a 'title', 'content', and a unique 'imagePrompt'.
+4.  **Image Prompts:** For the introduction, EACH chapter in the 'chapters' array, and the conclusion, you MUST create a descriptive prompt for an AI image generator. This prompt must describe a relevant, professional, and visually appealing image that illustrates the section's core theme. CRITICAL: If you include any text or words in the image, you MUST ensure they are spelled correctly.
+5.  **Content Only:** The 'content' field for every section (introduction, chapters, conclusion) must ONLY contain the written text in academic Markdown. Do NOT include the title or image prompt in the content field.
+6.  **Formatting:** All content must be written in clear, academic Markdown.
 
 Generate the complete document structure now.`,
 });
@@ -80,16 +82,13 @@ const generateAcademicDocumentFlow = ai.defineFlow(
       throw new Error('Failed to generate document outline.');
     }
 
-    const allChapters = [
-        // Not generating images for intro/conclusion to save time/cost
-        ...outline.chapters,
-    ];
+    const allSections = [outline.introduction, ...outline.chapters, outline.conclusion];
 
-    const imageGenerationPromises = allChapters.map(chapter => {
-        if (chapter.imagePrompt) {
+    const imageGenerationPromises = allSections.map(section => {
+        if (section.imagePrompt) {
             return ai.generate({
                 model: 'googleai/imagen-4.0-fast-generate-001',
-                prompt: `${chapter.imagePrompt}, professional, high quality, relevant for an academic paper`,
+                prompt: `${section.imagePrompt}. CRITICAL: If you include any text or words in the image, you MUST ensure they are spelled correctly.`,
             });
         }
         return Promise.resolve({ media: null });
@@ -99,10 +98,10 @@ const generateAcademicDocumentFlow = ai.defineFlow(
     
     results.forEach((result, index) => {
         if (result.status === 'fulfilled' && result.value.media?.url) {
-            allChapters[index].imageUrl = result.value.media.url;
+            allSections[index].imageUrl = result.value.media.url;
         } else {
             console.error(`Chapter ${index + 1} image generation failed.`);
-            allChapters[index].imageUrl = '';
+            allSections[index].imageUrl = '';
         }
     });
 

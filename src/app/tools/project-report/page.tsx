@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import jsPDF from 'jspdf';
 import Image from 'next/image';
-import { Packer, Document, Paragraph, TextRun, HeadingLevel, AlignmentType, PageOrientation, Table, TableRow, TableCell, WidthType, BorderStyle, PageSize } from 'docx';
+import { Packer, Document, Paragraph, TextRun, HeadingLevel, AlignmentType, PageOrientation, Table, TableRow, TableCell, WidthType, BorderStyle, PageSize as DocxPageSize } from 'docx';
 import { saveAs } from 'file-saver';
 import {
   Card,
@@ -154,6 +154,8 @@ export default function ProjectReportGeneratorPage() {
         if (!text || text.trim() === '') return [];
         return text.split('\n').filter(p => p.trim() !== '').map(p => new Paragraph({ text: p.trim(), spacing: { after: 150 } }));
     };
+    
+    const allSections = [result.introduction, ...result.chapters, result.conclusion];
 
     const titlePage = [
         new Paragraph({ text: "LOKMANYA TILAK JANKALYAN SHIKSHAN SANSTHA'S", alignment: AlignmentType.CENTER, spacing: { after: 200 } }),
@@ -193,24 +195,18 @@ export default function ProjectReportGeneratorPage() {
         }),
     ];
 
-    const contentPages = [
-        new Paragraph({ text: 'Introduction', heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER, spacing: { before: 400, after: 200 } }),
-        ...createBodyText(result.introduction),
-        ...result.chapters.flatMap(chapter => [
-            new Paragraph({ text: chapter.title, heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER, spacing: { before: 400, after: 200 } }),
-            ...(chapter.imageUrl ? [new Paragraph({ children: [new TextRun("See figure below.")] })] : []),
-            ...createBodyText(chapter.content)
-        ]),
-        new Paragraph({ text: 'Conclusion', heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER, spacing: { before: 400, after: 200 } }),
-        ...createBodyText(result.conclusion),
-    ];
+    const contentPages = allSections.flatMap(chapter => [
+        new Paragraph({ text: chapter.title, heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER, spacing: { before: 400, after: 200 } }),
+        ...(chapter.imageUrl ? [new Paragraph({ children: [new TextRun("See figure below.")] })] : []),
+        ...createBodyText(chapter.content)
+    ]);
 
     const doc = new Document({
         creator: "AI Mentor",
         title: `Project Report: ${topic}`,
         sections: [
-            { properties: { pageSize: { width: 16838, height: 11906, orientation: PageOrientation.LANDSCAPE }, margin: { top: 720, right: 720, bottom: 720, left: 720 } }, children: titlePage },
-            { properties: { pageSize: { width: 16838, height: 11906, orientation: PageOrientation.LANDSCAPE }, margin: { top: 720, right: 720, bottom: 720, left: 720 } }, children: contentPages },
+            { properties: { pageSize: { width: DocxPageSize.A4.height, height: DocxPageSize.A4.width, orientation: PageOrientation.LANDSCAPE }, margin: { top: 720, right: 720, bottom: 720, left: 720 } }, children: titlePage },
+            { properties: { pageSize: { width: DocxPageSize.A4.height, height: DocxPageSize.A4.width, orientation: PageOrientation.LANDSCAPE }, margin: { top: 720, right: 720, bottom: 720, left: 720 } }, children: contentPages },
         ],
     });
 
@@ -220,7 +216,8 @@ export default function ProjectReportGeneratorPage() {
     });
   };
 
-  const cleanContent = (text: string) => {
+  const cleanContent = (text: string | undefined) => {
+    if (!text) return '';
     return text.replace(/```json\s*|```/g, '').replace(/\\n/g, '\n').replace(/\\"/g, '"');
   };
 
@@ -305,9 +302,9 @@ export default function ProjectReportGeneratorPage() {
             <Carousel className="w-full">
               <CarouselContent>
                 {[
-                  { title: 'Introduction', content: result.introduction, imageUrl: null },
+                  result.introduction,
                   ...result.chapters,
-                  { title: 'Conclusion', content: result.conclusion, imageUrl: null },
+                  result.conclusion,
                 ].map((item, index) => (
                   <CarouselItem key={index}>
                     <div className="p-1">

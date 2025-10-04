@@ -78,6 +78,8 @@ import {
   generateProjectReport,
   type GenerateProjectReportInput,
 } from '@/ai/flows/project-report-generator-tool';
+import { generateVideo } from '@/ai/flows/video-generator-tool';
+import type { GenerateVideoInput } from '@/ai/flows/video-generator-tool';
 
 
 async function handleAction<T_Input, T_Output>(
@@ -164,6 +166,10 @@ export async function handleGenerateAcademicDocumentAction(input: GenerateAcadem
 
 export async function handleGenerateProjectReportAction(input: GenerateProjectReportInput) {
     return handleAction(input, generateProjectReport);
+}
+
+export async function handleGenerateVideoAction(input: GenerateVideoInput) {
+  return handleAction(input, generateVideo);
 }
 
 

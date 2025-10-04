@@ -11,9 +11,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { googleAI } from '@genkit-ai/googleai';
 
-export type GenerateProjectReportInput = z.infer<typeof GenerateProjectReportInputSchema>;
 const GenerateProjectReportInputSchema = z.object({
   topic: z.string().describe("The main topic or title of the project."),
   collegeName: z.string().describe("The name of the student's college."),
@@ -27,6 +25,7 @@ const GenerateProjectReportInputSchema = z.object({
   numPages: z.coerce.number().int().min(2, "Must be at least 2 pages.").max(15, "Cannot exceed 15 pages."),
   section: z.string().optional().describe("The student's section (e.g., A, B)."),
 });
+export type GenerateProjectReportInput = z.infer<typeof GenerateProjectReportInputSchema>;
 
 const ChapterSchema = z.object({
   title: z.string().describe('The title of the chapter or section.'),
@@ -35,13 +34,13 @@ const ChapterSchema = z.object({
   imageUrl: z.string().optional().describe('The data URI of the generated image for this chapter.'),
 });
 
-export type GenerateProjectReportOutput = z.infer<typeof GenerateProjectReportOutputSchema>;
 const GenerateProjectReportOutputSchema = z.object({
   title: z.string().describe('The main title of the generated document.'),
-  introduction: z.string().describe('The content of the introduction chapter in Markdown format.'),
+  introduction: ChapterSchema.describe('The introduction chapter object, containing title, content, and imagePrompt.'),
   chapters: z.array(ChapterSchema).describe('An array of generated chapters or sections for the document body.'),
-  conclusion: z.string().describe('The content of the conclusion chapter in Markdown format.'),
+  conclusion: ChapterSchema.describe('The conclusion chapter object, containing title, content, and imagePrompt.'),
 });
+export type GenerateProjectReportOutput = z.infer<typeof GenerateProjectReportOutputSchema>;
 
 const researchTopicTool = ai.defineTool(
     {
@@ -77,9 +76,11 @@ const prompt = ai.definePrompt({
 **CRITICAL INSTRUCTIONS:**
 1.  **Research First:** You MUST use the \`researchTopicTool\` to gather in-depth information about the specified topic.
 2.  **Analyze and Expand:** Based on the research findings, create a comprehensive academic paper. Flesh out each section with detailed, well-organized content.
-3.  **Strict Separation:** For each chapter, you MUST provide a separate 'content' and 'imagePrompt'. The 'content' field must contain ONLY the written text for that chapter. The 'imagePrompt' field must ONLY contain the prompt for the image. DO NOT mix them.
-4.  **Image Prompts:** For each chapter, you MUST create a descriptive 'imagePrompt'. This prompt must describe a relevant, professional, and visually appealing image that illustrates the chapter's core theme. CRITICAL: If you include any text or words in the image, you MUST ensure they are spelled correctly.
-5.  **Formatting:** All text in the 'content', 'introduction', and 'conclusion' fields must be in clear, academic Markdown.
+3.  **Strict JSON Structure:** Your entire output must be a single JSON object that perfectly matches the output schema.
+4.  **Complete All Fields:** You must generate content for 'title', 'introduction', 'chapters', and 'conclusion'.
+5.  **Introduction and Conclusion Objects:** The 'introduction' and 'conclusion' fields must be objects, each containing 'title', 'content', and a unique 'imagePrompt'.
+6.  **Image Prompts:** For the introduction, EACH chapter, and the conclusion, you MUST create a descriptive 'imagePrompt'. This prompt must describe a relevant, professional, and visually appealing image that illustrates the section's core theme. CRITICAL: If you include any text or words in the image, you MUST ensure they are spelled correctly.
+7.  **Content Only:** The 'content' field for every section must ONLY contain the written text in academic Markdown. Do NOT include the title or image prompt in the content field.
 
 Generate the complete document structure now.`,
 });
@@ -99,11 +100,13 @@ const generateProjectReportFlow = ai.defineFlow(
       throw new Error('Failed to generate document outline.');
     }
 
-    const imageGenerationPromises = outline.chapters.map(chapter => {
-        if (chapter.imagePrompt) {
+    const allSections = [outline.introduction, ...outline.chapters, outline.conclusion];
+
+    const imageGenerationPromises = allSections.map(section => {
+        if (section.imagePrompt) {
             return ai.generate({
                 model: 'googleai/imagen-4.0-fast-generate-001',
-                prompt: `${chapter.imagePrompt}. CRITICAL: If you include any text or words in the image, you MUST ensure they are spelled correctly.`,
+                prompt: `${section.imagePrompt}. CRITICAL: If you include any text or words in the image, you MUST ensure they are spelled correctly.`,
                 config: {
                   aspectRatio: '16:9',
                 },
@@ -116,10 +119,10 @@ const generateProjectReportFlow = ai.defineFlow(
     
     results.forEach((result, index) => {
         if (result.status === 'fulfilled' && result.value.media?.url) {
-            outline.chapters[index].imageUrl = result.value.media.url;
+            allSections[index].imageUrl = result.value.media.url;
         } else {
-            console.error(`Chapter ${index + 1} image generation failed.`);
-            outline.chapters[index].imageUrl = '';
+            console.error(`Section ${index + 1} image generation failed.`);
+            allSections[index].imageUrl = '';
         }
     });
 
