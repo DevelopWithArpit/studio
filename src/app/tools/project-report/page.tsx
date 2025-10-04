@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState } from 'react';
@@ -7,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import jsPDF from 'jspdf';
 import Image from 'next/image';
-import { Packer, Document, Paragraph, TextRun, HeadingLevel, AlignmentType, PageOrientation, Table, TableRow, TableCell, WidthType, BorderStyle } from 'docx';
+import { Packer, Document, Paragraph, TextRun, HeadingLevel, AlignmentType, PageOrientation, Table, TableRow, TableCell, WidthType, BorderStyle, PageSize } from 'docx';
 import { saveAs } from 'file-saver';
 import {
   Card,
@@ -29,12 +28,12 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { handleGenerateProjectReportAction, type GenerateProjectReportInput } from '@/app/actions';
+import { handleGenerateProjectReportAction } from '@/app/actions';
+import type { GenerateProjectReportInput, GenerateProjectReportOutput } from '@/ai/flows/project-report-generator-tool';
 import { Download, FileCode, Loader2, Image as ImageIconLucide } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Badge } from '@/components/ui/badge';
-import type { GenerateProjectReportOutput } from '@/ai/flows/project-report-generator-tool';
 
 const formSchema = z.object({
   topic: z.string().min(1, "Project topic is required."),
@@ -95,20 +94,20 @@ export default function ProjectReportGeneratorPage() {
   const handleDownloadPdf = () => {
     if (!result) return;
     
-    const doc = new jsPDF({ orientation: 'landscape' });
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
     const pageWidth = doc.internal.pageSize.getWidth();
     const {
       collegeName, departmentName, semester, year, subject, studentName, rollNumber, guideName, topic, section
     } = form.getValues();
 
     // --- Title Page ---
-    doc.setFontSize(14);
+    doc.setFontSize(14).setFont('helvetica', 'normal');
     doc.text("LOKMANYA TILAK JANKALYAN SHIKSHAN SANSTHA'S", pageWidth / 2, 30, { align: 'center' });
     
     doc.setFontSize(22).setFont('helvetica', 'bold');
     doc.text(collegeName.toUpperCase(), pageWidth / 2, 45, { align: 'center' });
     
-    doc.setFontSize(10);
+    doc.setFontSize(10).setFont('helvetica', 'normal');
     doc.text('(AN AUTONOMOUS INSTITUTE AFFILIATED TO RASHTRASANT TUKDOJI MAHARAJ NAGPUR UNIVERSITY)', pageWidth / 2, 53, { align: 'center' });
     
     doc.setFontSize(20).setFont('helvetica', 'bold');
@@ -124,20 +123,21 @@ export default function ProjectReportGeneratorPage() {
     doc.setFontSize(18).setFont('helvetica', 'bold');
     doc.text(studentName.toUpperCase(), pageWidth / 2, 135, { align: 'center' });
 
-    doc.setFontSize(14).setFont('helvetica', 'normal');
     let yPos = 160;
-    doc.text(`Semester: ${semester}`, 30, yPos);
-    doc.text(`Year: ${year}`, 30, yPos + 7);
-    doc.text(`Subject: ${subject}`, 30, yPos + 14);
-    if(section) doc.text(`Section: ${section}`, 30, yPos + 21);
-    doc.text(`Roll No:-${rollNumber}`, 30, yPos + 28);
+    const leftMargin = 20;
+    const rightMargin = pageWidth - 20;
     
-    doc.text('GUIDED BY:', pageWidth - 30, yPos + 14, { align: 'right' });
+    doc.setFontSize(14).setFont('helvetica', 'normal');
+    doc.text(`Semester: ${semester}`, leftMargin, yPos);
+    doc.text(`Year: ${year}`, leftMargin, yPos + 7);
+    doc.text(`Subject: ${subject}`, leftMargin, yPos + 14);
+    if(section) doc.text(`Section: ${section}`, leftMargin, yPos + 21);
+    doc.text(`Roll No:-${rollNumber}`, leftMargin, yPos + 28);
+    
+    doc.text('GUIDED BY:', rightMargin, yPos + 14, { align: 'right' });
     doc.setFontSize(14).setFont('helvetica', 'bold');
-    doc.text(guideName.toUpperCase(), pageWidth - 30, yPos + 21, { align: 'right' });
+    doc.text(guideName.toUpperCase(), rightMargin, yPos + 21, { align: 'right' });
     
-    // --- Content Pages ---
-    // (This part remains as it was, generating subsequent content pages)
     doc.addPage();
     doc.save(`${topic.replace(/\s+/g, '_')}.pdf`);
     toast({ title: "PDF Downloaded", description: "Your project report has been downloaded." });
@@ -156,13 +156,13 @@ export default function ProjectReportGeneratorPage() {
 
     const titlePage = [
         new Paragraph({ text: "LOKMANYA TILAK JANKALYAN SHIKSHAN SANSTHA'S", alignment: AlignmentType.CENTER, spacing: { after: 200 } }),
-        new Paragraph({ text: collegeName.toUpperCase(), bold: true, alignment: AlignmentType.CENTER, size: 36, spacing: { after: 100 } }),
-        new Paragraph({ text: "(AN AUTONOMOUS INSTITUTE AFFILIATED TO RASHTRASANT TUKDOJI MAHARAJ NAGPUR UNIVERSITY)", alignment: AlignmentType.CENTER, size: 20, spacing: { after: 200 } }),
-        new Paragraph({ text: `DEPARTMENT OF ${departmentName.toUpperCase()}`, bold: true, alignment: AlignmentType.CENTER, size: 32, spacing: { after: 600 } }),
-        new Paragraph({ text: "TOPIC OF THE PROJECT:", alignment: AlignmentType.CENTER, size: 28, spacing: { after: 100 } }),
-        new Paragraph({ text: topic.toUpperCase(), bold: true, alignment: AlignmentType.CENTER, size: 36, spacing: { after: 600 } }),
-        new Paragraph({ text: "PRESENTED BY:", alignment: AlignmentType.CENTER, size: 28, spacing: { after: 100 } }),
-        new Paragraph({ text: studentName.toUpperCase(), bold: true, alignment: AlignmentType.CENTER, size: 32, spacing: { after: 800 } }),
+        new Paragraph({ text: collegeName.toUpperCase(), bold: true, alignment: AlignmentType.CENTER, style: 'Title' }),
+        new Paragraph({ text: "(AN AUTONOMOUS INSTITUTE AFFILIATED TO RASHTRASANT TUKDOJI MAHARAJ NAGPUR UNIVERSITY)", alignment: AlignmentType.CENTER, style: 'IntenseQuote' }),
+        new Paragraph({ text: `DEPARTMENT OF ${departmentName.toUpperCase()}`, bold: true, alignment: AlignmentType.CENTER, style: 'Title', spacing: { before: 200, after: 600 } }),
+        new Paragraph({ text: "TOPIC OF THE PROJECT:", alignment: AlignmentType.CENTER, style: 'Heading2', spacing: { after: 100 } }),
+        new Paragraph({ text: topic.toUpperCase(), bold: true, alignment: AlignmentType.CENTER, style: 'Title', spacing: { after: 600 } }),
+        new Paragraph({ text: "PRESENTED BY:", alignment: AlignmentType.CENTER, style: 'Heading2', spacing: { after: 100 } }),
+        new Paragraph({ text: studentName.toUpperCase(), bold: true, alignment: AlignmentType.CENTER, style: 'Title', spacing: { after: 800 } }),
         new Table({
             columnWidths: [4500, 4500],
             borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE }, inside: { style: BorderStyle.NONE } },
@@ -197,6 +197,7 @@ export default function ProjectReportGeneratorPage() {
         ...createBodyText(result.introduction),
         ...result.chapters.flatMap(chapter => [
             new Paragraph({ text: chapter.title, heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER, spacing: { before: 400, after: 200 } }),
+            ...(chapter.imageUrl ? [new Paragraph({ children: [new TextRun("See figure below.")] })] : []),
             ...createBodyText(chapter.content)
         ]),
         new Paragraph({ text: 'Conclusion', heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER, spacing: { before: 400, after: 200 } }),
@@ -207,8 +208,8 @@ export default function ProjectReportGeneratorPage() {
         creator: "AI Mentor",
         title: `Project Report: ${topic}`,
         sections: [
-            { properties: { page: { margin: { top: 720, right: 720, bottom: 720, left: 720 }, orientation: PageOrientation.LANDSCAPE } }, children: titlePage },
-            { properties: { page: { margin: { top: 720, right: 720, bottom: 720, left: 720 }, orientation: PageOrientation.LANDSCAPE } }, children: contentPages },
+            { properties: { pageSize: { width: PageSize.A4.height, height: PageSize.A4.width, orientation: PageOrientation.LANDSCAPE }, margin: { top: 720, right: 720, bottom: 720, left: 720 } }, children: titlePage },
+            { properties: { pageSize: { width: PageSize.A4.height, height: PageSize.A4.width, orientation: PageOrientation.LANDSCAPE }, margin: { top: 720, right: 720, bottom: 720, left: 720 } }, children: contentPages },
         ],
     });
 
@@ -357,4 +358,3 @@ export default function ProjectReportGeneratorPage() {
     </div>
   );
 }
-
