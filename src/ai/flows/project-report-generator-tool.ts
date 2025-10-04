@@ -23,7 +23,6 @@ export const GenerateProjectReportInputSchema = z.object({
   studentName: z.string().describe("The student's full name."),
   rollNumber: z.string().describe("The student's class roll number."),
   guideName: z.string().describe("The name of the project guide."),
-  documentDataUri: z.string().describe("A document containing the outline and research notes for the academic paper, as a data URI. Format: 'data:<mimetype>;base64,<encoded_data>'."),
 });
 export type GenerateProjectReportInput = z.infer<typeof GenerateProjectReportInputSchema>;
 
@@ -42,26 +41,43 @@ const GenerateProjectReportOutputSchema = z.object({
 });
 export type GenerateProjectReportOutput = z.infer<typeof GenerateProjectReportOutputSchema>;
 
+const researchTopicTool = ai.defineTool(
+    {
+      name: 'researchTopicTool',
+      description: 'Performs in-depth research on a given academic or technical topic and returns a detailed body of research notes, key points, and relevant data.',
+      inputSchema: z.object({ topic: z.string() }),
+      outputSchema: z.string().describe('A detailed string of research findings.'),
+    },
+    async ({ topic }) => {
+      const researchPrompt = `You are a world-class research assistant. Generate a comprehensive and detailed body of research notes for the topic: "${topic}". The notes should be well-structured, containing key concepts, supporting data, potential arguments, and relevant background information suitable for an academic paper.`;
+      
+      const llmResponse = await ai.generate({
+        prompt: researchPrompt,
+      });
+
+      return llmResponse.text;
+    }
+);
+
 export async function generateProjectReport(input: GenerateProjectReportInput): Promise<GenerateProjectReportOutput> {
   return generateProjectReportFlow(input);
 }
 
 const prompt = ai.definePrompt({
   name: 'generateProjectReportPrompt',
-  input: { schema: z.object({ documentDataUri: z.string(), topic: z.string() }) },
+  input: { schema: z.object({ topic: z.string() }) },
   output: { schema: GenerateProjectReportOutputSchema },
-  prompt: `You are an expert academic writer. Your task is to generate a well-structured academic document (like a thesis, research paper, or SIP report) based on the user's uploaded document, which contains an outline and research notes. The generated content should be detailed enough to fill approximately 6-8 printed pages.
+  tools: [researchTopicTool],
+  prompt: `You are an expert academic writer. Your task is to generate a well-structured academic document (like a thesis, research paper, or SIP report) on a given topic. The generated content should be detailed enough to fill approximately 6-8 printed pages.
 
 **Topic:** {{{topic}}}
 
-**Uploaded Document (Outline & Notes):**
-{{media url=documentDataUri}}
-
 **Instructions:**
-1.  **Analyze and Expand:** Carefully analyze the provided outline and research notes. Flesh out each section with detailed, well-organized content to create a comprehensive academic paper. The total length should be substantial, aiming for 6-8 pages when printed.
-2.  **Structure:** Generate the content for the Introduction, all body Chapters, and the Conclusion.
-3.  **Image Prompts:** For each chapter (including Introduction and Conclusion), you MUST create a descriptive prompt for an AI image generator. The prompt should describe a relevant, professional, and visually appealing image that illustrates the chapter's core theme. The image should NOT contain any text.
-4.  **Formatting:** All content must be written in clear, academic Markdown.
+1.  **Research First:** You MUST use the \`researchTopicTool\` to gather in-depth information about the specified topic.
+2.  **Analyze and Expand:** Based on the research findings from the tool, create a comprehensive academic paper. Flesh out each section with detailed, well-organized content. The total length should be substantial, aiming for 6-8 pages when printed.
+3.  **Structure:** Generate the content for the Introduction, all body Chapters, and the Conclusion.
+4.  **Image Prompts:** For each chapter (including Introduction and Conclusion), you MUST create a descriptive prompt for an AI image generator. The prompt should describe a relevant, professional, and visually appealing image that illustrates the chapter's core theme. The image should NOT contain any text.
+5.  **Formatting:** All content must be written in clear, academic Markdown.
 
 Generate the complete document structure now.`,
 });
@@ -74,7 +90,6 @@ const generateProjectReportFlow = ai.defineFlow(
   },
   async (input) => {
     const { output: outline } = await prompt({
-      documentDataUri: input.documentDataUri,
       topic: input.topic,
     });
     if (!outline) {

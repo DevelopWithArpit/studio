@@ -35,7 +35,6 @@ type FormData = z.infer<typeof GenerateProjectReportInputSchema>;
 export default function ProjectReportGeneratorPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<GenerateProjectReportOutput | null>(null);
-  const [fileName, setFileName] = useState<string | null>(null);
   const { toast } = useToast();
 
   const form = useForm<FormData>({
@@ -50,28 +49,9 @@ export default function ProjectReportGeneratorPage() {
       studentName: '',
       rollNumber: '',
       guideName: '',
-      documentDataUri: '',
     },
   });
   
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 200 * 1024 * 1024) { // 200MB limit
-        toast({ variant: "destructive", title: "File too large", description: "Please upload a document smaller than 200MB."});
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = (loadEvent) => {
-        const dataUri = loadEvent.target?.result as string;
-        form.setValue('documentDataUri', dataUri);
-        setFileName(file.name);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-
   async function onSubmit(data: GenerateProjectReportInput) {
     setIsLoading(true);
     setResult(null);
@@ -201,7 +181,7 @@ export default function ProjectReportGeneratorPage() {
       <header className="space-y-2">
         <h1 className="text-3xl font-bold font-headline">Project Report Generator</h1>
         <p className="text-muted-foreground">
-          Generate a structured academic document from your outline and research notes.
+          Generate a structured academic document from your project topic. The AI will research the topic for you.
         </p>
       </header>
 
@@ -209,12 +189,13 @@ export default function ProjectReportGeneratorPage() {
         <CardHeader>
           <CardTitle>Generate Project Report</CardTitle>
           <CardDescription>
-            Fill in your project details and upload a document with your outline and research notes.
+            Fill in your project details and the AI will handle the research and writing.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                 <FormField control={form.control} name="topic" render={({ field }) => ( <FormItem> <FormLabel>Project Topic</FormLabel> <FormControl><Textarea rows={2} placeholder="e.g., The Impact of AI on Modern Software Development" {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField control={form.control} name="collegeName" render={({ field }) => ( <FormItem> <FormLabel>College Name</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                     <FormField control={form.control} name="departmentName" render={({ field }) => ( <FormItem> <FormLabel>Department Name</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
@@ -224,44 +205,12 @@ export default function ProjectReportGeneratorPage() {
                     <FormField control={form.control} name="year" render={({ field }) => ( <FormItem> <FormLabel>Year</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                     <FormField control={form.control} name="subject" render={({ field }) => ( <FormItem> <FormLabel>Subject</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                 </div>
-                 <FormField control={form.control} name="topic" render={({ field }) => ( <FormItem> <FormLabel>Project Topic</FormLabel> <FormControl><Textarea rows={2} {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <FormField control={form.control} name="studentName" render={({ field }) => ( <FormItem> <FormLabel>Student Name</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                     <FormField control={form.control} name="rollNumber" render={({ field }) => ( <FormItem> <FormLabel>Roll Number</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                     <FormField control={form.control} name="guideName" render={({ field }) => ( <FormItem> <FormLabel>Guide's Name</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}/>
                 </div>
-               <FormField
-                control={form.control}
-                name="documentDataUri"
-                render={() => (
-                  <FormItem>
-                    <FormLabel>Document Outline & Notes</FormLabel>
-                     <FormControl>
-                      <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center h-48">
-                        {fileName ? (
-                          <div className="flex flex-col items-center gap-2">
-                            <FileText className="w-12 h-12 text-primary" />
-                            <p className="text-sm font-medium">{fileName}</p>
-                            <Button variant="link" size="sm" asChild className="p-0 h-auto">
-                              <label htmlFor="file-upload" className="cursor-pointer">Change file</label>
-                            </Button>
-                          </div>
-                        ) : (
-                          <>
-                            <UploadCloud className="w-12 h-12 text-muted-foreground" />
-                            <p className="mt-2 text-sm text-muted-foreground">
-                              <label htmlFor="file-upload" className="font-semibold text-primary cursor-pointer hover:underline">Click to upload</label>{' '}or drag and drop
-                            </p>
-                            <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 200MB</p>
-                          </>
-                        )}
-                        <Input id="file-upload" type="file" className="sr-only" onChange={handleFileChange} accept=".pdf,.doc,.docx,.txt" />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              
               <Button type="submit" disabled={isLoading}>
                 {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating...</> : 'Generate Document'}
               </Button>
