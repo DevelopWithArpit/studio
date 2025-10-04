@@ -98,7 +98,7 @@ export default function ProjectReportGeneratorPage() {
     const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
     const pageWidth = doc.internal.pageSize.getWidth();
     const {
-      collegeName, departmentName, semester, year, subject, studentName, rollNumber, guideName, topic, section
+      collegeName, departmentName, subject, studentName, rollNumber, guideName, topic, section, year, semester
     } = form.getValues();
 
     // --- Title Page ---
@@ -209,8 +209,8 @@ export default function ProjectReportGeneratorPage() {
         creator: "AI Mentor",
         title: `Project Report: ${topic}`,
         sections: [
-            { properties: { pageSize: { width: PageSize.A4.height, height: PageSize.A4.width, orientation: PageOrientation.LANDSCAPE }, margin: { top: 720, right: 720, bottom: 720, left: 720 } }, children: titlePage },
-            { properties: { pageSize: { width: PageSize.A4.height, height: PageSize.A4.width, orientation: PageOrientation.LANDSCAPE }, margin: { top: 720, right: 720, bottom: 720, left: 720 } }, children: contentPages },
+            { properties: { pageSize: { width: 16838, height: 11906, orientation: PageOrientation.LANDSCAPE }, margin: { top: 720, right: 720, bottom: 720, left: 720 } }, children: titlePage },
+            { properties: { pageSize: { width: 16838, height: 11906, orientation: PageOrientation.LANDSCAPE }, margin: { top: 720, right: 720, bottom: 720, left: 720 } }, children: contentPages },
         ],
     });
 
@@ -221,16 +221,7 @@ export default function ProjectReportGeneratorPage() {
   };
 
   const cleanContent = (text: string) => {
-    try {
-      const jsonMatch = text.match(/\{.*\}/s);
-      if (jsonMatch) {
-        const parsed = JSON.parse(jsonMatch[0]);
-        return JSON.stringify(parsed, null, 2);
-      }
-    } catch (e) {
-      // Not valid JSON
-    }
-    return text.replace(/\\n/g, '\n').replace(/\\"/g, '"').replace(/"/g, '');
+    return text.replace(/```json\s*|```/g, '').replace(/\\n/g, '\n').replace(/\\"/g, '"');
   };
 
   return (
