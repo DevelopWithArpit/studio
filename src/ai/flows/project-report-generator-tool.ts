@@ -13,9 +13,7 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { googleAI } from '@genkit-ai/googleai';
 
-export type GenerateProjectReportInput = z.infer<typeof GenerateProjectReportInputSchema>;
-
-export const GenerateProjectReportInputSchema = z.object({
+const GenerateProjectReportInputSchema = z.object({
   topic: z.string().describe("The main topic or title of the project."),
   collegeName: z.string().describe("The name of the student's college."),
   departmentName: z.string().describe("The name of the department."),
@@ -28,6 +26,8 @@ export const GenerateProjectReportInputSchema = z.object({
   numPages: z.coerce.number().int().min(2, "Must be at least 2 pages.").max(15, "Cannot exceed 15 pages."),
   section: z.string().optional().describe("The student's section (e.g., A, B)."),
 });
+export type GenerateProjectReportInput = z.infer<typeof GenerateProjectReportInputSchema>;
+
 
 const ChapterSchema = z.object({
   title: z.string().describe('The title of the chapter or section.'),
@@ -36,14 +36,13 @@ const ChapterSchema = z.object({
   imageUrl: z.string().optional().describe('The data URI of the generated image for this chapter.'),
 });
 
-export type GenerateProjectReportOutput = z.infer<typeof GenerateProjectReportOutputSchema>;
-
 const GenerateProjectReportOutputSchema = z.object({
   title: z.string().describe('The main title of the generated document.'),
   introduction: z.string().describe('The content of the introduction chapter in Markdown format.'),
   chapters: z.array(ChapterSchema).describe('An array of generated chapters or sections for the document body.'),
   conclusion: z.string().describe('The content of the conclusion chapter in Markdown format.'),
 });
+export type GenerateProjectReportOutput = z.infer<typeof GenerateProjectReportOutputSchema>;
 
 const researchTopicTool = ai.defineTool(
     {
