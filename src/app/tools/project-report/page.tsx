@@ -5,9 +5,8 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import jsPDF from 'jspdf';
 import Image from 'next/image';
-import { Packer, Document, Paragraph, TextRun, HeadingLevel, AlignmentType, PageOrientation, Table, TableRow, TableCell, WidthType, BorderStyle, PageSize as DocxPageSize } from 'docx';
+import { Packer, Document, Paragraph, TextRun, HeadingLevel, AlignmentType, PageOrientation, Table, TableRow, TableCell, WidthType, BorderStyle, PageNumber, ISectionOptions, SectionType } from 'docx';
 import { saveAs } from 'file-saver';
 import {
   Card,
@@ -35,6 +34,8 @@ import { Download, FileCode, Loader2, Image as ImageIconLucide } from 'lucide-re
 import { Textarea } from '@/components/ui/textarea';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Badge } from '@/components/ui/badge';
+import jsPDF from 'jspdf';
+
 
 const formSchema = z.object({
   topic: z.string().min(1, "Project topic is required."),
@@ -205,8 +206,8 @@ export default function ProjectReportGeneratorPage() {
         creator: "AI Mentor",
         title: `Project Report: ${topic}`,
         sections: [
-            { properties: { pageSize: { width: DocxPageSize.A4.height, height: DocxPageSize.A4.width, orientation: PageOrientation.LANDSCAPE }, margin: { top: 720, right: 720, bottom: 720, left: 720 } }, children: titlePage },
-            { properties: { pageSize: { width: DocxPageSize.A4.height, height: DocxPageSize.A4.width, orientation: PageOrientation.LANDSCAPE }, margin: { top: 720, right: 720, bottom: 720, left: 720 } }, children: contentPages },
+            { properties: { type: SectionType.NEXT_PAGE, pageSize: { width: 16838, height: 11906, orientation: PageOrientation.LANDSCAPE }, margin: { top: 720, right: 720, bottom: 720, left: 720 } }, children: titlePage },
+            { properties: { type: SectionType.NEXT_PAGE, pageSize: { width: 16838, height: 11906, orientation: PageOrientation.LANDSCAPE }, margin: { top: 720, right: 720, bottom: 720, left: 720 } }, children: contentPages },
         ],
     });
 
@@ -218,7 +219,8 @@ export default function ProjectReportGeneratorPage() {
 
   const cleanContent = (text: string | undefined) => {
     if (!text) return '';
-    return text.replace(/```json\s*|```/g, '').replace(/\\n/g, '\n').replace(/\\"/g, '"');
+    // Basic cleanup for display, removing markdown-like syntax
+    return text.replace(/```(json)?/g, '').replace(/\\n/g, '\n').replace(/\\"/g, '"').replace(/##+\s?/g, '');
   };
 
   return (

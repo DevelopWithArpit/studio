@@ -12,7 +12,7 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 
-export const GenerateProjectReportInputSchema = z.object({
+const GenerateProjectReportInputSchema = z.object({
   topic: z.string().describe("The main topic or title of the project."),
   collegeName: z.string().describe("The name of the student's college."),
   departmentName: z.string().describe("The name of the department."),
@@ -34,7 +34,7 @@ const ChapterSchema = z.object({
   imageUrl: z.string().optional().describe('The data URI of the generated image for this chapter.'),
 });
 
-export const GenerateProjectReportOutputSchema = z.object({
+const GenerateProjectReportOutputSchema = z.object({
   title: z.string().describe('The main title of the generated document.'),
   introduction: ChapterSchema.describe('The introduction chapter object, containing title, content, and imagePrompt.'),
   chapters: z.array(ChapterSchema).describe('An array of generated chapters or sections for the document body.'),
