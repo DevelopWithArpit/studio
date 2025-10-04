@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState } from 'react';
@@ -36,7 +35,7 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-export default function AcademicWriterTool() {
+export default function ThesisGeneratorPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<GenerateAcademicDocumentOutput | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
@@ -139,9 +138,9 @@ export default function AcademicWriterTool() {
   return (
     <div className="space-y-8">
       <header className="space-y-2">
-        <h1 className="text-3xl font-bold font-headline">Academic Writer</h1>
+        <h1 className="text-3xl font-bold font-headline">Thesis Generator</h1>
         <p className="text-muted-foreground">
-          Generate a structured academic document (e.g., Thesis, SIP Report) from your outline and research notes.
+          Generate a structured academic document from your outline and research notes.
         </p>
       </header>
 

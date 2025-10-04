@@ -10,15 +10,27 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
+import { googleAI } from '@genkit-ai/googleai';
 
 const GenerateAcademicDocumentInputSchema = z.object({
-  documentDataUri: z.string().describe("A document containing the topic, outline, and research notes for the academic paper, as a data URI. Format: 'data:<mimetype>;base64,<encoded_data>'."),
+  topic: z.string().describe("The main topic or title of the project."),
+  collegeName: z.string().describe("The name of the student's college."),
+  departmentName: z.string().describe("The name of the department."),
+  semester: z.string().describe("The current semester."),
+  year: z.string().describe("The academic year."),
+  subject: z.string().describe("The subject of the project."),
+  studentName: z.string().describe("The student's full name."),
+  rollNumber: z.string().describe("The student's class roll number."),
+  guideName: z.string().describe("The name of the project guide."),
+  documentDataUri: z.string().describe("A document containing the outline and research notes for the academic paper, as a data URI. Format: 'data:<mimetype>;base64,<encoded_data>'."),
 });
 export type GenerateAcademicDocumentInput = z.infer<typeof GenerateAcademicDocumentInputSchema>;
 
 const ChapterSchema = z.object({
   title: z.string().describe('The title of the chapter or section.'),
   content: z.string().describe('The full content of the chapter/section, written in well-structured Markdown format.'),
+  imagePrompt: z.string().describe("A descriptive text prompt for an AI image generator to create a relevant, professional-looking picture for this chapter's content. The image should be illustrative and not contain text."),
+  imageUrl: z.string().optional().describe('The data URI of the generated image for this chapter.'),
 });
 
 const GenerateAcademicDocumentOutputSchema = z.object({
@@ -35,20 +47,20 @@ export async function generateAcademicDocument(input: GenerateAcademicDocumentIn
 
 const prompt = ai.definePrompt({
   name: 'generateAcademicDocumentPrompt',
-  input: { schema: GenerateAcademicDocumentInputSchema },
+  input: { schema: z.object({ documentDataUri: z.string(), topic: z.string() }) },
   output: { schema: GenerateAcademicDocumentOutputSchema },
-  prompt: `You are an expert academic writer. Your task is to generate a well-structured academic document (like a thesis, research paper, or SIP report) based on the user's uploaded document, which contains the topic, an outline, and research notes.
+  prompt: `You are an expert academic writer. Your task is to generate a well-structured academic document (like a thesis, research paper, or SIP report) based on the user's uploaded document, which contains an outline and research notes. The generated content should be detailed enough to fill approximately 6-8 printed pages.
 
-**Uploaded Document:**
+**Topic:** {{{topic}}}
+
+**Uploaded Document (Outline & Notes):**
 {{media url=documentDataUri}}
 
 **Instructions:**
-1.  **Analyze the Document:** Carefully analyze the provided document to identify the main topic, the structure (chapters, sections), headings, and any key research points or data. Determine if it's a thesis, SIP report, or another academic paper and adapt the tone and format accordingly.
-2.  **Title:** Extract or create a compelling and academic title for the document based on its content.
-3.  **Introduction:** Write a comprehensive introduction that sets the stage, states the problem or thesis statement, and outlines the structure of the document, following the provided outline.
-4.  **Body Chapters/Sections:** Generate the body based on the structure and headings found in the uploaded document. Flesh out each section with detailed, well-organized content, incorporating the research notes and key points provided.
-5.  **Conclusion:** Write a strong conclusion that summarizes the key findings, restates the thesis, and suggests areas for future research.
-6.  **Formatting:** All content for the introduction, chapters, and conclusion must be written in Markdown format, using headings, lists, and bold text as appropriate for academic writing.
+1.  **Analyze and Expand:** Carefully analyze the provided outline and research notes. Flesh out each section with detailed, well-organized content to create a comprehensive academic paper. The total length should be substantial, aiming for 6-8 pages when printed.
+2.  **Structure:** Generate the content for the Introduction, all body Chapters, and the Conclusion.
+3.  **Image Prompts:** For each chapter (including Introduction and Conclusion), you MUST create a descriptive prompt for an AI image generator. The prompt should describe a relevant, professional, and visually appealing image that illustrates the chapter's core theme. The image should NOT contain any text.
+4.  **Formatting:** All content must be written in clear, academic Markdown.
 
 Generate the complete document structure now.`,
 });
@@ -60,7 +72,40 @@ const generateAcademicDocumentFlow = ai.defineFlow(
     outputSchema: GenerateAcademicDocumentOutputSchema,
   },
   async (input) => {
-    const { output } = await prompt(input);
-    return output!;
+    const { output: outline } = await prompt({
+      documentDataUri: input.documentDataUri,
+      topic: input.topic,
+    });
+    if (!outline) {
+      throw new Error('Failed to generate document outline.');
+    }
+
+    const allChapters = [
+        // Not generating images for intro/conclusion to save time/cost
+        ...outline.chapters,
+    ];
+
+    const imageGenerationPromises = allChapters.map(chapter => {
+        if (chapter.imagePrompt) {
+            return ai.generate({
+                model: 'googleai/imagen-4.0-fast-generate-001',
+                prompt: `${chapter.imagePrompt}, professional, high quality, relevant for an academic paper`,
+            });
+        }
+        return Promise.resolve({ media: null });
+    });
+
+    const results = await Promise.allSettled(imageGenerationPromises);
+    
+    results.forEach((result, index) => {
+        if (result.status === 'fulfilled' && result.value.media?.url) {
+            allChapters[index].imageUrl = result.value.media.url;
+        } else {
+            console.error(`Chapter ${index + 1} image generation failed.`);
+            allChapters[index].imageUrl = '';
+        }
+    });
+
+    return outline;
   }
 );
