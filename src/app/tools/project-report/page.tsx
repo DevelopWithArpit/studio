@@ -29,7 +29,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { handleGenerateProjectReportAction } from '@/app/actions';
-import type { GenerateProjectReportInput, GenerateProjectReportOutput } from '@/ai/flows/project-report-generator-tool';
+import type { GenerateProjectReportOutput, GenerateProjectReportInput } from '@/ai/flows/project-report-generator-tool';
 import { Download, FileCode, Loader2, Image as ImageIconLucide } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
@@ -219,6 +219,23 @@ export default function ProjectReportGeneratorPage() {
     });
   };
 
+  const cleanContent = (text: string) => {
+    try {
+      // Attempt to find and parse JSON-like objects within the string
+      // This is a simplistic approach and might not cover all edge cases
+      const jsonMatch = text.match(/\{.*\}/s);
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]);
+        // Re-serialize with readable formatting
+        return JSON.stringify(parsed, null, 2);
+      }
+    } catch (e) {
+      // Not valid JSON, fall back to simple text cleaning
+    }
+    // Remove common unwanted artifacts from stringified objects
+    return text.replace(/\\n/g, '\n').replace(/\\"/g, '"').replace(/"/g, '');
+  };
+
   return (
     <div className="space-y-8">
       <header className="space-y-2">
@@ -314,7 +331,7 @@ export default function ProjectReportGeneratorPage() {
                             </Badge>
                             <h3 className="text-2xl font-bold font-headline mb-4">{item.title}</h3>
                             <div className="prose prose-sm prose-invert max-w-none flex-1">
-                              <p className="whitespace-pre-wrap">{item.content}</p>
+                              <p className="whitespace-pre-wrap">{cleanContent(item.content)}</p>
                             </div>
                           </div>
                           <div className="bg-muted flex items-center justify-center overflow-hidden relative">
