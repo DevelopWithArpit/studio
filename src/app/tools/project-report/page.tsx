@@ -190,7 +190,6 @@ export default function ProjectReportGeneratorPage() {
 
     const createTitle = (text: string) => new Paragraph({ text, heading: HeadingLevel.TITLE, alignment: AlignmentType.CENTER, spacing: { after: 200 } });
     const createHeading = (text: string) => new Paragraph({ text, heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER, spacing: { before: 400, after: 200 } });
-    const createSubheading = (text: string) => new Paragraph({ text, heading: HeadingLevel.HEADING_2, spacing: { before: 300, after: 150 } });
     const createBodyText = (text: string) => new Paragraph({ text, spacing: { after: 150 } });
 
     const titlePage = [
@@ -219,13 +218,13 @@ export default function ProjectReportGeneratorPage() {
 
     const contentPages = [
         createHeading('Introduction'),
-        ...result.introduction.split('\n').map(p => createBodyText(p)),
+        ...result.introduction.split('\n').filter(p => p.trim() !== '').map(p => createBodyText(p)),
         ...result.chapters.flatMap(chapter => [
             createHeading(chapter.title),
-            ...chapter.content.split('\n').map(p => createBodyText(p))
+            ...chapter.content.split('\n').filter(p => p.trim() !== '').map(p => createBodyText(p))
         ]),
         createHeading('Conclusion'),
-        ...result.conclusion.split('\n').map(p => createBodyText(p)),
+        ...result.conclusion.split('\n').filter(p => p.trim() !== '').map(p => createBodyText(p)),
     ];
 
     const doc = new Document({
