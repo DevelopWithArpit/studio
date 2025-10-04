@@ -106,23 +106,23 @@ export default function ProjectReportGeneratorPage() {
     doc.text("LOKMANYA TILAK JANKALYAN SHIKSHAN SANSTHA'S", pageWidth / 2, 30, { align: 'center' });
     
     doc.setFontSize(22).setFont('helvetica', 'bold');
-    doc.text(collegeName, pageWidth / 2, 45, { align: 'center' });
+    doc.text(collegeName.toUpperCase(), pageWidth / 2, 45, { align: 'center' });
     
     doc.setFontSize(10);
     doc.text('(AN AUTONOMOUS INSTITUTE AFFILIATED TO RASHTRASANT TUKDOJI MAHARAJ NAGPUR UNIVERSITY)', pageWidth / 2, 53, { align: 'center' });
     
     doc.setFontSize(20).setFont('helvetica', 'bold');
-    doc.text(`DEPARTMENT OF ${departmentName}`, pageWidth / 2, 68, { align: 'center' });
+    doc.text(`DEPARTMENT OF ${departmentName.toUpperCase()}`, pageWidth / 2, 68, { align: 'center' });
 
     doc.setFontSize(16).setFont('helvetica', 'normal');
     doc.text('TOPIC OF THE PROJECT:', pageWidth / 2, 90, { align: 'center' });
     doc.setFontSize(20).setFont('helvetica', 'bold');
-    doc.text(topic, pageWidth / 2, 100, { align: 'center' });
+    doc.text(topic.toUpperCase(), pageWidth / 2, 100, { align: 'center' });
 
     doc.setFontSize(16).setFont('helvetica', 'normal');
     doc.text('PRESENTED BY:', pageWidth / 2, 125, { align: 'center' });
     doc.setFontSize(18).setFont('helvetica', 'bold');
-    doc.text(studentName, pageWidth / 2, 135, { align: 'center' });
+    doc.text(studentName.toUpperCase(), pageWidth / 2, 135, { align: 'center' });
 
     doc.setFontSize(14).setFont('helvetica', 'normal');
     let yPos = 160;
@@ -134,10 +134,11 @@ export default function ProjectReportGeneratorPage() {
     
     doc.text('GUIDED BY:', pageWidth - 30, yPos + 14, { align: 'right' });
     doc.setFontSize(14).setFont('helvetica', 'bold');
-    doc.text(guideName, pageWidth - 30, yPos + 21, { align: 'right' });
+    doc.text(guideName.toUpperCase(), pageWidth - 30, yPos + 21, { align: 'right' });
     
     // --- Content Pages ---
     // (This part remains as it was, generating subsequent content pages)
+    doc.addPage();
     doc.save(`${topic.replace(/\s+/g, '_')}.pdf`);
     toast({ title: "PDF Downloaded", description: "Your project report has been downloaded." });
   };
@@ -150,18 +151,18 @@ export default function ProjectReportGeneratorPage() {
 
     const createBodyText = (text: string) => {
         if (!text || text.trim() === '') return [];
-        return text.split('\n').filter(p => p.trim() !== '').map(p => new Paragraph({ text: p, spacing: { after: 150 } }));
+        return text.split('\n').filter(p => p.trim() !== '').map(p => new Paragraph({ text: p.trim(), spacing: { after: 150 } }));
     };
 
     const titlePage = [
         new Paragraph({ text: "LOKMANYA TILAK JANKALYAN SHIKSHAN SANSTHA'S", alignment: AlignmentType.CENTER, spacing: { after: 200 } }),
-        new Paragraph({ text: collegeName, bold: true, alignment: AlignmentType.CENTER, size: 36, spacing: { after: 100 } }),
-        new Paragraph({ text: "(AN AUTONOMOUS INSTITUTE AFFILIATED TO RASHTRASANT TUKDOJI MAHARAJ NAGPUR UNIVERSITY)", alignment: AlignmentType.CENTER, spacing: { after: 200 } }),
-        new Paragraph({ text: `DEPARTMENT OF ${departmentName}`, bold: true, alignment: AlignmentType.CENTER, size: 32, spacing: { after: 600 } }),
+        new Paragraph({ text: collegeName.toUpperCase(), bold: true, alignment: AlignmentType.CENTER, size: 36, spacing: { after: 100 } }),
+        new Paragraph({ text: "(AN AUTONOMOUS INSTITUTE AFFILIATED TO RASHTRASANT TUKDOJI MAHARAJ NAGPUR UNIVERSITY)", alignment: AlignmentType.CENTER, size: 20, spacing: { after: 200 } }),
+        new Paragraph({ text: `DEPARTMENT OF ${departmentName.toUpperCase()}`, bold: true, alignment: AlignmentType.CENTER, size: 32, spacing: { after: 600 } }),
         new Paragraph({ text: "TOPIC OF THE PROJECT:", alignment: AlignmentType.CENTER, size: 28, spacing: { after: 100 } }),
-        new Paragraph({ text: topic, bold: true, alignment: AlignmentType.CENTER, size: 36, spacing: { after: 600 } }),
+        new Paragraph({ text: topic.toUpperCase(), bold: true, alignment: AlignmentType.CENTER, size: 36, spacing: { after: 600 } }),
         new Paragraph({ text: "PRESENTED BY:", alignment: AlignmentType.CENTER, size: 28, spacing: { after: 100 } }),
-        new Paragraph({ text: studentName, bold: true, alignment: AlignmentType.CENTER, size: 32, spacing: { after: 800 } }),
+        new Paragraph({ text: studentName.toUpperCase(), bold: true, alignment: AlignmentType.CENTER, size: 32, spacing: { after: 800 } }),
         new Table({
             columnWidths: [4500, 4500],
             borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE }, inside: { style: BorderStyle.NONE } },
@@ -181,7 +182,7 @@ export default function ProjectReportGeneratorPage() {
                         new TableCell({
                             children: [
                                 new Paragraph({ text: "GUIDED BY:", alignment: AlignmentType.RIGHT }),
-                                new Paragraph({ text: guideName, bold: true, alignment: AlignmentType.RIGHT }),
+                                new Paragraph({ text: guideName.toUpperCase(), bold: true, alignment: AlignmentType.RIGHT }),
                             ],
                              borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } },
                         }),
@@ -356,3 +357,4 @@ export default function ProjectReportGeneratorPage() {
     </div>
   );
 }
+
