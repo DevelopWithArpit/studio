@@ -4,6 +4,7 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import jsPDF from 'jspdf';
 import Image from 'next/image';
 import { Packer, Document, Paragraph, TextRun, HeadingLevel, AlignmentType, PageOrientation } from 'docx';
@@ -29,13 +30,26 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { handleGenerateProjectReportAction } from '@/app/actions';
-import { GenerateProjectReportInputSchema, type GenerateProjectReportOutput, type GenerateProjectReportInput } from '@/ai/flows/project-report-generator-tool';
+import { type GenerateProjectReportOutput, type GenerateProjectReportInput } from '@/ai/flows/project-report-generator-tool';
 import { Download, FileCode, Loader2, Image as ImageIconLucide } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Badge } from '@/components/ui/badge';
 
-type FormData = z.infer<typeof GenerateProjectReportInputSchema>;
+const formSchema = z.object({
+  topic: z.string().min(1, "Project topic is required."),
+  collegeName: z.string().min(1, "College name is required."),
+  departmentName: z.string().min(1, "Department name is required."),
+  semester: z.string().min(1, "Semester is required."),
+  year: z.string().min(1, "Year is required."),
+  subject: z.string().min(1, "Subject is required."),
+  studentName: z.string().min(1, "Student name is required."),
+  rollNumber: z.string().min(1, "Roll number is required."),
+  guideName: z.string().min(1, "Guide's name is required."),
+  numPages: z.coerce.number().int().min(2, "Must be at least 2 pages.").max(15, "Cannot exceed 15 pages."),
+});
+
+type FormData = z.infer<typeof formSchema>;
 
 export default function ProjectReportGeneratorPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -43,7 +57,7 @@ export default function ProjectReportGeneratorPage() {
   const { toast } = useToast();
 
   const form = useForm<FormData>({
-    resolver: zodResolver(GenerateProjectReportInputSchema),
+    resolver: zodResolver(formSchema),
     defaultValues: {
       topic: '',
       collegeName: '',
@@ -274,7 +288,7 @@ export default function ProjectReportGeneratorPage() {
                         <FormItem>
                           <FormLabel>Number of Pages</FormLabel>
                           <FormControl>
-                            <Input type="number" min="2" max="15" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10))}/>
+                            <Input type="number" min="2" max="15" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
