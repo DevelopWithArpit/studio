@@ -32,7 +32,7 @@ export type GenerateProjectReportInput = z.infer<typeof GenerateProjectReportInp
 const ChapterSchema = z.object({
   title: z.string().describe('The title of the chapter or section.'),
   content: z.string().describe('The full content of the chapter/section, written in well-structured Markdown format.'),
-  imagePrompt: z.string().describe("A descriptive text prompt for an AI image generator to create a relevant, professional-looking picture for this chapter's content. The image should be illustrative and not contain text."),
+  imagePrompt: z.string().describe("A descriptive text prompt for an AI image generator to create a relevant, professional-looking picture for this chapter's content. The image should be illustrative. CRITICAL: The image must NOT contain any text or letters."),
   imageUrl: z.string().optional().describe('The data URI of the generated image for this chapter.'),
 });
 
@@ -79,7 +79,7 @@ const prompt = ai.definePrompt({
 1.  **Research First:** You MUST use the \`researchTopicTool\` to gather in-depth information about the specified topic.
 2.  **Analyze and Expand:** Based on the research findings from the tool, create a comprehensive academic paper. Flesh out each section with detailed, well-organized content. The total length should be substantial, aiming for {{{numPages}}} pages when printed.
 3.  **Structure:** Generate the content for the Introduction, all body Chapters, and the Conclusion. The number of chapters should be appropriate for the requested page count.
-4.  **Image Prompts:** For each chapter (including Introduction and Conclusion), you MUST create a descriptive prompt for an AI image generator. The prompt should describe a relevant, professional, and visually appealing image that illustrates the chapter's core theme. The image should NOT contain any text.
+4.  **Image Prompts:** For each chapter (including Introduction and Conclusion), you MUST create a descriptive prompt for an AI image generator. The prompt must describe a relevant, professional, and visually appealing image that illustrates the chapter's core theme. CRITICAL: The image prompt must instruct the image generator to NOT include any text or words.
 5.  **Formatting:** All content must be written in clear, academic Markdown.
 
 Generate the complete document structure now.`,
@@ -109,7 +109,7 @@ const generateProjectReportFlow = ai.defineFlow(
         if (chapter.imagePrompt) {
             return ai.generate({
                 model: 'googleai/imagen-4.0-fast-generate-001',
-                prompt: `${chapter.imagePrompt}, professional, high quality, relevant for an academic paper`,
+                prompt: `${chapter.imagePrompt}, professional, high quality, relevant for an academic paper, no text or letters.`,
                 config: {
                   aspectRatio: '16:9',
                 },

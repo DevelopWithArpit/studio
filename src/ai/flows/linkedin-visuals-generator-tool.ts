@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -50,16 +51,16 @@ const generateLinkedInVisualsFlow = ai.defineFlow(
     const profilePicturePrompt = userPhotoUri
       ? [
           { media: { url: userPhotoUri } },
-          { text: `Based on the user's photo and their resume content, create a professional, high-quality headshot suitable for a LinkedIn profile picture. The background should be simple and professional, not distracting. The person should look friendly and approachable.` },
+          { text: `Based on the user's photo and their resume content, create a professional, high-quality headshot suitable for a LinkedIn profile picture. The background should be simple and professional, not distracting. The person should look friendly and approachable. The image must not contain any text.` },
           resumeContextPart,
         ]
       : [
-          { text: `Generate a professional, high-quality headshot suitable for a LinkedIn profile picture for a person in the software engineering industry. The person should look friendly and approachable. The background should be simple and professional. Use the resume content to guide the style.` },
+          { text: `Generate a professional, high-quality headshot suitable for a LinkedIn profile picture for a person in the software engineering industry. The person should look friendly and approachable. The background should be simple and professional. Use the resume content to guide the style. The image must not contain any text.` },
           resumeContextPart,
         ];
 
     const coverBannerPrompt = [
-        { text: `Analyze the user's resume content provided. Based on their industry, skills, and experience, generate a professional and abstract background image suitable for a LinkedIn cover banner (1584 x 396 pixels). The design should be modern, clean, and visually represent the user's professional field. For example, for a software engineer, it might incorporate subtle code-like patterns or abstract representations of data. For a graphic designer, it could be more artistic. The banner should not contain any text and should be visually appealing but not distracting.` },
+        { text: `Analyze the user's resume content provided. Based on their industry, skills, and experience, generate a professional and abstract background image suitable for a LinkedIn cover banner (1584 x 396 pixels). The design should be modern, clean, and visually represent the user's professional field. For example, for a software engineer, it might incorporate subtle code-like patterns or abstract representations of data. For a graphic designer, it could be more artistic. The banner must not contain any text and should be visually appealing but not distracting. CRITICAL: If you include any text or words in the image, you MUST ensure they are spelled correctly.` },
         resumeContextPart,
     ];
 

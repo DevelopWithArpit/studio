@@ -101,7 +101,7 @@ const outlinePrompt = ai.definePrompt({
 - For each slide, you MUST provide:
   1. A short, impactful title.
   2. A set of exactly 4 extremely CONCISE bullet points (or an empty array for title-only slides).
-  3. A descriptive prompt for an AI image generator (or an empty string). This prompt must describe a stunning, high-quality, and cinematic visual that powerfully represents the slide's core idea. Crucially, the generated image should NOT contain any text or letters whatsoever to avoid spelling and design errors. All image prompts must be in English.
+  3. A descriptive prompt for an AI image generator (or an empty string). This prompt must describe a stunning, high-quality, and cinematic visual that powerfully represents the slide's core idea. CRITICAL: If you include any text or words in the image, you MUST ensure they are spelled correctly.
   4. The appropriate 'slideLayout'.
   5. A 'logoUrl' if a company is mentioned.
 
@@ -144,10 +144,11 @@ const generatePresentationFlow = ai.defineFlow(
     }
 
     const applyStyle = (prompt: string) => {
+      let styledPrompt = prompt;
       if (input.imageStyle && input.imageStyle.toLowerCase() !== 'photorealistic') {
-        return `${prompt}, in a ${input.imageStyle} style`;
+        styledPrompt = `${prompt}, in a ${input.imageStyle} style`;
       }
-      return prompt;
+      return `${styledPrompt}. CRITICAL: If you include any text or words in the image, you MUST ensure they are spelled correctly.`;
     };
     
     // Create a map of slide index to its image prompt.
