@@ -6,6 +6,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import jsPDF from 'jspdf';
 import Image from 'next/image';
+import { Packer, Document, Paragraph, TextRun, HeadingLevel, AlignmentType } from 'docx';
+import { saveAs } from 'file-saver';
 import {
   Card,
   CardContent,
@@ -28,7 +30,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { handleGenerateProjectReportAction } from '@/app/actions';
 import { GenerateProjectReportInputSchema, type GenerateProjectReportOutput, type GenerateProjectReportInput } from '@/ai/flows/project-report-generator-tool';
-import { Download, Loader2, Image as ImageIconLucide } from 'lucide-react';
+import { Download, FileCode, Loader2, Image as ImageIconLucide } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Badge } from '@/components/ui/badge';
@@ -180,6 +182,67 @@ export default function ProjectReportGeneratorPage() {
     })();
   };
 
+  const handleDownloadDocx = () => {
+    if (!result) return;
+    const {
+      topic, collegeName, departmentName, year, subject, studentName, rollNumber, guideName
+    } = form.getValues();
+
+    const createTitle = (text: string) => new Paragraph({ text, heading: HeadingLevel.TITLE, alignment: AlignmentType.CENTER, spacing: { after: 200 } });
+    const createHeading = (text: string) => new Paragraph({ text, heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER, spacing: { before: 400, after: 200 } });
+    const createSubheading = (text: string) => new Paragraph({ text, heading: HeadingLevel.HEADING_2, spacing: { before: 300, after: 150 } });
+    const createBodyText = (text: string) => new Paragraph({ text, spacing: { after: 150 } });
+
+    const titlePage = [
+        new Paragraph({ text: collegeName, heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER }),
+        new Paragraph({ text: `Department of ${departmentName}`, alignment: AlignmentType.CENTER }),
+        new Paragraph({ text: `(${year})`, alignment: AlignmentType.CENTER, spacing: { after: 800 } }),
+        createTitle(topic),
+        new Paragraph({ text: `A Project Report submitted for the subject`, alignment: AlignmentType.CENTER }),
+        new Paragraph({ text: subject, bold: true, alignment: AlignmentType.CENTER, spacing: { after: 2000 } }),
+        new Paragraph({
+            children: [
+                new TextRun({ text: "Submitted by:\n", break: 1 }),
+                new TextRun({ text: studentName, bold: true }),
+                new TextRun(`\nRoll No: ${rollNumber}`),
+            ],
+            alignment: AlignmentType.LEFT,
+        }),
+        new Paragraph({
+             children: [
+                new TextRun({ text: "Guided by:\n", break: 1 }),
+                new TextRun({ text: guideName, bold: true }),
+            ],
+            alignment: AlignmentType.RIGHT,
+        }),
+    ];
+
+    const contentPages = [
+        createHeading('Introduction'),
+        ...result.introduction.split('\n').map(p => createBodyText(p)),
+        ...result.chapters.flatMap(chapter => [
+            createHeading(chapter.title),
+            ...chapter.content.split('\n').map(p => createBodyText(p))
+        ]),
+        createHeading('Conclusion'),
+        ...result.conclusion.split('\n').map(p => createBodyText(p)),
+    ];
+
+    const doc = new Document({
+        creator: "AI Mentor",
+        title: `Project Report: ${topic}`,
+        sections: [
+            { properties: { page: { margin: { top: 720, right: 720, bottom: 720, left: 720 } } }, children: titlePage },
+            { properties: { page: { margin: { top: 720, right: 720, bottom: 720, left: 720 } } }, children: contentPages },
+        ],
+    });
+
+    Packer.toBlob(doc).then(blob => {
+        saveAs(blob, `${topic.replace(/\s+/g, '_')}.docx`);
+        toast({ title: "DOCX Downloaded", description: "Your project report has been saved as an editable DOCX file." });
+    });
+  };
+
   return (
     <div className="space-y-8">
       <header className="space-y-2">
@@ -217,7 +280,7 @@ export default function ProjectReportGeneratorPage() {
                         <FormItem>
                           <FormLabel>Number of Pages</FormLabel>
                           <FormControl>
-                            <Input type="number" min="2" max="15" {...field} />
+                            <Input type="number" min="2" max="15" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10))}/>
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -303,10 +366,14 @@ export default function ProjectReportGeneratorPage() {
               <CarouselNext className="mr-12" />
             </Carousel>
           </CardContent>
-          <CardFooter>
+          <CardFooter className="gap-2">
             <Button onClick={handleDownloadPdf}>
               <Download className="mr-2 h-4 w-4" />
               Download as PDF
+            </Button>
+            <Button onClick={handleDownloadDocx} variant="secondary">
+              <FileCode className="mr-2 h-4 w-4" />
+              Download as DOCX
             </Button>
           </CardFooter>
         </Card>
