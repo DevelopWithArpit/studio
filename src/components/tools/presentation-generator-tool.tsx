@@ -186,7 +186,7 @@ Possible improvements, recommendations
         language: data.language,
         style: data.style,
     };
-    if (data.contentType === 'custom' && data.customStructure) {
+    if (data.contentType === 'custom' || data.contentType === 'projectProposal') {
         input.customStructure = data.customStructure;
     }
 
@@ -442,7 +442,7 @@ Possible improvements, recommendations
                 )}
               />
 
-              {contentType === 'custom' && (
+              {(contentType === 'custom' || contentType === 'projectProposal') && (
                 <FormField
                     control={form.control}
                     name="customStructure"
@@ -647,5 +647,7 @@ Possible improvements, recommendations
     </div>
   );
 }
+
+    
 
     
