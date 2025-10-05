@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState } from 'react';
@@ -33,47 +32,64 @@ import {
 import { Input } from '@/components/ui/input';
 import { handleSummarizeDocumentAction } from '@/app/actions';
 import type { SummarizeDocumentOutput } from '@/ai/flows/document-summarizer-tool';
-import { FileText, Loader2, UploadCloud } from 'lucide-react';
+import { FileText, Loader2, Trash2, UploadCloud, X } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 const formSchema = z.object({
-  documentDataUri: z.string().min(1, 'Please upload a document.'),
+  documentDataUris: z.array(z.string()).min(1, 'Please upload at least one document.'),
   length: z.enum(['Short', 'Medium', 'Long']),
   style: z.enum(['Bulleted List', 'Paragraph']),
 });
 
 type FormData = z.infer<typeof formSchema>;
+type FileInfo = { name: string; dataUri: string };
 
 export default function DocumentSummarizerTool() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<SummarizeDocumentOutput | null>(null);
-  const [fileName, setFileName] = useState<string | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<FileInfo[]>([]);
   const { toast } = useToast();
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      documentDataUri: '',
+      documentDataUris: [],
       length: 'Medium',
       style: 'Paragraph',
     },
   });
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 200 * 1024 * 1024) { // 200MB limit
-        toast({ variant: "destructive", title: "File too large", description: "Please upload a document smaller than 200MB."});
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = (loadEvent) => {
-        const dataUri = loadEvent.target?.result as string;
-        form.setValue('documentDataUri', dataUri);
-        setFileName(file.name);
-      };
-      reader.readAsDataURL(file);
+    const files = e.target.files;
+    if (files) {
+      const newFiles: FileInfo[] = [];
+      Array.from(files).forEach(file => {
+        if (file.size > 200 * 1024 * 1024) { // 200MB limit
+          toast({ variant: "destructive", title: "File too large", description: `"${file.name}" is larger than 200MB.`});
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = (loadEvent) => {
+          const dataUri = loadEvent.target?.result as string;
+          newFiles.push({ name: file.name, dataUri });
+          if (newFiles.length === files.length) {
+            const updatedFiles = [...selectedFiles, ...newFiles];
+            setSelectedFiles(updatedFiles);
+            form.setValue('documentDataUris', updatedFiles.map(f => f.dataUri));
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+      e.target.value = ''; // Reset input
     }
   };
+
+  const removeFile = (index: number) => {
+    const updatedFiles = selectedFiles.filter((_, i) => i !== index);
+    setSelectedFiles(updatedFiles);
+    form.setValue('documentDataUris', updatedFiles.map(f => f.dataUri));
+  };
+
 
   async function onSubmit(data: FormData) {
     setIsLoading(true);
@@ -100,42 +116,45 @@ export default function DocumentSummarizerTool() {
       </header>
       <Card>
         <CardHeader>
-          <CardTitle>Summarize a Document</CardTitle>
+          <CardTitle>Summarize Documents</CardTitle>
           <CardDescription>
-            Upload a document and choose your desired summary length and style.
+            Upload one or more documents and choose your desired summary length and style.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormItem>
-                <FormLabel>Document</FormLabel>
+                <FormLabel>Documents</FormLabel>
                 <FormControl>
-                  <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center">
-                    {fileName ? (
-                      <div className='flex flex-col items-center gap-2'>
-                        <FileText className="w-12 h-12 text-primary" />
-                        <p className='text-sm font-medium'>{fileName}</p>
-                         <Button variant="link" size="sm" asChild className='p-0 h-auto'>
-                           <label htmlFor="file-upload" className="cursor-pointer">Change file</label>
-                         </Button>
-                      </div>
-                    ) : (
-                      <>
-                        <UploadCloud className="w-12 h-12 text-muted-foreground" />
-                        <p className="mt-2 text-sm text-muted-foreground">
-                          <label htmlFor="file-upload" className="font-semibold text-primary cursor-pointer hover:underline">
-                            Click to upload
-                          </label>
-                           {' '}or drag and drop
-                        </p>
-                         <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 200MB</p>
-                      </>
-                    )}
-                    <Input id="file-upload" type="file" className="sr-only" onChange={handleFileChange} accept=".pdf,.doc,.docx,.txt"/>
+                  <div className="relative border-2 border-dashed border-muted rounded-lg p-6 flex flex-col items-center justify-center text-center min-h-[150px]">
+                    <UploadCloud className="w-12 h-12 text-muted-foreground" />
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      <label htmlFor="file-upload" className="font-semibold text-primary cursor-pointer hover:underline">
+                        Click to upload
+                      </label>
+                       {' '}or drag and drop
+                    </p>
+                     <p className="text-xs text-muted-foreground">PDF, DOCX, TXT up to 200MB each</p>
+                    <Input id="file-upload" type="file" multiple className="sr-only" onChange={handleFileChange} accept=".pdf,.doc,.docx,.txt"/>
                   </div>
                 </FormControl>
-                <FormMessage>{form.formState.errors.documentDataUri?.message}</FormMessage>
+                {selectedFiles.length > 0 && (
+                    <div className="space-y-2 mt-4">
+                        <p className="text-sm font-medium">Selected files:</p>
+                        <div className="flex flex-wrap gap-2">
+                        {selectedFiles.map((file, index) => (
+                            <Badge key={index} variant="secondary" className="pl-3 pr-1 py-1 text-sm">
+                                {file.name}
+                                <button type="button" onClick={() => removeFile(index)} className="ml-2 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2">
+                                    <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+                                </button>
+                            </Badge>
+                        ))}
+                        </div>
+                    </div>
+                )}
+                <FormMessage>{form.formState.errors.documentDataUris?.message}</FormMessage>
               </FormItem>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
