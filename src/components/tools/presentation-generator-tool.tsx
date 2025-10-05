@@ -647,7 +647,3 @@ Possible improvements, recommendations
     </div>
   );
 }
-
-    
-
-    
