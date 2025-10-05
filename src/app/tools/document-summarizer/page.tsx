@@ -32,7 +32,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { handleSummarizeDocumentAction } from '@/app/actions';
 import type { SummarizeDocumentOutput } from '@/ai/flows/document-summarizer-tool';
-import { FileText, Loader2, Trash2, UploadCloud, X } from 'lucide-react';
+import { Loader2, UploadCloud, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 const formSchema = z.object({
@@ -59,28 +59,39 @@ export default function DocumentSummarizerTool() {
     },
   });
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (files) {
-      const newFiles: FileInfo[] = [];
-      Array.from(files).forEach(file => {
+    if (!files || files.length === 0) return;
+
+    const filePromises = Array.from(files).map(file => {
+      return new Promise<FileInfo | null>((resolve, reject) => {
         if (file.size > 200 * 1024 * 1024) { // 200MB limit
           toast({ variant: "destructive", title: "File too large", description: `"${file.name}" is larger than 200MB.`});
+          resolve(null);
           return;
         }
         const reader = new FileReader();
         reader.onload = (loadEvent) => {
           const dataUri = loadEvent.target?.result as string;
-          newFiles.push({ name: file.name, dataUri });
-          if (newFiles.length === files.length) {
-            const updatedFiles = [...selectedFiles, ...newFiles];
-            setSelectedFiles(updatedFiles);
-            form.setValue('documentDataUris', updatedFiles.map(f => f.dataUri));
-          }
+          resolve({ name: file.name, dataUri });
         };
+        reader.onerror = reject;
         reader.readAsDataURL(file);
       });
-      e.target.value = ''; // Reset input
+    });
+
+    try {
+        const newFiles = (await Promise.all(filePromises)).filter((file): file is FileInfo => file !== null);
+        const updatedFiles = [...selectedFiles, ...newFiles];
+        setSelectedFiles(updatedFiles);
+        form.setValue('documentDataUris', updatedFiles.map(f => f.dataUri));
+    } catch (error) {
+        toast({ variant: "destructive", title: "Error reading files", description: "There was a problem processing your files."});
+    }
+
+    // Reset the input value to allow re-uploading the same file
+    if (e.target) {
+      e.target.value = '';
     }
   };
 
