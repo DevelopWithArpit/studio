@@ -26,7 +26,6 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { handleGeneratePresentationAction } from '@/app/actions';
 import type { GeneratePresentationOutput, GeneratePresentationInput } from '@/ai/flows/presentation-generator-tool';
@@ -637,7 +636,7 @@ Possible improvements, recommendations
             </Carousel>
           </CardContent>
           <CardFooter>
-            <Button onClick={handleDownload} disabled={isLoading}>
+            <Button onClick={handleDownload} disabled={!result}>
                 <Download className="mr-2 h-4 w-4"/>
                 Download Presentation
             </Button>

@@ -43,53 +43,58 @@ import {
 } from '@/ai/flows/career-path-suggester-tool';
 import {
     summarizeDocument,
-    type SummarizeDocumentInput,
 } from '@/ai/flows/document-summarizer-tool';
+import type { SummarizeDocumentInput } from '@/app/tools/document-summarizer/page';
 import {
     generatePresentation,
-    type GeneratePresentationInput,
 } from '@/ai/flows/presentation-generator-tool';
+import type { GeneratePresentationInput } from '@/ai/flows/presentation-generator-tool';
 import {
     generateLinkedInVisuals,
-    type GenerateLinkedInVisualsInput,
 } from '@/ai/flows/linkedin-visuals-generator-tool';
+import type { GenerateLinkedInVisualsInput } from '@/app/tools/linkedin-visuals-generator/page';
 import {
     removeWatermark,
-    type RemoveWatermarkInput,
 } from '@/ai/flows/watermark-remover-tool';
+import type { RemoveWatermarkInput } from '@/app/tools/watermark-remover/page';
 import {
     manipulateImageText,
-    type ManipulateImageTextInput,
 } from '@/ai/flows/image-text-manipulation-tool';
+import type { ManipulateImageTextInput } from '@/app/tools/image-text-manipulation/page';
 import {
     generatePortfolioWebsite,
     extractPortfolioDataFromText,
-    type GeneratePortfolioWebsiteInput,
 } from '@/ai/flows/portfolio-generator-tool';
+import type { GeneratePortfolioWebsiteInput } from '@/ai/flows/portfolio-generator-tool';
 import {
     humanizeText,
-    type HumanizeTextInput,
 } from '@/ai/flows/text-humanizer-tool';
+import type { HumanizeTextInput } from '@/app/tools/text-humanizer/page';
 import {
   generateAcademicDocument,
-  type GenerateAcademicDocumentInput,
 } from '@/ai/flows/thesis-generator-tool';
+import type { GenerateAcademicDocumentInput } from '@/app/tools/thesis-generator/page';
 import {
   generateProjectReport,
-  type GenerateProjectReportInput,
 } from '@/ai/flows/project-report-generator-tool';
+import type { GenerateProjectReportInput } from '@/app/tools/project-report/page';
 import { generateVideo } from '@/ai/flows/video-generator-tool';
-import type { GenerateVideoInput } from '@/ai/flows/video-generator-tool';
+import type { GenerateVideoInput } from '@/app/tools/video-generator/page';
 
 
 async function handleAction<T_Input, T_Output>(
   input: T_Input,
-  flow: (input: T_Input) => Promise<T_Output>
-) {
+  flow: (input: T_Input) => Promise<T_Output>,
+  retries = 1
+): Promise<{ success: boolean; data?: T_Output, error?: string }> {
   try {
     const result = await flow(input);
     return { success: true, data: result };
   } catch (e) {
+     if (retries > 0) {
+      console.warn(`Action failed, retrying... (${retries} retries left)`);
+      return handleAction(input, flow, retries - 1);
+    }
     const errorMessage =
       e instanceof Error ? e.message : 'An unexpected error occurred.';
     return { success: false, error: errorMessage };
@@ -141,7 +146,7 @@ export async function handleSummarizeDocumentAction(input: SummarizeDocumentInpu
 }
 
 export async function handleGeneratePresentationAction(input: GeneratePresentationInput) {
-    return handleAction(input, generatePresentation);
+    return handleAction(input, generatePresentation, 1);
 }
 
 export async function handleGenerateLinkedInVisualsAction(input: GenerateLinkedInVisualsInput) {

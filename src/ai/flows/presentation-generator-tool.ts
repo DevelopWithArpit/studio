@@ -29,7 +29,7 @@ const getCompanyLogoTool = ai.defineTool(
     }
 );
 
-const GeneratePresentationInputSchema = z.object({
+export const GeneratePresentationInputSchema = z.object({
   topic: z.string().describe('The topic or title of the presentation.'),
   presenterName: z.string().optional().describe("The name of the presenter."),
   rollNumber: z.string().optional().describe("The presenter's roll number."),
@@ -43,23 +43,23 @@ const GeneratePresentationInputSchema = z.object({
 });
 export type GeneratePresentationInput = z.infer<typeof GeneratePresentationInputSchema>;
 
-const SlideSchema = z.object({
+export const SlideSchema = z.object({
   title: z.string().describe('The title of the slide.'),
   content: z.array(z.string()).describe('An array of exactly 4 short bullet points for the slide content. Each bullet point must have around 8 words. This can be an empty array for title-only slides.'),
-  imagePrompt: z.string().describe('A text prompt to generate a relevant image for this slide. Can be an empty string if no image is needed.'),
+  imagePrompt: z.string().describe('A text prompt to generate a relevant image for this slide. Can be an empty string if no image is needed. CRITICAL: Any text in generated images MUST be spelled correctly.'),
   logoUrl: z.string().optional().describe('The URL of a company logo to display on the slide, fetched using the getCompanyLogoTool.'),
   slideLayout: z.enum(['title', 'contentWithImage', 'titleOnly']).describe("The best layout for this slide. Use 'title' for the main title slide, 'contentWithImage' for slides with bullet points and a visual, and 'titleOnly' for section headers or simple, impactful statements."),
   imageUrl: z.string().optional().describe('The data URI of the generated image for the slide.'),
 });
 
-const DesignSchema = z.object({
+export const DesignSchema = z.object({
   backgroundColor: z.string().describe('A hex color code for the slide background (e.g., "#0B192E").'),
   textColor: z.string().describe('A hex color code for the main text (e.g., "#E6F1FF").'),
   accentColor: z.string().describe('A hex color code for titles and accents (e.g., "#64FFDA").'),
   backgroundPrompt: z.string().describe("A prompt for an AI image generator to create a subtle, professional background image related to the presentation topic. It should be abstract and not distracting."),
 });
 
-const PresentationOutlineSchema = z.object({
+export const PresentationOutlineSchema = z.object({
   title: z.string().describe('The main title of the presentation.'),
   slides: z.array(SlideSchema).describe('An array of slide objects.'),
   design: DesignSchema.describe('A design theme for the presentation, inspired by the topic.'),
@@ -142,7 +142,6 @@ const generatePresentationFlow = ai.defineFlow(
       return `${styledPrompt}. CRITICAL: If you include any text or words in the image, you MUST ensure they are spelled correctly.`;
     };
     
-    // Create a map of slide index to its image prompt.
     const slideImagePrompts = new Map<number, string>();
     outline.slides.forEach((slide, index) => {
         if (slide.imagePrompt) {
@@ -152,7 +151,6 @@ const generatePresentationFlow = ai.defineFlow(
 
     const imageGenerationPromises = [];
 
-    // Background Image Promise (always at index 0)
     if (outline.design.backgroundPrompt) {
         imageGenerationPromises.push(
             ai.generate({
@@ -164,7 +162,6 @@ const generatePresentationFlow = ai.defineFlow(
         imageGenerationPromises.push(Promise.resolve({ media: { url: '' } }));
     }
 
-    // Slide Image Promises
     for (const prompt of slideImagePrompts.values()) {
         imageGenerationPromises.push(
             ai.generate({
@@ -176,7 +173,6 @@ const generatePresentationFlow = ai.defineFlow(
 
     const results = await Promise.allSettled(imageGenerationPromises);
 
-    // Process background image result (from index 0)
     const backgroundResult = results[0];
     if (backgroundResult.status === 'fulfilled' && backgroundResult.value.media?.url) {
         outline.backgroundImageUrl = backgroundResult.value.media.url;
@@ -185,7 +181,6 @@ const generatePresentationFlow = ai.defineFlow(
         outline.backgroundImageUrl = ''; 
     }
     
-    // Process slide image results
     const slideImageResults = results.slice(1);
     const slidePromptKeys = Array.from(slideImagePrompts.keys());
 
