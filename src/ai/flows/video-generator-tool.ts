@@ -4,16 +4,13 @@
 /**
  * @fileOverview A tool to generate video from a text prompt.
  *
- * - generateVideo - A function that generates a video from a text prompt.
- * - GenerateVideoInput - The input type for the generateVideo function.
- * - GenerateVideoOutput - The return type for the generateVideo function.
+ * - generateVideo - Kicks off the video generation process.
+ * - checkVideoStatus - Checks the status of an ongoing video generation operation.
  */
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { googleAI } from '@genkit-ai/googleai';
-import * as fs from 'fs';
-import { Readable } from 'stream';
 import { MediaPart } from 'genkit';
 
 const GenerateVideoInputSchema = z.object({
@@ -23,17 +20,24 @@ const GenerateVideoInputSchema = z.object({
 export type GenerateVideoInput = z.infer<typeof GenerateVideoInputSchema>;
 
 const GenerateVideoOutputSchema = z.object({
-  videoUrl: z.string().describe('The data URI of the generated video.'),
+  operationName: z.string().describe('The name of the long-running operation.'),
 });
 export type GenerateVideoOutput = z.infer<typeof GenerateVideoOutputSchema>;
 
-export async function generateVideo(input: GenerateVideoInput): Promise<GenerateVideoOutput> {
-  return generateVideoFlow(input);
-}
+const CheckVideoStatusInputSchema = z.object({
+    operationName: z.string(),
+});
+
+const CheckVideoStatusOutputSchema = z.object({
+    done: z.boolean(),
+    videoUrl: z.string().optional(),
+    error: z.string().optional(),
+});
+export type CheckVideoStatusOutput = z.infer<typeof CheckVideoStatusOutputSchema>;
+
 
 async function downloadVideo(video: MediaPart): Promise<Buffer> {
     const fetch = (await import('node-fetch')).default;
-    // Add API key before fetching the video.
     const videoDownloadResponse = await fetch(
       `${video.media!.url}&key=${process.env.GEMINI_API_KEY}`
     );
@@ -51,6 +55,15 @@ async function downloadVideo(video: MediaPart): Promise<Buffer> {
     }
     return Buffer.concat(chunks);
 }
+
+export async function generateVideo(input: GenerateVideoInput): Promise<GenerateVideoOutput> {
+  return generateVideoFlow(input);
+}
+
+export async function checkVideoStatus(input: {operationName: string}): Promise<CheckVideoStatusOutput> {
+    return checkVideoStatusFlow(input);
+}
+
 
 const generateVideoFlow = ai.defineFlow(
   {
@@ -71,26 +84,34 @@ const generateVideoFlow = ai.defineFlow(
       if (!operation) {
         throw new Error('Expected the model to return an operation');
       }
-  
-      // Wait until the operation completes.
-      while (!operation.done) {
-        operation = await ai.checkOperation(operation);
-        // Sleep for 5 seconds before checking again.
-        await new Promise((resolve) => setTimeout(resolve, 5000));
-      }
-  
-      if (operation.error) {
-        throw new Error('failed to generate video: ' + operation.error.message);
-      }
-  
-      const video = operation.output?.message?.content.find((p) => !!p.media);
-      if (!video) {
-        throw new Error('Failed to find the generated video');
-      }
-
-      const videoData = await downloadVideo(video);
-      const videoDataUri = `data:video/mp4;base64,${videoData.toString('base64')}`;
-
-      return { videoUrl: videoDataUri };
+      
+      return { operationName: operation.name };
   }
 );
+
+
+const checkVideoStatusFlow = ai.defineFlow({
+    name: 'checkVideoStatusFlow',
+    inputSchema: CheckVideoStatusInputSchema,
+    outputSchema: CheckVideoStatusOutputSchema,
+}, async ({ operationName }) => {
+    let operation = await ai.checkOperation({ name: operationName });
+    
+    if (!operation.done) {
+        return { done: false };
+    }
+
+    if (operation.error) {
+        return { done: true, error: operation.error.message };
+    }
+
+    const video = operation.output?.message?.content.find((p) => !!p.media);
+    if (!video) {
+        return { done: true, error: 'Failed to find the generated video in the operation result.' };
+    }
+
+    const videoData = await downloadVideo(video);
+    const videoDataUri = `data:video/mp4;base64,${videoData.toString('base64')}`;
+
+    return { done: true, videoUrl: videoDataUri };
+});

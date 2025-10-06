@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -21,13 +21,12 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { handleGenerateVideoAction } from '@/app/actions';
-import type { GenerateVideoOutput } from '@/ai/flows/video-generator-tool';
+import { handleGenerateVideoAction, handleCheckVideoStatusAction } from '@/app/actions';
 import { Loader2 } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { Slider } from '@/components/ui/slider';
+import { Progress } from '@/components/ui/progress';
 
 const formSchema = z.object({
   prompt: z.string().min(10, 'Please enter a prompt of at least 10 characters.'),
@@ -38,8 +37,11 @@ type FormData = z.infer<typeof formSchema>;
 
 export default function VideoGeneratorTool() {
   const [isLoading, setIsLoading] = useState(false);
-  const [result, setResult] = useState<GenerateVideoOutput | null>(null);
+  const [polling, setPolling] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const { toast } = useToast();
+  const pollingInterval = useRef<NodeJS.Timeout | null>(null);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -51,22 +53,78 @@ export default function VideoGeneratorTool() {
 
   const duration = form.watch('durationSeconds');
 
-  async function onSubmit(data: FormData) {
-    setIsLoading(true);
-    setResult(null);
-    const response = await handleGenerateVideoAction(data);
-    setIsLoading(false);
+  const stopPolling = () => {
+    if (pollingInterval.current) {
+      clearInterval(pollingInterval.current);
+      pollingInterval.current = null;
+    }
+    setPolling(false);
+    setProgress(100);
+  };
+
+  const pollStatus = async (operationName: string) => {
+    const response = await handleCheckVideoStatusAction({ operationName });
 
     if (response.success && response.data) {
-      setResult(response.data);
+        if (response.data.done) {
+            stopPolling();
+            setIsLoading(false);
+            if (response.data.videoUrl) {
+                setVideoUrl(response.data.videoUrl);
+                toast({ title: 'Video Generated!', description: 'Your video is ready.' });
+            } else {
+                toast({ variant: 'destructive', title: 'Error Generating Video', description: response.data.error || 'The operation finished but no video was found.' });
+            }
+        } else {
+           // Fake progress bar
+           setProgress(p => Math.min(p + 5, 95));
+        }
     } else {
+        stopPolling();
+        setIsLoading(false);
+        toast({ variant: 'destructive', title: 'Error Polling Status', description: response.error });
+    }
+  };
+
+
+  async function onSubmit(data: FormData) {
+    setIsLoading(true);
+    setVideoUrl(null);
+    setProgress(0);
+    setPolling(false);
+    if(pollingInterval.current) clearInterval(pollingInterval.current);
+
+
+    const response = await handleGenerateVideoAction(data);
+
+    if (response.success && response.data?.operationName) {
+      const { operationName } = response.data;
+      setPolling(true);
+      setProgress(5);
+      toast({ title: 'Video Generation Started', description: 'This may take a minute or two. Please wait.' });
+      
+      pollingInterval.current = setInterval(() => {
+        pollStatus(operationName);
+      }, 5000);
+
+    } else {
+      setIsLoading(false);
       toast({
         variant: 'destructive',
-        title: 'Error generating video',
+        title: 'Error starting video generation',
         description: response.error,
       });
     }
   }
+
+  useEffect(() => {
+    // Cleanup on unmount
+    return () => {
+      if (pollingInterval.current) {
+        clearInterval(pollingInterval.current);
+      }
+    };
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -124,27 +182,28 @@ export default function VideoGeneratorTool() {
               />
               <Button type="submit" disabled={isLoading}>
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isLoading ? 'Generating Video...' : 'Generate Video'}
+                {isLoading ? 'Processing...' : 'Generate Video'}
               </Button>
             </form>
           </Form>
         </CardContent>
       </Card>
 
-      {(isLoading || result) && (
+      {(isLoading || videoUrl) && (
         <Card>
           <CardHeader>
             <CardTitle>Generated Video</CardTitle>
           </CardHeader>
           <CardContent className="flex items-center justify-center p-6">
-            {isLoading && !result ? (
-              <div className="w-full aspect-video flex flex-col items-center justify-center bg-muted rounded-lg">
+            {isLoading ? (
+              <div className="w-full aspect-video flex flex-col items-center justify-center bg-muted rounded-lg space-y-4">
                  <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                 <p className="text-muted-foreground mt-4">Generating video, this may take a minute...</p>
+                 <p className="text-muted-foreground">Generating video, this may take a minute...</p>
+                 {polling &&  <Progress value={progress} className="w-3/4" />}
               </div>
-            ) : result ? (
+            ) : videoUrl ? (
               <video
-                src={result.videoUrl}
+                src={videoUrl}
                 controls
                 className="rounded-lg border w-full"
               />
@@ -155,3 +214,4 @@ export default function VideoGeneratorTool() {
     </div>
   );
 }
+

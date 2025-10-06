@@ -23,20 +23,21 @@ import {
 } from '@/ai/flows/interview-question-generator-tool';
 import {
   getResumeFeedback,
-  type GetResumeFeedbackInput,
 } from '@/ai/flows/resume-feedback-tool';
+import type { GetResumeFeedbackInput } from '@/app/tools/resume-feedback/page';
 import {
   generateDiagram,
   type GenerateDiagramInput,
 } from '@/ai/flows/diagram-generator-tool';
 import {
     textToSpeech,
-    type TextToSpeechInput,
 } from '@/ai/flows/text-to-speech-tool';
+import type { TextToSpeechInput } from '@/app/tools/text-to-speech/page';
 import {
     generateCoverLetter,
-    type GenerateCoverLetterInput,
 } from '@/ai/flows/cover-letter-assistant-tool';
+import type { GenerateCoverLetterInput } from '@/app/tools/cover-letter-assistant/page';
+
 import {
     suggestCareerPaths,
     type SuggestCareerPathsInput,
@@ -78,7 +79,7 @@ import {
   generateProjectReport,
 } from '@/ai/flows/project-report-generator-tool';
 import type { GenerateProjectReportInput } from '@/app/tools/project-report/page';
-import { generateVideo } from '@/ai/flows/video-generator-tool';
+import { generateVideo, checkVideoStatus } from '@/ai/flows/video-generator-tool';
 import type { GenerateVideoInput } from '@/app/tools/video-generator/page';
 
 
@@ -175,6 +176,10 @@ export async function handleGenerateProjectReportAction(input: GenerateProjectRe
 
 export async function handleGenerateVideoAction(input: GenerateVideoInput) {
   return handleAction(input, generateVideo);
+}
+
+export async function handleCheckVideoStatusAction(input: {operationName: string}) {
+  return handleAction(input, checkVideoStatus);
 }
 
 
