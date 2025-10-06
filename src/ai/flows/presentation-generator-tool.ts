@@ -29,7 +29,7 @@ const getCompanyLogoTool = ai.defineTool(
     }
 );
 
-export const GeneratePresentationInputSchema = z.object({
+const GeneratePresentationInputSchema = z.object({
   topic: z.string().describe('The topic or title of the presentation.'),
   presenterName: z.string().optional().describe("The name of the presenter."),
   rollNumber: z.string().optional().describe("The presenter's roll number."),
@@ -43,7 +43,7 @@ export const GeneratePresentationInputSchema = z.object({
 });
 export type GeneratePresentationInput = z.infer<typeof GeneratePresentationInputSchema>;
 
-export const SlideSchema = z.object({
+const SlideSchema = z.object({
   title: z.string().describe('The title of the slide.'),
   content: z.array(z.string()).describe('An array of exactly 4 short bullet points for the slide content. Each bullet point must have around 8 words. This can be an empty array for title-only slides.'),
   imagePrompt: z.string().describe('A text prompt to generate a relevant image for this slide. Can be an empty string if no image is needed. CRITICAL: Any text in generated images MUST be spelled correctly.'),
@@ -52,14 +52,14 @@ export const SlideSchema = z.object({
   imageUrl: z.string().optional().describe('The data URI of the generated image for the slide.'),
 });
 
-export const DesignSchema = z.object({
+const DesignSchema = z.object({
   backgroundColor: z.string().describe('A hex color code for the slide background (e.g., "#0B192E").'),
   textColor: z.string().describe('A hex color code for the main text (e.g., "#E6F1FF").'),
   accentColor: z.string().describe('A hex color code for titles and accents (e.g., "#64FFDA").'),
   backgroundPrompt: z.string().describe("A prompt for an AI image generator to create a subtle, professional background image related to the presentation topic. It should be abstract and not distracting."),
 });
 
-export const PresentationOutlineSchema = z.object({
+const PresentationOutlineSchema = z.object({
   title: z.string().describe('The main title of the presentation.'),
   slides: z.array(SlideSchema).describe('An array of slide objects.'),
   design: DesignSchema.describe('A design theme for the presentation, inspired by the topic.'),
@@ -199,3 +199,5 @@ const generatePresentationFlow = ai.defineFlow(
     return outline;
   }
 );
+
+    

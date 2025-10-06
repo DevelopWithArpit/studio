@@ -7,8 +7,8 @@ import {
 } from '@/ai/flows/ai-explanation-tool';
 import {
   smartSearch,
-  type SmartSearchInput,
 } from '@/ai/flows/smart-search-tool';
+import type { SmartSearchInput } from '@/app/tools/smart-search/page';
 import {
   generateCode,
   type GenerateCodeInput,
@@ -48,7 +48,7 @@ import type { SummarizeDocumentInput } from '@/app/tools/document-summarizer/pag
 import {
     generatePresentation,
 } from '@/ai/flows/presentation-generator-tool';
-import type { GeneratePresentationInput } from '@/ai/flows/presentation-generator-tool';
+import type { GeneratePresentationInput } from '@/components/tools/presentation-generator-tool';
 import {
     generateLinkedInVisuals,
 } from '@/ai/flows/linkedin-visuals-generator-tool';
@@ -204,3 +204,5 @@ export async function handleGeneratePortfolioWebsiteAction(input: GeneratePortfo
         return { success: false, error: errorMessage };
     }
 }
+
+    

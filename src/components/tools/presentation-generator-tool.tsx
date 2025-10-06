@@ -28,7 +28,6 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { handleGeneratePresentationAction } from '@/app/actions';
-import type { GeneratePresentationOutput, GeneratePresentationInput } from '@/ai/flows/presentation-generator-tool';
 import {
   Carousel,
   CarouselContent,
@@ -65,6 +64,33 @@ const formSchema = z.object({
     message: "Please provide a custom structure with at least 10 characters.",
     path: ['customStructure'],
 });
+
+export type GeneratePresentationInput = z.infer<typeof formSchema>;
+
+const SlideSchema = z.object({
+  title: z.string(),
+  content: z.array(z.string()),
+  imagePrompt: z.string(),
+  logoUrl: z.string().optional(),
+  slideLayout: z.enum(['title', 'contentWithImage', 'titleOnly']),
+  imageUrl: z.string().optional(),
+});
+
+const DesignSchema = z.object({
+  backgroundColor: z.string(),
+  textColor: z.string(),
+  accentColor: z.string(),
+  backgroundPrompt: z.string(),
+});
+
+const PresentationOutlineSchema = z.object({
+  title: z.string(),
+  slides: z.array(SlideSchema),
+  design: DesignSchema,
+  backgroundImageUrl: z.string().optional(),
+});
+
+export type GeneratePresentationOutput = z.infer<typeof PresentationOutlineSchema>;
 
 type FormData = z.infer<typeof formSchema>;
 
@@ -646,3 +672,5 @@ Possible improvements, recommendations
     </div>
   );
 }
+
+    
