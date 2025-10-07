@@ -96,8 +96,8 @@ async function handleAction<T_Input, T_Output>(
       console.warn(`Action failed, retrying... (${retries} retries left)`);
       return handleAction(input, flow, retries - 1);
     }
-    const errorMessage =
-      e instanceof Error ? e.message : 'An unexpected error occurred.';
+    // Ensure the error is always a string to prevent React rendering errors.
+    const errorMessage = e instanceof Error ? e.message : String(e);
     return { success: false, error: errorMessage };
   }
 }
