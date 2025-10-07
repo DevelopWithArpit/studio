@@ -100,7 +100,7 @@ const generateProjectReportFlow = ai.defineFlow(
 
     const imageResults = await Promise.allSettled(imageGenerationPromises);
 
-    // 4. Attach the generated image URLs back to their corresponding sections in the original outline.
+    // 4. Attach the generated image URLs back to their corresponding sections.
     imageResults.forEach((result, index) => {
       const section = allSections[index];
       if (result.status === 'fulfilled' && result.value?.media?.url) {
@@ -110,8 +110,8 @@ const generateProjectReportFlow = ai.defineFlow(
         section.imageUrl = ''; // Set to empty string on failure
       }
     });
-
-    // 5. Return the fully populated outline.
+    
+    // 5. Return the fully populated outline. The `allSections` array is an array of references to the objects in the outline, so the outline is already modified.
     return outline;
   }
 );
