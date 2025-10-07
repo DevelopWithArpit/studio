@@ -336,39 +336,41 @@ export default function ProjectReportGeneratorPage() {
                   ...result.chapters,
                   result.conclusion,
                 ].map((item, index) => (
-                  <CarouselItem key={index}>
-                    <div className="p-1">
-                      <Card className="overflow-hidden">
-                        <div className="grid grid-cols-1 md:grid-cols-2 h-[500px]">
-                          <div className="p-6 flex flex-col overflow-y-auto">
-                            <Badge variant="outline" className="w-fit mb-4">
-                              Page {index + 1}
-                            </Badge>
-                            <h3 className="text-2xl font-bold font-headline mb-4">{item.title}</h3>
-                            <div className="prose prose-sm prose-invert max-w-none flex-1">
-                              <p className="whitespace-pre-wrap">{cleanContent(item.content)}</p>
+                  item && (
+                    <CarouselItem key={index}>
+                      <div className="p-1">
+                        <Card className="overflow-hidden">
+                          <div className="grid grid-cols-1 md:grid-cols-2 h-[500px]">
+                            <div className="p-6 flex flex-col overflow-y-auto">
+                              <Badge variant="outline" className="w-fit mb-4">
+                                Page {index + 1}
+                              </Badge>
+                              <h3 className="text-2xl font-bold font-headline mb-4">{item.title}</h3>
+                              <div className="prose prose-sm prose-invert max-w-none flex-1">
+                                <p className="whitespace-pre-wrap">{cleanContent(item.content)}</p>
+                              </div>
+                            </div>
+                            <div className="bg-muted flex items-center justify-center overflow-hidden relative">
+                              {item.imageUrl ? (
+                                <Image
+                                  src={item.imageUrl}
+                                  alt={`Illustration for ${item.title}`}
+                                  layout="fill"
+                                  objectFit="cover"
+                                  className="w-full h-full"
+                                />
+                              ) : (
+                                <div className="flex flex-col items-center justify-center text-muted-foreground">
+                                  <ImageIconLucide className="w-16 h-16" />
+                                  <p className="mt-2 text-sm font-semibold">No Image</p>
+                                </div>
+                              )}
                             </div>
                           </div>
-                          <div className="bg-muted flex items-center justify-center overflow-hidden relative">
-                            {item.imageUrl ? (
-                              <Image
-                                src={item.imageUrl}
-                                alt={`Illustration for ${item.title}`}
-                                layout="fill"
-                                objectFit="cover"
-                                className="w-full h-full"
-                              />
-                            ) : (
-                              <div className="flex flex-col items-center justify-center text-muted-foreground">
-                                <ImageIconLucide className="w-16 h-16" />
-                                <p className="mt-2 text-sm font-semibold">No Image</p>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </Card>
-                    </div>
-                  </CarouselItem>
+                        </Card>
+                      </div>
+                    </CarouselItem>
+                  )
                 ))}
               </CarouselContent>
               <CarouselPrevious className="ml-12" />
@@ -390,5 +392,3 @@ export default function ProjectReportGeneratorPage() {
     </div>
   );
 }
-
-    
