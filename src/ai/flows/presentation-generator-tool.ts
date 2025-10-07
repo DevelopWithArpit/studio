@@ -5,8 +5,6 @@
  * @fileOverview Generates a presentation outline with titles, content, and images.
  *
  * - generatePresentation - A function that creates a complete presentation.
- * - GeneratePresentationInput - The input type for the function.
- * - GeneratePresentationOutput - The return type for a single slide's image.
  */
 
 import { ai } from '@/ai/genkit';
@@ -29,24 +27,27 @@ const getCompanyLogoTool = ai.defineTool(
     }
 );
 
+// Client-side accessible types are now in the component file.
+// We only define schemas for the flow's internal use here.
 const GeneratePresentationInputSchema = z.object({
-  topic: z.string().describe('The topic or title of the presentation.'),
-  presenterName: z.string().optional().describe("The name of the presenter."),
-  rollNumber: z.string().optional().describe("The presenter's roll number."),
-  department: z.string().optional().describe("The presenter's department."),
-  numSlides: z.number().int().min(2).max(20).describe('The number of slides to generate (for general topics).'),
-  contentType: z.enum(['general', 'projectProposal', 'pitchDeck', 'custom']).default('general').describe('The type of content to generate.'),
-  customStructure: z.string().optional().describe("A user-defined structure for the presentation, as a string of slide titles, potentially with notes for each."),
-  imageStyle: z.string().optional().describe("An optional style for the images (e.g., 'photorealistic', 'cartoon')."),
-  language: z.string().optional().describe("The language for the presentation content (e.g., 'English', 'Hindi', 'Marathi')."),
-  style: z.enum(['Default', 'Tech Pitch', 'Creative']).default('Default').describe('The visual design and narrative style of the presentation.'),
+  topic: z.string(),
+  presenterName: z.string().optional(),
+  rollNumber: z.string().optional(),
+  department: z.string().optional(),
+  numSlides: z.number().int().min(2).max(20),
+  contentType: z.enum(['general', 'projectProposal', 'pitchDeck', 'custom']),
+  customStructure: z.string().optional(),
+  imageStyle: z.string().optional(),
+  language: z.string().optional(),
+  style: z.enum(['Default', 'Tech Pitch', 'Creative']),
 });
 export type GeneratePresentationInput = z.infer<typeof GeneratePresentationInputSchema>;
+
 
 const SlideSchema = z.object({
   title: z.string().describe('The title of the slide.'),
   content: z.array(z.string()).describe('An array of exactly 4 short bullet points for the slide content. Each bullet point must have around 8 words. This can be an empty array for title-only slides.'),
-  imagePrompt: z.string().describe('A text prompt to generate a relevant image for this slide. Can be an empty string if no image is needed. CRITICAL: Any text in generated images MUST be spelled correctly.'),
+  imagePrompt: z.string().describe('A text prompt to generate a relevant image for this slide. Can be an empty string if no image is needed. This prompt should ONLY describe the visual content of the image.'),
   logoUrl: z.string().optional().describe('The URL of a company logo to display on the slide, fetched using the getCompanyLogoTool.'),
   slideLayout: z.enum(['title', 'contentWithImage', 'titleOnly']).describe("The best layout for this slide. Use 'title' for the main title slide, 'contentWithImage' for slides with bullet points and a visual, and 'titleOnly' for section headers or simple, impactful statements."),
   imageUrl: z.string().optional().describe('The data URI of the generated image for the slide.'),
@@ -66,6 +67,7 @@ const PresentationOutlineSchema = z.object({
   backgroundImageUrl: z.string().optional().describe('The data URI of the generated background image for the presentation.'),
 });
 export type GeneratePresentationOutput = z.infer<typeof PresentationOutlineSchema>;
+
 
 export async function generatePresentation(input: GeneratePresentationInput): Promise<GeneratePresentationOutput> {
   return generatePresentationFlow(input);
@@ -98,7 +100,7 @@ const outlinePrompt = ai.definePrompt({
 **Content Generation:**
 - The tone must be professional, authoritative, and clear. Avoid jargon.
 - If a slide mentions a company, you MUST use the \`getCompanyLogoTool\` to include the company's logo URL in the 'logoUrl' field.
-- For each slide, you MUST provide: a title, content, an English image prompt, the slide layout, and a logoUrl if applicable. CRITICAL: Any text in generated images MUST be spelled correctly.
+- For each slide, you MUST provide: a title, content, an English image prompt, the slide layout, and a logoUrl if applicable. The image prompt should ONLY describe the visual content.
 
 **Structure Generation Instructions:**
 - **The first slide must always be the main title slide with the layout 'title'.**
@@ -199,5 +201,3 @@ const generatePresentationFlow = ai.defineFlow(
     return outline;
   }
 );
-
-    
