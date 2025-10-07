@@ -41,8 +41,6 @@ const GeneratePresentationInputSchema = z.object({
   language: z.string().optional(),
   style: z.enum(['Default', 'Tech Pitch', 'Creative']),
 });
-export type GeneratePresentationInput = z.infer<typeof GeneratePresentationInputSchema>;
-
 
 const SlideSchema = z.object({
   title: z.string().describe('The title of the slide.'),
@@ -69,7 +67,7 @@ const PresentationOutlineSchema = z.object({
 export type GeneratePresentationOutput = z.infer<typeof PresentationOutlineSchema>;
 
 
-export async function generatePresentation(input: GeneratePresentationInput): Promise<GeneratePresentationOutput> {
+export async function generatePresentation(input: z.infer<typeof GeneratePresentationInputSchema>): Promise<GeneratePresentationOutput> {
   return generatePresentationFlow(input);
 }
 

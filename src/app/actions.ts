@@ -3,84 +3,84 @@
 
 import {
   explainTopic,
-  type ExplainTopicInput,
 } from '@/ai/flows/ai-explanation-tool';
 import {
   smartSearch,
 } from '@/ai/flows/smart-search-tool';
-import type { SmartSearchInput } from '@/app/tools/smart-search/page';
 import {
   generateCode,
-  type GenerateCodeInput,
 } from '@/ai/flows/code-generator-tool';
 import {
   analyzeCode,
-  type AnalyzeCodeInput,
 } from '@/ai/flows/code-analyzer-tool';
 import {
   generateInterviewQuestions,
-  type GenerateInterviewQuestionsInput,
 } from '@/ai/flows/interview-question-generator-tool';
 import {
   getResumeFeedback,
 } from '@/ai/flows/resume-feedback-tool';
-import type { GetResumeFeedbackInput } from '@/app/tools/resume-feedback/page';
 import {
   generateDiagram,
-  type GenerateDiagramInput,
 } from '@/ai/flows/diagram-generator-tool';
 import {
     textToSpeech,
 } from '@/ai/flows/text-to-speech-tool';
-import type { TextToSpeechInput } from '@/app/tools/text-to-speech/page';
 import {
     generateCoverLetter,
 } from '@/ai/flows/cover-letter-assistant-tool';
-import type { GenerateCoverLetterInput } from '@/app/tools/cover-letter-assistant/page';
 
 import {
     suggestCareerPaths,
-    type SuggestCareerPathsInput,
 } from '@/ai/flows/career-path-suggester-tool';
 import {
     summarizeDocument,
 } from '@/ai/flows/document-summarizer-tool';
-import type { SummarizeDocumentInput } from '@/app/tools/document-summarizer/page';
 import {
     generatePresentation,
 } from '@/ai/flows/presentation-generator-tool';
-import type { GeneratePresentationInput } from '@/components/tools/presentation-generator-tool';
 import {
     generateLinkedInVisuals,
 } from '@/ai/flows/linkedin-visuals-generator-tool';
-import type { GenerateLinkedInVisualsInput } from '@/app/tools/linkedin-visuals-generator/page';
 import {
     removeWatermark,
 } from '@/ai/flows/watermark-remover-tool';
-import type { RemoveWatermarkInput } from '@/app/tools/watermark-remover/page';
 import {
     manipulateImageText,
 } from '@/ai/flows/image-text-manipulation-tool';
-import type { ManipulateImageTextInput } from '@/app/tools/image-text-manipulation/page';
 import {
     generatePortfolioWebsite,
     extractPortfolioDataFromText,
 } from '@/ai/flows/portfolio-generator-tool';
-import type { GeneratePortfolioWebsiteInput } from '@/ai/flows/portfolio-generator-tool';
 import {
     humanizeText,
 } from '@/ai/flows/text-humanizer-tool';
-import type { HumanizeTextInput } from '@/app/tools/text-humanizer/page';
 import {
   generateAcademicDocument,
 } from '@/ai/flows/thesis-generator-tool';
-import type { GenerateAcademicDocumentInput } from '@/app/tools/thesis-generator/page';
 import {
   generateProjectReport,
 } from '@/ai/flows/project-report-generator-tool';
-import type { GenerateProjectReportInput } from '@/app/tools/project-report/page';
 import { generateVideo, checkVideoStatus } from '@/ai/flows/video-generator-tool';
-import type { GenerateVideoInput } from '@/app/tools/video-generator/page';
+import type { GenerateVideoInput } from '@/ai/flows/video-generator-tool';
+import type { GenerateProjectReportInput } from '@/app/tools/project-report/page';
+import type { GenerateAcademicDocumentInput } from '@/app/tools/thesis-generator/page';
+import type { HumanizeTextInput } from '@/app/tools/text-humanizer/page';
+import type { GeneratePortfolioWebsiteInput } from '@/ai/flows/portfolio-generator-tool';
+import type { ManipulateImageTextInput } from '@/app/tools/image-text-manipulation/page';
+import type { RemoveWatermarkInput } from '@/app/tools/watermark-remover/page';
+import type { GenerateLinkedInVisualsInput } from '@/app/tools/linkedin-visuals-generator/page';
+import type { GeneratePresentationInput } from '@/components/tools/presentation-generator-tool';
+import type { SummarizeDocumentInput } from '@/app/tools/document-summarizer/page';
+import type { SuggestCareerPathsInput } from '@/ai/flows/career-path-suggester-tool';
+import type { GenerateCoverLetterInput } from '@/app/tools/cover-letter-assistant/page';
+import type { TextToSpeechInput } from '@/app/tools/text-to-speech/page';
+import type { GenerateDiagramInput } from '@/ai/flows/diagram-generator-tool';
+import type { GetResumeFeedbackInput } from '@/app/tools/resume-feedback/page';
+import type { GenerateInterviewQuestionsInput } from '@/ai/flows/interview-question-generator-tool';
+import type { AnalyzeCodeInput } from '@/ai/flows/code-analyzer-tool';
+import type { GenerateCodeInput } from '@/ai/flows/code-generator-tool';
+import type { SmartSearchInput } from '@/app/tools/smart-search/page';
+import type { ExplainTopicInput } from '@/ai/flows/ai-explanation-tool';
 
 
 async function handleAction<T_Input, T_Output>(
@@ -209,5 +209,3 @@ export async function handleGeneratePortfolioWebsiteAction(input: GeneratePortfo
         return { success: false, error: errorMessage };
     }
 }
-
-    
