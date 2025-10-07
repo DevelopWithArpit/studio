@@ -135,58 +135,34 @@ const generatePresentationFlow = ai.defineFlow(
       return `${styledPrompt}. CRITICAL: If you include any text or words in the image, you MUST ensure they are spelled correctly.`;
     };
     
-    const slideImagePrompts = new Map<number, string>();
-    outline.slides.forEach((slide, index) => {
-        if (slide.imagePrompt) {
-            slideImagePrompts.set(index, slide.imagePrompt);
+    const sectionsWithPrompts = [
+        ...outline.slides,
+        { imagePrompt: outline.design.backgroundPrompt, imageUrl: '' } // Add background prompt as a section
+    ].filter(section => section && section.imagePrompt);
+
+    const imageGenerationPromises = sectionsWithPrompts.map(section => 
+        ai.generate({
+            model: 'googleai/imagen-4.0-ultra-generate-001',
+            prompt: applyStyle(section.imagePrompt),
+        })
+    );
+    
+    const imageResults = await Promise.allSettled(imageGenerationPromises);
+
+    imageResults.forEach((result, index) => {
+        const section = sectionsWithPrompts[index];
+        if (result.status === 'fulfilled' && result.value.media?.url) {
+            section.imageUrl = result.value.media.url;
+        } else {
+            console.error(`Image generation failed for prompt: "${section.imagePrompt}"`, result.status === 'rejected' ? result.reason : 'No URL returned');
+            section.imageUrl = ''; // Ensure imageUrl is at least an empty string.
         }
     });
 
-    const imageGenerationPromises = [];
-
-    if (outline.design.backgroundPrompt) {
-        imageGenerationPromises.push(
-            ai.generate({
-                model: 'googleai/imagen-4.0-ultra-generate-001',
-                prompt: applyStyle(outline.design.backgroundPrompt),
-            })
-        );
-    } else {
-        imageGenerationPromises.push(Promise.resolve({ media: { url: '' } }));
-    }
-
-    for (const prompt of slideImagePrompts.values()) {
-        imageGenerationPromises.push(
-            ai.generate({
-                model: 'googleai/imagen-4.0-ultra-generate-001',
-                prompt: applyStyle(prompt),
-            })
-        );
-    }
-
-    const results = await Promise.allSettled(imageGenerationPromises);
-
-    const backgroundResult = results[0];
-    if (backgroundResult.status === 'fulfilled' && backgroundResult.value.media?.url) {
-        outline.backgroundImageUrl = backgroundResult.value.media.url;
-    } else {
-        console.error('Background image generation failed:', backgroundResult.status === 'rejected' ? backgroundResult.reason : 'No URL returned');
-        outline.backgroundImageUrl = ''; 
-    }
-    
-    const slideImageResults = results.slice(1);
-    const slidePromptKeys = Array.from(slideImagePrompts.keys());
-
-    for (let i = 0; i < slideImageResults.length; i++) {
-        const result = slideImageResults[i];
-        const slideIndex = slidePromptKeys[i];
-        
-        if (result.status === 'fulfilled' && result.value.media?.url) {
-            outline.slides[slideIndex].imageUrl = result.value.media.url;
-        } else {
-            console.error(`Slide ${slideIndex + 1} image generation failed:`, result.status === 'rejected' ? result.reason : 'No URL returned');
-            outline.slides[slideIndex].imageUrl = '';
-        }
+    // Assign background image URL
+    const backgroundSection = sectionsWithPrompts.find(s => s.imagePrompt === outline.design.backgroundPrompt);
+    if (backgroundSection) {
+        outline.backgroundImageUrl = backgroundSection.imageUrl;
     }
 
     return outline;

@@ -158,7 +158,7 @@ export default function ProjectReportGeneratorPage() {
     
     const allSections = [result.introduction, ...result.chapters, result.conclusion];
     const imagePromises = allSections.map(async chapter => {
-        if (chapter.imageUrl) {
+        if (chapter && chapter.imageUrl) {
             const response = await fetch(chapter.imageUrl);
             return response.arrayBuffer();
         }
@@ -206,6 +206,7 @@ export default function ProjectReportGeneratorPage() {
     ];
 
     const contentPages = allSections.flatMap((chapter, index) => {
+        if (!chapter) return [];
         const imageBuffer = imageBuffers[index];
         const chapterContent = [
             new Paragraph({ text: chapter.title, heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER, spacing: { before: 400, after: 200 } }),
@@ -250,6 +251,8 @@ export default function ProjectReportGeneratorPage() {
     if (!text) return '';
     return text.replace(/```(json)?/g, '').replace(/\\n/g, '\n').replace(/\\"/g, '"').replace(/##+\s?/g, '');
   };
+  
+  const allSections = result ? [result.introduction, ...result.chapters, result.conclusion] : [];
 
   return (
     <div className="space-y-8">
@@ -331,11 +334,7 @@ export default function ProjectReportGeneratorPage() {
           <CardContent>
             <Carousel className="w-full">
               <CarouselContent>
-                {[
-                  result.introduction,
-                  ...result.chapters,
-                  result.conclusion,
-                ].map((item, index) => (
+                {allSections.map((item, index) => (
                   item && (
                     <CarouselItem key={index}>
                       <div className="p-1">
