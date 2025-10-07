@@ -77,41 +77,67 @@ const generateProjectReportFlow = ai.defineFlow(
       throw new Error('Failed to generate document outline.');
     }
 
-    // 2. Create a single list of all sections that need an image.
-    const allSections = [
-      outline.introduction,
-      ...outline.chapters,
-      outline.conclusion,
-    ];
+    // 2. Create a single list of all image prompts that need to be generated.
+    const imagePrompts = [
+      outline.introduction.imagePrompt,
+      ...outline.chapters.map(c => c.imagePrompt),
+      outline.conclusion.imagePrompt,
+    ].filter(Boolean); // Filter out any empty/null prompts
 
     // 3. Generate images for all sections in parallel.
-    const imageGenerationPromises = allSections.map(section => {
-      if (section.imagePrompt) {
-        return ai.generate({
-          model: 'googleai/imagen-4.0-ultra-generate-001',
-          prompt: `${section.imagePrompt}. This image must not contain any text or words.`,
-          config: {
-            aspectRatio: '16:9',
-          },
-        });
-      }
-      return Promise.resolve(null); // Return null for sections without an image prompt
+    const imageGenerationPromises = imagePrompts.map(promptText => {
+      return ai.generate({
+        model: 'googleai/imagen-4.0-ultra-generate-001',
+        prompt: `${promptText}. This image must not contain any text or words.`,
+        config: {
+          aspectRatio: '16:9',
+        },
+      });
     });
 
     const imageResults = await Promise.allSettled(imageGenerationPromises);
 
-    // 4. Attach the generated image URLs back to their corresponding sections.
-    imageResults.forEach((result, index) => {
-      const section = allSections[index];
-      if (result.status === 'fulfilled' && result.value?.media?.url) {
-        section.imageUrl = result.value.media.url;
-      } else {
-        console.error(`Section "${section.title}" image generation failed:`, result.status === 'rejected' ? result.reason : 'No URL returned');
-        section.imageUrl = ''; // Set to empty string on failure
-      }
-    });
+    // 4. Attach the generated image URLs back to their corresponding sections in the original outline object.
+    let resultIndex = 0;
     
-    // 5. Return the fully populated outline. The `allSections` array is an array of references to the objects in the outline, so the outline is already modified.
+    // Assign to introduction
+    if (outline.introduction.imagePrompt) {
+        const introResult = imageResults[resultIndex];
+        if (introResult.status === 'fulfilled' && introResult.value?.media?.url) {
+            outline.introduction.imageUrl = introResult.value.media.url;
+        } else {
+            console.error(`Introduction image generation failed.`);
+            outline.introduction.imageUrl = '';
+        }
+        resultIndex++;
+    }
+
+    // Assign to chapters
+    for (let i = 0; i < outline.chapters.length; i++) {
+        if (outline.chapters[i].imagePrompt) {
+            const chapterResult = imageResults[resultIndex];
+            if (chapterResult.status === 'fulfilled' && chapterResult.value?.media?.url) {
+                outline.chapters[i].imageUrl = chapterResult.value.media.url;
+            } else {
+                 console.error(`Chapter ${i + 1} image generation failed.`);
+                outline.chapters[i].imageUrl = '';
+            }
+            resultIndex++;
+        }
+    }
+
+    // Assign to conclusion
+    if (outline.conclusion.imagePrompt) {
+        const conclusionResult = imageResults[resultIndex];
+         if (conclusionResult.status === 'fulfilled' && conclusionResult.value?.media?.url) {
+            outline.conclusion.imageUrl = conclusionResult.value.media.url;
+        } else {
+            console.error(`Conclusion image generation failed.`);
+            outline.conclusion.imageUrl = '';
+        }
+    }
+    
+    // 5. Return the fully populated and correct outline object.
     return outline;
   }
 );
