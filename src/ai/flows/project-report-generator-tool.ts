@@ -77,38 +77,45 @@ const generateProjectReportFlow = ai.defineFlow(
       throw new Error('Failed to generate document outline.');
     }
 
-    // 2. Collect all sections that need an image.
-    const sectionsWithPrompts = [
+    // 2. Collect all sections that need an image into a single list.
+    const sectionsToProcess = [
         outline.introduction, 
         ...outline.chapters, 
         outline.conclusion
-    ].filter(section => section && section.imagePrompt);
+    ];
 
     // 3. Generate all images in parallel.
-    const imageGenerationPromises = sectionsWithPrompts.map(section => 
-        ai.generate({
-            model: 'googleai/imagen-4.0-ultra-generate-001',
-            prompt: `${section.imagePrompt}. This image must not contain any text or words.`,
-            config: {
-                aspectRatio: '16:9',
-            },
-        })
-    );
+    const imageGenerationPromises = sectionsToProcess.map(section => {
+        if (section && section.imagePrompt) {
+            return ai.generate({
+                model: 'googleai/imagen-4.0-ultra-generate-001',
+                prompt: `${section.imagePrompt}. This image must not contain any text or words.`,
+                config: {
+                    aspectRatio: '16:9',
+                },
+            });
+        }
+        return Promise.resolve(null); // Return a placeholder for sections without a prompt
+    });
     
     const imageResults = await Promise.allSettled(imageGenerationPromises);
 
-    // 4. Assign the generated image URLs back to their corresponding sections.
+    // 4. Assign the generated image URLs back to the original outline object.
     imageResults.forEach((result, index) => {
-        const section = sectionsWithPrompts[index];
-        if (result.status === 'fulfilled' && result.value.media?.url) {
+        const section = sectionsToProcess[index];
+        if (section && result.status === 'fulfilled' && result.value?.media?.url) {
             section.imageUrl = result.value.media.url;
         } else {
-            console.error(`Image generation failed for prompt: "${section.imagePrompt}"`, result.status === 'rejected' ? result.reason : 'No URL returned');
-            section.imageUrl = ''; // Ensure imageUrl is at least an empty string.
+            if (section) {
+                console.error(`Image generation failed for prompt: "${section.imagePrompt}"`, result.status === 'rejected' ? result.reason : 'No URL returned');
+                section.imageUrl = ''; // Ensure imageUrl is at least an empty string.
+            }
         }
     });
     
-    // 5. Return the fully populated outline.
+    // 5. Return the fully populated original outline.
     return outline;
   }
 );
+
+    

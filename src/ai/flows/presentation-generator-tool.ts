@@ -122,6 +122,7 @@ const generatePresentationFlow = ai.defineFlow(
     outputSchema: PresentationOutlineSchema,
   },
   async (input) => {
+    // 1. Generate the text-only outline first.
     const { output: outline } = await outlinePrompt(input);
     if (!outline) {
       throw new Error('Failed to generate presentation outline.');
@@ -135,11 +136,14 @@ const generatePresentationFlow = ai.defineFlow(
       return `${styledPrompt}. CRITICAL: If you include any text or words in the image, you MUST ensure they are spelled correctly.`;
     };
     
+    // 2. Collect all prompts that need an image.
     const sectionsWithPrompts = [
         ...outline.slides,
-        { imagePrompt: outline.design.backgroundPrompt, imageUrl: '' } // Add background prompt as a section
+        // Add the background prompt as a "section" to generate it in the same batch
+        { imagePrompt: outline.design.backgroundPrompt, imageUrl: '' } 
     ].filter(section => section && section.imagePrompt);
 
+    // 3. Generate all images in parallel.
     const imageGenerationPromises = sectionsWithPrompts.map(section => 
         ai.generate({
             model: 'googleai/imagen-4.0-ultra-generate-001',
@@ -149,22 +153,26 @@ const generatePresentationFlow = ai.defineFlow(
     
     const imageResults = await Promise.allSettled(imageGenerationPromises);
 
+    // 4. Assign the generated URLs back to the corresponding sections.
     imageResults.forEach((result, index) => {
         const section = sectionsWithPrompts[index];
         if (result.status === 'fulfilled' && result.value.media?.url) {
             section.imageUrl = result.value.media.url;
         } else {
             console.error(`Image generation failed for prompt: "${section.imagePrompt}"`, result.status === 'rejected' ? result.reason : 'No URL returned');
-            section.imageUrl = ''; // Ensure imageUrl is at least an empty string.
+            section.imageUrl = ''; // Ensure imageUrl is at least an empty string to prevent errors.
         }
     });
 
-    // Assign background image URL
+    // 5. Assign the background image URL from the special section we added.
     const backgroundSection = sectionsWithPrompts.find(s => s.imagePrompt === outline.design.backgroundPrompt);
     if (backgroundSection) {
         outline.backgroundImageUrl = backgroundSection.imageUrl;
     }
 
+    // 6. Return the fully populated outline.
     return outline;
   }
 );
+
+    

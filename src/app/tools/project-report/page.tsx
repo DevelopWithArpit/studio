@@ -159,8 +159,14 @@ export default function ProjectReportGeneratorPage() {
     const allSections = [result.introduction, ...result.chapters, result.conclusion];
     const imagePromises = allSections.map(async chapter => {
         if (chapter && chapter.imageUrl) {
-            const response = await fetch(chapter.imageUrl);
-            return response.arrayBuffer();
+            try {
+                const response = await fetch(chapter.imageUrl);
+                 if (!response.ok) return null;
+                return response.arrayBuffer();
+            } catch (error) {
+                console.error("Failed to fetch image for DOCX:", error);
+                return null;
+            }
         }
         return null;
     });
@@ -218,14 +224,11 @@ export default function ProjectReportGeneratorPage() {
                 children: [
                     new ImageRun({
                         data: imageBuffer,
-                        transformation: { width: 500, height: 281 },
-                        floating: {
-                            horizontalPosition: { align: AlignmentType.CENTER },
-                            verticalPosition: { align: AlignmentType.CENTER },
-                        }
+                        transformation: { width: 450, height: 253 }, // 16:9 aspect ratio
                     })
                 ],
-                alignment: AlignmentType.CENTER
+                alignment: AlignmentType.CENTER,
+                spacing: { before: 200, after: 200 }
             }));
         }
         return chapterContent;
@@ -391,3 +394,5 @@ export default function ProjectReportGeneratorPage() {
     </div>
   );
 }
+
+    

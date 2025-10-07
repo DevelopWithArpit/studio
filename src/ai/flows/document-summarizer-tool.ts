@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -49,6 +50,12 @@ Generate a concise and accurate summary.`},
       output: { schema: SummarizeDocumentOutputSchema },
     });
 
-    return llmResponse.output!;
+    if (!llmResponse.output) {
+      throw new Error("Failed to generate summary.");
+    }
+
+    return llmResponse.output;
   }
 );
+
+    

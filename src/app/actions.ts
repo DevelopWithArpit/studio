@@ -3,24 +3,29 @@
 
 import {
   explainTopic,
+  type ExplainTopicInput,
 } from '@/ai/flows/ai-explanation-tool';
 import {
   smartSearch,
 } from '@/ai/flows/smart-search-tool';
 import {
   generateCode,
+  type GenerateCodeInput,
 } from '@/ai/flows/code-generator-tool';
 import {
   analyzeCode,
+  type AnalyzeCodeInput,
 } from '@/ai/flows/code-analyzer-tool';
 import {
   generateInterviewQuestions,
+  type GenerateInterviewQuestionsInput,
 } from '@/ai/flows/interview-question-generator-tool';
 import {
   getResumeFeedback,
 } from '@/ai/flows/resume-feedback-tool';
 import {
   generateDiagram,
+  type GenerateDiagramInput,
 } from '@/ai/flows/diagram-generator-tool';
 import {
     textToSpeech,
@@ -31,6 +36,7 @@ import {
 
 import {
     suggestCareerPaths,
+    type SuggestCareerPathsInput,
 } from '@/ai/flows/career-path-suggester-tool';
 import {
     summarizeDocument,
@@ -71,16 +77,10 @@ import type { RemoveWatermarkInput } from '@/app/tools/watermark-remover/page';
 import type { GenerateLinkedInVisualsInput } from '@/app/tools/linkedin-visuals-generator/page';
 import type { GeneratePresentationInput } from '@/components/tools/presentation-generator-tool';
 import type { SummarizeDocumentInput } from '@/ai/flows/document-summarizer-tool';
-import type { SuggestCareerPathsInput } from '@/ai/flows/career-path-suggester-tool';
 import type { GenerateCoverLetterInput } from '@/app/tools/cover-letter-assistant/page';
 import type { TextToSpeechInput } from '@/app/tools/text-to-speech/page';
-import type { GenerateDiagramInput } from '@/ai/flows/diagram-generator-tool';
 import type { GetResumeFeedbackInput } from '@/app/tools/resume-feedback/page';
-import type { GenerateInterviewQuestionsInput } from '@/ai/flows/interview-question-generator-tool';
-import type { AnalyzeCodeInput } from '@/ai/flows/code-analyzer-tool';
-import type { GenerateCodeInput } from '@/ai/flows/code-generator-tool';
 import type { SmartSearchInput } from '@/app/tools/smart-search/page';
-import type { ExplainTopicInput } from '@/ai/flows/ai-explanation-tool';
 
 
 async function handleAction<T_Input, T_Output>(
@@ -171,7 +171,7 @@ export async function handleGenerateAcademicDocumentAction(input: GenerateAcadem
 }
 
 export async function handleGenerateProjectReportAction(input: GenerateProjectReportInput) {
-    return handleAction(input, generateProjectReport);
+    return handleAction(input, generateProjectReport, 1);
 }
 
 export async function handleGenerateVideoAction(input: GenerateVideoInput) {
