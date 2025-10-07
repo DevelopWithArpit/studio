@@ -27,7 +27,7 @@ const GenerateProjectReportInputSchema = z.object({
 const ChapterSchema = z.object({
   title: z.string().describe('The title of the chapter or section.'),
   content: z.string().describe('The full content of the chapter/section, written in well-structured Markdown format. This field must ONLY contain the text content for the chapter.'),
-  imagePrompt: z.string().describe("A descriptive text prompt for an AI image generator to create a relevant, professional-looking picture for this chapter's content. The image should be illustrative and must not contain any text."),
+  imagePrompt: z.string().describe("A descriptive text prompt for an AI image generator to create a relevant, professional-looking picture for this chapter's content. The image should be illustrative and visually appealing."),
   imageUrl: z.string().optional().describe('The data URI of the generated image for this chapter.'),
 });
 
@@ -55,7 +55,7 @@ const prompt = ai.definePrompt({
 1.  **Research and Write:** Based on your internal knowledge, conduct in-depth research on the specified topic and write a comprehensive academic paper.
 2.  **Structure and Content:** You must generate a complete JSON object including a main 'title', an 'introduction' object, a 'chapters' array, and a 'conclusion' object.
 3.  **Introduction and Conclusion Objects:** The 'introduction' and 'conclusion' fields must be objects, each containing a 'title', 'content', and a unique 'imagePrompt'.
-4.  **Image Prompts:** For the introduction, EACH chapter, and the conclusion, you MUST create a descriptive 'imagePrompt'. This prompt must describe a relevant, professional, and visually appealing image that illustrates the section's core theme. The image prompt must not contain any text.
+4.  **Image Prompts:** For the introduction, EACH chapter, and the conclusion, you MUST create a descriptive 'imagePrompt'. This prompt must describe a relevant, professional, and visually appealing image that illustrates the section's core theme.
 5.  **Content-Only Fields:** The 'content' field for every section must ONLY contain the written text in academic Markdown. Do NOT include the title or image prompt in the content field.
 
 CRITICAL: Your entire output MUST be a single, valid JSON object that conforms to the schema. Do not output any text or explanation before or after the JSON object.`,
@@ -112,4 +112,5 @@ const generateProjectReportFlow = ai.defineFlow(
     return outline;
   }
 );
+
 
