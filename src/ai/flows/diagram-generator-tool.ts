@@ -40,7 +40,7 @@ Description: "${description}"
 Ensure the output is a well-structured diagram. For example, for a flowchart, use standard shapes for start/end, process, and decision points. For a system architecture, use clear icons and labels for components. CRITICAL: Any text or labels in the diagram MUST be spelled correctly.`;
 
     const { media } = await ai.generate({
-      model: 'googleai/imagen-4.0-generate-001',
+      model: 'googleai/imagen-4.0-ultra-generate-001',
       prompt: prompt,
     });
 

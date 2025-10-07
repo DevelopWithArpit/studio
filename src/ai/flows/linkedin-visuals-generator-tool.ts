@@ -46,7 +46,7 @@ const generateLinkedInVisualsFlow = ai.defineFlow(
         throw new Error("Either resumeDataUri or resumeText must be provided.");
     }
 
-    const profilePictureModel = userPhotoUri ? 'googleai/gemini-2.5-flash-image-preview' : 'googleai/imagen-4.0-generate-001';
+    const profilePictureModel = userPhotoUri ? 'googleai/gemini-2.5-flash-image-preview' : 'googleai/imagen-4.0-ultra-generate-001';
 
     const profilePicturePrompt = userPhotoUri
       ? [
@@ -71,7 +71,7 @@ const generateLinkedInVisualsFlow = ai.defineFlow(
         config: { responseModalities: ['TEXT', 'IMAGE'] },
       }),
       ai.generate({
-        model: 'googleai/imagen-4.0-generate-001',
+        model: 'googleai/imagen-4.0-ultra-generate-001',
         prompt: coverBannerPrompt,
       }),
     ]);

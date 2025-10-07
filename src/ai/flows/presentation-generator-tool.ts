@@ -147,7 +147,7 @@ const generatePresentationFlow = ai.defineFlow(
     if (outline.design.backgroundPrompt) {
         imageGenerationPromises.push(
             ai.generate({
-                model: 'googleai/imagen-4.0-generate-001',
+                model: 'googleai/imagen-4.0-ultra-generate-001',
                 prompt: applyStyle(outline.design.backgroundPrompt),
             })
         );
@@ -158,7 +158,7 @@ const generatePresentationFlow = ai.defineFlow(
     for (const prompt of slideImagePrompts.values()) {
         imageGenerationPromises.push(
             ai.generate({
-                model: 'googleai/imagen-4.0-generate-001',
+                model: 'googleai/imagen-4.0-ultra-generate-001',
                 prompt: applyStyle(prompt),
             })
         );
