@@ -31,9 +31,9 @@ import {
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { handleSummarizeDocumentAction } from '@/app/actions';
-import type { SummarizeDocumentOutput } from '@/ai/flows/document-summarizer-tool';
 import { Loader2, UploadCloud, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import type { SummarizeDocumentOutput } from '@/ai/flows/document-summarizer-tool';
 
 const formSchema = z.object({
   documentDataUris: z.array(z.string()).min(1, 'Please upload at least one document.'),
@@ -85,11 +85,11 @@ export default function DocumentSummarizerTool() {
         const updatedFiles = [...selectedFiles, ...newFiles];
         setSelectedFiles(updatedFiles);
         form.setValue('documentDataUris', updatedFiles.map(f => f.dataUri));
+        form.clearErrors('documentDataUris');
     } catch (error) {
         toast({ variant: "destructive", title: "Error reading files", description: "There was a problem processing your files."});
     }
 
-    // Reset the input value to allow re-uploading the same file
     if (e.target) {
       e.target.value = '';
     }
@@ -108,13 +108,13 @@ export default function DocumentSummarizerTool() {
     const response = await handleSummarizeDocumentAction(data);
     setIsLoading(false);
 
-    if (response.success) {
+    if (response.success && response.data) {
       setResult(response.data);
     } else {
       toast({
         variant: 'destructive',
         title: 'Error summarizing document',
-        description: response.error,
+        description: response.error || 'An unknown error occurred.',
       });
     }
   }

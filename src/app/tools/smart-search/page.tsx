@@ -24,9 +24,9 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { handleSmartSearchAction } from '@/app/actions';
-import type { SmartSearchOutput } from '@/ai/flows/smart-search-tool';
 import { Loader2, UploadCloud, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import type { SmartSearchOutput } from '@/ai/flows/smart-search-tool';
 
 const formSchema = z.object({
   documentDataUris: z
@@ -78,6 +78,7 @@ export default function SmartSearchTool() {
         const updatedFiles = [...selectedFiles, ...newFiles];
         setSelectedFiles(updatedFiles);
         form.setValue('documentDataUris', updatedFiles.map(f => f.dataUri));
+        form.clearErrors('documentDataUris');
     } catch (error) {
         toast({ variant: "destructive", title: "Error reading files", description: "There was a problem processing your files."});
     }
@@ -100,13 +101,13 @@ export default function SmartSearchTool() {
     const response = await handleSmartSearchAction(data);
     setIsLoading(false);
 
-    if (response.success) {
+    if (response.success && response.data) {
       setResult(response.data);
     } else {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: response.error,
+        description: response.error || 'An unknown error occurred.',
       });
     }
   }
