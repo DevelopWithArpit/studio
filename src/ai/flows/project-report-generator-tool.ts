@@ -87,7 +87,7 @@ const generateProjectReportFlow = ai.defineFlow(
     // 3. Generate images for all sections in parallel.
     const imageGenerationPromises = sectionsWithPrompts.map(section => {
         return ai.generate({
-            model: 'googleai/imagen-4.0-fast-generate-001',
+            model: 'googleai/imagen-4.0-generate-001',
             prompt: `${section.imagePrompt}. This image must not contain any text or words.`,
             config: {
               aspectRatio: '16:9',
@@ -112,5 +112,3 @@ const generateProjectReportFlow = ai.defineFlow(
     return outline;
   }
 );
-
-

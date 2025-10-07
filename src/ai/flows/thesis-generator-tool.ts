@@ -87,7 +87,7 @@ const generateAcademicDocumentFlow = ai.defineFlow(
     const imageGenerationPromises = allSections.map(section => {
         if (section.imagePrompt) {
             return ai.generate({
-                model: 'googleai/imagen-4.0-fast-generate-001',
+                model: 'googleai/imagen-4.0-generate-001',
                 prompt: `${section.imagePrompt}. CRITICAL: If you include any text or words in the image, you MUST ensure they are spelled correctly.`,
             });
         }

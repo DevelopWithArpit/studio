@@ -1,12 +1,6 @@
 
 'use server';
 
-/**
- * @fileOverview Generates a presentation outline with titles, content, and images.
- *
- * - generatePresentation - A function that creates a complete presentation.
- */
-
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { googleAI } from '@genkit-ai/googleai';
@@ -27,8 +21,7 @@ const getCompanyLogoTool = ai.defineTool(
     }
 );
 
-// Client-side accessible types are now in the component file.
-// We only define schemas for the flow's internal use here.
+// We define schemas for the flow's internal use here.
 const GeneratePresentationInputSchema = z.object({
   topic: z.string(),
   presenterName: z.string().optional(),
@@ -48,7 +41,7 @@ const SlideSchema = z.object({
   imagePrompt: z.string().describe('A text prompt to generate a relevant image for this slide. Can be an empty string if no image is needed. This prompt should ONLY describe the visual content of the image.'),
   logoUrl: z.string().optional().describe('The URL of a company logo to display on the slide, fetched using the getCompanyLogoTool.'),
   slideLayout: z.enum(['title', 'contentWithImage', 'titleOnly']).describe("The best layout for this slide. Use 'title' for the main title slide, 'contentWithImage' for slides with bullet points and a visual, and 'titleOnly' for section headers or simple, impactful statements."),
-  imageUrl: z.string().optional().describe('The data URI of the generated image for the slide.'),
+  imageUrl: z.string().optional(),
 });
 
 const DesignSchema = z.object({
@@ -62,7 +55,7 @@ const PresentationOutlineSchema = z.object({
   title: z.string().describe('The main title of the presentation.'),
   slides: z.array(SlideSchema).describe('An array of slide objects.'),
   design: DesignSchema.describe('A design theme for the presentation, inspired by the topic.'),
-  backgroundImageUrl: z.string().optional().describe('The data URI of the generated background image for the presentation.'),
+  backgroundImageUrl: z.string().optional(),
 });
 export type GeneratePresentationOutput = z.infer<typeof PresentationOutlineSchema>;
 
@@ -154,7 +147,7 @@ const generatePresentationFlow = ai.defineFlow(
     if (outline.design.backgroundPrompt) {
         imageGenerationPromises.push(
             ai.generate({
-                model: 'googleai/imagen-4.0-fast-generate-001',
+                model: 'googleai/imagen-4.0-generate-001',
                 prompt: applyStyle(outline.design.backgroundPrompt),
             })
         );
@@ -165,7 +158,7 @@ const generatePresentationFlow = ai.defineFlow(
     for (const prompt of slideImagePrompts.values()) {
         imageGenerationPromises.push(
             ai.generate({
-                model: 'googleai/imagen-4.0-fast-generate-001',
+                model: 'googleai/imagen-4.0-generate-001',
                 prompt: applyStyle(prompt),
             })
         );
