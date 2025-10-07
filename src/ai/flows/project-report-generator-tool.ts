@@ -72,7 +72,7 @@ const prompt = ai.definePrompt({
 
 **CRITICAL INSTRUCTIONS:**
 1.  **Research First:** You MUST use the \`researchTopicTool\` to gather in-depth information about the specified topic.
-2.  **Analyze and Expand:** Based on the research findings, create a comprehensive academic paper. Flesh out each section with detailed, well-organized content.
+2.  **Analyze and Expand:** Based SOLELY on the research findings from the tool, create a comprehensive academic paper. Flesh out each section with detailed, well-organized content from the research.
 3.  **Strict JSON Structure:** Your entire output must be a single JSON object that perfectly matches the output schema.
 4.  **Complete All Fields:** You must generate content for 'title', 'introduction', 'chapters', and 'conclusion'.
 5.  **Introduction and Conclusion Objects:** The 'introduction' and 'conclusion' fields must be objects, each containing 'title', 'content', and a unique 'imagePrompt'.
@@ -133,5 +133,3 @@ const generateProjectReportFlow = ai.defineFlow(
     return outline;
   }
 );
-
-    
