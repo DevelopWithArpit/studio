@@ -103,12 +103,12 @@ const generateProjectReportFlow = ai.defineFlow(
     // 4. Assign the generated image URLs back to the original outline object.
     imageResults.forEach((result, index) => {
         const section = sectionsToProcess[index];
-        if (section && result.status === 'fulfilled' && result.value?.media?.url) {
-            section.imageUrl = result.value.media.url;
-        } else {
-            if (section) {
+        if (section) {
+            if (result.status === 'fulfilled' && result.value?.media?.url) {
+                section.imageUrl = result.value.media.url;
+            } else {
                 console.error(`Image generation failed for prompt: "${section.imagePrompt}"`, result.status === 'rejected' ? result.reason : 'No URL returned');
-                section.imageUrl = ''; // Ensure imageUrl is at least an empty string.
+                section.imageUrl = ''; // Ensure imageUrl is at least an empty string to prevent errors.
             }
         }
     });
