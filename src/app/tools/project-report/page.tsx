@@ -51,14 +51,14 @@ const formSchema = z.object({
   section: z.string().optional(),
 });
 
-type FormData = z.infer<typeof formSchema>;
+export type GenerateProjectReportInput = z.infer<typeof formSchema>;
 
 export default function ProjectReportGeneratorPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<GenerateProjectReportOutput | null>(null);
   const { toast } = useToast();
 
-  const form = useForm<FormData>({
+  const form = useForm<GenerateProjectReportInput>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       topic: 'WATER MAN OF INDIA LIFE AND ACHEIVEMENT',
@@ -75,7 +75,7 @@ export default function ProjectReportGeneratorPage() {
     },
   });
   
-  async function onSubmit(data: FormData) {
+  async function onSubmit(data: GenerateProjectReportInput) {
     setIsLoading(true);
     setResult(null);
     const response = await handleGenerateProjectReportAction(data);
@@ -362,3 +362,5 @@ export default function ProjectReportGeneratorPage() {
     </div>
   );
 }
+
+    

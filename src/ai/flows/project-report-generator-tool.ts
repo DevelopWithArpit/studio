@@ -23,12 +23,11 @@ const GenerateProjectReportInputSchema = z.object({
   numPages: z.coerce.number().int().min(2, "Must be at least 2 pages.").max(15, "Cannot exceed 15 pages."),
   section: z.string().optional().describe("The student's section (e.g., A, B)."),
 });
-type GenerateProjectReportInput = z.infer<typeof GenerateProjectReportInputSchema>;
 
 const ChapterSchema = z.object({
   title: z.string().describe('The title of the chapter or section.'),
   content: z.string().describe('The full content of the chapter/section, written in well-structured Markdown format. This field must ONLY contain the text content for the chapter.'),
-  imagePrompt: z.string().describe("A descriptive text prompt for an AI image generator to create a relevant, professional-looking picture for this chapter's content. The image should be illustrative. CRITICAL: Any text or words in the image MUST be spelled correctly."),
+  imagePrompt: z.string().describe("A descriptive text prompt for an AI image generator to create a relevant, professional-looking picture for this chapter's content. The image should be illustrative and must not contain any text."),
   imageUrl: z.string().optional().describe('The data URI of the generated image for this chapter.'),
 });
 
@@ -38,7 +37,7 @@ const GenerateProjectReportOutputSchema = z.object({
   chapters: z.array(ChapterSchema).describe('An array of generated chapters or sections for the document body.'),
   conclusion: ChapterSchema.describe('The conclusion chapter object, containing title, content, and imagePrompt.'),
 });
-type GenerateProjectReportOutput = z.infer<typeof GenerateProjectReportOutputSchema>;
+export type GenerateProjectReportOutput = z.infer<typeof GenerateProjectReportOutputSchema>;
 
 const researchTopicTool = ai.defineTool(
     {
@@ -58,7 +57,7 @@ const researchTopicTool = ai.defineTool(
     }
 );
 
-export async function generateProjectReport(input: GenerateProjectReportInput): Promise<GenerateProjectReportOutput> {
+export async function generateProjectReport(input: z.infer<typeof GenerateProjectReportInputSchema>): Promise<GenerateProjectReportOutput> {
   return generateProjectReportFlow(input);
 }
 
@@ -77,10 +76,10 @@ const prompt = ai.definePrompt({
 3.  **Strict JSON Structure:** Your entire output must be a single JSON object that perfectly matches the output schema.
 4.  **Complete All Fields:** You must generate content for 'title', 'introduction', 'chapters', and 'conclusion'.
 5.  **Introduction and Conclusion Objects:** The 'introduction' and 'conclusion' fields must be objects, each containing 'title', 'content', and a unique 'imagePrompt'.
-6.  **Image Prompts:** For the introduction, EACH chapter, and the conclusion, you MUST create a descriptive 'imagePrompt'. This prompt must describe a relevant, professional, and visually appealing image that illustrates the section's core theme. CRITICAL: If you include any text or words in the image, you MUST ensure they are spelled correctly.
+6.  **Image Prompts:** For the introduction, EACH chapter, and the conclusion, you MUST create a descriptive 'imagePrompt'. This prompt must describe a relevant, professional, and visually appealing image that illustrates the section's core theme. The image prompt must not contain any text.
 7.  **Content Only:** The 'content' field for every section must ONLY contain the written text in academic Markdown. Do NOT include the title or image prompt in the content field.
 
-Generate the complete document structure now.`,
+CRITICAL: Your entire output MUST be a single, valid JSON object that conforms to the schema.`,
 });
 
 const generateProjectReportFlow = ai.defineFlow(
@@ -110,7 +109,7 @@ const generateProjectReportFlow = ai.defineFlow(
     const imageGenerationPromises = sectionsWithPrompts.map(section => {
         return ai.generate({
             model: 'googleai/imagen-4.0-fast-generate-001',
-            prompt: `${section.imagePrompt}. CRITICAL: If you include any text or words in the image, you MUST ensure they are spelled correctly.`,
+            prompt: `${section.imagePrompt}. This image must not contain any text or words.`,
             config: {
               aspectRatio: '16:9',
             },
@@ -119,13 +118,13 @@ const generateProjectReportFlow = ai.defineFlow(
 
     const imageResults = await Promise.allSettled(imageGenerationPromises);
 
-    // 4. Attach the generated image URLs back to their corresponding sections.
+    // 4. Attach the generated image URLs back to their corresponding sections in the original outline.
     imageResults.forEach((result, index) => {
         const section = sectionsWithPrompts[index];
         if (result.status === 'fulfilled' && result.value.media?.url) {
             section.imageUrl = result.value.media.url;
         } else {
-            console.error(`Section "${section.title}" image generation failed.`);
+            console.error(`Section "${section.title}" image generation failed:`, result.status === 'rejected' ? result.reason : 'No URL returned');
             section.imageUrl = ''; // Set to empty string on failure
         }
     });
@@ -134,3 +133,5 @@ const generateProjectReportFlow = ai.defineFlow(
     return outline;
   }
 );
+
+    

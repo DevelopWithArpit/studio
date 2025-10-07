@@ -70,7 +70,7 @@ import type { ManipulateImageTextInput } from '@/app/tools/image-text-manipulati
 import type { RemoveWatermarkInput } from '@/app/tools/watermark-remover/page';
 import type { GenerateLinkedInVisualsInput } from '@/app/tools/linkedin-visuals-generator/page';
 import type { GeneratePresentationInput } from '@/components/tools/presentation-generator-tool';
-import type { SummarizeDocumentInput } from '@/app/tools/document-summarizer/page';
+import type { SummarizeDocumentInput } from '@/ai/flows/document-summarizer-tool';
 import type { SuggestCareerPathsInput } from '@/ai/flows/career-path-suggester-tool';
 import type { GenerateCoverLetterInput } from '@/app/tools/cover-letter-assistant/page';
 import type { TextToSpeechInput } from '@/app/tools/text-to-speech/page';
@@ -209,3 +209,5 @@ export async function handleGeneratePortfolioWebsiteAction(input: GeneratePortfo
         return { success: false, error: errorMessage };
     }
 }
+
+    
