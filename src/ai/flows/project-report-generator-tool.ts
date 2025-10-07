@@ -77,35 +77,38 @@ const generateProjectReportFlow = ai.defineFlow(
       throw new Error('Failed to generate document outline.');
     }
 
-    // 2. Create a list of all sections that need an image.
-    const sectionsWithPrompts = [
-        outline.introduction, 
-        ...outline.chapters, 
-        outline.conclusion
-    ].filter(section => section.imagePrompt);
+    // 2. Create a single list of all sections that need an image.
+    const allSections = [
+      outline.introduction,
+      ...outline.chapters,
+      outline.conclusion,
+    ];
 
     // 3. Generate images for all sections in parallel.
-    const imageGenerationPromises = sectionsWithPrompts.map(section => {
+    const imageGenerationPromises = allSections.map(section => {
+      if (section.imagePrompt) {
         return ai.generate({
-            model: 'googleai/imagen-4.0-ultra-generate-001',
-            prompt: `${section.imagePrompt}. This image must not contain any text or words.`,
-            config: {
-              aspectRatio: '16:9',
-            },
+          model: 'googleai/imagen-4.0-ultra-generate-001',
+          prompt: `${section.imagePrompt}. This image must not contain any text or words.`,
+          config: {
+            aspectRatio: '16:9',
+          },
         });
+      }
+      return Promise.resolve(null); // Return null for sections without an image prompt
     });
 
     const imageResults = await Promise.allSettled(imageGenerationPromises);
 
     // 4. Attach the generated image URLs back to their corresponding sections in the original outline.
     imageResults.forEach((result, index) => {
-        const section = sectionsWithPrompts[index];
-        if (result.status === 'fulfilled' && result.value.media?.url) {
-            section.imageUrl = result.value.media.url;
-        } else {
-            console.error(`Section "${section.title}" image generation failed:`, result.status === 'rejected' ? result.reason : 'No URL returned');
-            section.imageUrl = ''; // Set to empty string on failure
-        }
+      const section = allSections[index];
+      if (result.status === 'fulfilled' && result.value?.media?.url) {
+        section.imageUrl = result.value.media.url;
+      } else {
+        console.error(`Section "${section.title}" image generation failed:`, result.status === 'rejected' ? result.reason : 'No URL returned');
+        section.imageUrl = ''; // Set to empty string on failure
+      }
     });
 
     // 5. Return the fully populated outline.
