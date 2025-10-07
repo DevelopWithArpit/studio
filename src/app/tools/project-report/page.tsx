@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Image from 'next/image';
-import { Packer, Document, Paragraph, TextRun, HeadingLevel, AlignmentType, PageOrientation, Table, TableRow, TableCell, WidthType, BorderStyle, PageNumber, ISectionOptions, SectionType } from 'docx';
+import { Packer, Document, Paragraph, TextRun, HeadingLevel, AlignmentType, PageOrientation, Table, TableRow, TableCell, WidthType, BorderStyle, PageNumber, ISectionOptions, SectionType, ImageRun } from 'docx';
 import { saveAs } from 'file-saver';
 import {
   Card,
@@ -145,7 +145,7 @@ export default function ProjectReportGeneratorPage() {
     toast({ title: "PDF Downloaded", description: "Your project report has been downloaded." });
   };
 
-  const handleDownloadDocx = () => {
+  const handleDownloadDocx = async () => {
     if (!result) return;
     const {
       topic, collegeName, departmentName, semester, year, subject, studentName, rollNumber, guideName, section
@@ -157,6 +157,15 @@ export default function ProjectReportGeneratorPage() {
     };
     
     const allSections = [result.introduction, ...result.chapters, result.conclusion];
+    const imagePromises = allSections.map(async chapter => {
+        if (chapter.imageUrl) {
+            const response = await fetch(chapter.imageUrl);
+            return response.arrayBuffer();
+        }
+        return null;
+    });
+    
+    const imageBuffers = await Promise.all(imagePromises);
 
     const titlePage = [
         new Paragraph({ text: "LOKMANYA TILAK JANKALYAN SHIKSHAN SANSTHA'S", alignment: AlignmentType.CENTER, spacing: { after: 200 } }),
@@ -196,18 +205,38 @@ export default function ProjectReportGeneratorPage() {
         }),
     ];
 
-    const contentPages = allSections.flatMap(chapter => [
-        new Paragraph({ text: chapter.title, heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER, spacing: { before: 400, after: 200 } }),
-        ...(chapter.imageUrl ? [new Paragraph({ children: [new TextRun("See figure below.")] })] : []),
-        ...createBodyText(chapter.content)
-    ]);
+    const contentPages = allSections.flatMap((chapter, index) => {
+        const imageBuffer = imageBuffers[index];
+        const chapterContent = [
+            new Paragraph({ text: chapter.title, heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER, spacing: { before: 400, after: 200 } }),
+            ...createBodyText(chapter.content),
+        ];
+
+        if (imageBuffer) {
+            chapterContent.push(new Paragraph({
+                children: [
+                    new ImageRun({
+                        data: imageBuffer,
+                        transformation: { width: 500, height: 281 },
+                        floating: {
+                            horizontalPosition: { align: AlignmentType.CENTER },
+                            verticalPosition: { align: AlignmentType.CENTER },
+                        }
+                    })
+                ],
+                alignment: AlignmentType.CENTER
+            }));
+        }
+        return chapterContent;
+    });
+
 
     const doc = new Document({
         creator: "AI Mentor",
         title: `Project Report: ${topic}`,
         sections: [
             { properties: { type: SectionType.NEXT_PAGE, pageSize: { width: 16838, height: 11906, orientation: PageOrientation.LANDSCAPE }, margin: { top: 720, right: 720, bottom: 720, left: 720 } }, children: titlePage },
-            { properties: { type: SectionType.NEXT_PAGE, pageSize: { width: 16838, height: 11906, orientation: PageOrientation.LANDSCAPE }, margin: { top: 720, right: 720, bottom: 720, left: 720 } }, children: contentPages },
+            { properties: { type: SectionType.NEXT_PAGE, pageSize: { width: 11906, height: 16838, orientation: PageOrientation.PORTRAIT }, margin: { top: 720, right: 720, bottom: 720, left: 720 } }, children: contentPages },
         ],
     });
 
@@ -219,7 +248,6 @@ export default function ProjectReportGeneratorPage() {
 
   const cleanContent = (text: string | undefined) => {
     if (!text) return '';
-    // Basic cleanup for display, removing markdown-like syntax
     return text.replace(/```(json)?/g, '').replace(/\\n/g, '\n').replace(/\\"/g, '"').replace(/##+\s?/g, '');
   };
 
@@ -326,9 +354,9 @@ export default function ProjectReportGeneratorPage() {
                               <Image
                                 src={item.imageUrl}
                                 alt={`Illustration for ${item.title}`}
-                                width={500}
-                                height={500}
-                                className="object-cover w-full h-full"
+                                layout="fill"
+                                objectFit="cover"
+                                className="w-full h-full"
                               />
                             ) : (
                               <div className="flex flex-col items-center justify-center text-muted-foreground">
