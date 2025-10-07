@@ -157,7 +157,7 @@ export default function ProjectReportGeneratorPage() {
     };
     
     const allSections = [result.introduction, ...result.chapters, result.conclusion];
-    const imagePromises = allSections.map(async chapter => {
+    const imagePromises = allSections.map(async (chapter) => {
         if (chapter && chapter.imageUrl) {
             try {
                 const response = await fetch(chapter.imageUrl);
