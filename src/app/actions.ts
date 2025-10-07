@@ -75,12 +75,35 @@ import type { GeneratePortfolioWebsiteInput } from '@/ai/flows/portfolio-generat
 import type { ManipulateImageTextInput } from '@/app/tools/image-text-manipulation/page';
 import type { RemoveWatermarkInput } from '@/app/tools/watermark-remover/page';
 import type { GenerateLinkedInVisualsInput } from '@/app/tools/linkedin-visuals-generator/page';
-import type { GeneratePresentationInput } from '@/components/tools/presentation-generator-tool';
-import type { SummarizeDocumentInput } from '@/ai/flows/document-summarizer-tool';
+import type { SummarizeDocumentInput } from '@/app/tools/document-summarizer/page';
 import type { GenerateCoverLetterInput } from '@/app/tools/cover-letter-assistant/page';
 import type { TextToSpeechInput } from '@/app/tools/text-to-speech/page';
 import type { GetResumeFeedbackInput } from '@/app/tools/resume-feedback/page';
 import type { SmartSearchInput } from '@/app/tools/smart-search/page';
+import { z } from 'zod';
+
+const formSchema = z.object({
+  topic: z.string().min(3, 'Please enter a topic with at least 3 characters.'),
+  presenterName: z.string().optional(),
+  rollNumber: z.string().optional(),
+  department: z.string().optional(),
+  numSlides: z.coerce.number().int().min(2, "Must be at least 2 slides.").max(20, "Cannot exceed 20 slides."),
+  imageStyle: z.string().optional(),
+  language: z.string().optional(),
+  contentType: z.enum(['general', 'projectProposal', 'pitchDeck', 'custom']).default('general'),
+  customStructure: z.string().optional(),
+  style: z.enum(['Default', 'Tech Pitch', 'Creative']).default('Default'),
+}).refine(data => {
+    if (data.contentType === 'custom') {
+        return (data.customStructure || '').trim().length > 10;
+    }
+    return true;
+}, {
+    message: "Please provide a custom structure with at least 10 characters.",
+    path: ['customStructure'],
+});
+
+export type GeneratePresentationInput = z.infer<typeof formSchema>;
 
 
 async function handleAction<T_Input, T_Output>(
@@ -209,3 +232,5 @@ export async function handleGeneratePortfolioWebsiteAction(input: GeneratePortfo
         return { success: false, error: errorMessage };
     }
 }
+
+    

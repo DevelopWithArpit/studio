@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Image from 'next/image';
 import PptxGenJS from 'pptxgenjs';
+import { saveAs } from 'file-saver';
 import {
   Card,
   CardContent,
@@ -43,6 +44,9 @@ import { Textarea } from '../ui/textarea';
 import { RobotsBuildingLoader } from '../ui/robots-building-loader';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Label } from '@/components/ui/label';
+import { GeneratePresentationOutput } from '@/ai/flows/presentation-generator-tool';
+import type { GeneratePresentationInput } from '@/app/actions';
+
 
 const formSchema = z.object({
   topic: z.string().min(3, 'Please enter a topic with at least 3 characters.'),
@@ -65,32 +69,6 @@ const formSchema = z.object({
     path: ['customStructure'],
 });
 
-export type GeneratePresentationInput = z.infer<typeof formSchema>;
-
-const SlideSchema = z.object({
-  title: z.string(),
-  content: z.array(z.string()),
-  imagePrompt: z.string(),
-  logoUrl: z.string().optional(),
-  slideLayout: z.enum(['title', 'contentWithImage', 'titleOnly']),
-  imageUrl: z.string().optional(),
-});
-
-const DesignSchema = z.object({
-  backgroundColor: z.string(),
-  textColor: z.string(),
-  accentColor: z.string(),
-  backgroundPrompt: z.string(),
-});
-
-const PresentationOutlineSchema = z.object({
-  title: z.string(),
-  slides: z.array(SlideSchema),
-  design: DesignSchema,
-  backgroundImageUrl: z.string().optional(),
-});
-
-export type GeneratePresentationOutput = z.infer<typeof PresentationOutlineSchema>;
 
 type FormData = z.infer<typeof formSchema>;
 
@@ -236,6 +214,8 @@ Possible improvements, recommendations
  const handleDownload = () => {
     if (!result) return;
 
+    toast({ title: 'Generating PPTX...', description: 'Please wait while your presentation is being created.' });
+
     const pptx = new PptxGenJS();
     pptx.layout = 'LAYOUT_WIDE';
     
@@ -269,9 +249,9 @@ Possible improvements, recommendations
     });
 
     const presenterDetails = [
-        result.presenterName ? `Presented by: ${result.presenterName}` : null,
-        result.rollNumber ? `Roll No: ${result.rollNumber}` : null,
-        result.department ? `Department: ${result.department}` : null
+        form.getValues('presenterName') ? `Presented by: ${form.getValues('presenterName')}` : null,
+        form.getValues('rollNumber') ? `Roll No: ${form.getValues('rollNumber')}` : null,
+        form.getValues('department') ? `Department: ${form.getValues('department')}` : null
     ].filter(Boolean).join('\n');
 
     if (presenterDetails) {
@@ -295,7 +275,7 @@ Possible improvements, recommendations
 
     // Content Slides
     result.slides.forEach((slide, slideIndex) => {
-        if (slide.slideLayout === 'title') return; // Skip the duplicate title slide data
+        if (slide.slideLayout === 'title' && slideIndex === 0) return; 
 
         const contentSlide = pptx.addSlide({ masterName: "MASTER_SLIDE" });
         contentSlide.transition = transitions[slideIndex % transitions.length];
@@ -345,8 +325,12 @@ Possible improvements, recommendations
         }
     });
 
-    pptx.writeFile({ fileName: `${result.title}.pptx` });
-    toast({ title: 'Download Started', description: `Your presentation "${result.title}.pptx" is downloading.` });
+    pptx.write('blob').then((blob) => {
+      saveAs(blob, `${result.title}.pptx`);
+      toast({ title: 'Download Started', description: `Your presentation "${result.title}.pptx" is downloading.` });
+    }).catch(err => {
+      toast({ variant: 'destructive', title: 'Error Creating PPTX', description: err.toString() });
+    });
   };
 
 
