@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -204,7 +205,7 @@ export default function ResumeFeedbackTool() {
                             rows={15}
                             {...field}
                             onChange={(e) => {
-                              field.onChange(e);
+                              field.onChange(e.target.value);
                               setFileName(null);
                             }}
                           />
@@ -250,7 +251,7 @@ export default function ResumeFeedbackTool() {
                               or drag and drop
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              PDF, TXT up to 200MB
+                              PDF, DOCX, TXT up to 200MB
                             </p>
                           </>
                         )}
@@ -259,7 +260,7 @@ export default function ResumeFeedbackTool() {
                           type="file"
                           className="sr-only"
                           onChange={handleFileChange}
-                          accept=".pdf,.txt"
+                          accept=".pdf,.doc,.docx,.txt"
                         />
                       </div>
                     </FormControl>
@@ -344,13 +345,13 @@ export default function ResumeFeedbackTool() {
                 )}
               </TabsContent>
               <TabsContent value="rewritten" className="mt-4">
-                {isLoading && !result ? (
+                {isLoading ? (
                   <div className="border rounded-lg"><Skeleton className="h-[1056px] w-full max-w-[816px] mx-auto" /></div>
                 ) : (
                   result?.rewrittenResume && (
                     <div className="space-y-4">
-                       <div className="bg-gray-200 p-4 md:p-8 flex justify-center overflow-auto">
-                           <div id="resume-preview-content" className="w-full max-w-4xl">
+                       <div className="bg-gray-200 p-8 flex justify-center overflow-auto">
+                           <div id="resume-preview-content" className="origin-top-left">
                                 <ResumeTemplate resumeData={result.rewrittenResume} />
                            </div>
                       </div>

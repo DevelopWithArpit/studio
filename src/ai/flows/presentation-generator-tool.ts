@@ -27,7 +27,7 @@ const GeneratePresentationInputSchema = z.object({
   presenterName: z.string().optional(),
   rollNumber: z.string().optional(),
   department: z.string().optional(),
-  numSlides: z.number().int().min(2).max(20),
+  numSlides: z.coerce.number().int().min(2).max(20),
   contentType: z.enum(['general', 'projectProposal', 'pitchDeck', 'custom']),
   customStructure: z.string().optional(),
   imageStyle: z.string().optional(),
@@ -75,7 +75,7 @@ const outlinePrompt = ai.definePrompt({
 - **Visuals First**: For each slide, first conceive a powerful, memorable visual, then write a short title and content to complement it.
 - **One Idea Per Slide**: Each slide must focus on a single, core idea.
 - **Strict Content Rules**: Each content slide must have exactly 4 bullet points of about 8 words each. For 'titleOnly' slides, the content array must be empty.
-- **Layout Intelligence**: For each slide, choose the most appropriate layout: 'title', 'contentWithImage', or 'titleOnly'.
+- **Layout Intelligence**: For each slide, choose the most appropriate layout: 'title', 'contentWithImage', 'titleOnly'.
 
 **Language Requirement:**
 - Generate all text content (titles and bullet points) in the requested language: **{{#if language}}{{language}}{{else}}English{{/if}}**.
@@ -133,7 +133,7 @@ const generatePresentationFlow = ai.defineFlow(
       if (input.imageStyle && input.imageStyle.toLowerCase() !== 'photorealistic') {
         styledPrompt = `${prompt}, in a ${input.imageStyle} style`;
       }
-      return `${styledPrompt}. CRITICAL: If you include any text or words in the image, you MUST ensure they are spelled correctly.`;
+      return `${styledPrompt}. CRITICAL: This image must not contain any text or words.`;
     };
     
     // 2. Collect all prompts that need an image.
@@ -174,5 +174,3 @@ const generatePresentationFlow = ai.defineFlow(
     return outline;
   }
 );
-
-    

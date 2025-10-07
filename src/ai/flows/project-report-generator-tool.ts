@@ -117,5 +117,3 @@ const generateProjectReportFlow = ai.defineFlow(
     return outline;
   }
 );
-
-    
