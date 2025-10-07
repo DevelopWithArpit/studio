@@ -5,8 +5,6 @@
  * @fileOverview Generates a structured academic document based on a topic and research notes.
  * 
  * - generateProjectReport - A function that generates project report content.
- * - GenerateProjectReportInput - The input type for the function.
- * - GenerateProjectReportOutput - The return type for the function.
  */
 
 import { ai } from '@/ai/genkit';
@@ -25,7 +23,7 @@ const GenerateProjectReportInputSchema = z.object({
   numPages: z.coerce.number().int().min(2, "Must be at least 2 pages.").max(15, "Cannot exceed 15 pages."),
   section: z.string().optional().describe("The student's section (e.g., A, B)."),
 });
-export type GenerateProjectReportInput = z.infer<typeof GenerateProjectReportInputSchema>;
+type GenerateProjectReportInput = z.infer<typeof GenerateProjectReportInputSchema>;
 
 const ChapterSchema = z.object({
   title: z.string().describe('The title of the chapter or section.'),
@@ -40,7 +38,7 @@ const GenerateProjectReportOutputSchema = z.object({
   chapters: z.array(ChapterSchema).describe('An array of generated chapters or sections for the document body.'),
   conclusion: ChapterSchema.describe('The conclusion chapter object, containing title, content, and imagePrompt.'),
 });
-export type GenerateProjectReportOutput = z.infer<typeof GenerateProjectReportOutputSchema>;
+type GenerateProjectReportOutput = z.infer<typeof GenerateProjectReportOutputSchema>;
 
 const researchTopicTool = ai.defineTool(
     {
