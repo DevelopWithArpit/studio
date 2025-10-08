@@ -80,7 +80,7 @@ const generateProjectReportFlow = ai.defineFlow(
     // 2. Create a unified list of all prompts that need an image.
     const allPrompts: { type: 'introduction' | 'chapter' | 'conclusion'; index?: number; prompt: string }[] = [];
     
-    if (outline.introduction.imagePrompt) {
+    if (outline.introduction?.imagePrompt) {
         allPrompts.push({ type: 'introduction', prompt: outline.introduction.imagePrompt });
     }
     outline.chapters.forEach((chapter, index) => {
@@ -88,7 +88,7 @@ const generateProjectReportFlow = ai.defineFlow(
             allPrompts.push({ type: 'chapter', index, prompt: chapter.imagePrompt });
         }
     });
-    if (outline.conclusion.imagePrompt) {
+    if (outline.conclusion?.imagePrompt) {
         allPrompts.push({ type: 'conclusion', prompt: outline.conclusion.imagePrompt });
     }
 
@@ -116,7 +116,7 @@ const generateProjectReportFlow = ai.defineFlow(
 
         switch (correspondingPromptItem.type) {
             case 'introduction':
-                outline.introduction.imageUrl = imageUrl;
+                if (outline.introduction) outline.introduction.imageUrl = imageUrl;
                 break;
             case 'chapter':
                 if (correspondingPromptItem.index !== undefined && outline.chapters[correspondingPromptItem.index]) {
@@ -124,7 +124,7 @@ const generateProjectReportFlow = ai.defineFlow(
                 }
                 break;
             case 'conclusion':
-                outline.conclusion.imageUrl = imageUrl;
+                if (outline.conclusion) outline.conclusion.imageUrl = imageUrl;
                 break;
         }
     });
