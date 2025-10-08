@@ -55,7 +55,7 @@ const prompt = ai.definePrompt({
 1.  **Research and Write:** Based on your internal knowledge, conduct in-depth research on the specified topic and write a comprehensive academic paper.
 2.  **Structure and Content:** You must generate a complete JSON object including a main 'title', an 'introduction' object, a 'chapters' array, and a 'conclusion' object.
 3.  **Introduction and Conclusion Objects:** The 'introduction' and 'conclusion' fields must be objects, each containing a 'title', 'content', and a unique 'imagePrompt'.
-4.  **Image Prompts:** For the introduction, EACH chapter, and the conclusion, you MUST create a descriptive 'imagePrompt'. This prompt must describe a relevant, professional, and visually appealing image that illustrates the section's core theme.
+4.  **Image Prompts:** For the introduction, EACH chapter, and the conclusion, you MUST create a descriptive 'imagePrompt'. This prompt must describe a relevant, professional, and visually appealing image that illustrates the section's core theme. The image prompt MUST be in English.
 5.  **Content-Only Fields:** The 'content' field for every section must ONLY contain the written text in academic Markdown. Do NOT include the title or image prompt in the content field.
 
 CRITICAL: Your entire output MUST be a single, valid JSON object that conforms to the schema. Do not output any text or explanation before or after the JSON object.`,
@@ -77,18 +77,26 @@ const generateProjectReportFlow = ai.defineFlow(
       throw new Error('Failed to generate document outline.');
     }
 
-    // 2. Collect all image prompts into a single list to generate them in parallel.
-    const allPrompts = [
-        outline.introduction.imagePrompt,
-        ...outline.chapters.map(c => c.imagePrompt),
-        outline.conclusion.imagePrompt
-    ].filter(Boolean); // Filter out any empty prompts
+    // 2. Create a unified list of all prompts that need an image.
+    const allPrompts: { type: 'introduction' | 'chapter' | 'conclusion'; index?: number; prompt: string }[] = [];
+    
+    if (outline.introduction.imagePrompt) {
+        allPrompts.push({ type: 'introduction', prompt: outline.introduction.imagePrompt });
+    }
+    outline.chapters.forEach((chapter, index) => {
+        if (chapter.imagePrompt) {
+            allPrompts.push({ type: 'chapter', index, prompt: chapter.imagePrompt });
+        }
+    });
+    if (outline.conclusion.imagePrompt) {
+        allPrompts.push({ type: 'conclusion', prompt: outline.conclusion.imagePrompt });
+    }
 
     // 3. Generate all images in parallel.
-    const imageGenerationPromises = allPrompts.map(prompt => 
+    const imageGenerationPromises = allPrompts.map(item => 
         ai.generate({
             model: 'googleai/imagen-4.0-ultra-generate-001',
-            prompt: `${prompt}. This image must not contain any text or words.`,
+            prompt: `${item.prompt}. This image must not contain any text or words. High quality, professional, illustrative.`,
             config: {
                 aspectRatio: '16:9',
             },
@@ -97,45 +105,31 @@ const generateProjectReportFlow = ai.defineFlow(
     
     const imageResults = await Promise.allSettled(imageGenerationPromises);
 
-    // 4. Assign the generated image URLs back to the original outline object.
-    let resultIndex = 0;
-    
-    // Assign to introduction
-    if (outline.introduction.imagePrompt) {
-        const introResult = imageResults[resultIndex++];
-        if (introResult.status === 'fulfilled' && introResult.value.media?.url) {
-            outline.introduction.imageUrl = introResult.value.media.url;
-        } else {
-            console.error(`Image generation failed for introduction: "${outline.introduction.imagePrompt}"`);
-            outline.introduction.imageUrl = '';
+    // 4. Assign the generated URLs back to the corresponding sections in the original outline.
+    imageResults.forEach((result, i) => {
+        const correspondingPromptItem = allPrompts[i];
+        const imageUrl = result.status === 'fulfilled' && result.value.media?.url ? result.value.media.url : '';
+        
+        if (!imageUrl) {
+             console.error(`Image generation failed for prompt: "${correspondingPromptItem.prompt}"`, result.status === 'rejected' ? result.reason : 'No URL returned');
         }
-    }
 
-    // Assign to chapters
-    for (let i = 0; i < outline.chapters.length; i++) {
-        if (outline.chapters[i].imagePrompt) {
-            const chapterResult = imageResults[resultIndex++];
-            if (chapterResult.status === 'fulfilled' && chapterResult.value.media?.url) {
-                outline.chapters[i].imageUrl = chapterResult.value.media.url;
-            } else {
-                console.error(`Image generation failed for chapter ${i}: "${outline.chapters[i].imagePrompt}"`);
-                outline.chapters[i].imageUrl = '';
-            }
+        switch (correspondingPromptItem.type) {
+            case 'introduction':
+                outline.introduction.imageUrl = imageUrl;
+                break;
+            case 'chapter':
+                if (correspondingPromptItem.index !== undefined && outline.chapters[correspondingPromptItem.index]) {
+                    outline.chapters[correspondingPromptItem.index].imageUrl = imageUrl;
+                }
+                break;
+            case 'conclusion':
+                outline.conclusion.imageUrl = imageUrl;
+                break;
         }
-    }
-    
-    // Assign to conclusion
-    if (outline.conclusion.imagePrompt) {
-        const conclusionResult = imageResults[resultIndex];
-        if (conclusionResult?.status === 'fulfilled' && conclusionResult.value.media?.url) {
-            outline.conclusion.imageUrl = conclusionResult.value.media.url;
-        } else {
-            console.error(`Image generation failed for conclusion: "${outline.conclusion.imagePrompt}"`);
-            outline.conclusion.imageUrl = '';
-        }
-    }
-    
-    // 5. Return the fully populated original outline.
+    });
+
+    // 5. Return the fully populated outline.
     return outline;
   }
 );
