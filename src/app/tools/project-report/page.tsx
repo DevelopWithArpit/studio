@@ -94,7 +94,7 @@ export default function ProjectReportGeneratorPage() {
   }
 
   const handleDownloadPdf = () => {
-    if (!result) return;
+    if (!result || !result.sections) return;
     
     const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
     const pageWidth = doc.internal.pageSize.getWidth();
@@ -146,7 +146,7 @@ export default function ProjectReportGeneratorPage() {
   };
 
   const handleDownloadDocx = async () => {
-    if (!result) return;
+    if (!result || !result.sections) return;
     const {
       topic, collegeName, departmentName, semester, year, subject, studentName, rollNumber, guideName, section
     } = form.getValues();
@@ -156,8 +156,7 @@ export default function ProjectReportGeneratorPage() {
         return text.split('\n').filter(p => p.trim() !== '').map(p => new Paragraph({ text: p.trim(), spacing: { after: 150 } }));
     };
     
-    const allSections = [result.introduction, ...result.chapters, result.conclusion];
-    const imagePromises = allSections.map(async (chapter) => {
+    const imagePromises = result.sections.map(async (chapter) => {
         if (chapter && chapter.imageUrl) {
             try {
                 const response = await fetch(chapter.imageUrl);
@@ -211,7 +210,7 @@ export default function ProjectReportGeneratorPage() {
         }),
     ];
 
-    const contentPages = allSections.flatMap((chapter, index) => {
+    const contentPages = result.sections.flatMap((chapter, index) => {
         if (!chapter) return [];
         const imageBuffer = imageBuffers[index];
         const chapterContent = [
@@ -255,8 +254,6 @@ export default function ProjectReportGeneratorPage() {
     return text.replace(/```(json)?/g, '').replace(/\\n/g, '\n').replace(/\\"/g, '"').replace(/##+\s?/g, '');
   };
   
-  const allSections = result ? [result.introduction, ...result.chapters, result.conclusion] : [];
-
   return (
     <div className="space-y-8">
       <header className="space-y-2">
@@ -328,7 +325,7 @@ export default function ProjectReportGeneratorPage() {
         </Card>
       )}
 
-      {result && (
+      {result && result.sections && (
         <Card>
           <CardHeader>
             <CardTitle>{result.title}</CardTitle>
@@ -337,7 +334,7 @@ export default function ProjectReportGeneratorPage() {
           <CardContent>
             <Carousel className="w-full">
               <CarouselContent>
-                {allSections.map((item, index) => (
+                {result.sections.map((item, index) => (
                   item && (
                     <CarouselItem key={index}>
                       <div className="p-1">

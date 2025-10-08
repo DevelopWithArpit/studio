@@ -33,9 +33,8 @@ const ChapterSchema = z.object({
 
 const GenerateProjectReportOutputSchema = z.object({
   title: z.string().describe('The main title of the generated document.'),
-  introduction: ChapterSchema.describe('The introduction chapter object, containing title, content, and imagePrompt.'),
-  chapters: z.array(ChapterSchema).describe('An array of generated chapters or sections for the document body.'),
-  conclusion: ChapterSchema.describe('The conclusion chapter object, containing title, content, and imagePrompt.'),
+  // The schema is now a flat array of chapters. The first is the introduction, the last is the conclusion.
+  sections: z.array(ChapterSchema).describe('An array of all generated sections, including introduction, chapters, and conclusion.'),
 });
 export type GenerateProjectReportOutput = z.infer<typeof GenerateProjectReportOutputSchema>;
 
@@ -53,10 +52,9 @@ const prompt = ai.definePrompt({
 
 **CRITICAL INSTRUCTIONS:**
 1.  **Research and Write:** Based on your internal knowledge, conduct in-depth research on the specified topic and write a comprehensive academic paper.
-2.  **Structure and Content:** You must generate a complete JSON object including a main 'title', an 'introduction' object, a 'chapters' array, and a 'conclusion' object.
-3.  **Introduction and Conclusion Objects:** The 'introduction' and 'conclusion' fields must be objects, each containing a 'title', 'content', and a unique 'imagePrompt'.
-4.  **Image Prompts:** For the introduction, EACH chapter, and the conclusion, you MUST create a descriptive 'imagePrompt'. This prompt must describe a relevant, professional, and visually appealing image that illustrates the section's core theme. The image prompt MUST be in English.
-5.  **Content-Only Fields:** The 'content' field for every section must ONLY contain the written text in academic Markdown. Do NOT include the title or image prompt in the content field.
+2.  **Structure and Content:** You must generate a 'title' and a flat 'sections' array. The first element in 'sections' must be the introduction. The last element must be the conclusion.
+3.  **Image Prompts:** For EVERY section in the 'sections' array (including introduction and conclusion), you MUST create a descriptive 'imagePrompt'. This prompt must describe a relevant, professional, and visually appealing image that illustrates the section's core theme. The image prompt MUST be in English.
+4.  **Content-Only Fields:** The 'content' field for every section must ONLY contain the written text in academic Markdown. Do NOT include the title or image prompt in the content field.
 
 CRITICAL: Your entire output MUST be a single, valid JSON object that conforms to the schema. Do not output any text or explanation before or after the JSON object.`,
 });
@@ -73,24 +71,18 @@ const generateProjectReportFlow = ai.defineFlow(
       topic: input.topic,
       numPages: input.numPages,
     });
-    if (!outline) {
+    if (!outline || !outline.sections || outline.sections.length === 0) {
       throw new Error('Failed to generate document outline.');
     }
 
     // 2. Create a unified list of all prompts that need an image.
-    const allPrompts: { type: 'introduction' | 'chapter' | 'conclusion'; index?: number; prompt: string }[] = [];
+    const allPrompts: { sectionIndex: number; prompt: string }[] = [];
     
-    if (outline.introduction?.imagePrompt) {
-        allPrompts.push({ type: 'introduction', prompt: outline.introduction.imagePrompt });
-    }
-    outline.chapters.forEach((chapter, index) => {
-        if (chapter.imagePrompt) {
-            allPrompts.push({ type: 'chapter', index, prompt: chapter.imagePrompt });
+    outline.sections.forEach((section, index) => {
+        if (section.imagePrompt) {
+            allPrompts.push({ sectionIndex: index, prompt: section.imagePrompt });
         }
     });
-    if (outline.conclusion?.imagePrompt) {
-        allPrompts.push({ type: 'conclusion', prompt: outline.conclusion.imagePrompt });
-    }
 
     // 3. Generate all images in parallel.
     const imageGenerationPromises = allPrompts.map(item => 
@@ -114,18 +106,9 @@ const generateProjectReportFlow = ai.defineFlow(
              console.error(`Image generation failed for prompt: "${correspondingPromptItem.prompt}"`, result.status === 'rejected' ? result.reason : 'No URL returned');
         }
 
-        switch (correspondingPromptItem.type) {
-            case 'introduction':
-                if (outline.introduction) outline.introduction.imageUrl = imageUrl;
-                break;
-            case 'chapter':
-                if (correspondingPromptItem.index !== undefined && outline.chapters[correspondingPromptItem.index]) {
-                    outline.chapters[correspondingPromptItem.index].imageUrl = imageUrl;
-                }
-                break;
-            case 'conclusion':
-                if (outline.conclusion) outline.conclusion.imageUrl = imageUrl;
-                break;
+        const sectionIndex = correspondingPromptItem.sectionIndex;
+        if (outline.sections[sectionIndex]) {
+            outline.sections[sectionIndex].imageUrl = imageUrl;
         }
     });
 
