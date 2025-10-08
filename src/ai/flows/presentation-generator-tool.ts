@@ -136,17 +136,18 @@ const generatePresentationFlow = ai.defineFlow(
       return `${styledPrompt}. CRITICAL: This image must not contain any text or words.`;
     };
     
-    // 2. Collect all prompts that need an image, including the background.
+    // 2. Collect all prompts that need an image into a single, unified list.
     const allPrompts: { type: 'background' | 'slide'; index?: number; prompt: string }[] = [];
+    
     if (outline.design.backgroundPrompt) {
         allPrompts.push({ type: 'background', prompt: outline.design.backgroundPrompt });
     }
+
     outline.slides.forEach((slide, index) => {
         if (slide.imagePrompt) {
             allPrompts.push({ type: 'slide', index, prompt: slide.imagePrompt });
         }
     });
-
 
     // 3. Generate all images in parallel.
     const imageGenerationPromises = allPrompts.map(item => 
@@ -158,7 +159,7 @@ const generatePresentationFlow = ai.defineFlow(
     
     const imageResults = await Promise.allSettled(imageGenerationPromises);
 
-    // 4. Assign the generated URLs back to the corresponding sections.
+    // 4. Assign the generated URLs back to the corresponding sections in the original outline.
     imageResults.forEach((result, i) => {
         const correspondingPromptItem = allPrompts[i];
         const imageUrl = result.status === 'fulfilled' && result.value.media?.url ? result.value.media.url : '';
@@ -170,7 +171,10 @@ const generatePresentationFlow = ai.defineFlow(
         if (correspondingPromptItem.type === 'background') {
             outline.backgroundImageUrl = imageUrl;
         } else if (correspondingPromptItem.type === 'slide' && correspondingPromptItem.index !== undefined) {
-            outline.slides[correspondingPromptItem.index].imageUrl = imageUrl;
+            // Ensure the slide exists before trying to assign to it.
+            if(outline.slides[correspondingPromptItem.index]) {
+                outline.slides[correspondingPromptItem.index].imageUrl = imageUrl;
+            }
         }
     });
 
@@ -178,3 +182,5 @@ const generatePresentationFlow = ai.defineFlow(
     return outline;
   }
 );
+
+    
