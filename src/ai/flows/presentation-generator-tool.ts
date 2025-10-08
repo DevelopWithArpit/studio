@@ -136,41 +136,45 @@ const generatePresentationFlow = ai.defineFlow(
       return `${styledPrompt}. CRITICAL: This image must not contain any text or words.`;
     };
     
-    // 2. Collect all prompts that need an image.
-    const sectionsWithPrompts = [
-        ...outline.slides,
-        // Add the background prompt as a "section" to generate it in the same batch
-        { imagePrompt: outline.design.backgroundPrompt, imageUrl: '' } 
-    ].filter(section => section && section.imagePrompt);
+    // 2. Collect all prompts that need an image, including the background.
+    const allPrompts: { type: 'background' | 'slide'; index?: number; prompt: string }[] = [];
+    if (outline.design.backgroundPrompt) {
+        allPrompts.push({ type: 'background', prompt: outline.design.backgroundPrompt });
+    }
+    outline.slides.forEach((slide, index) => {
+        if (slide.imagePrompt) {
+            allPrompts.push({ type: 'slide', index, prompt: slide.imagePrompt });
+        }
+    });
+
 
     // 3. Generate all images in parallel.
-    const imageGenerationPromises = sectionsWithPrompts.map(section => 
+    const imageGenerationPromises = allPrompts.map(item => 
         ai.generate({
             model: 'googleai/imagen-4.0-ultra-generate-001',
-            prompt: applyStyle(section.imagePrompt),
+            prompt: applyStyle(item.prompt),
         })
     );
     
     const imageResults = await Promise.allSettled(imageGenerationPromises);
 
     // 4. Assign the generated URLs back to the corresponding sections.
-    imageResults.forEach((result, index) => {
-        const section = sectionsWithPrompts[index];
-        if (result.status === 'fulfilled' && result.value.media?.url) {
-            section.imageUrl = result.value.media.url;
-        } else {
-            console.error(`Image generation failed for prompt: "${section.imagePrompt}"`, result.status === 'rejected' ? result.reason : 'No URL returned');
-            section.imageUrl = ''; // Ensure imageUrl is at least an empty string to prevent errors.
+    imageResults.forEach((result, i) => {
+        const correspondingPromptItem = allPrompts[i];
+        const imageUrl = result.status === 'fulfilled' && result.value.media?.url ? result.value.media.url : '';
+        
+        if (!imageUrl) {
+             console.error(`Image generation failed for prompt: "${correspondingPromptItem.prompt}"`, result.status === 'rejected' ? result.reason : 'No URL returned');
+        }
+
+        if (correspondingPromptItem.type === 'background') {
+            outline.backgroundImageUrl = imageUrl;
+        } else if (correspondingPromptItem.type === 'slide' && correspondingPromptItem.index !== undefined) {
+            outline.slides[correspondingPromptItem.index].imageUrl = imageUrl;
         }
     });
 
-    // 5. Assign the background image URL from the special section we added.
-    const backgroundSection = sectionsWithPrompts.find(s => s.imagePrompt === outline.design.backgroundPrompt);
-    if (backgroundSection) {
-        outline.backgroundImageUrl = backgroundSection.imageUrl;
-    }
-
-    // 6. Return the fully populated outline.
+    // 5. Return the fully populated outline.
     return outline;
   }
 );
