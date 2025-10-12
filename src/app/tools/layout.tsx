@@ -39,7 +39,6 @@ import {
   Github,
   LifeBuoy,
   Settings,
-  Download,
   Video,
   BookMarked,
 } from 'lucide-react';
