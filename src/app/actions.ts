@@ -86,25 +86,15 @@ import type { SmartSearchInput } from '@/app/tools/smart-search/page';
 
 export type GeneratePresentationInput = FlowInput;
 
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
 async function handleAction<T_Input, T_Output>(
   input: T_Input,
-  flow: (input: T_Input) => Promise<T_Output>,
-  retries = 1
+  flow: (input: T_Input) => Promise<T_Output>
 ): Promise<{ success: boolean; data?: T_Output, error?: string }> {
   try {
     const result = await flow(input);
     return { success: true, data: result };
   } catch (e: any) {
     const errorMessage = e.message || String(e);
-    // Check if the error is a rate limit error and if we have retries left.
-    if (errorMessage.includes('429') && retries > 0) {
-      console.warn(`Rate limit hit, retrying in 10 seconds... (${retries} retries left)`);
-      await sleep(10000); // Wait for 10 seconds
-      return handleAction(input, flow, retries - 1);
-    }
-    // Ensure the error is always a string to prevent React rendering errors.
     return { success: false, error: errorMessage };
   }
 }
@@ -158,7 +148,7 @@ export async function handleGeneratePresentationAction(input: GeneratePresentati
 }
 
 export async function handleGenerateSingleImageAction(input: GenerateSingleImageInput) {
-    return handleAction(input, generateSingleImage, 2); // Allow more retries for single image regeneration
+    return handleAction(input, generateSingleImage);
 }
 
 export async function handleGenerateLinkedInVisualsAction(input: GenerateLinkedInVisualsInput) {
@@ -182,7 +172,7 @@ export async function handleGenerateAcademicDocumentAction(input: GenerateAcadem
 }
 
 export async function handleGenerateProjectReportAction(input: GenerateProjectReportInput) {
-    return handleAction(input, generateProjectReport, 1);
+    return handleAction(input, generateProjectReport);
 }
 
 export async function handleGenerateVideoAction(input: GenerateVideoInput) {

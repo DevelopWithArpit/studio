@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -37,7 +37,7 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel';
 import { Badge } from '@/components/ui/badge';
-import { Download, Loader2, Image as ImageIconLucide, RotateCw, Sparkles } from 'lucide-react';
+import { Download, Loader2, Image as ImageIconLucide, RotateCw, Sparkles, Timer } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { cn } from '@/lib/utils';
 import { Textarea } from '../ui/textarea';
@@ -72,10 +72,13 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 type Slide = GeneratePresentationOutput['slides'][0];
 
+const COOLDOWN_SECONDS = 60;
+
 export default function PresentationGeneratorTool() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<GeneratePresentationOutput | null>(null);
   const [generatingSlide, setGeneratingSlide] = useState<number | null>(null);
+  const [cooldowns, setCooldowns] = useState<Record<number, number>>({});
   const { toast } = useToast();
 
   const form = useForm<FormData>({
@@ -129,6 +132,23 @@ export default function PresentationGeneratorTool() {
   const contentType = form.watch('contentType');
   const style = form.watch('style');
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCooldowns(prev => {
+        const newCooldowns: Record<number, number> = {};
+        let changed = false;
+        for (const key in prev) {
+          if (prev[key] > 0) {
+            newCooldowns[key] = prev[key] - 1;
+            changed = true;
+          }
+        }
+        return changed ? newCooldowns : prev;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   React.useEffect(() => {
     if (style === 'Tech Pitch') {
         if (form.getValues('contentType') !== 'pitchDeck') {
@@ -169,7 +189,6 @@ Summary of work
 Possible improvements, recommendations
 9. Acknowledgement`);
     } else if (form.getValues('customStructure')?.startsWith('1. Introduction')) {
-      // Clear if it was the default project proposal text
       form.setValue('customStructure', '');
     }
   }, [contentType, form]);
@@ -220,7 +239,6 @@ Possible improvements, recommendations
     const pptx = new PptxGenJS();
     pptx.layout = 'LAYOUT_WIDE';
     
-    // Define a master slide
     pptx.defineSlideMaster({
         title: "MASTER_SLIDE",
         background: { color: "0B192E" },
@@ -230,7 +248,6 @@ Possible improvements, recommendations
         ],
     });
     
-    // Title Slide
     const titleSlide = pptx.addSlide({ masterName: "MASTER_SLIDE" });
     titleSlide.addText(result.title || "Presentation", { 
         x: 1, y: 2, w: 8, h: 1.5, 
@@ -257,7 +274,6 @@ Possible improvements, recommendations
         });
     }
     
-    // Content Slides
     result.slides.forEach((slide) => {
         const contentSlide = pptx.addSlide({ masterName: "MASTER_SLIDE" });
         
@@ -290,11 +306,12 @@ Possible improvements, recommendations
   };
   
    const handleGenerateImage = async (slideIndex: number) => {
-    if (!result) return;
+    if (!result || cooldowns[slideIndex] > 0) return;
     const slideToGenerate = result.slides[slideIndex];
     if (!slideToGenerate) return;
 
     setGeneratingSlide(slideIndex);
+    setCooldowns(prev => ({...prev, [slideIndex]: COOLDOWN_SECONDS}));
 
     const response = await handleGenerateSingleImageAction({
         imagePrompt: slideToGenerate.imagePrompt,
@@ -313,6 +330,12 @@ Possible improvements, recommendations
         toast({ title: 'Image Generated!', description: `Image for "${slideToGenerate.title}" has been created.` });
     } else {
         toast({ variant: 'destructive', title: 'Image Generation Failed', description: response.error || 'Could not generate the image.' });
+        // Reset cooldown on failure so user can try again
+        setCooldowns(prev => {
+            const newCooldowns = {...prev};
+            delete newCooldowns[slideIndex];
+            return newCooldowns;
+        });
     }
 };
 
@@ -602,18 +625,16 @@ Possible improvements, recommendations
                                             fill
                                             className="object-cover w-full h-full"
                                         />
-                                        <Button variant="secondary" size="sm" className="absolute bottom-4 right-4" onClick={() => handleGenerateImage(index)}>
-                                            <RotateCw className="mr-2 h-4 w-4" />
-                                            Retry
+                                        <Button variant="secondary" size="sm" className="absolute bottom-4 right-4" onClick={() => handleGenerateImage(index)} disabled={cooldowns[index] > 0 || generatingSlide !== null}>
+                                          {cooldowns[index] > 0 ? <><Timer className="mr-2 h-4 w-4" /> {cooldowns[index]}s</> : <><RotateCw className="mr-2 h-4 w-4" /> Retry</>}
                                         </Button>
                                       </>
                                     ) : (
                                         <div className="flex flex-col items-center justify-center text-muted-foreground">
                                             <ImageIconLucide className="w-16 h-16" />
                                             <p className="mt-2 text-sm font-semibold">No Image</p>
-                                            <Button variant="default" size="sm" className="mt-4" onClick={() => handleGenerateImage(index)}>
-                                                <Sparkles className="mr-2 h-4 w-4" />
-                                                Generate Image
+                                            <Button variant="default" size="sm" className="mt-4" onClick={() => handleGenerateImage(index)} disabled={cooldowns[index] > 0 || generatingSlide !== null}>
+                                                {cooldowns[index] > 0 ? <><Timer className="mr-2 h-4 w-4" /> {cooldowns[index]}s</> : <><Sparkles className="mr-2 h-4 w-4" /> Generate Image</>}
                                             </Button>
                                         </div>
                                     )}
