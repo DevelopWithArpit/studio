@@ -44,6 +44,7 @@ import {
 import {
     generatePresentation,
     generateSingleImage,
+    type GeneratePresentationInput as FlowInput,
     type GenerateSingleImageInput,
 } from '@/ai/flows/presentation-generator-tool';
 import {
@@ -82,30 +83,8 @@ import type { GenerateCoverLetterInput } from '@/app/tools/cover-letter-assistan
 import type { TextToSpeechInput } from '@/app/tools/text-to-speech/page';
 import type { GetResumeFeedbackInput } from '@/app/tools/resume-feedback/page';
 import type { SmartSearchInput } from '@/app/tools/smart-search/page';
-import { z } from 'zod';
 
-const formSchema = z.object({
-  topic: z.string().min(3, 'Please enter a topic with at least 3 characters.'),
-  presenterName: z.string().optional(),
-  rollNumber: z.string().optional(),
-  department: z.string().optional(),
-  numSlides: z.coerce.number().int().min(2, "Must be at least 2 slides.").max(20, "Cannot exceed 20 slides."),
-  imageStyle: z.string().optional(),
-  language: z.string().optional(),
-  contentType: z.enum(['general', 'projectProposal', 'pitchDeck', 'custom']).default('general'),
-  customStructure: z.string().optional(),
-  style: z.enum(['Default', 'Tech Pitch', 'Creative']).default('Default'),
-}).refine(data => {
-    if (data.contentType === 'custom') {
-        return (data.customStructure || '').trim().length > 10;
-    }
-    return true;
-}, {
-    message: "Please provide a custom structure with at least 10 characters.",
-    path: ['customStructure'],
-});
-
-export type GeneratePresentationInput = z.infer<typeof formSchema>;
+export type GeneratePresentationInput = FlowInput;
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -175,7 +154,7 @@ export async function handleSummarizeDocumentAction(input: SummarizeDocumentInpu
 }
 
 export async function handleGeneratePresentationAction(input: GeneratePresentationInput) {
-    return handleAction(input, generatePresentation, 1);
+    return handleAction(input, generatePresentation);
 }
 
 export async function handleGenerateSingleImageAction(input: GenerateSingleImageInput) {
