@@ -4,6 +4,8 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 const GeneratePresentationInputSchema = z.object({
   topic: z.string(),
   presenterName: z.string().optional(),
@@ -101,15 +103,35 @@ const generatePresentationFlow = ai.defineFlow(
     outputSchema: PresentationOutlineSchema,
   },
   async (input) => {
+    // 1. Generate the text outline first
     const { output: outline } = await outlinePrompt(input);
     if (!outline) {
       throw new Error('Failed to generate presentation outline.');
     }
+
+    const imageStyle = input.imageStyle || 'photorealistic';
+
+    // 2. Generate all images sequentially with a delay to avoid rate limiting
+    for (const slide of outline.slides) {
+      try {
+        await sleep(60000); // Wait for 60 seconds before each request
+        const { media } = await ai.generate({
+            model: 'googleai/gemini-2.5-flash-image-preview',
+            prompt: applyStyle(slide.imagePrompt, imageStyle),
+            config: {
+                responseModalities: ['TEXT', 'IMAGE'],
+            },
+        });
+        if (media?.url) {
+            slide.imageUrl = media.url;
+        }
+      } catch (error) {
+        console.error(`Image generation failed for slide: "${slide.title}". Error: ${error}`);
+        // Leave imageUrl as undefined, the frontend will handle it
+      }
+    }
     
-    // Do not generate images here to avoid rate limiting.
-    // Images will be generated on-demand from the client.
-    
-    return { ...outline, backgroundImageUrl: undefined, slides: outline.slides.map(s => ({...s, imageUrl: undefined})) };
+    return outline;
   }
 );
 
@@ -136,5 +158,3 @@ const generateSingleImageFlow = ai.defineFlow(
         return { imageUrl: media.url };
     }
 );
-
-    

@@ -219,8 +219,8 @@ Possible improvements, recommendations
     if (response.success && response.data) {
         setResult(response.data);
         toast({
-            title: "Presentation Outline Generated!",
-            description: "Your presentation text is ready. You can now generate images for each slide.",
+            title: "Presentation Generated!",
+            description: "Your presentation text and images are being generated in the background. This may take several minutes.",
         });
     } else {
         toast({
@@ -572,7 +572,7 @@ Possible improvements, recommendations
                 />
               </div>
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating Outline...</> : 'Generate Presentation'}
+                {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating...</> : 'Generate Presentation'}
               </Button>
             </form>
           </Form>
@@ -582,8 +582,8 @@ Possible improvements, recommendations
       {isLoading && (
         <Card>
           <CardHeader>
-            <CardTitle>Generating Presentation Outline</CardTitle>
-            <CardDescription>The AI is building your presentation text. This may take a few moments...</CardDescription>
+            <CardTitle>Generating Presentation...</CardTitle>
+            <CardDescription>The AI is building your presentation. This may take several minutes as images are generated one by one.</CardDescription>
           </CardHeader>
           <CardContent>
             <RobotsBuildingLoader />
@@ -596,7 +596,7 @@ Possible improvements, recommendations
           <CardHeader>
             <CardTitle>{result?.title}</CardTitle>
             <CardDescription>
-                Your generated presentation is ready. Generate images for each slide.
+                Your generated presentation is ready. Review the slides and download the final PPTX file.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -632,10 +632,8 @@ Possible improvements, recommendations
                                     ) : (
                                         <div className="flex flex-col items-center justify-center text-muted-foreground">
                                             <ImageIconLucide className="w-16 h-16" />
-                                            <p className="mt-2 text-sm font-semibold">No Image</p>
-                                            <Button variant="default" size="sm" className="mt-4" onClick={() => handleGenerateImage(index)} disabled={cooldowns[index] > 0 || generatingSlide !== null}>
-                                                {cooldowns[index] > 0 ? <><Timer className="mr-2 h-4 w-4" /> {cooldowns[index]}s</> : <><Sparkles className="mr-2 h-4 w-4" /> Generate Image</>}
-                                            </Button>
+                                            <p className="mt-2 text-sm font-semibold">Image generation is in progress...</p>
+                                            <Loader2 className="w-8 h-8 animate-spin text-primary mt-2" />
                                         </div>
                                     )}
                                 </div>
@@ -660,5 +658,3 @@ Possible improvements, recommendations
     </div>
   );
 }
-
-    
