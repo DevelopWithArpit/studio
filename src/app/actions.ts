@@ -107,6 +107,7 @@ const formSchema = z.object({
 
 export type GeneratePresentationInput = z.infer<typeof formSchema>;
 
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function handleAction<T_Input, T_Output>(
   input: T_Input,
@@ -116,13 +117,15 @@ async function handleAction<T_Input, T_Output>(
   try {
     const result = await flow(input);
     return { success: true, data: result };
-  } catch (e) {
-     if (retries > 0) {
-      console.warn(`Action failed, retrying... (${retries} retries left)`);
+  } catch (e: any) {
+    const errorMessage = e.message || String(e);
+    // Check if the error is a rate limit error and if we have retries left.
+    if (errorMessage.includes('429') && retries > 0) {
+      console.warn(`Rate limit hit, retrying in 10 seconds... (${retries} retries left)`);
+      await sleep(10000); // Wait for 10 seconds
       return handleAction(input, flow, retries - 1);
     }
     // Ensure the error is always a string to prevent React rendering errors.
-    const errorMessage = e instanceof Error ? e.message : String(e);
     return { success: false, error: errorMessage };
   }
 }
@@ -176,7 +179,7 @@ export async function handleGeneratePresentationAction(input: GeneratePresentati
 }
 
 export async function handleGenerateSingleImageAction(input: GenerateSingleImageInput) {
-    return handleAction(input, generateSingleImage);
+    return handleAction(input, generateSingleImage, 2); // Allow more retries for single image regeneration
 }
 
 export async function handleGenerateLinkedInVisualsAction(input: GenerateLinkedInVisualsInput) {
@@ -238,5 +241,3 @@ export async function handleGeneratePortfolioWebsiteAction(input: GeneratePortfo
         return { success: false, error: errorMessage };
     }
 }
-
-    

@@ -150,7 +150,6 @@ const generatePresentationFlow = ai.defineFlow(
     // 2. Generate the background image first and wait for it.
     if (outline.design.backgroundPrompt) {
         try {
-            await sleep(1000); // Add delay before the request
             const { media } = await ai.generate({
                 model: 'googleai/gemini-2.5-flash-image-preview',
                 prompt: applyStyle(outline.design.backgroundPrompt, input.imageStyle || 'photorealistic'),
@@ -169,7 +168,6 @@ const generatePresentationFlow = ai.defineFlow(
     for (const slide of outline.slides) {
         if (slide.imagePrompt) {
             try {
-                await sleep(1000); // Add delay before each request
                 const { media } = await ai.generate({
                     model: 'googleai/gemini-2.5-flash-image-preview',
                     prompt: applyStyle(slide.imagePrompt, input.imageStyle || 'photorealistic'),
@@ -198,7 +196,6 @@ const generateSingleImageFlow = ai.defineFlow(
         outputSchema: GenerateSingleImageOutputSchema,
     },
     async (input) => {
-        await sleep(1000); // Add delay before the request
         const { media } = await ai.generate({
             model: 'googleai/gemini-2.5-flash-image-preview',
             prompt: applyStyle(input.imagePrompt, input.imageStyle),
