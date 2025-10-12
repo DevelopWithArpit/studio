@@ -120,6 +120,8 @@ const outlinePrompt = ai.definePrompt({
 - Content Type: {{{contentType}}}
 - Presentation Style: {{{style}}}
 {{#if customStructure}}- Custom Structure: {{{customStructure}}}{{/if}}
+
+Your entire output must be a single, valid JSON object that conforms to the schema.
 `,
 });
 
@@ -144,52 +146,43 @@ const generatePresentationFlow = ai.defineFlow(
       throw new Error('Failed to generate presentation outline.');
     }
     
-    // 2. Create a unified list of all prompts that need an image.
-    const allPrompts: { type: 'background' | 'slide'; index?: number; prompt: string }[] = [];
-    
+    // 2. Generate the background image first.
     if (outline.design.backgroundPrompt) {
-        allPrompts.push({ type: 'background', prompt: outline.design.backgroundPrompt });
+        try {
+            const { media } = await ai.generate({
+                model: 'googleai/gemini-2.5-flash-image-preview',
+                prompt: applyStyle(outline.design.backgroundPrompt, input.imageStyle || 'photorealistic'),
+                config: {
+                    responseModalities: ['TEXT', 'IMAGE'],
+                },
+            });
+            outline.backgroundImageUrl = media?.url || '';
+        } catch (error) {
+            console.error(`Background image generation failed:`, error);
+            outline.backgroundImageUrl = ''; // Ensure it's set to something
+        }
     }
 
-    outline.slides.forEach((slide, index) => {
+    // 3. Generate slide images sequentially to avoid rate limiting.
+    for (const slide of outline.slides) {
         if (slide.imagePrompt) {
-            allPrompts.push({ type: 'slide', index, prompt: slide.imagePrompt });
-        }
-    });
-
-    // 3. Generate all images in parallel.
-    const imageGenerationPromises = allPrompts.map(item => 
-        ai.generate({
-            model: 'googleai/gemini-2.5-flash-image-preview',
-            prompt: applyStyle(item.prompt, input.imageStyle || 'photorealistic'),
-            config: {
-                responseModalities: ['TEXT', 'IMAGE'],
-            },
-        })
-    );
-    
-    const imageResults = await Promise.allSettled(imageGenerationPromises);
-
-    // 4. Assign the generated URLs back to the corresponding sections in the original outline.
-    imageResults.forEach((result, i) => {
-        const correspondingPromptItem = allPrompts[i];
-        const imageUrl = result.status === 'fulfilled' && result.value.media?.url ? result.value.media.url : '';
-        
-        if (!imageUrl) {
-             console.error(`Image generation failed for prompt: "${correspondingPromptItem.prompt}"`, result.status === 'rejected' ? result.reason : 'No URL returned');
-        }
-
-        if (correspondingPromptItem.type === 'background') {
-            outline.backgroundImageUrl = imageUrl;
-        } else if (correspondingPromptItem.type === 'slide' && correspondingPromptItem.index !== undefined) {
-            // Ensure the slide exists before trying to assign to it.
-            if(outline.slides[correspondingPromptItem.index]) {
-                outline.slides[correspondingPromptItem.index].imageUrl = imageUrl;
+            try {
+                const { media } = await ai.generate({
+                    model: 'googleai/gemini-2.5-flash-image-preview',
+                    prompt: applyStyle(slide.imagePrompt, input.imageStyle || 'photorealistic'),
+                    config: {
+                        responseModalities: ['TEXT', 'IMAGE'],
+                    },
+                });
+                slide.imageUrl = media?.url || '';
+            } catch (error) {
+                console.error(`Image generation failed for slide "${slide.title}":`, error);
+                slide.imageUrl = ''; // Set to empty string on failure
             }
         }
-    });
+    }
 
-    // 5. Return the fully populated outline.
+    // 4. Return the fully populated outline.
     return outline;
   }
 );
