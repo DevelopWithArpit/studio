@@ -37,7 +37,7 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel';
 import { Badge } from '@/components/ui/badge';
-import { Download, Loader2, Image as ImageIconLucide, RotateCw, Sparkles, Timer } from 'lucide-react';
+import { Download, Loader2, Image as ImageIconLucide, RotateCw } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { cn } from '@/lib/utils';
 import { Textarea } from '../ui/textarea';
@@ -70,9 +70,6 @@ const formSchema = z.object({
 
 
 type FormData = z.infer<typeof formSchema>;
-type Slide = GeneratePresentationOutput['slides'][0];
-
-const COOLDOWN_SECONDS = 60;
 
 export default function PresentationGeneratorTool() {
   const [isLoading, setIsLoading] = useState(false);
@@ -220,7 +217,7 @@ Possible improvements, recommendations
         setResult(response.data);
         toast({
             title: "Presentation Generated!",
-            description: "Your presentation text and images are being generated in the background. This may take several minutes.",
+            description: "Your presentation text and images have been generated.",
         });
     } else {
         toast({
@@ -311,8 +308,7 @@ Possible improvements, recommendations
     if (!slideToGenerate) return;
 
     setGeneratingSlide(slideIndex);
-    setCooldowns(prev => ({...prev, [slideIndex]: COOLDOWN_SECONDS}));
-
+    
     const response = await handleGenerateSingleImageAction({
         imagePrompt: slideToGenerate.imagePrompt,
         imageStyle: form.getValues('imageStyle') || 'photorealistic',
@@ -330,12 +326,6 @@ Possible improvements, recommendations
         toast({ title: 'Image Generated!', description: `Image for "${slideToGenerate.title}" has been created.` });
     } else {
         toast({ variant: 'destructive', title: 'Image Generation Failed', description: response.error || 'Could not generate the image.' });
-        // Reset cooldown on failure so user can try again
-        setCooldowns(prev => {
-            const newCooldowns = {...prev};
-            delete newCooldowns[slideIndex];
-            return newCooldowns;
-        });
     }
 };
 
@@ -583,7 +573,7 @@ Possible improvements, recommendations
         <Card>
           <CardHeader>
             <CardTitle>Generating Presentation...</CardTitle>
-            <CardDescription>The AI is building your presentation. This may take several minutes as images are generated one by one.</CardDescription>
+            <CardDescription>The AI is building your presentation. This may take a minute or two.</CardDescription>
           </CardHeader>
           <CardContent>
             <RobotsBuildingLoader />
@@ -625,15 +615,17 @@ Possible improvements, recommendations
                                             fill
                                             className="object-cover w-full h-full"
                                         />
-                                        <Button variant="secondary" size="sm" className="absolute bottom-4 right-4" onClick={() => handleGenerateImage(index)} disabled={cooldowns[index] > 0 || generatingSlide !== null}>
-                                          {cooldowns[index] > 0 ? <><Timer className="mr-2 h-4 w-4" /> {cooldowns[index]}s</> : <><RotateCw className="mr-2 h-4 w-4" /> Retry</>}
+                                        <Button variant="secondary" size="sm" className="absolute bottom-4 right-4" onClick={() => handleGenerateImage(index)} disabled={generatingSlide !== null}>
+                                            <RotateCw className="mr-2 h-4 w-4" /> Retry
                                         </Button>
                                       </>
                                     ) : (
-                                        <div className="flex flex-col items-center justify-center text-muted-foreground">
+                                        <div className="flex flex-col items-center justify-center text-muted-foreground p-4 text-center">
                                             <ImageIconLucide className="w-16 h-16" />
-                                            <p className="mt-2 text-sm font-semibold">Image generation is in progress...</p>
-                                            <Loader2 className="w-8 h-8 animate-spin text-primary mt-2" />
+                                            <p className="mt-2 text-sm font-semibold">Image generation failed or was skipped.</p>
+                                            <Button variant="default" size="sm" className="mt-4" onClick={() => handleGenerateImage(index)} disabled={generatingSlide !== null}>
+                                                <RotateCw className="mr-2 h-4 w-4" /> Generate Image
+                                            </Button>
                                         </div>
                                     )}
                                 </div>

@@ -94,7 +94,11 @@ async function handleAction<T_Input, T_Output>(
     const result = await flow(input);
     return { success: true, data: result };
   } catch (e: any) {
+    console.error(e);
     const errorMessage = e.message || String(e);
+    if (errorMessage.includes('429')) {
+      return { success: false, error: 'Too Many Requests: The API is rate-limited. Please wait a moment before trying again.' };
+    }
     return { success: false, error: errorMessage };
   }
 }

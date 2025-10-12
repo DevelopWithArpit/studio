@@ -3,8 +3,8 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
+import { googleAI } from '@genkit-ai/googleai';
 
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 const GeneratePresentationInputSchema = z.object({
   topic: z.string(),
@@ -31,7 +31,6 @@ const SlideSchema = z.object({
 const PresentationOutlineSchema = z.object({
   title: z.string().describe('The main title of the presentation.'),
   slides: z.array(SlideSchema).describe('An array of slide objects.'),
-  backgroundImageUrl: z.string().optional().describe('A URL for a subtle, professional background image for the slides.'),
 });
 export type GeneratePresentationOutput = z.infer<typeof PresentationOutlineSchema>;
 
@@ -66,7 +65,6 @@ const outlinePrompt = ai.definePrompt({
 **Content Generation:**
 - The tone must be professional, authoritative, and clear. Avoid jargon.
 - For each slide, you MUST provide: a title, content (as an array of bullet points), and an English image prompt for an AI image generator. The image prompt should ONLY describe the visual content. DO NOT generate an imageUrl.
-- Also generate a prompt for a single, professional, and subtle background image that can be used across all slides. The prompt should be abstract and not contain any text.
 
 **Structure Generation Instructions:**
 - If the user provides a "Custom Structure," you MUST use it. The 'numSlides' parameter should be IGNORED.
@@ -92,7 +90,7 @@ const applyStyle = (prompt: string, style: string) => {
     if (style && style.toLowerCase() !== 'photorealistic') {
       styledPrompt = `${prompt}, in a ${style} style`;
     }
-    return `${styledPrompt}. CRITICAL: This image must not contain any text or words.`;
+    return `${styledPrompt}. This image must not contain any text or words. High quality, professional, illustrative.`;
 };
 
 
@@ -111,18 +109,23 @@ const generatePresentationFlow = ai.defineFlow(
 
     const imageStyle = input.imageStyle || 'photorealistic';
 
-    // 2. Generate all images sequentially with a delay to avoid rate limiting
+    // 2. Generate all images sequentially to avoid rate limiting
     for (const slide of outline.slides) {
+      if (!slide.imagePrompt || !slide.imagePrompt.trim()) {
+        continue;
+      }
       try {
-        await sleep(60000); // Wait for 60 seconds before each request
-        const { media } = await ai.generate({
-            model: 'googleai/gemini-2.5-flash-image-preview',
-            prompt: applyStyle(slide.imagePrompt, imageStyle),
-            config: {
-                responseModalities: ['TEXT', 'IMAGE'],
-            },
+        const imageGenPrompt = applyStyle(slide.imagePrompt, imageStyle);
+        
+        const {media} = await ai.generate({
+          model: googleAI.model('gemini-2.0-flash-preview-image-generation'),
+          prompt: imageGenPrompt,
+          config: {
+            responseModalities: ['TEXT', 'IMAGE'],
+          },
         });
-        if (media?.url) {
+        
+        if (media && media.url) {
             slide.imageUrl = media.url;
         }
       } catch (error) {
@@ -144,11 +147,11 @@ const generateSingleImageFlow = ai.defineFlow(
     },
     async (input) => {
         const { media } = await ai.generate({
-            model: 'googleai/gemini-2.5-flash-image-preview',
-            prompt: applyStyle(input.imagePrompt, input.imageStyle),
-            config: {
-                responseModalities: ['TEXT', 'IMAGE'],
-            },
+          model: googleAI.model('gemini-2.0-flash-preview-image-generation'),
+          prompt: applyStyle(input.imagePrompt, input.imageStyle),
+          config: {
+            responseModalities: ['TEXT', 'IMAGE'],
+          },
         });
 
         if (!media?.url) {
