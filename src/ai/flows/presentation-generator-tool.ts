@@ -4,8 +4,6 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
 const GeneratePresentationInputSchema = z.object({
   topic: z.string(),
   presenterName: z.string().optional(),
@@ -138,3 +136,5 @@ const generateSingleImageFlow = ai.defineFlow(
         return { imageUrl: media.url };
     }
 );
+
+    
