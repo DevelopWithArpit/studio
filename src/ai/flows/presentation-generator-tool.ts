@@ -3,7 +3,6 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { googleAI } from '@genkit-ai/googleai';
 
 // Utility function to introduce a delay
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -33,6 +32,7 @@ const SlideSchema = z.object({
 const PresentationOutlineSchema = z.object({
   title: z.string().describe('The main title of the presentation.'),
   slides: z.array(SlideSchema).describe('An array of slide objects.'),
+  backgroundImageUrl: z.string().optional().describe('A URL for a subtle, professional background image for the slides.'),
 });
 export type GeneratePresentationOutput = z.infer<typeof PresentationOutlineSchema>;
 
@@ -67,6 +67,7 @@ const outlinePrompt = ai.definePrompt({
 **Content Generation:**
 - The tone must be professional, authoritative, and clear. Avoid jargon.
 - For each slide, you MUST provide: a title, content (as an array of bullet points), and an English image prompt for an AI image generator. The image prompt should ONLY describe the visual content. DO NOT generate an imageUrl.
+- Also generate a prompt for a single, professional, and subtle background image that can be used across all slides. The prompt should be abstract and not contain any text.
 
 **Structure Generation Instructions:**
 - If the user provides a "Custom Structure," you MUST use it. The 'numSlides' parameter should be IGNORED.
@@ -76,6 +77,7 @@ const outlinePrompt = ai.definePrompt({
 
 **User Input:**
 - Topic: {{{topic}}}
+- Style: {{{style}}}
 {{#if presenterName}}- Presenter: {{{presenterName}}}{{/if}}
 {{#if rollNumber}}- Roll Number: {{{rollNumber}}}{{/if}}
 {{#if department}}- Department: {{{department}}}{{/if}}
@@ -94,6 +96,7 @@ const applyStyle = (prompt: string, style: string) => {
     return `${styledPrompt}. CRITICAL: This image must not contain any text or words.`;
 };
 
+
 const generatePresentationFlow = ai.defineFlow(
   {
     name: 'generatePresentationFlow',
@@ -107,8 +110,45 @@ const generatePresentationFlow = ai.defineFlow(
       throw new Error('Failed to generate presentation outline.');
     }
     
-    // 2. Return the outline without images. Images will be generated on-demand from the client.
-    return outline;
+    // 2. Generate the background image
+    let backgroundImageUrl: string | undefined;
+    if (outline.backgroundImageUrl) { // The prompt now puts the prompt in this field
+      try {
+        await sleep(10000); // Wait 10 seconds before the first image call
+        const { media } = await ai.generate({
+          model: 'googleai/imagen-4.0-ultra-generate-001',
+          prompt: `${outline.backgroundImageUrl}, abstract background, subtle, professional, high quality`,
+        });
+        backgroundImageUrl = media?.url;
+      } catch (e) {
+        console.error("Failed to generate background image", e);
+      }
+    }
+
+
+    // 3. Generate slide images sequentially
+    for (const slide of outline.slides) {
+        if (slide.imagePrompt) {
+            try {
+                await sleep(10000); // Wait 10 seconds before each image call
+                const { media } = await ai.generate({
+                    model: 'googleai/gemini-2.5-flash-image-preview',
+                    prompt: applyStyle(slide.imagePrompt, input.imageStyle || 'photorealistic'),
+                    config: {
+                        responseModalities: ['TEXT', 'IMAGE'],
+                    },
+                });
+                if (media?.url) {
+                    slide.imageUrl = media.url;
+                }
+            } catch (error) {
+                console.error(`Image generation failed for slide "${slide.title}"`, error);
+                // Continue to the next slide
+            }
+        }
+    }
+    
+    return { ...outline, backgroundImageUrl };
   }
 );
 
@@ -120,8 +160,8 @@ const generateSingleImageFlow = ai.defineFlow(
         outputSchema: GenerateSingleImageOutputSchema,
     },
     async (input) => {
-        // Add a delay to avoid hitting rate limits, even for single requests.
-        await sleep(1000);
+        // Add a significant delay to avoid hitting rate limits, even for single requests.
+        await sleep(10000);
         const { media } = await ai.generate({
             model: 'googleai/gemini-2.5-flash-image-preview',
             prompt: applyStyle(input.imagePrompt, input.imageStyle),
@@ -137,4 +177,3 @@ const generateSingleImageFlow = ai.defineFlow(
         return { imageUrl: media.url };
     }
 );
-
