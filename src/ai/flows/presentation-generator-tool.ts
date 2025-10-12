@@ -66,7 +66,7 @@ const outlinePrompt = ai.definePrompt({
 
 **Content Generation:**
 - The tone must be professional, authoritative, and clear. Avoid jargon.
-- For each slide, you MUST provide: a title, content (as an array of bullet points), and an English image prompt for an AI image generator. The image prompt should ONLY describe the visual content.
+- For each slide, you MUST provide: a title, content (as an array of bullet points), and an English image prompt for an AI image generator. The image prompt should ONLY describe the visual content. DO NOT generate an imageUrl.
 
 **Structure Generation Instructions:**
 - If the user provides a "Custom Structure," you MUST use it. The 'numSlides' parameter should be IGNORED.
@@ -107,28 +107,7 @@ const generatePresentationFlow = ai.defineFlow(
       throw new Error('Failed to generate presentation outline.');
     }
     
-    // 2. Generate slide images sequentially to avoid rate limiting.
-    for (const slide of outline.slides) {
-        if (slide.imagePrompt) {
-            try {
-                // Add a delay to avoid hitting rate limits
-                await sleep(1000); 
-                const { media } = await ai.generate({
-                    model: 'googleai/gemini-2.5-flash-image-preview',
-                    prompt: applyStyle(slide.imagePrompt, input.imageStyle || 'photorealistic'),
-                    config: {
-                        responseModalities: ['TEXT', 'IMAGE'],
-                    },
-                });
-                slide.imageUrl = media?.url || '';
-            } catch (error) {
-                console.error(`Image generation failed for slide "${slide.title}":`, error);
-                slide.imageUrl = ''; // Set to empty string on failure
-            }
-        }
-    }
-
-    // 4. Return the fully populated outline.
+    // 2. Return the outline without images. Images will be generated on-demand from the client.
     return outline;
   }
 );
@@ -141,7 +120,7 @@ const generateSingleImageFlow = ai.defineFlow(
         outputSchema: GenerateSingleImageOutputSchema,
     },
     async (input) => {
-        // Add a delay to avoid hitting rate limits
+        // Add a delay to avoid hitting rate limits, even for single requests.
         await sleep(1000);
         const { media } = await ai.generate({
             model: 'googleai/gemini-2.5-flash-image-preview',
@@ -158,3 +137,4 @@ const generateSingleImageFlow = ai.defineFlow(
         return { imageUrl: media.url };
     }
 );
+

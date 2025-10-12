@@ -37,7 +37,7 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel';
 import { Badge } from '@/components/ui/badge';
-import { Download, Loader2, Image as ImageIconLucide, RotateCw } from 'lucide-react';
+import { Download, Loader2, Image as ImageIconLucide, RotateCw, Sparkles } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { cn } from '@/lib/utils';
 import { Textarea } from '../ui/textarea';
@@ -75,7 +75,7 @@ type Slide = GeneratePresentationOutput['slides'][0];
 export default function PresentationGeneratorTool() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<GeneratePresentationOutput | null>(null);
-  const [regeneratingSlide, setRegeneratingSlide] = useState<number | null>(null);
+  const [generatingSlide, setGeneratingSlide] = useState<number | null>(null);
   const { toast } = useToast();
 
   const form = useForm<FormData>({
@@ -200,8 +200,8 @@ Possible improvements, recommendations
     if (response.success && response.data) {
         setResult(response.data);
         toast({
-            title: "Presentation Generated!",
-            description: "Your presentation with text and images is ready.",
+            title: "Presentation Outline Generated!",
+            description: "Your presentation text is ready. You can now generate images for each slide.",
         });
     } else {
         toast({
@@ -289,19 +289,19 @@ Possible improvements, recommendations
     toast({ title: 'Download Started', description: `Your presentation "${result.title}.pptx" is downloading.` });
   };
   
-   const handleRetryImage = async (slideIndex: number) => {
+   const handleGenerateImage = async (slideIndex: number) => {
     if (!result) return;
-    const slideToRetry = result.slides[slideIndex];
-    if (!slideToRetry) return;
+    const slideToGenerate = result.slides[slideIndex];
+    if (!slideToGenerate) return;
 
-    setRegeneratingSlide(slideIndex);
+    setGeneratingSlide(slideIndex);
 
     const response = await handleGenerateSingleImageAction({
-        imagePrompt: slideToRetry.imagePrompt,
+        imagePrompt: slideToGenerate.imagePrompt,
         imageStyle: form.getValues('imageStyle') || 'photorealistic',
     });
 
-    setRegeneratingSlide(null);
+    setGeneratingSlide(null);
 
     if (response.success && response.data?.imageUrl) {
         setResult(currentResult => {
@@ -310,9 +310,9 @@ Possible improvements, recommendations
             newSlides[slideIndex].imageUrl = response.data.imageUrl;
             return { ...currentResult, slides: newSlides };
         });
-        toast({ title: 'Image Regenerated!', description: `Image for "${slideToRetry.title}" has been updated.` });
+        toast({ title: 'Image Generated!', description: `Image for "${slideToGenerate.title}" has been created.` });
     } else {
-        toast({ variant: 'destructive', title: 'Image Regeneration Failed', description: response.error || 'Could not regenerate the image.' });
+        toast({ variant: 'destructive', title: 'Image Generation Failed', description: response.error || 'Could not generate the image.' });
     }
 };
 
@@ -549,7 +549,7 @@ Possible improvements, recommendations
                 />
               </div>
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating Presentation...</> : 'Generate Presentation'}
+                {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating Outline...</> : 'Generate Presentation'}
               </Button>
             </form>
           </Form>
@@ -559,8 +559,8 @@ Possible improvements, recommendations
       {isLoading && (
         <Card>
           <CardHeader>
-            <CardTitle>Generating Presentation</CardTitle>
-            <CardDescription>The AI is building your presentation. This may take a few moments...</CardDescription>
+            <CardTitle>Generating Presentation Outline</CardTitle>
+            <CardDescription>The AI is building your presentation text. This may take a few moments...</CardDescription>
           </CardHeader>
           <CardContent>
             <RobotsBuildingLoader />
@@ -573,7 +573,7 @@ Possible improvements, recommendations
           <CardHeader>
             <CardTitle>{result?.title}</CardTitle>
             <CardDescription>
-                Your generated presentation is ready.
+                Your generated presentation is ready. Generate images for each slide.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -592,22 +592,28 @@ Possible improvements, recommendations
                                     </ul>
                                 </div>
                                 <div className="bg-muted flex items-center justify-center overflow-hidden relative">
-                                    {regeneratingSlide === index ? (
+                                    {generatingSlide === index ? (
                                         <Loader2 className="w-16 h-16 animate-spin text-primary" />
                                     ) : slide.imageUrl ? (
+                                      <>
                                         <Image
                                             src={slide.imageUrl}
                                             alt={slide.title}
                                             fill
                                             className="object-cover w-full h-full"
                                         />
+                                        <Button variant="secondary" size="sm" className="absolute bottom-4 right-4" onClick={() => handleGenerateImage(index)}>
+                                            <RotateCw className="mr-2 h-4 w-4" />
+                                            Retry
+                                        </Button>
+                                      </>
                                     ) : (
-                                        <div className="flex flex-col items-center justify-center text-destructive">
+                                        <div className="flex flex-col items-center justify-center text-muted-foreground">
                                             <ImageIconLucide className="w-16 h-16" />
-                                            <p className="mt-2 text-sm font-semibold">Image failed</p>
-                                            <Button variant="secondary" size="sm" className="mt-4" onClick={() => handleRetryImage(index)}>
-                                                <RotateCw className="mr-2 h-4 w-4" />
-                                                Retry Image
+                                            <p className="mt-2 text-sm font-semibold">No Image</p>
+                                            <Button variant="default" size="sm" className="mt-4" onClick={() => handleGenerateImage(index)}>
+                                                <Sparkles className="mr-2 h-4 w-4" />
+                                                Generate Image
                                             </Button>
                                         </div>
                                     )}
