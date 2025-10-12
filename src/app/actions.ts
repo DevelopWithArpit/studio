@@ -43,6 +43,8 @@ import {
 } from '@/ai/flows/document-summarizer-tool';
 import {
     generatePresentation,
+    generateSingleImage,
+    type GenerateSingleImageInput,
 } from '@/ai/flows/presentation-generator-tool';
 import {
     generateLinkedInVisuals,
@@ -171,6 +173,10 @@ export async function handleSummarizeDocumentAction(input: SummarizeDocumentInpu
 
 export async function handleGeneratePresentationAction(input: GeneratePresentationInput) {
     return handleAction(input, generatePresentation, 1);
+}
+
+export async function handleGenerateSingleImageAction(input: GenerateSingleImageInput) {
+    return handleAction(input, generateSingleImage);
 }
 
 export async function handleGenerateLinkedInVisualsAction(input: GenerateLinkedInVisualsInput) {

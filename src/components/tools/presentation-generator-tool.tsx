@@ -28,7 +28,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { handleGeneratePresentationAction } from '@/app/actions';
+import { handleGeneratePresentationAction, handleGenerateSingleImageAction } from '@/app/actions';
 import {
   Carousel,
   CarouselContent,
@@ -37,15 +37,14 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel';
 import { Badge } from '@/components/ui/badge';
-import { Download, Loader2, Image as ImageIconLucide } from 'lucide-react';
+import { Download, Loader2, Image as ImageIconLucide, RotateCw } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { cn } from '@/lib/utils';
 import { Textarea } from '../ui/textarea';
 import { RobotsBuildingLoader } from '../ui/robots-building-loader';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Label } from '@/components/ui/label';
-import { GeneratePresentationOutput } from '@/ai/flows/presentation-generator-tool';
-import type { GeneratePresentationInput } from '@/app/actions';
+import type { GeneratePresentationOutput, GeneratePresentationInput as FlowInput } from '@/ai/flows/presentation-generator-tool';
 
 
 const formSchema = z.object({
@@ -71,10 +70,12 @@ const formSchema = z.object({
 
 
 type FormData = z.infer<typeof formSchema>;
+type Slide = GeneratePresentationOutput['slides'][0];
 
 export default function PresentationGeneratorTool() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<GeneratePresentationOutput | null>(null);
+  const [regeneratingSlide, setRegeneratingSlide] = useState<number | null>(null);
   const { toast } = useToast();
 
   const form = useForm<FormData>({
@@ -178,7 +179,7 @@ Possible improvements, recommendations
     setIsLoading(true);
     setResult(null);
 
-    const input: GeneratePresentationInput = {
+    const input: FlowInput = {
         topic: data.topic,
         presenterName: data.presenterName,
         rollNumber: data.rollNumber,
@@ -325,6 +326,33 @@ Possible improvements, recommendations
     saveAs(blob, `${result.title}.pptx`);
     toast({ title: 'Download Started', description: `Your presentation "${result.title}.pptx" is downloading.` });
   };
+  
+   const handleRetryImage = async (slideIndex: number) => {
+    if (!result) return;
+    const slideToRetry = result.slides[slideIndex];
+    if (!slideToRetry) return;
+
+    setRegeneratingSlide(slideIndex);
+
+    const response = await handleGenerateSingleImageAction({
+        imagePrompt: slideToRetry.imagePrompt,
+        imageStyle: form.getValues('imageStyle') || 'photorealistic',
+    });
+
+    setRegeneratingSlide(null);
+
+    if (response.success && response.data?.imageUrl) {
+        setResult(currentResult => {
+            if (!currentResult) return null;
+            const newSlides = [...currentResult.slides];
+            newSlides[slideIndex].imageUrl = response.data.imageUrl;
+            return { ...currentResult, slides: newSlides };
+        });
+        toast({ title: 'Image Regenerated!', description: `Image for "${slideToRetry.title}" has been updated.` });
+    } else {
+        toast({ variant: 'destructive', title: 'Image Regeneration Failed', description: response.error || 'Could not regenerate the image.' });
+    }
+};
 
 
   return (
@@ -602,18 +630,23 @@ Possible improvements, recommendations
                                     </ul>
                                 </div>
                                 <div className="bg-muted flex items-center justify-center overflow-hidden relative">
-                                    {slide.imageUrl && slide.imageUrl.startsWith('data:image') ? (
+                                    {regeneratingSlide === index ? (
+                                        <Loader2 className="w-16 h-16 animate-spin text-primary" />
+                                    ) : slide.imageUrl ? (
                                         <Image
                                             src={slide.imageUrl}
                                             alt={slide.title}
-                                            width={500}
-                                            height={500}
+                                            fill
                                             className="object-cover w-full h-full"
                                         />
                                     ) : (
                                         <div className="flex flex-col items-center justify-center text-destructive">
                                             <ImageIconLucide className="w-16 h-16" />
-                                            <p className="mt-2 text-sm font-semibold">Image failed to generate</p>
+                                            <p className="mt-2 text-sm font-semibold">Image failed</p>
+                                            <Button variant="secondary" size="sm" className="mt-4" onClick={() => handleRetryImage(index)}>
+                                                <RotateCw className="mr-2 h-4 w-4" />
+                                                Retry Image
+                                            </Button>
                                         </div>
                                     )}
                                     {slide.logoUrl && (

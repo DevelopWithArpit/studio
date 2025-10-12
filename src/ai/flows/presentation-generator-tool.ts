@@ -32,11 +32,13 @@ const GeneratePresentationInputSchema = z.object({
   style: z.enum(['Default', 'Tech Pitch', 'Creative']),
 });
 
+export type GeneratePresentationInput = z.infer<typeof GeneratePresentationInputSchema>;
+
 const SlideSchema = z.object({
   title: z.string().describe('The title of the slide.'),
   content: z.array(z.string()).describe('An array of short bullet points for the slide content.'),
   imagePrompt: z.string().describe('A text prompt to generate a relevant image for this slide.'),
-  logoUrl: z.string().optional().describe('The URL of a company logo to display on the slide.'),
+  logoUrl: z.string().nullable().describe('The URL of a company logo to display on the slide.'),
   slideLayout: z.enum(['title', 'contentWithImage', 'titleOnly']).describe("The best layout for this slide."),
   imageUrl: z.string().optional(),
 });
@@ -56,8 +58,23 @@ const PresentationOutlineSchema = z.object({
 });
 export type GeneratePresentationOutput = z.infer<typeof PresentationOutlineSchema>;
 
+const GenerateSingleImageInputSchema = z.object({
+    imagePrompt: z.string(),
+    imageStyle: z.string(),
+});
+export type GenerateSingleImageInput = z.infer<typeof GenerateSingleImageInputSchema>;
+
+const GenerateSingleImageOutputSchema = z.object({
+    imageUrl: z.string(),
+});
+export type GenerateSingleImageOutput = z.infer<typeof GenerateSingleImageOutputSchema>;
+
 export async function generatePresentation(input: z.infer<typeof GeneratePresentationInputSchema>): Promise<GeneratePresentationOutput> {
   return generatePresentationFlow(input);
+}
+
+export async function generateSingleImage(input: GenerateSingleImageInput): Promise<GenerateSingleImageOutput> {
+    return generateSingleImageFlow(input);
 }
 
 const outlinePrompt = ai.definePrompt({
@@ -106,6 +123,14 @@ const outlinePrompt = ai.definePrompt({
 `,
 });
 
+const applyStyle = (prompt: string, style: string) => {
+    let styledPrompt = prompt;
+    if (style && style.toLowerCase() !== 'photorealistic') {
+      styledPrompt = `${prompt}, in a ${style} style`;
+    }
+    return `${styledPrompt}. CRITICAL: This image must not contain any text or words.`;
+};
+
 const generatePresentationFlow = ai.defineFlow(
   {
     name: 'generatePresentationFlow',
@@ -118,14 +143,6 @@ const generatePresentationFlow = ai.defineFlow(
     if (!outline) {
       throw new Error('Failed to generate presentation outline.');
     }
-
-    const applyStyle = (prompt: string) => {
-      let styledPrompt = prompt;
-      if (input.imageStyle && input.imageStyle.toLowerCase() !== 'photorealistic') {
-        styledPrompt = `${prompt}, in a ${input.imageStyle} style`;
-      }
-      return `${styledPrompt}. CRITICAL: This image must not contain any text or words.`;
-    };
     
     // 2. Create a unified list of all prompts that need an image.
     const allPrompts: { type: 'background' | 'slide'; index?: number; prompt: string }[] = [];
@@ -144,7 +161,7 @@ const generatePresentationFlow = ai.defineFlow(
     const imageGenerationPromises = allPrompts.map(item => 
         ai.generate({
             model: 'googleai/imagen-4.0-ultra-generate-001',
-            prompt: applyStyle(item.prompt),
+            prompt: applyStyle(item.prompt, input.imageStyle || 'photorealistic'),
         })
     );
     
@@ -172,4 +189,25 @@ const generatePresentationFlow = ai.defineFlow(
     // 5. Return the fully populated outline.
     return outline;
   }
+);
+
+
+const generateSingleImageFlow = ai.defineFlow(
+    {
+        name: 'generateSingleImageFlow',
+        inputSchema: GenerateSingleImageInputSchema,
+        outputSchema: GenerateSingleImageOutputSchema,
+    },
+    async (input) => {
+        const { media } = await ai.generate({
+            model: 'googleai/imagen-4.0-ultra-generate-001',
+            prompt: applyStyle(input.imagePrompt, input.imageStyle),
+        });
+
+        if (!media?.url) {
+            throw new Error('Failed to generate image.');
+        }
+
+        return { imageUrl: media.url };
+    }
 );
