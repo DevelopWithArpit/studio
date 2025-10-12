@@ -5,6 +5,9 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { googleAI } from '@genkit-ai/googleai';
 
+// Utility function to introduce a delay
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 const getCompanyLogoTool = ai.defineTool(
     {
         name: 'getCompanyLogoTool',
@@ -120,8 +123,6 @@ const outlinePrompt = ai.definePrompt({
 - Content Type: {{{contentType}}}
 - Presentation Style: {{{style}}}
 {{#if customStructure}}- Custom Structure: {{{customStructure}}}{{/if}}
-
-Your entire output must be a single, valid JSON object that conforms to the schema.
 `,
 });
 
@@ -146,9 +147,10 @@ const generatePresentationFlow = ai.defineFlow(
       throw new Error('Failed to generate presentation outline.');
     }
     
-    // 2. Generate the background image first.
+    // 2. Generate the background image first and wait for it.
     if (outline.design.backgroundPrompt) {
         try {
+            await sleep(1000); // Add delay before the request
             const { media } = await ai.generate({
                 model: 'googleai/gemini-2.5-flash-image-preview',
                 prompt: applyStyle(outline.design.backgroundPrompt, input.imageStyle || 'photorealistic'),
@@ -167,6 +169,7 @@ const generatePresentationFlow = ai.defineFlow(
     for (const slide of outline.slides) {
         if (slide.imagePrompt) {
             try {
+                await sleep(1000); // Add delay before each request
                 const { media } = await ai.generate({
                     model: 'googleai/gemini-2.5-flash-image-preview',
                     prompt: applyStyle(slide.imagePrompt, input.imageStyle || 'photorealistic'),
@@ -195,6 +198,7 @@ const generateSingleImageFlow = ai.defineFlow(
         outputSchema: GenerateSingleImageOutputSchema,
     },
     async (input) => {
+        await sleep(1000); // Add delay before the request
         const { media } = await ai.generate({
             model: 'googleai/gemini-2.5-flash-image-preview',
             prompt: applyStyle(input.imagePrompt, input.imageStyle),
