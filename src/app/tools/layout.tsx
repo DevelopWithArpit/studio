@@ -46,9 +46,6 @@ import {
 import { AppLogo } from '@/components/app-logo';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { useToast } from '@/hooks/use-toast';
-import { downloadProject } from '@/lib/download-project';
-
 
 type ToolConfig = {
   id: string;
@@ -88,17 +85,6 @@ const categories = [...new Set(tools.map(tool => tool.category))].sort((a, b) =>
 
 const ToolSidebar = () => {
   const pathname = usePathname();
-  const { toast } = useToast();
-
-  const onDownload = () => {
-    toast({ title: "Zipping Project...", description: "Your project files are being zipped for download." });
-    try {
-      downloadProject();
-      toast({ title: "Download Started!", description: "Your project is being downloaded." });
-    } catch (error) {
-      toast({ variant: 'destructive', title: "Download Failed", description: "Could not download project files." });
-    }
-  };
   
   return (
     <Sidebar collapsible="icon" className="border-r bg-card">
@@ -145,15 +131,6 @@ const ToolSidebar = () => {
        <SidebarFooter>
         <Separator />
         <SidebarMenu>
-           <SidebarMenuItem>
-              <SidebarMenuButton 
-                onClick={onDownload} 
-                tooltip={{children: 'Download Project', side: 'right', align: 'center'}}
-              >
-                <Download />
-                <span className="truncate">Download Project</span>
-              </SidebarMenuButton>
-          </SidebarMenuItem>
           <SidebarMenuItem>
             <Link href="/tools/support" className="block">
                 <SidebarMenuButton isActive={pathname === '/tools/support'} tooltip={{children: 'Support', side: 'right', align: 'center'}}>
