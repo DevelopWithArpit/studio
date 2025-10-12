@@ -160,8 +160,11 @@ const generatePresentationFlow = ai.defineFlow(
     // 3. Generate all images in parallel.
     const imageGenerationPromises = allPrompts.map(item => 
         ai.generate({
-            model: 'googleai/imagen-4.0-ultra-generate-001',
+            model: 'googleai/gemini-2.5-flash-image-preview',
             prompt: applyStyle(item.prompt, input.imageStyle || 'photorealistic'),
+            config: {
+                responseModalities: ['TEXT', 'IMAGE'],
+            },
         })
     );
     
@@ -200,8 +203,11 @@ const generateSingleImageFlow = ai.defineFlow(
     },
     async (input) => {
         const { media } = await ai.generate({
-            model: 'googleai/imagen-4.0-ultra-generate-001',
+            model: 'googleai/gemini-2.5-flash-image-preview',
             prompt: applyStyle(input.imagePrompt, input.imageStyle),
+            config: {
+                responseModalities: ['TEXT', 'IMAGE'],
+            },
         });
 
         if (!media?.url) {
