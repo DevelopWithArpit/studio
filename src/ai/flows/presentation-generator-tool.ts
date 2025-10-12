@@ -69,7 +69,7 @@ const outlinePrompt = ai.definePrompt({
     input: { schema: GeneratePresentationInputSchema },
     output: { schema: PresentationOutlineSchema },
     tools: [getCompanyLogoTool],
-    prompt: `You are an expert presentation creator and visual designer. Your task is to generate a detailed presentation outline in a valid JSON format based on the user's request.
+    prompt: `You are an expert presentation creator and visual designer. Your task is to generate a detailed presentation outline based on the user's request. Your entire response must be a single, valid JSON object that conforms to the schema.
 
 **Core Principles:**
 - **Visuals First**: For each slide, first conceive a powerful, memorable visual, then write a short title and content to complement it.
@@ -109,8 +109,6 @@ const outlinePrompt = ai.definePrompt({
 - Content Type: {{{contentType}}}
 - Presentation Style: {{{style}}}
 {{#if customStructure}}- Custom Structure: {{{customStructure}}}{{/if}}
-
-CRITICAL: Your entire output MUST be a single, valid JSON object that conforms to the schema.
 `,
 });
 
