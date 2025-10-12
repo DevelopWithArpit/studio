@@ -123,8 +123,6 @@ const generateSingleImageFlow = ai.defineFlow(
         outputSchema: GenerateSingleImageOutputSchema,
     },
     async (input) => {
-        // Add a significant delay to avoid hitting rate limits, even for single requests.
-        await sleep(10000);
         const { media } = await ai.generate({
             model: 'googleai/gemini-2.5-flash-image-preview',
             prompt: applyStyle(input.imagePrompt, input.imageStyle),
