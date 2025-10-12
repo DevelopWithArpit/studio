@@ -211,7 +211,7 @@ Possible improvements, recommendations
     }
   }
 
- const handleDownload = () => {
+ const handleDownload = async () => {
     if (!result) return;
 
     toast({ title: 'Generating PPTX...', description: 'Please wait while your presentation is being created.' });
@@ -224,7 +224,7 @@ Possible improvements, recommendations
     
     const masterBackground: PptxGenJS.BackgroundProps = { color: cleanColor(design.backgroundColor) };
     if (backgroundImageUrl && backgroundImageUrl.startsWith('data:image')) {
-        masterBackground.path = backgroundImageUrl;
+        masterBackground.data = backgroundImageUrl;
     }
 
     pptx.defineSlideMaster({
@@ -291,18 +291,8 @@ Possible improvements, recommendations
         
         if (slide.slideLayout === 'contentWithImage') {
             if (slide.content.length > 0) {
-                slide.content.forEach((point, index) => {
-                    contentSlide.addText(point, {
-                        x: 0.5, y: 1.8 + (index * 0.7), w: '55%', h: 0.7,
-                        fontSize: 18,
-                        color: cleanColor(design.textColor),
-                        bullet: true,
-                        fontFace: 'Arial',
-                        anim: {
-                            type: 'fly',
-                            options: { direction: 'u', duration: 0.5, delay: 0.75 + (index * 0.25) }
-                        }
-                    });
+                contentSlide.addText(slide.content.map(p => ({ text: p, options: { breakLine: true, fontSize: 18, color: cleanColor(design.textColor), bullet: true, fontFace: 'Arial' } })), {
+                    x: 0.5, y: 1.8, w: '55%', h: 4,
                 });
             }
 
@@ -311,26 +301,29 @@ Possible improvements, recommendations
                     data: slide.imageUrl,
                     x: '60%', y: 1.5, w: '35%', h: 4.5,
                     sizing: { type: 'contain', w: 3.5, h: 4.5 },
-                    anim: { type: 'zoom', options: { scale: 'in', duration: 1, delay: 0.5 } }
                 });
             }
-             if (slide.logoUrl) {
+             if (slide.logoUrl && slide.logoUrl.startsWith('https')) {
                 contentSlide.addImage({
                     path: slide.logoUrl,
                     x: '90%', y: '90%', w: '8%', h: '8%',
                      sizing: { type: 'contain', w: 0.8, h: 0.8 },
-                     anim: { type: 'fade', duration: 1, delay: 1 }
+                });
+            }
+        } else if (slide.slideLayout === 'titleOnly') {
+             if (slide.imageUrl && slide.imageUrl.startsWith('data:image')) {
+                contentSlide.addImage({
+                    data: slide.imageUrl,
+                    x: '10%', y: 1.8, w: '80%', h: 4,
+                    sizing: { type: 'contain', w: 8, h: 4 },
                 });
             }
         }
     });
 
-    pptx.write('blob').then((blob) => {
-      saveAs(blob, `${result.title}.pptx`);
-      toast({ title: 'Download Started', description: `Your presentation "${result.title}.pptx" is downloading.` });
-    }).catch(err => {
-      toast({ variant: 'destructive', title: 'Error Creating PPTX', description: err.toString() });
-    });
+    const blob = await pptx.write('blob');
+    saveAs(blob, `${result.title}.pptx`);
+    toast({ title: 'Download Started', description: `Your presentation "${result.title}.pptx" is downloading.` });
   };
 
 
@@ -656,5 +649,3 @@ Possible improvements, recommendations
     </div>
   );
 }
-
-    
