@@ -220,33 +220,25 @@ Possible improvements, recommendations
     const pptx = new PptxGenJS();
     pptx.layout = 'LAYOUT_WIDE';
     
-    const { design, backgroundImageUrl } = result;
-    const cleanColor = (color: string) => color.startsWith('#') ? color.substring(1) : color;
-    
-    const masterBackground: PptxGenJS.BackgroundProps = { color: cleanColor(design.backgroundColor) };
-    if (backgroundImageUrl && backgroundImageUrl.startsWith('data:image')) {
-        masterBackground.data = backgroundImageUrl;
-    }
-
+    // Define a master slide
     pptx.defineSlideMaster({
         title: "MASTER_SLIDE",
-        background: masterBackground,
+        background: { color: "0B192E" },
         objects: [
-            { 'rect':    { x:0.0, y:6.8, w:'100%', h:0.75, fill:{ color: cleanColor(design.accentColor) } } },
-            { 'text':    { text:'AI Mentor', options:{ x:0.5, y:6.9, w:5, h:0.5, fontFace:'Arial', fontSize:14, color:cleanColor(design.backgroundColor), bold:true } } },
+            { 'rect':    { x:0.0, y:6.8, w:'100%', h:0.75, fill:{ color: "64FFDA" } } },
+            { 'text':    { text:'AI Mentor', options:{ x:0.5, y:6.9, w:5, h:0.5, fontFace:'Arial', fontSize:14, color:"0B192E", bold:true } } },
         ],
     });
     
     // Title Slide
     const titleSlide = pptx.addSlide({ masterName: "MASTER_SLIDE" });
-    titleSlide.addText(result.title, { 
+    titleSlide.addText(result.title || "Presentation", { 
         x: 1, y: 2, w: 8, h: 1.5, 
         fontSize: 44, 
         bold: true, 
-        color: cleanColor(design.textColor), 
+        color: "FFFFFF", 
         align: 'center',
         fontFace: 'Helvetica',
-        anim: { type: 'fly', options: { direction: 'b', duration: 1, effect: 'def' } }
     });
 
     const presenterDetails = [
@@ -259,66 +251,36 @@ Possible improvements, recommendations
         titleSlide.addText(presenterDetails, { 
             x: 1, y: 4, w: 8, h: 1, 
             fontSize: 20, 
-            color: cleanColor(design.textColor), 
+            color: "E6F1FF", 
             align: 'center',
             fontFace: 'Arial',
-            anim: { type: 'fly', options: { direction: 'b', duration: 1, delay: 0.5, effect: 'def' } }
         });
     }
     
-    const transitions: PptxGenJS.Transition[] = [
-        { type: "fade", duration: 1 },
-        { type: "push", duration: 1, options: { direction: 'l' } },
-        { type: "wipe", duration: 1, options: { direction: 'l' } },
-        { type: "cover", duration: 1, options: { direction: 'l' } },
-    ];
-
-
     // Content Slides
-    result.slides.forEach((slide, slideIndex) => {
-        if (slide.slideLayout === 'title' && slideIndex === 0) return; 
-
+    result.slides.forEach((slide) => {
         const contentSlide = pptx.addSlide({ masterName: "MASTER_SLIDE" });
-        contentSlide.transition = transitions[slideIndex % transitions.length];
         
         contentSlide.addText(slide.title, { 
             x: 0.5, y: 0.5, w: '90%', h: 1, 
             fontSize: 32, 
             bold: true, 
-            color: cleanColor(design.accentColor),
+            color: "64FFDA",
             fontFace: 'Helvetica',
-            anim: { type: 'fly', options: { direction: 'l', duration: 0.5, effect: 'def' } }
         });
         
-        if (slide.slideLayout === 'contentWithImage') {
-            if (slide.content.length > 0) {
-                contentSlide.addText(slide.content.map(p => ({ text: p, options: { breakLine: true, fontSize: 18, color: cleanColor(design.textColor), bullet: true, fontFace: 'Arial' } })), {
-                    x: 0.5, y: 1.8, w: '55%', h: 4,
-                });
-            }
+        if (slide.content.length > 0) {
+            contentSlide.addText(slide.content.map(p => ({ text: p, options: { breakLine: true, fontSize: 18, color: "E6F1FF", bullet: true, fontFace: 'Arial' } })), {
+                x: 0.5, y: 1.8, w: '55%', h: 4,
+            });
+        }
 
-            if (slide.imageUrl && slide.imageUrl.startsWith('data:image')) {
-                contentSlide.addImage({
-                    data: slide.imageUrl,
-                    x: '60%', y: 1.5, w: '35%', h: 4.5,
-                    sizing: { type: 'contain', w: 3.5, h: 4.5 },
-                });
-            }
-             if (slide.logoUrl && slide.logoUrl.startsWith('https')) {
-                contentSlide.addImage({
-                    path: slide.logoUrl,
-                    x: '90%', y: '90%', w: '8%', h: '8%',
-                     sizing: { type: 'contain', w: 0.8, h: 0.8 },
-                });
-            }
-        } else if (slide.slideLayout === 'titleOnly') {
-             if (slide.imageUrl && slide.imageUrl.startsWith('data:image')) {
-                contentSlide.addImage({
-                    data: slide.imageUrl,
-                    x: '10%', y: 1.8, w: '80%', h: 4,
-                    sizing: { type: 'contain', w: 8, h: 4 },
-                });
-            }
+        if (slide.imageUrl && slide.imageUrl.startsWith('data:image')) {
+            contentSlide.addImage({
+                data: slide.imageUrl,
+                x: '60%', y: 1.5, w: '35%', h: 4.5,
+                sizing: { type: 'contain', w: 3.5, h: 4.5 },
+            });
         }
     });
 
@@ -647,17 +609,6 @@ Possible improvements, recommendations
                                                 <RotateCw className="mr-2 h-4 w-4" />
                                                 Retry Image
                                             </Button>
-                                        </div>
-                                    )}
-                                    {slide.logoUrl && (
-                                        <div className="absolute bottom-4 right-4 bg-white/80 p-2 rounded-md">
-                                            <Image
-                                                src={slide.logoUrl}
-                                                alt="Company Logo"
-                                                width={60}
-                                                height={60}
-                                                className="object-contain"
-                                            />
                                         </div>
                                     )}
                                 </div>
