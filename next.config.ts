@@ -25,6 +25,9 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  serverActions: {
+    maxDuration: 300, // 5 minutes
+  },
 };
 
 export default nextConfig;
