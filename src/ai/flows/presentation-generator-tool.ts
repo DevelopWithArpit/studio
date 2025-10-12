@@ -4,7 +4,6 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 
-// Utility function to introduce a delay
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 const GeneratePresentationInputSchema = z.object({
@@ -104,51 +103,15 @@ const generatePresentationFlow = ai.defineFlow(
     outputSchema: PresentationOutlineSchema,
   },
   async (input) => {
-    // 1. Generate the text-only outline first.
     const { output: outline } = await outlinePrompt(input);
     if (!outline) {
       throw new Error('Failed to generate presentation outline.');
     }
     
-    // 2. Generate the background image
-    let backgroundImageUrl: string | undefined;
-    if (outline.backgroundImageUrl) { // The prompt now puts the prompt in this field
-      try {
-        await sleep(10000); // Wait 10 seconds before the first image call
-        const { media } = await ai.generate({
-          model: 'googleai/imagen-4.0-ultra-generate-001',
-          prompt: `${outline.backgroundImageUrl}, abstract background, subtle, professional, high quality`,
-        });
-        backgroundImageUrl = media?.url;
-      } catch (e) {
-        console.error("Failed to generate background image", e);
-      }
-    }
-
-
-    // 3. Generate slide images sequentially
-    for (const slide of outline.slides) {
-        if (slide.imagePrompt) {
-            try {
-                await sleep(10000); // Wait 10 seconds before each image call
-                const { media } = await ai.generate({
-                    model: 'googleai/gemini-2.5-flash-image-preview',
-                    prompt: applyStyle(slide.imagePrompt, input.imageStyle || 'photorealistic'),
-                    config: {
-                        responseModalities: ['TEXT', 'IMAGE'],
-                    },
-                });
-                if (media?.url) {
-                    slide.imageUrl = media.url;
-                }
-            } catch (error) {
-                console.error(`Image generation failed for slide "${slide.title}"`, error);
-                // Continue to the next slide
-            }
-        }
-    }
+    // Do not generate images here to avoid rate limiting.
+    // Images will be generated on-demand from the client.
     
-    return { ...outline, backgroundImageUrl };
+    return { ...outline, backgroundImageUrl: undefined, slides: outline.slides.map(s => ({...s, imageUrl: undefined})) };
   }
 );
 
