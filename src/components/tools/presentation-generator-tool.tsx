@@ -37,7 +37,7 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel';
 import { Badge } from '@/components/ui/badge';
-import { Download, Loader2, Image as ImageIconLucide, RotateCw } from 'lucide-react';
+import { Download, Loader2, Image as ImageIconLucide, RotateCw, Sparkles } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { cn } from '@/lib/utils';
 import { Textarea } from '../ui/textarea';
@@ -46,6 +46,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Label } from '@/components/ui/label';
 import type { GeneratePresentationOutput, GeneratePresentationInput as FlowInput } from '@/ai/flows/presentation-generator-tool';
 
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 const formSchema = z.object({
   topic: z.string().min(3, 'Please enter a topic with at least 3 characters.'),
@@ -70,12 +71,13 @@ const formSchema = z.object({
 
 
 type FormData = z.infer<typeof formSchema>;
+type Slide = GeneratePresentationOutput['slides'][0];
 
 export default function PresentationGeneratorTool() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isTextLoading, setIsTextLoading] = useState(false);
+  const [isBulkImageLoading, setIsBulkImageLoading] = useState(false);
   const [result, setResult] = useState<GeneratePresentationOutput | null>(null);
   const [generatingSlide, setGeneratingSlide] = useState<number | null>(null);
-  const [cooldowns, setCooldowns] = useState<Record<number, number>>({});
   const { toast } = useToast();
 
   const form = useForm<FormData>({
@@ -129,23 +131,6 @@ export default function PresentationGeneratorTool() {
   const contentType = form.watch('contentType');
   const style = form.watch('style');
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCooldowns(prev => {
-        const newCooldowns: Record<number, number> = {};
-        let changed = false;
-        for (const key in prev) {
-          if (prev[key] > 0) {
-            newCooldowns[key] = prev[key] - 1;
-            changed = true;
-          }
-        }
-        return changed ? newCooldowns : prev;
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
   React.useEffect(() => {
     if (style === 'Tech Pitch') {
         if (form.getValues('contentType') !== 'pitchDeck') {
@@ -192,7 +177,7 @@ Possible improvements, recommendations
 
 
   async function onSubmit(data: FormData) {
-    setIsLoading(true);
+    setIsTextLoading(true);
     setResult(null);
 
     const input: FlowInput = {
@@ -212,12 +197,12 @@ Possible improvements, recommendations
 
     const response = await handleGeneratePresentationAction(input);
     
-    setIsLoading(false);
+    setIsTextLoading(false);
     if (response.success && response.data) {
         setResult(response.data);
         toast({
-            title: "Presentation Generated!",
-            description: "Your presentation text and images have been generated.",
+            title: "Presentation Outline Generated!",
+            description: "Your presentation text is ready. You can now generate the images.",
         });
     } else {
         toast({
@@ -271,7 +256,7 @@ Possible improvements, recommendations
         });
     }
     
-    result.slides.forEach((slide) => {
+    for (const slide of result.slides) {
         const contentSlide = pptx.addSlide({ masterName: "MASTER_SLIDE" });
         
         contentSlide.addText(slide.title, { 
@@ -295,39 +280,63 @@ Possible improvements, recommendations
                 sizing: { type: 'contain', w: 3.5, h: 4.5 },
             });
         }
-    });
+    }
 
     const blob = await pptx.write('blob');
     saveAs(blob, `${result.title}.pptx`);
     toast({ title: 'Download Started', description: `Your presentation "${result.title}.pptx" is downloading.` });
   };
   
-   const handleGenerateImage = async (slideIndex: number) => {
-    if (!result || cooldowns[slideIndex] > 0) return;
-    const slideToGenerate = result.slides[slideIndex];
-    if (!slideToGenerate) return;
+   const generateImageAndUpdateState = async (slideIndex: number): Promise<boolean> => {
+     if (!result) return false;
+     const slideToGenerate = result.slides[slideIndex];
+     if (!slideToGenerate) return false;
 
-    setGeneratingSlide(slideIndex);
-    
-    const response = await handleGenerateSingleImageAction({
-        imagePrompt: slideToGenerate.imagePrompt,
-        imageStyle: form.getValues('imageStyle') || 'photorealistic',
-    });
+     setGeneratingSlide(slideIndex);
+     
+     const response = await handleGenerateSingleImageAction({
+         imagePrompt: slideToGenerate.imagePrompt,
+         imageStyle: form.getValues('imageStyle') || 'photorealistic',
+     });
 
-    setGeneratingSlide(null);
+     setGeneratingSlide(null);
 
-    if (response.success && response.data?.imageUrl) {
-        setResult(currentResult => {
-            if (!currentResult) return null;
-            const newSlides = [...currentResult.slides];
-            newSlides[slideIndex].imageUrl = response.data.imageUrl;
-            return { ...currentResult, slides: newSlides };
-        });
-        toast({ title: 'Image Generated!', description: `Image for "${slideToGenerate.title}" has been created.` });
-    } else {
-        toast({ variant: 'destructive', title: 'Image Generation Failed', description: response.error || 'Could not generate the image.' });
-    }
-};
+     if (response.success && response.data?.imageUrl) {
+         setResult(currentResult => {
+             if (!currentResult) return null;
+             const newSlides = [...currentResult.slides];
+             newSlides[slideIndex] = { ...newSlides[slideIndex], imageUrl: response.data.imageUrl };
+             return { ...currentResult, slides: newSlides };
+         });
+         return true;
+     } else {
+         toast({ variant: 'destructive', title: 'Image Generation Failed', description: `Could not generate image for slide: "${slideToGenerate.title}". ${response.error || ''}` });
+         return false;
+     }
+   };
+   
+   const handleGenerateAllImages = async () => {
+     if (!result) return;
+     setIsBulkImageLoading(true);
+     toast({ title: 'Bulk Image Generation Started', description: 'Generating all missing images sequentially. This may take some time.' });
+
+     let slideIndex = 0;
+     for (const slide of result.slides) {
+       if (!slide.imageUrl) {
+         const success = await generateImageAndUpdateState(slideIndex);
+         if (success) {
+           await sleep(2000); // Wait 2 seconds before the next request to avoid rate limits
+         } else {
+           toast({ variant: 'destructive', title: 'Bulk Generation Halted', description: `Failed to generate image for "${slide.title}". Please try again manually.` });
+           break; 
+         }
+       }
+       slideIndex++;
+     }
+
+     setIsBulkImageLoading(false);
+     toast({ title: 'Bulk Image Generation Complete', description: 'All available images have been generated.' });
+   };
 
 
   return (
@@ -561,19 +570,19 @@ Possible improvements, recommendations
                   )}
                 />
               </div>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating...</> : 'Generate Presentation'}
+              <Button type="submit" disabled={isTextLoading}>
+                {isTextLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating Text...</> : 'Generate Presentation'}
               </Button>
             </form>
           </Form>
         </CardContent>
       </Card>
 
-      {isLoading && (
+      {isTextLoading && (
         <Card>
           <CardHeader>
             <CardTitle>Generating Presentation...</CardTitle>
-            <CardDescription>The AI is building your presentation. This may take a minute or two.</CardDescription>
+            <CardDescription>The AI is building your presentation outline. This may take a moment.</CardDescription>
           </CardHeader>
           <CardContent>
             <RobotsBuildingLoader />
@@ -615,16 +624,16 @@ Possible improvements, recommendations
                                             fill
                                             className="object-cover w-full h-full"
                                         />
-                                        <Button variant="secondary" size="sm" className="absolute bottom-4 right-4" onClick={() => handleGenerateImage(index)} disabled={generatingSlide !== null}>
+                                        <Button variant="secondary" size="sm" className="absolute bottom-4 right-4" onClick={() => generateImageAndUpdateState(index)} disabled={generatingSlide !== null || isBulkImageLoading}>
                                             <RotateCw className="mr-2 h-4 w-4" /> Retry
                                         </Button>
                                       </>
                                     ) : (
                                         <div className="flex flex-col items-center justify-center text-muted-foreground p-4 text-center">
                                             <ImageIconLucide className="w-16 h-16" />
-                                            <p className="mt-2 text-sm font-semibold">Image generation failed or was skipped.</p>
-                                            <Button variant="default" size="sm" className="mt-4" onClick={() => handleGenerateImage(index)} disabled={generatingSlide !== null}>
-                                                <RotateCw className="mr-2 h-4 w-4" /> Generate Image
+                                            <p className="mt-2 text-sm font-semibold">Image not generated.</p>
+                                            <Button variant="default" size="sm" className="mt-4" onClick={() => generateImageAndUpdateState(index)} disabled={generatingSlide !== null || isBulkImageLoading}>
+                                                <RotateCw className="mr-2 h-4 w-4" /> Generate
                                             </Button>
                                         </div>
                                     )}
@@ -639,10 +648,14 @@ Possible improvements, recommendations
                 <CarouselNext className="mr-12" />
             </Carousel>
           </CardContent>
-          <CardFooter>
+          <CardFooter className="flex flex-wrap gap-2">
             <Button onClick={handleDownload} disabled={!result}>
                 <Download className="mr-2 h-4 w-4"/>
                 Download Presentation
+            </Button>
+            <Button onClick={handleGenerateAllImages} variant="outline" disabled={isBulkImageLoading || generatingSlide !== null}>
+                {isBulkImageLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                {isBulkImageLoading ? 'Generating...' : 'Generate All Images'}
             </Button>
           </CardFooter>
         </Card>

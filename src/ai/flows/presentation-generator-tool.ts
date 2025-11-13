@@ -101,39 +101,13 @@ const generatePresentationFlow = ai.defineFlow(
     outputSchema: PresentationOutlineSchema,
   },
   async (input) => {
-    // 1. Generate the text outline first
+    // Generate the text outline and image prompts ONLY.
     const { output: outline } = await outlinePrompt(input);
     if (!outline) {
       throw new Error('Failed to generate presentation outline.');
     }
-
-    const imageStyle = input.imageStyle || 'photorealistic';
-
-    // 2. Generate all images sequentially to avoid rate limiting
-    for (const slide of outline.slides) {
-      if (!slide.imagePrompt || !slide.imagePrompt.trim()) {
-        continue;
-      }
-      try {
-        const imageGenPrompt = applyStyle(slide.imagePrompt, imageStyle);
-        
-        const {media} = await ai.generate({
-          model: googleAI.model('gemini-2.0-flash-preview-image-generation'),
-          prompt: imageGenPrompt,
-          config: {
-            responseModalities: ['TEXT', 'IMAGE'],
-          },
-        });
-        
-        if (media && media.url) {
-            slide.imageUrl = media.url;
-        }
-      } catch (error) {
-        console.error(`Image generation failed for slide: "${slide.title}". Error: ${error}`);
-        // Leave imageUrl as undefined, the frontend will handle it
-      }
-    }
-    
+    // Return the outline without generating images automatically.
+    // The frontend will handle image generation.
     return outline;
   }
 );
@@ -161,3 +135,4 @@ const generateSingleImageFlow = ai.defineFlow(
         return { imageUrl: media.url };
     }
 );
+
